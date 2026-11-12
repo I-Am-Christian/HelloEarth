@@ -194,3 +194,8 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 
 /* Full header wordmark, compact circular planet remains favicon */
 .brand-wordmark{display:block;width:clamp(170px,18vw,230px);height:auto;max-height:55px;object-fit:contain}
+
+/* Hero actions remain left-aligned; text stays centered within matching pills */
+.hero-actions{justify-content:flex-start!important}
+.hero-actions>.button,.hero-actions>.quiet-note{text-align:center!important;justify-content:center!important}
+.brand-wordmark{width:clamp(180px,19vw,250px);max-height:70px}
