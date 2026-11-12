@@ -153,3 +153,16 @@ body{isolation:isolate;background:#070c20}
 @media(max-width:800px){.earth-orbit,.earth-orbit-path{width:75vw}.distant-sun,.earth-orbit,.earth-orbit-path{left:64%}}
 @media(max-width:600px){.earth-orbit,.earth-orbit-path{width:82vw}.distant-sun,.earth-orbit,.earth-orbit-path{left:62%;top:44%}.earth-position{width:70px;height:70px}.moon-body{width:17px}}
 @media(prefers-reduced-motion:reduce){.earth-orbit,.earth-position,.moon-orbit,.earth-continents,.distant-sun{animation:none!important}}
+
+
+/* Visibility fix: keep the solar system above the page background,
+   but below the content. A negative z-index hides it behind body paint. */
+.solar-background{z-index:1!important;display:block!important;visibility:visible!important}
+body > main{position:relative;z-index:2}
+body > .site-header{position:relative;z-index:10}
+body > footer,body > .site-footer{position:relative;z-index:2}
+.hero,.hero-layout,.hero-art-spacer{background:transparent!important}
+.earth-orbit{animation:earth-revolve 12s linear infinite!important;animation-play-state:running!important}
+.earth-position{animation:earth-counter-revolve 12s linear infinite!important;animation-play-state:running!important}
+.moon-orbit{animation:moon-revolve 5s linear infinite!important;animation-play-state:running!important}
+@media(prefers-reduced-motion:reduce){.earth-orbit,.earth-position,.moon-orbit{animation-play-state:paused!important}}
