@@ -191,3 +191,6 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 /* Slower 36-second Earth orbit; same speed for counter-rotation keeps the globe upright */
 .earth-orbit{animation-duration:36s!important}
 .earth-position{animation-duration:36s!important}
+
+/* Full header wordmark, compact circular planet remains favicon */
+.brand-wordmark{display:block;width:clamp(170px,18vw,230px);height:auto;max-height:55px;object-fit:contain}
