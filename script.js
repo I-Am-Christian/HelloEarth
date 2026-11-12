@@ -21,3 +21,24 @@ launcher.addEventListener('click', () => toggleChat(!panel.classList.contains('o
 close.addEventListener('click', () => toggleChat(false));
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && panel.classList.contains('open')) toggleChat(false); });
 document.getElementById('year').textContent = new Date().getFullYear();
+
+const studentButtons = document.querySelectorAll('.student-select');
+studentButtons.forEach(button => button.addEventListener('click', () => {
+  studentButtons.forEach(item => {
+    const active = item === button;
+    item.classList.toggle('selected', active);
+    item.setAttribute('aria-pressed', String(active));
+  });
+  document.getElementById('detail-name').textContent = button.dataset.name;
+  document.getElementById('detail-level').textContent = button.dataset.level;
+  document.getElementById('detail-goal').textContent = button.dataset.goal;
+  document.getElementById('detail-percent').textContent = button.dataset.progress + '%';
+  document.getElementById('detail-progress').style.width = button.dataset.progress + '%';
+}));
+document.addEventListener('click', event => {
+  if (!nav.contains(event.target) && !menu.contains(event.target)) {
+    nav.classList.remove('open');
+    menu.setAttribute('aria-expanded', 'false');
+  }
+  if (panel.classList.contains('open') && !event.target.closest('.chat-widget')) toggleChat(false);
+});
