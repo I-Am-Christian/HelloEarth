@@ -187,3 +187,7 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 .hero-actions>.button{gap:0}
 .hero-actions>.quiet-note{background:#2a2845a8;border:1px solid #7d6da655;color:#c9c4dc}
 @media(max-width:440px){.hero-actions>.button,.hero-actions>.quiet-note{width:min(170px,calc(50% - 8px));font-size:12px}}
+
+/* Slower 36-second Earth orbit; same speed for counter-rotation keeps the globe upright */
+.earth-orbit{animation-duration:36s!important}
+.earth-position{animation-duration:36s!important}
