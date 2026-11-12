@@ -22,3 +22,30 @@ html{scroll-padding-top:24px}body{overflow-x:hidden}img,svg,video{max-width:100%
 @media(min-width:1500px){.wrap{width:min(1200px,calc(100% - 96px))}.hero-layout{min-height:690px}.hero-art{max-width:500px}}
 @media(max-height:550px) and (min-width:601px){.chat-panel{max-height:calc(100dvh - 100px)}.hero-layout{min-height:0}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* HelloEarth rounded purple edition */
+:root{--paper:#101525;--ink:#f2f0fa;--muted:#aeb2cc;--line:#3a3c59;--sage:#292b49;--green:#a996ed;--white:#1a1d33;--cream:#1c2038}
+body{background:var(--paper);color:var(--ink)}
+.site-header{background:#101525ee;border-bottom:1px solid #343652}
+.feature{border:1px solid #3e3a60;background:#1a1d33;border-radius:20px;padding:28px;transition:transform .2s ease,border-color .2s ease,background .2s ease}
+.feature:hover{transform:translateY(-4px);border-color:#8d75d6;background:#22223e}
+.button{border-radius:999px;transition:transform .2s ease,box-shadow .2s ease}
+.button:hover{transform:translateY(-2px);box-shadow:0 8px 22px #08091a50}
+.dashboard{border-radius:22px;overflow:hidden}
+.dash-stats>div{border-radius:13px}
+.dash-student{border-radius:12px}
+.student-select{width:100%;display:flex;text-align:left;align-items:center;cursor:pointer;background:transparent;color:inherit;font:inherit;transition:background .2s ease,border-color .2s ease;border:1px solid transparent}
+.student-select:hover,.student-select.selected{background:#2c2945;border-color:#554978}
+.student-select:focus-visible{outline:2px solid #b6a0ff;outline-offset:2px}
+.student-select .student-name{flex:1}
+.student-detail{margin-top:18px;padding:17px 18px;background:#282741;border:1px solid #474063;border-radius:15px}
+.detail-top{display:flex;justify-content:space-between;gap:10px;font-weight:700}
+.detail-top span:last-child{color:#c7b1ff}
+.student-detail p{margin:4px 0 12px;color:#b1afc7;font-size:13px}
+.student-detail small{display:block;margin-top:7px;color:#b1afc7;font-size:11px}
+.progress-track{height:7px;background:#45415f;border-radius:999px;overflow:hidden}
+.progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#6e8bce,#b79aff);transition:width .4s ease}
+.atlas-symbol{border-radius:28px}.soft-label,.chat-status{border-radius:999px}
+.chat-launcher{border-radius:999px;transition:transform .2s ease}.chat-launcher:hover{transform:translateY(-2px)}
+.chat-panel{border-radius:20px;overflow:hidden}.menu-toggle{border-radius:12px}
+@media(max-width:600px){.feature{padding:22px}.student-detail{padding:14px}.chat-panel{border-radius:17px}}
