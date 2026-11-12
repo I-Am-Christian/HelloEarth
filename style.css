@@ -89,3 +89,6 @@ body{background:var(--paper);color:var(--ink)}
 .legal-content a{color:#cbb8ff;text-decoration:underline;text-underline-offset:3px}
 @media(max-width:750px){.footer-main{grid-template-columns:1fr 1fr;gap:35px;padding:45px 0}.footer-about{grid-column:1/-1}.footer-bottom{flex-wrap:wrap}.legal-main{padding:55px 0 75px}}
 @media(max-width:400px){.footer-main{gap:24px}.footer-column a{font-size:12px}.footer-bottom{flex-direction:column;align-items:flex-start}}
+
+/* Minimal HelloEarth open-book identity */
+.brand-logo{display:block;width:44px;height:44px;flex:none;filter:drop-shadow(0 0 8px #a28fff40);transition:transform .25s ease,filter .25s ease}.brand:hover .brand-logo,.footer-brand:hover .brand-logo{transform:translateY(-2px) rotate(-3deg);filter:drop-shadow(0 0 13px #a28fff70)}.footer-brand .brand-logo{width:39px;height:39px}@media(max-width:600px){.brand-logo{width:38px;height:38px}}@media(max-width:360px){.brand-logo{width:34px;height:34px}}@media(prefers-reduced-motion:reduce){.brand-logo{transition:none!important}}
