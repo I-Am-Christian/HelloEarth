@@ -166,3 +166,17 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 .earth-position{animation:earth-counter-revolve 12s linear infinite!important;animation-play-state:running!important}
 .moon-orbit{animation:moon-revolve 5s linear infinite!important;animation-play-state:running!important}
 @media(prefers-reduced-motion:reduce){.earth-orbit,.earth-position,.moon-orbit{animation-play-state:paused!important}}
+
+/* Orbit geometry and motion correction (same center and radius as visible ring) */
+.earth-orbit-path{transform:translate(-50%,-50%)!important}
+.earth-orbit,.earth-orbit-path{width:min(63vw,670px)!important;aspect-ratio:1!important}
+.earth-position{left:50%!important;top:0!important}
+@media(max-width:800px){.earth-orbit,.earth-orbit-path{width:75vw!important}}
+@media(max-width:600px){.earth-orbit,.earth-orbit-path{width:82vw!important}}
+/* Explicit user-requested movement: ensure OS motion preferences do not freeze the planets */
+@media(prefers-reduced-motion:reduce){
+.earth-orbit{animation:earth-revolve 12s linear infinite!important;animation-play-state:running!important}
+.earth-position{animation:earth-counter-revolve 12s linear infinite!important;animation-play-state:running!important}
+.moon-orbit{animation:moon-revolve 5s linear infinite!important;animation-play-state:running!important}
+.earth-continents{animation:earth-spin 14s linear infinite!important}
+}
