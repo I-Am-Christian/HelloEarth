@@ -42,3 +42,38 @@ document.addEventListener('click', event => {
   }
   if (panel.classList.contains('open') && !event.target.closest('.chat-widget')) toggleChat(false);
 });
+
+const header = document.querySelector('.site-header');
+const updateHeader = () => header.classList.toggle('scrolled', window.scrollY > 12);
+window.addEventListener('scroll', updateHeader, {passive:true});
+updateHeader();
+const navLinks = [...nav.querySelectorAll('a[href^="#"]')];
+const observedSections = navLinks.map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+if ('IntersectionObserver' in window) {
+  const sectionObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      navLinks.forEach(link => {
+        const active = link.getAttribute('href') === '#' + entry.target.id;
+        link.classList.toggle('active', active);
+        if (active) link.setAttribute('aria-current','location');
+        else link.removeAttribute('aria-current');
+      });
+    });
+  }, {rootMargin:'-25% 0px -60% 0px'});
+  observedSections.forEach(section => sectionObserver.observe(section));
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const revealObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, {threshold:.08});
+    document.querySelectorAll('.feature,.workflow-card,.section-heading,.dashboard,.atlas-layout,.faq-layout').forEach(element => {
+      element.classList.add('reveal');
+      revealObserver.observe(element);
+    });
+  }
+}
