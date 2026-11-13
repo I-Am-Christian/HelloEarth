@@ -248,3 +248,44 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 .distant-sun::before{inset:-85%;opacity:.62;filter:blur(6px)}
 .distant-sun::after{left:-125%;width:350%;height:3px;opacity:.55;box-shadow:0 0 10px 3px #ffb0522e}
 .distant-sun.sun-boost::before{opacity:.88}
+
+/* Refined dashboard preview: a cohesive product mockup with balanced spacing */
+.preview-section .preview-layout{grid-template-columns:minmax(0,.83fr) minmax(0,1.17fr);gap:clamp(32px,5vw,78px);align-items:center}
+.preview-section .preview-intro{max-width:450px}
+.preview-section .dashboard{position:relative;background:linear-gradient(155deg,#232849 0%,#191f3c 62%,#1b1c38 100%)!important;border:1px solid #8075ba65;border-radius:24px;box-shadow:0 30px 75px #03061788,0 0 45px #5d4bb214;overflow:hidden}
+.preview-section .dashboard::before{content:"";position:absolute;top:-130px;right:-120px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,#8465ed24,transparent 68%);pointer-events:none}
+.preview-section .dash-header{height:64px;padding:0 26px;background:#ffffff06;border-bottom:1px solid #aaa2da24}
+.preview-section .dash-brand{display:flex;align-items:center;gap:8px;font-family:Arial,sans-serif;font-weight:750;letter-spacing:-.3px;font-size:16px}
+.preview-section .tiny-earth{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#5f58bd3b;color:#b8a4ff}
+.preview-section .dash-label{padding:6px 10px;border:1px solid #8b80c340;border-radius:999px;color:#c9c1e8;font-size:11px}
+.preview-section .dash-body{padding:26px 28px 28px}
+.preview-section .dash-hello{font-family:Georgia,serif;font-size:29px;letter-spacing:-.6px;color:#f6f2ff}
+.preview-section .dash-sub{font-size:13px;margin:5px 0 22px;color:#b8b7d0}
+.preview-section .dash-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.preview-section .dash-stats>div{min-width:0;padding:16px 14px;background:linear-gradient(145deg,#343359aa,#26284688);border:1px solid #aaa0df35;border-radius:15px}
+.preview-section .dash-stats strong{font-family:Arial,sans-serif;font-weight:750;font-size:27px;color:#f6f2ff}
+.preview-section .dash-stats span{display:block;margin-top:5px;font-size:11px;color:#b8b6d3}
+.preview-section .dash-row-title{margin:25px 0 11px;font-size:13px;color:#f4f1ff}
+.preview-section .dash-row-title span{font-size:11px;color:#a9a8c8}
+.preview-section .dash-student{padding:12px 13px;margin-bottom:7px;background:#ffffff06;border:1px solid #9990d025;border-radius:13px;transition:background .2s,border-color .2s,transform .2s}
+.preview-section .dash-student:hover{background:#7767c327;border-color:#a793ec75;transform:translateY(-1px)}
+.preview-section .dash-student.selected{background:#8069d127;border-color:#aa8df18c;box-shadow:inset 3px 0 0 #b99bff}
+.preview-section .dash-student .avatar{width:37px;height:37px;display:grid;place-items:center;flex-shrink:0;border-radius:12px;background:#6552a6;color:#f4eaff}
+.preview-section .dash-student .alt-avatar{background:#354c83;color:#e1e9ff}
+.preview-section .student-name{font-size:13px}
+.preview-section .student-name small{margin-top:4px}
+.preview-section .level{padding:5px 8px;border:1px solid #ad92ed88;border-radius:7px;color:#e2d3ff;font-size:11px}
+.preview-section .lesson-list{gap:8px}
+.preview-section .lesson-list>div{padding:13px 14px;gap:12px;background:#ffffff07;border:1px solid #a49bcd2b;border-radius:12px}
+.preview-section .lesson-list time{min-width:42px;color:#cdb8ff}
+.preview-section .lesson-list span{font-size:12px}
+.preview-section .lesson-list b{display:block;font-size:11px;white-space:nowrap;color:#bbb4d2}
+.preview-section .student-detail{margin-top:18px;padding:17px 18px;border-radius:15px;background:linear-gradient(120deg,#4a3d7c7a,#292b4a);border:1px solid #aa94ee50}
+.preview-section .progress-track{height:8px;background:#aaa0d32d}
+.preview-section .progress-fill{background:linear-gradient(90deg,#77a7f4,#bc92ff)}
+@media(max-width:900px){.preview-section .preview-layout{grid-template-columns:1fr;gap:28px}.preview-section .preview-intro{max-width:640px}}
+@media(max-width:500px){.preview-section .dash-body{padding:17px 15px}.preview-section .dash-header{padding:0 16px}.preview-section .dash-stats>div{padding:12px 9px}.preview-section .dash-stats strong{font-size:22px}.preview-section .dash-stats span{font-size:10px}.preview-section .lesson-list b{display:none}}
+/* Smaller, more refined Sun: tighter corona and gentler horizontal glare */
+.distant-sun::before{inset:-55%;opacity:.48;filter:blur(5px);background:repeating-conic-gradient(from 7deg,transparent 0deg 12deg,#ffbd5930 13deg 14deg,transparent 15deg 25deg),radial-gradient(circle,#ffe1a366 0%,#ffa84b30 35%,transparent 68%)}
+.distant-sun::after{left:-85%;width:270%;height:2px;opacity:.44;filter:blur(2px);box-shadow:0 0 8px 2px #ffb05228}
+.distant-sun.sun-boost::before{opacity:.72}
