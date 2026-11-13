@@ -77,3 +77,23 @@ if ('IntersectionObserver' in window) {
     });
   }
 }
+
+/* Solar system interaction */
+(() => {
+ const scene=document.querySelector('.solar-background'), orbit=scene?.querySelector('.earth-orbit'), earth=scene?.querySelector('.earth-position'), sun=scene?.querySelector('.distant-sun');
+ const toggle=document.getElementById('orbit-toggle'), slider=document.getElementById('orbit-speed'), value=document.getElementById('orbit-speed-value');
+ if(!orbit||!earth||!sun||!toggle||!slider)return;
+ let duration=52, paused=false, dragging=false, angle=0, lastTime=performance.now();
+ const motion=()=>[orbit,earth];
+ const setMotion=()=>{motion().forEach(el=>{el.style.animationDuration=duration+'s';el.style.animationPlayState=paused||dragging?'paused':'running'});toggle.textContent=paused?'Play':'Pause';toggle.setAttribute('aria-pressed',String(paused));};
+ const currentAngle=()=>{const matrix=new DOMMatrixReadOnly(getComputedStyle(orbit).transform);return (Math.atan2(matrix.b,matrix.a)*180/Math.PI+360)%360};
+ const setPhase=a=>{angle=(a+360)%360;orbit.style.animationDelay=(-angle/360*duration)+'s';earth.style.animationDelay=(-angle/360*duration)+'s';};
+ toggle.addEventListener('click',()=>{paused=!paused;setMotion()});
+ slider.addEventListener('input',()=>{const phase=currentAngle();duration=Number(slider.value);value.textContent=duration+'s';setPhase(phase);setMotion()});
+ sun.addEventListener('click',()=>{sun.classList.toggle('sun-boost');sun.setAttribute('aria-pressed',String(sun.classList.contains('sun-boost')))});
+ earth.addEventListener('pointerdown',e=>{if(e.button!==0)return;dragging=true;angle=currentAngle();setMotion();earth.classList.add('dragging');earth.setPointerCapture(e.pointerId);e.preventDefault()});
+ earth.addEventListener('pointermove',e=>{if(!dragging)return;const rect=orbit.getBoundingClientRect(),cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;const a=(Math.atan2(e.clientY-cy,e.clientX-cx)*180/Math.PI+90+360)%360;setPhase(a)});
+ const endDrag=()=>{if(!dragging)return;dragging=false;earth.classList.remove('dragging');setMotion()};
+ earth.addEventListener('pointerup',endDrag);earth.addEventListener('pointercancel',endDrag);
+ setMotion();
+})();
