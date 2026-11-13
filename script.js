@@ -147,3 +147,23 @@ function setLanguage(lang){const strings=translations[lang];nodes.forEach(({node
 let saved;try{saved=localStorage.getItem('helloearth-language')}catch(e){}const browser=(navigator.languages?.[0]||navigator.language||'en').toLowerCase().split('-')[0];setLanguage(translations[saved]?saved:(translations[browser]?browser:'en'));
 picker.addEventListener('change',()=>setLanguage(picker.value));
 })();
+
+/* On phones, keep the animated solar system in its own fixed-size hero slot.
+   On desktop, restore the original full-page background. */
+(() => {
+ const scene=document.querySelector('.solar-background');
+ const slot=document.querySelector('.hero-art-spacer');
+ const main=document.querySelector('main');
+ if(!scene||!slot||!main)return;
+ const mobile=window.matchMedia('(max-width:700px)');
+ function placeScene(){
+   if(mobile.matches){
+     if(scene.parentElement!==slot)slot.appendChild(scene);
+   }else if(scene.parentElement===slot){
+     document.body.insertBefore(scene,main);
+   }
+ }
+ placeScene();
+ if(mobile.addEventListener)mobile.addEventListener('change',placeScene);
+ else mobile.addListener(placeScene);
+})();
