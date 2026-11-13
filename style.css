@@ -450,3 +450,11 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 @media(min-width:901px){.preview-section .preview-layout{grid-template-columns:minmax(220px,.45fr) minmax(0,1.55fr)!important;gap:clamp(18px,2.5vw,38px)!important}.preview-section .preview-intro{max-width:330px}}
 .preview-section .preview-showcase{width:100%;max-width:none}
 .preview-section .preview-slide>.dashboard,.preview-section .preview-slide>.floating-preview{min-height:640px}
+
+/* Fill the showcase nearly edge-to-edge within the outlined area */
+.preview-section .preview-carousel{width:100%!important}
+.preview-section .preview-slide>.dashboard,.preview-section .preview-slide>.floating-preview{width:100%!important;min-height:690px!important;margin:0!important}
+.preview-section .preview-showcase{padding:0!important}
+.preview-section .preview-navigation{padding:0 2px!important;margin-top:12px!important}
+@media(min-width:901px){.preview-section .preview-layout{grid-template-columns:minmax(180px,.32fr) minmax(0,1.68fr)!important;gap:20px!important}}
+@media(max-width:900px){.preview-section .preview-layout{grid-template-columns:1fr!important}.preview-section .preview-slide>.dashboard,.preview-section .preview-slide>.floating-preview{min-height:0!important}}
