@@ -673,3 +673,36 @@ body > footer,body > .site-footer{position:relative;z-index:2}
  .hero .hero-art-spacer .moon-orbit,.hero .hero-art-spacer .moon-orbit-path{width:95px!important;height:95px!important}
  .hero .hero-art-spacer .starfield{opacity:.65!important}
 }
+
+/* Mobile hero: remove distracting solar animation; introduce a calm feature showcase */
+.mobile-hero-highlights{display:none}
+@media(max-width:700px){
+ .hero{position:relative!important;overflow:hidden!important}
+ .hero .hero-layout{position:relative;z-index:1;display:flex!important;flex-direction:column!important;gap:0!important;min-height:0!important;padding-top:40px!important;padding-bottom:68px!important}
+ .hero .hero-art-spacer{display:none!important}
+ .hero .mobile-hero-highlights{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:9px!important;
+  width:100%!important;
+  margin:38px auto 0!important;
+  padding:12px!important;
+  box-sizing:border-box!important;
+  border:1px solid #9573d17d!important;
+  border-radius:22px!important;
+  background:linear-gradient(145deg,#292347b0,#171e3cdd)!important;
+  box-shadow:0 16px 50px #070b2355!important;
+ }
+ .hero .mobile-hero-highlights>div{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:12px;min-width:0;min-height:105px;padding:12px 5px;
+  border:1px solid #8e79c555;border-radius:17px;
+  background:linear-gradient(150deg,#37305a99,#202442dd);
+  text-align:center;color:#f4efff;
+ }
+ .hero .mobile-hero-highlights>div>span{font-size:30px;line-height:1;color:#bb98ff}
+ .hero .mobile-hero-highlights strong{font-size:12px;line-height:1.4;font-weight:600}
+ .hero:after{content:"";position:absolute;left:-15%;right:-15%;bottom:-95px;height:160px;border-top:1px solid #a07afa7a;border-radius:50% 50% 0 0;background:radial-gradient(ellipse at 50% 0%,#6543ad48,transparent 70%);pointer-events:none}
+ .solar-background{display:none!important}
+ .hero .hero-actions{position:relative;z-index:2}
+}
