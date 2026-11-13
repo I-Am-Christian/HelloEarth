@@ -588,3 +588,15 @@ body > footer,body > .site-footer{position:relative;z-index:2}
  .preview-section .preview-intro h2{max-width:none!important}
  .preview-section .preview-intro p{margin-inline:auto!important;max-width:550px!important}
 }
+
+/* Balanced, centered three-step workflow */
+.workflow-section .section-heading{text-align:center!important;max-width:760px!important;margin:0 auto 44px!important}
+.workflow-section .section-heading h2{max-width:none!important;margin:14px auto 16px!important;line-height:1.14!important}
+.workflow-section .section-heading .section-lead{max-width:590px!important;margin-inline:auto!important}
+.workflow-section .workflow-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:22px!important;align-items:stretch!important;max-width:1150px!important;margin:0 auto!important}
+.workflow-section .workflow-card{display:flex!important;flex-direction:column!important;align-items:center!important;text-align:center!important;justify-content:flex-start!important;min-height:265px!important;padding:30px 26px!important;box-sizing:border-box!important;background:linear-gradient(150deg,#222640,#1c2037)!important;border:1px solid #6d628e66!important;border-radius:18px!important}
+.workflow-section .workflow-card>span{align-self:center!important}
+.workflow-section .workflow-icon{margin:17px auto 20px!important}
+.workflow-section .workflow-card h3{font-size:clamp(20px,2vw,25px)!important;margin:0 0 12px!important}
+.workflow-section .workflow-card p{max-width:310px!important;margin:0 auto!important;line-height:1.65!important}
+@media(max-width:800px){.workflow-section .workflow-grid{grid-template-columns:1fr!important;max-width:480px!important;gap:14px!important}.workflow-section .workflow-card{min-height:0!important;padding:24px 22px!important}.workflow-section .section-heading{margin-bottom:28px!important}.workflow-section .section-heading h2{font-size:clamp(30px,7vw,44px)!important}}
