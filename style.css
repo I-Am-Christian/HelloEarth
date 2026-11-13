@@ -458,3 +458,44 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 .preview-section .preview-navigation{padding:0 2px!important;margin-top:12px!important}
 @media(min-width:901px){.preview-section .preview-layout{grid-template-columns:minmax(180px,.32fr) minmax(0,1.68fr)!important;gap:20px!important}}
 @media(max-width:900px){.preview-section .preview-layout{grid-template-columns:1fr!important}.preview-section .preview-slide>.dashboard,.preview-section .preview-slide>.floating-preview{min-height:0!important}}
+
+/* Mobile preview redesign: readable, compact, full-width mockups */
+@media(max-width:700px){
+ .preview-section{padding:64px 0 76px!important}
+ .preview-section .wrap.preview-layout{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:25px!important;width:100%!important;padding-inline:16px!important;box-sizing:border-box}
+ .preview-section .preview-intro{max-width:none!important;text-align:center}
+ .preview-section .preview-intro h2{font-size:clamp(29px,8vw,39px)!important;line-height:1.15!important;margin:12px auto!important;max-width:350px}
+ .preview-section .preview-intro p{font-size:14px!important;line-height:1.65!important;max-width:380px!important;margin:0 auto 12px!important}
+ .preview-section .preview-caption{font-size:11px!important;line-height:1.5}
+ .preview-section .preview-showcase{width:100%!important;min-width:0!important;max-width:100%!important}
+ .preview-section .preview-carousel{width:100%!important;min-width:0!important;overflow:hidden!important}
+ .preview-section .preview-track{align-items:stretch!important}
+ .preview-section .preview-slide{width:100%!important;min-width:0!important;flex:0 0 100%!important;overflow:hidden}
+ .preview-section .preview-slide>.dashboard,.preview-section .preview-slide>.floating-preview{width:100%!important;min-height:0!important;height:auto!important;box-sizing:border-box}
+ .preview-section .dash-header{height:49px!important;padding:0 14px!important}
+ .preview-section .dash-brand{font-size:13px!important}
+ .preview-section .dash-label{font-size:10px!important;padding:5px 8px!important}
+ .preview-section .dash-body{padding:16px 13px 17px!important}
+ .preview-section .dash-hello{font-size:23px!important}
+ .preview-section .dash-sub{font-size:11px!important;margin:5px 0 14px!important}
+ .preview-section .dash-stats{gap:6px!important}
+ .preview-section .dash-stats>div{padding:9px 7px!important;min-width:0!important}
+ .preview-section .dash-stats strong{font-size:20px!important}
+ .preview-section .dash-stats span{font-size:9px!important;line-height:1.3!important}
+ .preview-section .dash-row-title{margin:15px 0 8px!important;font-size:11px!important}
+ .preview-section .dash-student{padding:8px!important;gap:7px!important}
+ .preview-section .dash-student span,.preview-section .lesson-list span{font-size:10px!important}
+ .preview-section .lesson-list>div{padding:9px 8px!important;gap:6px!important}
+ .preview-section .student-detail{padding:12px!important;margin-top:12px!important}
+ .preview-section .preview-navigation{display:flex!important;justify-content:space-between!important;align-items:center!important;margin-top:13px!important;padding:0 2px!important}
+ .preview-section .preview-navigation button{min-width:38px;min-height:38px}
+ .preview-section .floating-desktop{min-height:450px!important}
+ .preview-section .floating-preview{overflow:hidden!important}
+ .preview-section .floating-preview .desktop-note{max-width:90%!important}
+}
+@media(max-width:380px){
+ .preview-section .wrap.preview-layout{padding-inline:10px!important}
+ .preview-section .dash-body{padding:12px 9px!important}
+ .preview-section .dash-stats{gap:4px!important}
+ .preview-section .dash-stats>div{padding:7px 5px!important}
+}
