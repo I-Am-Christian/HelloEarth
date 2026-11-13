@@ -208,3 +208,6 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 .features .value-strip{margin-top:24px;align-items:stretch}
 .features .value-strip>div{min-width:0;min-height:100px;height:100%;box-sizing:border-box;padding:24px 28px;border-radius:20px;display:flex;flex-direction:column;justify-content:center}
 @media(max-width:760px){.features .feature-grid,.features .value-strip{grid-template-columns:1fr;gap:16px}.features .feature{min-height:170px}.features .value-strip{margin-top:16px}.features .value-strip>div{min-height:88px}}
+
+/* Slightly slower orbital revolution; Earth and counter-rotation stay synchronized */
+.earth-orbit,.earth-position{animation-duration:44s!important}
