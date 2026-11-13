@@ -499,3 +499,42 @@ body > footer,body > .site-footer{position:relative;z-index:2}
  .preview-section .dash-stats{gap:4px!important}
  .preview-section .dash-stats>div{padding:7px 5px!important}
 }
+
+/* Framed showcase: dashboard inside a larger, clearly separate container */
+@media(min-width:901px){
+ .preview-section .preview-layout{
+  grid-template-columns:minmax(270px,.55fr) minmax(0,1.45fr)!important;
+  gap:clamp(24px,3vw,52px)!important;
+ }
+ .preview-section .preview-intro{max-width:360px!important}
+ .preview-section .preview-intro h2{font-size:clamp(34px,3.3vw,49px)!important;line-height:1.14!important}
+ .preview-section .preview-showcase{
+  padding:24px 24px 18px!important;
+  background:linear-gradient(145deg,#202541,#151c37 75%)!important;
+  border:1px solid #7365a16b!important;
+  border-radius:18px!important;
+  box-shadow:0 24px 75px #04081970, inset 0 1px #b8a6ff12;
+  box-sizing:border-box!important;
+ }
+ .preview-section .preview-slide>.dashboard,.preview-section .preview-slide>.floating-preview{
+  min-height:0!important;
+  border:1px solid #786da477!important;
+  border-radius:10px!important;
+ }
+ .preview-section .preview-navigation{margin-top:16px!important;padding:0!important}
+}
+@media(min-width:701px) and (max-width:900px){
+ .preview-section .preview-showcase{padding:18px!important;background:#1c2340!important;border:1px solid #7365a16b;border-radius:16px!important;box-sizing:border-box}
+}
+@media(max-width:700px){
+ .preview-section .preview-showcase{
+  padding:12px 12px 10px!important;
+  background:linear-gradient(145deg,#202541,#151c37)!important;
+  border:1px solid #7365a16b!important;
+  border-radius:14px!important;
+  box-shadow:0 14px 40px #05091b66;
+  box-sizing:border-box!important;
+ }
+ .preview-section .preview-slide>.dashboard,.preview-section .preview-slide>.floating-preview{border-radius:8px!important}
+ .preview-section .preview-navigation{margin-top:12px!important}
+}
