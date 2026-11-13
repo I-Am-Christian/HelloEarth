@@ -292,3 +292,7 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 
 /* Four balanced Essentials cards with a clear lesson-creation feature */
 @media(min-width:761px){.features .feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.features .feature{min-height:190px}}
+
+/* Header logo hover: scale in place with a crisp purple glow, no lift, tilt or blur */
+.brand .brand-logo{transform-origin:center center;transition:transform .22s ease,filter .22s ease!important;filter:none!important}
+.brand:hover .brand-logo,.brand:focus-visible .brand-logo{transform:scale(1.17)!important;filter:drop-shadow(0 0 5px #a477ff) drop-shadow(0 0 11px #874fff88)!important}
