@@ -78,24 +78,18 @@ if ('IntersectionObserver' in window) {
   }
 }
 
-/* Solar system interaction */
-(() => {
- const scene=document.querySelector('.solar-background'), orbit=scene?.querySelector('.earth-orbit'), earth=scene?.querySelector('.earth-position'), sun=scene?.querySelector('.distant-sun');
- const toggle=document.getElementById('orbit-toggle'), slider=document.getElementById('orbit-speed'), value=document.getElementById('orbit-speed-value');
- if(!orbit||!earth||!sun||!toggle||!slider)return;
- let duration=52, paused=false, dragging=false, angle=0, lastTime=performance.now();
- const motion=()=>[orbit,earth];
- const setMotion=()=>{motion().forEach(el=>{el.style.animationDuration=duration+'s';el.style.animationPlayState=paused||dragging?'paused':'running'});toggle.textContent=paused?'Play':'Pause';toggle.setAttribute('aria-pressed',String(paused));};
- const currentAngle=()=>{const matrix=new DOMMatrixReadOnly(getComputedStyle(orbit).transform);return (Math.atan2(matrix.b,matrix.a)*180/Math.PI+360)%360};
- const setPhase=a=>{angle=(a+360)%360;orbit.style.animationDelay=(-angle/360*duration)+'s';earth.style.animationDelay=(-angle/360*duration)+'s';};
- toggle.addEventListener('click',()=>{paused=!paused;setMotion()});
- slider.addEventListener('input',()=>{const phase=currentAngle();duration=Number(slider.value);value.textContent=duration+'s';setPhase(phase);setMotion()});
+/* Solar interactions: fixed orbit speed, draggable Earth and clickable Sun */
+(()=>{
+ const scene=document.querySelector('.solar-background'),orbit=scene?.querySelector('.earth-orbit'),earth=scene?.querySelector('.earth-position'),sun=scene?.querySelector('.distant-sun');
+ if(!orbit||!earth||!sun)return;
+ const duration=86.667;let dragging=false;
  sun.addEventListener('click',()=>{sun.classList.toggle('sun-boost');sun.setAttribute('aria-pressed',String(sun.classList.contains('sun-boost')))});
- earth.addEventListener('pointerdown',e=>{if(e.button!==0)return;dragging=true;angle=currentAngle();setMotion();earth.classList.add('dragging');earth.setPointerCapture(e.pointerId);e.preventDefault()});
- earth.addEventListener('pointermove',e=>{if(!dragging)return;const rect=orbit.getBoundingClientRect(),cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;const a=(Math.atan2(e.clientY-cy,e.clientX-cx)*180/Math.PI+90+360)%360;setPhase(a)});
- const endDrag=()=>{if(!dragging)return;dragging=false;earth.classList.remove('dragging');setMotion()};
+ const phase=()=>{const m=new DOMMatrixReadOnly(getComputedStyle(orbit).transform);return (Math.atan2(m.b,m.a)*180/Math.PI+360)%360};
+ function setPhase(a){const delay=-(a/360*duration)+'s';orbit.style.animationDelay=delay;earth.style.animationDelay=delay}
+ earth.addEventListener('pointerdown',e=>{if(e.button!==0)return;dragging=true;orbit.style.animationPlayState='paused';earth.style.animationPlayState='paused';earth.classList.add('dragging');earth.setPointerCapture(e.pointerId);e.preventDefault()});
+ earth.addEventListener('pointermove',e=>{if(!dragging)return;const rect=orbit.getBoundingClientRect(),cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;setPhase((Math.atan2(e.clientY-cy,e.clientX-cx)*180/Math.PI+450)%360)});
+ const endDrag=()=>{if(!dragging)return;dragging=false;earth.classList.remove('dragging');orbit.style.animationPlayState='running';earth.style.animationPlayState='running'};
  earth.addEventListener('pointerup',endDrag);earth.addEventListener('pointercancel',endDrag);
- setMotion();
 })();
 
 /* Swipeable dashboard and desktop concept previews */
