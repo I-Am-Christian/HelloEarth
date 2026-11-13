@@ -439,3 +439,9 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 .preview-section .preview-slide>.dashboard,.preview-section .preview-slide>.floating-preview,.preview-section .preview-slide>.windows-preview{border-radius:0!important}
 .preview-section .preview-showcase{border-radius:0!important}
 @media(prefers-reduced-motion:reduce){.preview-section .preview-track{transition:none}}
+
+/* Match carousel slide dimensions and remove rounding on outer mockups */
+.preview-section .preview-track{align-items:stretch!important}
+.preview-section .preview-slide{align-self:stretch!important}
+.preview-section .preview-slide>.dashboard,.preview-section .preview-slide>.floating-preview,.preview-section .preview-slide>.windows-preview{border-radius:0!important;min-height:100%;box-sizing:border-box}
+.preview-section .floating-desktop,.preview-section .windows-wallpaper{min-height:100%}
