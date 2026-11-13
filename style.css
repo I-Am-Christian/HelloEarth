@@ -431,3 +431,11 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 .preview-section .preview-slide{flex:0 0 100%!important;width:100%!important;max-width:100%!important;box-sizing:border-box}
 .preview-section .preview-carousel{scroll-snap-type:x mandatory}
 .preview-section .preview-slide>.windows-preview{width:100%;height:100%}
+
+/* Stable single-card slider: translate slides instead of fighting native scroll snapping */
+.preview-section .preview-carousel{overflow:hidden!important;scroll-snap-type:none!important;border-radius:0!important;touch-action:pan-y!important}
+.preview-section .preview-track{gap:0!important;transform:translate3d(0,0,0);transition:transform .38s ease;will-change:transform}
+.preview-section .preview-slide{scroll-snap-align:none!important;flex:0 0 100%!important;cursor:default}
+.preview-section .preview-slide>.dashboard,.preview-section .preview-slide>.floating-preview,.preview-section .preview-slide>.windows-preview{border-radius:0!important}
+.preview-section .preview-showcase{border-radius:0!important}
+@media(prefers-reduced-motion:reduce){.preview-section .preview-track{transition:none}}
