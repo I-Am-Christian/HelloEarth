@@ -382,3 +382,8 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 .language-picker option{background:#24203e;color:#fff}
 @media(max-width:950px){.language-picker{margin-left:auto}.header-inner{gap:10px}}
 @media(max-width:420px){.language-picker{padding:6px}.language-picker select{max-width:67px;font-size:10px}.language-picker-icon{font-size:10px}.brand{font-size:19px}.header-inner{gap:7px}}
+
+/* Give planned student-linked transcription its own feature row */
+@media(min-width:761px){.features .feature-transcription{grid-column:1/-1;min-height:0;padding:28px 32px}}
+.feature-transcription{border-color:#9b7cdb80;background:linear-gradient(120deg,#272447,#1d2748)}
+.feature-transcription .feature-note{display:inline-block;margin-top:14px;font-size:11px;color:#bba6e9;letter-spacing:.2px}
