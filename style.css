@@ -243,3 +243,8 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 .hero{pointer-events:none}
 .hero-copy,.hero-copy *,.site-header,.site-header *{pointer-events:auto}
 .solar-controls{position:fixed;z-index:20}
+
+/* Compact solar flare: shorter, softer rays and lens streak */
+.distant-sun::before{inset:-85%;opacity:.62;filter:blur(6px)}
+.distant-sun::after{left:-125%;width:350%;height:3px;opacity:.55;box-shadow:0 0 10px 3px #ffb0522e}
+.distant-sun.sun-boost::before{opacity:.88}
