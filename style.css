@@ -238,3 +238,8 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 .solar-controls output{min-width:28px}
 @media(max-width:600px){.solar-controls{right:8px;bottom:8px;padding:7px;gap:5px;font-size:10px}.solar-controls input{width:56px}.solar-controls button{padding:7px}}
 @media(prefers-reduced-motion:reduce){.starfield-extra{animation:none}}
+
+/* Allow direct planet interaction in the transparent hero without blocking links */
+.hero{pointer-events:none}
+.hero-copy,.hero-copy *,.site-header,.site-header *{pointer-events:auto}
+.solar-controls{position:fixed;z-index:20}
