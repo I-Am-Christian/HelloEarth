@@ -104,6 +104,7 @@ if ('IntersectionObserver' in window) {
  prev.addEventListener('click',()=>go(active===0?slides.length-1:active-1));
  next.addEventListener('click',()=>go((active+1)%slides.length));
  dots.forEach((dot,i)=>dot.addEventListener('click',()=>go(i)));
+ slides.forEach((slide,i)=>slide.addEventListener('click',e=>{if(i===active||e.target.closest('button,a,input,select,textarea'))return;go(i)}));
  let scrollTimer;
  viewport.addEventListener('scroll',()=>{clearTimeout(scrollTimer);scrollTimer=setTimeout(()=>{const left=viewport.scrollLeft;active=slides.reduce((best,slide,i)=>Math.abs(slide.offsetLeft-slides[0].offsetLeft-left)<Math.abs(slides[best].offsetLeft-slides[0].offsetLeft-left)?i:best,0);dots.forEach((dot,i)=>{dot.classList.toggle('active',i===active);dot.setAttribute('aria-current',i===active?'true':'false')})},90)},{passive:true});
  viewport.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();go(active+(e.key==='ArrowRight'?1:-1))}});
