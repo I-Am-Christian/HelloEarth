@@ -445,3 +445,8 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 .preview-section .preview-slide{align-self:stretch!important}
 .preview-section .preview-slide>.dashboard,.preview-section .preview-slide>.floating-preview,.preview-section .preview-slide>.windows-preview{border-radius:0!important;min-height:100%;box-sizing:border-box}
 .preview-section .floating-desktop,.preview-section .windows-wallpaper{min-height:100%}
+
+/* Two larger preview slides; removed redundant third desktop mockup */
+@media(min-width:901px){.preview-section .preview-layout{grid-template-columns:minmax(220px,.45fr) minmax(0,1.55fr)!important;gap:clamp(18px,2.5vw,38px)!important}.preview-section .preview-intro{max-width:330px}}
+.preview-section .preview-showcase{width:100%;max-width:none}
+.preview-section .preview-slide>.dashboard,.preview-section .preview-slide>.floating-preview{min-height:640px}
