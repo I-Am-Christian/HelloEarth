@@ -352,3 +352,25 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 .floating-caption small{display:block;color:#b6aecb;font-size:10px;font-weight:400;margin-top:5px}
 @media(max-width:900px){.preview-section .preview-layout{grid-template-columns:1fr}.preview-slide{flex-basis:88%}}
 @media(max-width:550px){.preview-slide{flex-basis:93%}.preview-track{gap:10px}.floating-desktop{min-height:520px;padding:14px}.floating-calendar{width:85%;padding:12px}.floating-notepad{width:80%;right:8px}.floating-pin{font-size:8px}.window-controls{display:none}}
+
+/* Mobile-first hero: centered solar scene and clear, separated copy */
+@media(max-width:600px){
+ .hero .hero-layout{display:block;min-height:650px;padding-top:46px;padding-bottom:245px;box-sizing:border-box}
+ .hero .hero-copy{position:relative;z-index:5;max-width:100%;text-align:center}
+ .hero-copy .eyebrow{font-size:10px;line-height:1.5;letter-spacing:1px;margin-bottom:20px;max-width:100%;white-space:normal;text-align:center}
+ .hero h1{font-size:clamp(35px,9vw,46px);line-height:1.12;letter-spacing:-1.6px}
+ .hero-copy>p{font-size:14px;line-height:1.7;max-width:390px;margin-left:auto;margin-right:auto;text-align:center;text-shadow:0 2px 12px #070d24}
+ .hero-actions{justify-content:center!important;gap:10px!important;margin-top:25px}
+ .hero-actions>.button,.hero-actions>.quiet-note{width:calc(50% - 5px);max-width:180px;min-height:46px;font-size:11px;padding:10px 8px}
+ .solar-background{background:radial-gradient(ellipse at 50% 69%,#19254c 0%,#0a102b 48%,#060a1d 100%)}
+ .distant-sun,.earth-orbit,.earth-orbit-path{left:50%!important;top:74%!important}
+ .earth-orbit,.earth-orbit-path{width:min(78vw,350px)!important}
+ .distant-sun{width:clamp(54px,15vw,76px)!important}
+ .earth-position{width:clamp(58px,17vw,80px)!important;height:clamp(58px,17vw,80px)!important}
+ .moon-body{width:16px!important}
+ .solar-controls{bottom:74px;right:8px;transform:scale(.87);transform-origin:right bottom}
+ .chat-widget{right:10px;bottom:10px}
+ .chat-launcher{min-height:42px}
+ .features{position:relative;z-index:3}
+}
+@media(max-width:380px){.hero .hero-layout{min-height:620px;padding-bottom:230px}.hero h1{font-size:34px}.hero-actions>.button,.hero-actions>.quiet-note{font-size:10px}}
