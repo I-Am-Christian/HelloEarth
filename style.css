@@ -387,3 +387,7 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 @media(min-width:761px){.features .feature-transcription{grid-column:1/-1;min-height:0;padding:28px 32px}}
 .feature-transcription{border-color:#9b7cdb80;background:linear-gradient(120deg,#272447,#1d2748)}
 .feature-transcription .feature-note{display:inline-block;margin-top:14px;font-size:11px;color:#bba6e9;letter-spacing:.2px}
+
+/* Fixed orbit speed: 40% slower than the previous 52-second revolution */
+.earth-orbit,.earth-position{animation-duration:86.667s!important}
+.solar-controls{display:none!important}
