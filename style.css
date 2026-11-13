@@ -219,3 +219,22 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 
 /* Gentler orbit: Earth and counter-rotation remain synchronized */
 .earth-orbit,.earth-position{animation-duration:52s!important}
+
+/* Interactive solar system: cinematic solar rays, extra stars and accessible controls */
+.solar-background{pointer-events:none!important}
+.starfield-extra{opacity:.6;background-image:radial-gradient(1.5px 1.5px at 12% 38%,#b6dfff 98%,transparent),radial-gradient(1px 1px at 29% 11%,#fff 98%,transparent),radial-gradient(2px 2px at 46% 75%,#c8a7ff 98%,transparent),radial-gradient(1px 1px at 71% 33%,#fff 98%,transparent),radial-gradient(1.5px 1.5px at 92% 59%,#a6d7ff 98%,transparent),radial-gradient(1px 1px at 58% 95%,#fff 98%,transparent);background-size:510px 390px;animation:stars-shimmer 9s ease-in-out infinite alternate}
+@keyframes stars-shimmer{to{opacity:.95}}
+.distant-sun{border:0;padding:0;cursor:pointer;pointer-events:auto!important;z-index:3;overflow:visible}
+.distant-sun::before{inset:-170%;background:repeating-conic-gradient(from 7deg,transparent 0deg 9deg,#ffbb593b 10deg 11deg,transparent 12deg 20deg),radial-gradient(circle,#ffdc9677 0%,#ff9c4c3b 24%,#ff832421 44%,transparent 68%);filter:blur(5px)}
+.distant-sun::after{left:-330%;width:760%;height:5px;background:linear-gradient(90deg,transparent 0%,#ffb75b22 18%,#ffda8a77 38%,#fffbd4 50%,#ffda8a77 62%,#ffb75b22 82%,transparent);box-shadow:0 0 23px 7px #ffb05248}
+.distant-sun.sun-boost{box-shadow:0 0 45px 12px #ffe9a3aa,0 0 120px 50px #ffa33e70,0 0 260px 100px #ff7b2830!important}
+.distant-sun.sun-boost::before{filter:blur(3px) brightness(1.7)}
+.earth-position{pointer-events:auto!important;cursor:grab;touch-action:none}
+.earth-position.dragging{cursor:grabbing}
+.solar-controls{position:absolute;right:18px;bottom:18px;z-index:6;pointer-events:auto;display:flex;align-items:center;gap:9px;padding:9px 12px;border:1px solid #b8a5ee55;border-radius:14px;background:#090f29dc;color:#e6e2ff;font:12px Arial,sans-serif;backdrop-filter:blur(10px)}
+.solar-controls button{background:#6c4cba;color:#fff;border:0;border-radius:9px;padding:8px 12px;cursor:pointer;font:inherit}
+.solar-controls label{display:flex;align-items:center;gap:7px}
+.solar-controls input{width:86px;accent-color:#b59aff;cursor:pointer}
+.solar-controls output{min-width:28px}
+@media(max-width:600px){.solar-controls{right:8px;bottom:8px;padding:7px;gap:5px;font-size:10px}.solar-controls input{width:56px}.solar-controls button{padding:7px}}
+@media(prefers-reduced-motion:reduce){.starfield-extra{animation:none}}
