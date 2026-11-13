@@ -216,3 +216,6 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 .distant-sun::after{content:"";position:absolute;left:-210%;top:50%;width:520%;height:4px;transform:translateY(-50%);background:linear-gradient(90deg,transparent,#ffb84b00 13%,#ffd47d77 38%,#fff8cfbb 50%,#ffd47d77 62%,#ffb84b00 87%,transparent);filter:blur(2px);box-shadow:0 0 17px 5px #ffae5038;opacity:.78;pointer-events:none}
 @keyframes solar-corona{50%{transform:rotate(8deg) scale(1.1);opacity:.82}}
 @media(prefers-reduced-motion:reduce){.distant-sun::before{animation:none!important}}
+
+/* Gentler orbit: Earth and counter-rotation remain synchronized */
+.earth-orbit,.earth-position{animation-duration:52s!important}
