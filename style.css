@@ -296,3 +296,59 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 /* Header logo hover: scale in place with a crisp purple glow, no lift, tilt or blur */
 .brand .brand-logo{transform-origin:center center;transition:transform .22s ease,filter .22s ease!important;filter:none!important}
 .brand:hover .brand-logo,.brand:focus-visible .brand-logo{transform:scale(1.17)!important;filter:drop-shadow(0 0 5px #a477ff) drop-shadow(0 0 11px #874fff88)!important}
+
+/* Swipeable product showcase: visible preview of the next card */
+.preview-section .preview-layout{grid-template-columns:minmax(260px,.67fr) minmax(0,1.33fr);gap:clamp(20px,3vw,46px)}
+.preview-showcase{min-width:0;width:100%}
+.preview-carousel{overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:none;border-radius:24px;touch-action:pan-x pan-y}
+.preview-carousel::-webkit-scrollbar{display:none}
+.preview-track{display:flex;align-items:stretch;gap:16px}
+.preview-slide{flex:0 0 88%;min-width:0;scroll-snap-align:start;display:flex;align-items:stretch}
+.preview-slide>.dashboard,.preview-slide>.floating-preview{width:100%;height:100%;min-width:0}
+.preview-section .preview-slide .dash-body{padding:19px 20px 20px}
+.preview-section .preview-slide .dash-stats>div{padding:11px 10px}
+.preview-section .preview-slide .dash-stats strong{font-size:23px}
+.preview-section .preview-slide .dash-hello{font-size:25px}
+.preview-section .preview-slide .dash-row-title{margin:17px 0 9px}
+.preview-section .preview-slide .dash-student{padding:9px 10px}
+.preview-section .preview-slide .lesson-list>div{padding:9px 10px}
+.preview-section .preview-slide .student-detail{margin-top:12px;padding:13px}
+.preview-navigation{display:flex;align-items:center;justify-content:space-between;margin-top:15px;padding:0 3px}
+.preview-dots,.preview-arrows{display:flex;gap:9px;align-items:center}
+.preview-dot{width:9px;height:9px;padding:0;border:0;border-radius:99px;background:#72668f;cursor:pointer;transition:width .2s,background .2s}
+.preview-dot.active{width:29px;background:#b9a0ff}
+.preview-arrows button{width:38px;height:38px;border:1px solid #8c78c45e;border-radius:12px;background:#292646;color:#e9e0ff;font-size:19px;cursor:pointer}
+.preview-arrows button:hover{background:#7454bd}
+.floating-preview{position:relative;overflow:hidden;border-radius:24px;border:1px solid #8075ba65;background:linear-gradient(135deg,#1c2753,#171b39 65%,#31235b);box-shadow:0 30px 75px #03061788}
+.floating-desktop{position:relative;min-height:565px;padding:20px 18px;background:radial-gradient(ellipse at 75% 40%,#624cb544,transparent 62%),radial-gradient(ellipse at 20% 90%,#3476ae22,transparent 60%)}
+.floating-desktop-top{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:700;letter-spacing:2px;color:#c8c0ec}
+.floating-dot{width:8px;height:8px;border-radius:50%;background:#bca3ff;box-shadow:0 0 10px #a88dff}
+.floating-clock{margin-left:auto;letter-spacing:0}
+.floating-calendar{width:78%;margin-top:32px;padding:18px;background:#f4f4fc;border:1px solid #fff;border-radius:15px;color:#252943;box-shadow:0 15px 45px #080e2888}
+.floating-cal-title{display:flex;gap:11px;align-items:center;margin-bottom:14px}
+.cal-icon{display:grid;place-items:center;width:36px;height:36px;background:#ffffff;border-radius:9px;border:1px solid #dedcf3;color:#6a52c1;font-weight:800}
+.floating-cal-title strong,.floating-cal-title small,.floating-calendar-row strong,.floating-calendar-row small{display:block}
+.floating-cal-title strong{font-size:13px}
+.floating-cal-title small{font-size:10px;color:#71758d;margin-top:3px}
+.floating-calendar-row{display:flex;gap:12px;align-items:center;padding:11px 0;border-top:1px solid #e2e2f1}
+.floating-calendar-row time{color:#7358c0;font-size:11px;font-weight:700}
+.floating-calendar-row strong{font-size:11px}
+.floating-calendar-row small{font-size:10px;color:#777b91;margin-top:3px}
+.floating-notepad{position:absolute;right:15px;top:122px;width:73%;border:1px solid #b6a2f0;border-radius:14px;background:#24243f;color:#f6f3ff;box-shadow:0 20px 55px #050719bb,0 0 25px #9576ed36;overflow:hidden;transform:rotate(-1deg)}
+.floating-titlebar{display:flex;align-items:center;gap:6px;padding:11px 10px;background:#37315b;border-bottom:1px solid #a08bd052;font-size:10px}
+.floating-app-icon{color:#c7a7ff;font-size:17px}
+.floating-pin{margin-left:auto;color:#d4bfff;font-size:9px;white-space:nowrap}
+.window-controls{color:#b2aacd;letter-spacing:3px;white-space:nowrap}
+.floating-note-body{padding:17px}
+.floating-status{color:#c9a7ff;font-size:10px;letter-spacing:1.4px;font-weight:800}
+.floating-note-body h3{display:flex;justify-content:space-between;align-items:center;gap:8px;font:700 19px Georgia,serif;margin:11px 0 4px}
+.floating-note-body h3 span{font:700 11px Arial,sans-serif;color:#d4baff;border:1px solid #9b81d1;border-radius:7px;padding:5px 7px}
+.floating-note-body p{font-size:11px;color:#bdb9d1;line-height:1.55;margin:5px 0 13px}
+.floating-note-body>strong{font-size:11px}
+.floating-divider{height:1px;background:#9383c142;margin:13px 0}
+.floating-next{margin-top:12px;padding:10px;background:#7456b13b;border-radius:9px;color:#e1d1ff;font-size:10px}
+.floating-caption{position:absolute;left:18px;right:18px;bottom:18px;padding:13px 15px;background:#0e1535e6;border:1px solid #9a84e055;border-radius:12px;font-size:12px;font-weight:700}
+.floating-caption>span{color:#c8a7ff;margin-right:6px}
+.floating-caption small{display:block;color:#b6aecb;font-size:10px;font-weight:400;margin-top:5px}
+@media(max-width:900px){.preview-section .preview-layout{grid-template-columns:1fr}.preview-slide{flex-basis:88%}}
+@media(max-width:550px){.preview-slide{flex-basis:93%}.preview-track{gap:10px}.floating-desktop{min-height:520px;padding:14px}.floating-calendar{width:85%;padding:12px}.floating-notepad{width:80%;right:8px}.floating-pin{font-size:8px}.window-controls{display:none}}
