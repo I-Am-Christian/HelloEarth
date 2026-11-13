@@ -631,3 +631,45 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 @media(max-width:850px){.features .essential-audio{min-width:230px;gap:8px;padding:16px 10px}.features .audio-bars{gap:2px}.features .audio-bars i{width:3px}.features .essential-card{gap:18px!important;padding:24px!important}.features .essential-icon{width:55px;height:55px;min-width:55px}.features .essential-icon svg{width:28px;height:28px}}
 @media(max-width:700px){.features .essentials-heading{margin-bottom:27px}.features .essentials-heading>p{font-size:14px;padding:0 6px}.features .essentials-grid{grid-template-columns:1fr!important;gap:14px!important}.features .essential-card{min-height:0!important;padding:22px!important;gap:16px!important;align-items:flex-start!important}.features .essential-card h3{font-size:21px!important}.features .essential-card p{font-size:13px!important}.features .feature-transcription{flex-wrap:wrap!important}.features .essential-audio{width:100%;max-width:none;min-width:0;box-sizing:border-box;transform:none;margin-top:12px}.features .essentials-benefits{grid-template-columns:1fr!important;gap:12px!important}.features .essentials-benefits>div{min-height:75px;padding:14px!important}}
 @media(max-width:380px){.features .essential-card{padding:17px!important;gap:12px!important}.features .essential-icon{width:45px;height:45px;min-width:45px}.features .essential-icon svg{width:24px;height:24px}.features .audio-time{font-size:9px}}
+
+/* Mobile-only: bound the orbit to the space below the hero buttons */
+@media(max-width:700px){
+ .hero .hero-layout{display:flex!important;flex-direction:column!important;gap:0!important;min-height:0!important;align-items:stretch!important}
+ .hero .hero-copy{position:relative;z-index:1}
+ .hero .hero-art-spacer{
+  position:relative!important;
+  display:block!important;
+  width:100%!important;
+  height:clamp(260px,76vw,350px)!important;
+  min-height:0!important;
+  margin:12px auto 0!important;
+  overflow:hidden!important;
+  isolation:isolate;
+ }
+ .hero .hero-art-spacer>.solar-background{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  z-index:0!important;
+  overflow:hidden!important;
+  background:transparent!important;
+  pointer-events:none!important;
+ }
+ .hero .hero-art-spacer .distant-sun,
+ .hero .hero-art-spacer .earth-orbit,
+ .hero .hero-art-spacer .earth-orbit-path{
+  left:50%!important;
+  top:50%!important;
+ }
+ .hero .hero-art-spacer .earth-orbit,
+ .hero .hero-art-spacer .earth-orbit-path{
+  width:min(73vw,285px)!important;
+  height:auto!important;
+  aspect-ratio:1!important;
+ }
+ .hero .hero-art-spacer .distant-sun{width:clamp(53px,15vw,76px)!important}
+ .hero .hero-art-spacer .earth-position{width:58px!important;height:58px!important}
+ .hero .hero-art-spacer .moon-orbit,.hero .hero-art-spacer .moon-orbit-path{width:95px!important;height:95px!important}
+ .hero .hero-art-spacer .starfield{opacity:.65!important}
+}
