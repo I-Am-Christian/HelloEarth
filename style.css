@@ -374,3 +374,11 @@ body > footer,body > .site-footer{position:relative;z-index:2}
  .features{position:relative;z-index:3}
 }
 @media(max-width:380px){.hero .hero-layout{min-height:620px;padding-bottom:230px}.hero h1{font-size:34px}.hero-actions>.button,.hero-actions>.quiet-note{font-size:10px}}
+
+/* Accessible language switcher for the public preview */
+.language-picker{display:inline-flex;align-items:center;gap:6px;margin-left:auto;border:1px solid #8170bb77;border-radius:12px;padding:7px 9px;background:#272442;color:#e9ddff;font:12px Arial,sans-serif;white-space:nowrap}
+.language-picker-icon{font-weight:800;color:#d0b2ff}
+.language-picker select{border:0;outline-offset:3px;background:transparent;color:#eee7ff;font:inherit;max-width:100px;cursor:pointer}
+.language-picker option{background:#24203e;color:#fff}
+@media(max-width:950px){.language-picker{margin-left:auto}.header-inner{gap:10px}}
+@media(max-width:420px){.language-picker{padding:6px}.language-picker select{max-width:67px;font-size:10px}.language-picker-icon{font-size:10px}.brand{font-size:19px}.header-inner{gap:7px}}
