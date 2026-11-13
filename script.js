@@ -92,52 +92,46 @@ if ('IntersectionObserver' in window) {
  earth.addEventListener('pointerup',endDrag);earth.addEventListener('pointercancel',endDrag);
 })();
 
-/* Reliable three-slide preview carousel */
+/* Preview carousel: transform-based navigation with touch swipe */
 (() => {
  const viewport=document.getElementById('preview-carousel');
  if(!viewport)return;
- const slides=Array.from(viewport.querySelectorAll('.preview-slide'));
+ const track=viewport.querySelector('.preview-track');
+ const slides=Array.from(track?.children||[]).filter(el=>el.classList.contains('preview-slide'));
  const dots=Array.from(document.querySelectorAll('.preview-dot'));
  const prev=document.getElementById('preview-prev');
  const next=document.getElementById('preview-next');
- if(!slides.length||!prev||!next)return;
- let active=0, programmatic=false, unlockTimer;
- const update=()=>{
+ if(!track||slides.length<2||!prev||!next)return;
+ let active=0, startX=null, startY=null;
+ function show(index){
+   active=(index+slides.length)%slides.length;
+   track.style.transform='translate3d(-'+(active*100)+'%,0,0)';
    dots.forEach((dot,i)=>{
      dot.classList.toggle('active',i===active);
      dot.setAttribute('aria-current',i===active?'true':'false');
    });
- };
- const go=index=>{
-   active=(index+slides.length)%slides.length;
-   update();
-   programmatic=true;
-   clearTimeout(unlockTimer);
-   viewport.scrollTo({left:active*viewport.clientWidth,behavior:'smooth'});
-   unlockTimer=setTimeout(()=>{programmatic=false;},650);
- };
- prev.addEventListener('click',()=>go(active-1));
- next.addEventListener('click',()=>go(active+1));
- dots.forEach((dot,i)=>dot.addEventListener('click',()=>go(i)));
- slides.forEach((slide,i)=>slide.addEventListener('click',e=>{
-   if(i!==active&&!e.target.closest('button,a,input,select,textarea'))go(i);
- }));
- let scrollTimer;
- viewport.addEventListener('scroll',()=>{
-   if(programmatic)return;
-   clearTimeout(scrollTimer);
-   scrollTimer=setTimeout(()=>{
-     active=Math.max(0,Math.min(slides.length-1,Math.round(viewport.scrollLeft/Math.max(1,viewport.clientWidth))));
-     update();
-   },100);
+   slides.forEach((slide,i)=>slide.setAttribute('aria-hidden',String(i!==active)));
+ }
+ prev.addEventListener('click',()=>show(active-1));
+ next.addEventListener('click',()=>show(active+1));
+ dots.forEach((dot,i)=>dot.addEventListener('click',()=>show(i)));
+ viewport.addEventListener('touchstart',e=>{
+   if(e.touches.length!==1)return;
+   startX=e.touches[0].clientX;startY=e.touches[0].clientY;
+ },{passive:true});
+ viewport.addEventListener('touchend',e=>{
+   if(startX===null||!e.changedTouches.length)return;
+   const dx=e.changedTouches[0].clientX-startX;
+   const dy=e.changedTouches[0].clientY-startY;
+   if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.25)show(active+(dx<0?1:-1));
+   startX=null;startY=null;
  },{passive:true});
  viewport.addEventListener('keydown',e=>{
    if(e.key==='ArrowRight'||e.key==='ArrowLeft'){
-     e.preventDefault();
-     go(active+(e.key==='ArrowRight'?1:-1));
+     e.preventDefault();show(active+(e.key==='ArrowRight'?1:-1));
    }
  });
- update();
+ show(0);
 })();
 
 /* Public-site translation: local curated strings, automatic browser-language detection. */
