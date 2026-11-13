@@ -289,3 +289,6 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 .distant-sun::before{inset:-55%;opacity:.48;filter:blur(5px);background:repeating-conic-gradient(from 7deg,transparent 0deg 12deg,#ffbd5930 13deg 14deg,transparent 15deg 25deg),radial-gradient(circle,#ffe1a366 0%,#ffa84b30 35%,transparent 68%)}
 .distant-sun::after{left:-85%;width:270%;height:2px;opacity:.44;filter:blur(2px);box-shadow:0 0 8px 2px #ffb05228}
 .distant-sun.sun-boost::before{opacity:.72}
+
+/* Four balanced Essentials cards with a clear lesson-creation feature */
+@media(min-width:761px){.features .feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.features .feature{min-height:190px}}
