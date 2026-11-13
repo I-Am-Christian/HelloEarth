@@ -105,7 +105,8 @@ if ('IntersectionObserver' in window) {
  let active=0, startX=null, startY=null;
  function show(index){
    active=(index+slides.length)%slides.length;
-   track.style.transform='translate3d(-'+(active*100)+'%,0,0)';
+   const distance=slides[active].offsetLeft-slides[0].offsetLeft;
+   track.style.transform='translate3d('+(-distance)+'px,0,0)';
    dots.forEach((dot,i)=>{
      dot.classList.toggle('active',i===active);
      dot.setAttribute('aria-current',i===active?'true':'false');
@@ -131,6 +132,7 @@ if ('IntersectionObserver' in window) {
      e.preventDefault();show(active+(e.key==='ArrowRight'?1:-1));
    }
  });
+ window.addEventListener('resize',()=>show(active));
  show(0);
 })();
 
