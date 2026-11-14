@@ -1544,3 +1544,9 @@ body > footer,body > .site-footer{position:relative;z-index:2}
  .atlas-responsibility p{font-size:12px}
 }
 @media(prefers-reduced-motion:reduce){.workflow-section .workflow-card{transition:none!important}.workflow-section .workflow-card:hover{transform:none!important}}
+
+/* Reserve closer-to-realistic space for the expanded Atlas section before it scrolls into view. */
+@supports(content-visibility:auto){
+ .atlas-section{contain-intrinsic-size:auto 1060px}
+ @media(max-width:700px){.atlas-section{contain-intrinsic-size:auto 1480px}}
+}
