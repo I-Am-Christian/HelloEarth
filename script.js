@@ -219,10 +219,10 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  let dockOffset=null;
  let dockHeading=0;
  rocket.style.display='none';
- const draw=(x,y,heading,landed)=>{
+ const draw=(x,y,heading,landed,scale=1)=>{
   rocket.style.display='block';
   rocket.classList.toggle('landed',landed);
-  rocket.style.transform='translate3d('+x+'px,'+y+'px,0) translate(-50%,-50%) rotate('+heading+'deg) scale('+(landed?0.7:1)+')';
+  rocket.style.transform='translate3d('+x+'px,'+y+'px,0) translate(-50%,-50%) rotate('+heading+'deg) scale('+scale+')';
  };
  scene.addEventListener('rocketlaunch',()=>{
   const stageRect=stage.getBoundingClientRect();
@@ -242,7 +242,7 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
    if(stageRect.width>0&&stageRect.height>0){
     const m=getPosition(moon,stageRect);
     if(dockOffset){
-     draw(m.x+dockOffset.x*m.size,m.y+dockOffset.y*m.size,dockHeading,true);
+     draw(m.x+dockOffset.x*m.size,m.y+dockOffset.y*m.size,dockHeading,true,0.7);
     }else{
      const e=getPosition(earth,stageRect);
      const dx=e.x-m.x,dy=e.y-m.y;
@@ -261,9 +261,9 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
       // The Moon moves, but the rocket stays anchored to that same patch of surface.
       dockOffset={x:(x-m.x)/m.size,y:(y-m.y)/m.size};
       dockHeading=heading;
-      draw(x,y,heading,true);
+      draw(x,y,heading,true,0.7);
      }else{
-      draw(x,y,heading,false);
+      draw(x,y,heading,false,1-0.3*smooth);
      }
     }
    }
