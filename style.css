@@ -706,3 +706,80 @@ body > footer,body > .site-footer{position:relative;z-index:2}
  .solar-background{display:none!important}
  .hero .hero-actions{position:relative;z-index:2}
 }
+
+/* Solar system is contained in the hero's right column on desktop,
+   and in its own compact stage beneath the actions on mobile. */
+.hero .hero-art-spacer{
+ position:relative!important;
+ display:block!important;
+ visibility:visible!important;
+ overflow:hidden!important;
+ isolation:isolate;
+ box-sizing:border-box;
+ background:transparent!important;
+}
+.hero .hero-art-spacer>.solar-background{
+ position:absolute!important;
+ inset:0!important;
+ display:block!important;
+ width:100%!important;
+ height:100%!important;
+ z-index:0!important;
+ visibility:visible!important;
+ overflow:hidden!important;
+ pointer-events:none!important;
+ background:transparent!important;
+}
+.hero .hero-art-spacer .distant-sun,
+.hero .hero-art-spacer .earth-orbit,
+.hero .hero-art-spacer .earth-orbit-path{left:50%!important;top:50%!important}
+.hero .hero-art-spacer .earth-orbit,
+.hero .hero-art-spacer .earth-orbit-path{
+ width:min(86%,510px)!important;
+ height:auto!important;
+ aspect-ratio:1!important;
+}
+.hero .hero-art-spacer .distant-sun{width:clamp(60px,7vw,100px)!important;pointer-events:auto!important}
+.hero .hero-art-spacer .earth-position{width:clamp(62px,7vw,105px)!important;height:clamp(62px,7vw,105px)!important}
+.hero .hero-art-spacer .starfield{opacity:.65!important}
+@media(min-width:701px){
+ .hero .hero-layout{
+  display:grid!important;
+  grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)!important;
+  align-items:center!important;
+  gap:clamp(15px,3vw,55px)!important;
+  min-height:clamp(530px,45vw,690px)!important;
+ }
+ .hero .hero-art-spacer{
+  width:100%!important;
+  height:clamp(480px,40vw,620px)!important;
+  min-height:0!important;
+  margin:0!important;
+ }
+ .hero .mobile-hero-highlights{display:none!important}
+}
+@media(max-width:700px){
+ .hero .hero-layout{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  min-height:0!important;
+  gap:0!important;
+  padding-bottom:35px!important;
+ }
+ .hero .hero-art-spacer{
+  display:block!important;
+  width:100%!important;
+  height:clamp(290px,83vw,370px)!important;
+  min-height:0!important;
+  margin:20px auto 0!important;
+ }
+ .hero .hero-art-spacer>.solar-background{display:block!important}
+ .hero .hero-art-spacer .earth-orbit,
+ .hero .hero-art-spacer .earth-orbit-path{width:min(75vw,295px)!important}
+ .hero .hero-art-spacer .distant-sun{width:clamp(53px,15vw,74px)!important}
+ .hero .hero-art-spacer .earth-position{width:clamp(47px,13vw,60px)!important;height:clamp(47px,13vw,60px)!important}
+ .hero .hero-art-spacer .moon-orbit,.hero .hero-art-spacer .moon-orbit-path{width:175%!important;height:auto!important;aspect-ratio:1!important}
+ .hero .mobile-hero-highlights{display:none!important}
+ .hero:after{display:none!important}
+}
