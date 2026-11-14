@@ -983,3 +983,18 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 }
 .hero .hero-art-spacer .moon-rocket.landed{z-index:8}
 @media(max-width:700px){.hero .hero-art-spacer .moon-body{width:21px!important}}
+
+/* Keep the rocket the same physical size and coordinate system at touchdown.
+   Only its trail stops; its position keeps following the Moon without a snap. */
+.hero .hero-art-spacer .moon-rocket,
+.hero .hero-art-spacer .moon-rocket.landed{
+ font-size:18px!important;
+ transform-origin:center center!important;
+ pointer-events:none!important;
+ transition:none!important;
+}
+.hero .hero-art-spacer .moon-rocket.landed .rocket-trail{display:none!important}
+@media(max-width:700px){
+ .hero .hero-art-spacer .moon-rocket,
+ .hero .hero-art-spacer .moon-rocket.landed{font-size:15px!important}
+}
