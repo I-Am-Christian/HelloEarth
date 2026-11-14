@@ -822,3 +822,50 @@ body > footer,body > .site-footer{position:relative;z-index:2}
  background-size:370px 330px;
 }
 .site-header .header-inner{position:relative;z-index:1}
+
+/* Keep Earth's whole orbit and the Moon inside the hero artwork at every viewport size. */
+.hero .hero-art-spacer .earth-orbit,
+.hero .hero-art-spacer .earth-orbit-path{
+ width:var(--safe-orbit-size, 220px)!important;
+ max-width:none!important;
+ height:var(--safe-orbit-size, 220px)!important;
+ aspect-ratio:1!important;
+}
+.hero .hero-art-spacer .moon-rocket{
+ position:absolute;
+ top:0;
+ left:0;
+ z-index:7;
+ pointer-events:none;
+ font-size:25px;
+ line-height:1;
+ filter:drop-shadow(0 0 5px #9fcaff) drop-shadow(0 3px 6px #070c20);
+ will-change:transform;
+ transform:translate3d(-100px,-100px,0);
+}
+.hero .hero-art-spacer .rocket-ship{display:block}
+.hero .hero-art-spacer .rocket-trail{
+ position:absolute;
+ left:40%;
+ top:80%;
+ width:8px;
+ height:25px;
+ transform:translateX(-50%);
+ border-radius:99px;
+ background:linear-gradient(#fff6c9,#ffae50 36%,#fa5e4caa 65%,transparent);
+ filter:blur(2px);
+ animation:rocket-flame .28s ease-in-out infinite alternate;
+}
+.hero .hero-art-spacer .moon-rocket.landed .rocket-trail{display:none}
+@keyframes rocket-flame{from{height:13px;opacity:.65}to{height:26px;opacity:1}}
+@media(max-width:700px){
+ .hero .hero-art-spacer{height:clamp(330px,88vw,400px)!important}
+ .hero .hero-art-spacer .moon-orbit,
+ .hero .hero-art-spacer .moon-orbit-path{
+  width:155%!important;
+  height:auto!important;
+  aspect-ratio:1!important;
+ }
+ .hero .hero-art-spacer .moon-rocket{font-size:20px}
+}
+@media(prefers-reduced-motion:reduce){.hero .hero-art-spacer .rocket-trail{animation:none}}
