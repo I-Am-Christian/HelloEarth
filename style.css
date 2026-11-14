@@ -1418,3 +1418,129 @@ body > footer,body > .site-footer{position:relative;z-index:2}
   .faq-section{contain-intrinsic-size:auto 950px}
  }
 }
+
+/* How it works: clean, number-free workflow cards across screen sizes. */
+.workflow-section .workflow-grid{gap:20px!important}
+.workflow-section .workflow-card{
+ position:relative;
+ overflow:hidden;
+ justify-content:center!important;
+ min-height:258px!important;
+ padding:34px 27px!important;
+ background:
+  radial-gradient(circle at 50% -30%,#7853ba23,transparent 62%),
+  linear-gradient(155deg,#252842,#1b2038)!important;
+ border:1px solid #6c648e78!important;
+ box-shadow:0 15px 35px #06091a27,inset 0 1px 0 #ffffff0b;
+ transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease!important;
+}
+.workflow-section .workflow-card::before{
+ content:"";position:absolute;left:26%;right:26%;top:0;height:1px;
+ background:linear-gradient(90deg,transparent,#c3a7fa55,transparent);
+}
+.workflow-section .workflow-card:hover{
+ transform:translateY(-4px);
+ border-color:#a88dec9e!important;
+ box-shadow:0 20px 44px #06091a55,0 0 24px #9b74de16!important;
+}
+.workflow-section .workflow-icon{
+ width:61px!important;height:61px!important;min-width:61px;
+ display:grid!important;place-items:center!important;
+ margin:0 auto 21px!important;
+ border-radius:17px!important;
+ border:1px solid #987ad163;
+ background:linear-gradient(140deg,#594584,#342d60)!important;
+ box-shadow:0 9px 22px #0a092344,inset 0 1px 0 #e2cfff18;
+ font-size:28px!important;
+}
+.workflow-section .workflow-card h3{margin:0 0 11px!important;font-size:clamp(21px,2vw,26px)!important}
+.workflow-section .workflow-card p{line-height:1.75!important;color:#bfc3db!important;font-size:14px!important}
+@media(max-width:800px){
+ .workflow-section .workflow-grid{grid-template-columns:1fr!important;max-width:550px!important;gap:15px!important}
+ .workflow-section .workflow-card{min-height:0!important;padding:29px 24px!important}
+}
+@media(max-width:420px){
+ .workflow-section .workflow-card{padding:26px 18px!important;border-radius:17px!important}
+ .workflow-section .workflow-icon{width:54px!important;height:54px!important;min-width:54px;margin-bottom:17px!important}
+}
+
+/* Atlas AI: keep the existing placeholder, expand the concept below it. */
+.atlas-section .atlas-layout{max-width:980px!important;gap:clamp(25px,5vw,85px)!important}
+.atlas-section .atlas-layout>div:last-child{min-width:0}
+.atlas-section .atlas-layout>div:last-child>p{max-width:560px!important}
+.atlas-section .atlas-details{
+ max-width:1160px;
+ margin:76px auto 0;
+}
+.atlas-details-heading{max-width:730px;margin:0 auto 30px;text-align:center}
+.atlas-details-heading .eyebrow{margin-bottom:14px;color:#bfa4fb}
+.atlas-details-heading h3{
+ margin:0 auto 16px;
+ color:#f2edff;
+ font-family:Georgia,'Times New Roman',serif;
+ font-size:clamp(28px,3.3vw,41px);
+ font-weight:normal;
+ line-height:1.2;
+ letter-spacing:-.65px;
+}
+.atlas-details-heading p{max-width:670px;margin:auto;font-size:15px;line-height:1.85;color:#b9bdd7}
+.atlas-detail-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:stretch}
+.atlas-detail-card{
+ position:relative;
+ min-width:0;
+ padding:27px 25px 28px;
+ border-radius:20px;
+ border:1px solid #6d608d80;
+ background:linear-gradient(150deg,#252842f5,#1d213af7);
+ box-shadow:0 15px 35px #07091a25,inset 0 1px #ece1ff0c;
+}
+.atlas-detail-icon{
+ display:grid;place-items:center;
+ width:48px;height:48px;margin-bottom:22px;
+ color:#d6baff;
+ font:normal 29px/1 Georgia,serif;
+ border-radius:14px;
+ border:1px solid #8c72c171;
+ background:linear-gradient(145deg,#514078,#33294f);
+}
+.atlas-detail-card h4{
+ margin:0 0 12px;
+ color:#eeeaf8;
+ font:normal clamp(20px,1.8vw,23px)/1.3 Georgia,'Times New Roman',serif;
+}
+.atlas-detail-card p{margin:0;color:#bfc2d8;font-size:14px;line-height:1.75}
+.atlas-responsibility{
+ display:flex;align-items:center;gap:17px;
+ max-width:910px;box-sizing:border-box;
+ margin:24px auto 0;
+ padding:19px 22px;
+ border:1px solid #8473a65e;
+ border-radius:18px;
+ background:linear-gradient(115deg,#272442a8,#23243bb0);
+}
+.atlas-responsibility-icon{
+ display:grid;place-items:center;flex:0 0 45px;width:45px;height:45px;
+ border-radius:13px;color:#d4beff;background:#4a39736d;font-size:24px;
+}
+.atlas-responsibility strong{display:block;color:#eee9fc;font-size:14px;margin-bottom:3px}
+.atlas-responsibility p{margin:0;max-width:780px;color:#b9bed8;font-size:13px;line-height:1.65}
+@media(max-width:860px){
+ .atlas-section .atlas-details{margin-top:58px}
+ .atlas-detail-grid{grid-template-columns:1fr;max-width:620px;margin-inline:auto;gap:14px}
+ .atlas-detail-card{padding:23px 24px}
+ .atlas-detail-icon{margin-bottom:14px}
+}
+@media(max-width:700px){
+ .atlas-section .atlas-layout{gap:24px!important}
+ .atlas-section .atlas-details{margin-top:46px}
+ .atlas-details-heading{margin-bottom:24px}
+ .atlas-details-heading p{font-size:14px;line-height:1.7}
+ .atlas-responsibility{align-items:flex-start;padding:16px;gap:12px}
+ .atlas-responsibility-icon{width:38px;height:38px;flex-basis:38px;font-size:21px}
+}
+@media(max-width:420px){
+ .atlas-detail-card{padding:21px 19px;border-radius:17px}
+ .atlas-detail-card h4{font-size:21px}
+ .atlas-responsibility p{font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){.workflow-section .workflow-card{transition:none!important}.workflow-section .workflow-card:hover{transform:none!important}}
