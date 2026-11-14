@@ -302,7 +302,6 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  let rocketVisible=false;
  let wasLanded=false;
  let frameQueued=false;
- let stageVisible=!('IntersectionObserver' in window);
 
  rocket.style.display='none';
  rocket.classList.remove('landed');
@@ -322,26 +321,20 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
   rocket.style.transform='translate3d('+x+'px,'+y+'px,0) translate(-50%,-50%) rotate('+heading+'deg) scale('+scale+')';
  };
 
- // Finish every active flight on phones, even when IntersectionObserver briefly
- // thinks the stage is offscreen (common when the mobile toolbar resizes).
- // Keep pausing the already-landed rocket on offscreen desktop sections.
- const canAnimate=()=>!document.hidden&&(
-  flight!==null||
-  (attached!==null&&(stageVisible||window.innerWidth<=700))
- );
+ // Mobile browsers may report the solar stage as offscreen while a user can
+ // still see it, or suppress visibility events during their toolbar animation.
+ // Once launched, keep one requestAnimationFrame chain alive until touchdown
+ // and afterwards to keep the parked rocket rotating with the Moon.
+ const canAnimate=()=>flight!==null||attached!==null;
  const scheduleFrame=()=>{
   if(frameQueued||!canAnimate())return;
   frameQueued=true;
   requestAnimationFrame(frame);
  };
- if('IntersectionObserver' in window){
-  const observer=new IntersectionObserver(entries=>{
-   stageVisible=entries.some(entry=>entry.isIntersecting);
-   if(stageVisible)scheduleFrame();
-  },{rootMargin:'160px 0px'});
-  observer.observe(stage);
- }
- document.addEventListener('visibilitychange',scheduleFrame);
+ // Re-arm after page restoration (e.g. switching tabs on iOS Safari).
+ document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden)scheduleFrame();
+ });
  window.addEventListener('pageshow',scheduleFrame);
  const status=text=>{
   if(hudLabel&&hudLabel.textContent!==text)hudLabel.textContent=text;
@@ -365,8 +358,7 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
   };
   hud?.classList.add('in-flight');
   status('ROCKET EN ROUTE · MOON LANDING');
-  // Make the mobile flight independent of observer callback timing.
-  stageVisible=true;
+  // Start on the same user interaction, independently of any observer.
   render(flight.fromX,flight.fromY,flight.heading,1,false);
   scheduleFrame();
  });
