@@ -88,6 +88,14 @@ if ('IntersectionObserver' in window) {
  const duration=260;
  let pointerStart=null;
  let didDrag=false;
+ let rocketAlreadyLaunched=false;
+ const launchOnce=()=>{
+  if(rocketAlreadyLaunched)return;
+  rocketAlreadyLaunched=true;
+  earth.classList.add("rocket-launched");
+  earth.setAttribute("aria-label","Rocket launched to the Moon");
+  scene.dispatchEvent(new Event("rocketlaunch"));
+ };
  sun.addEventListener('click',()=>{
   sun.classList.toggle('sun-boost');
   sun.setAttribute('aria-pressed',String(sun.classList.contains('sun-boost')));
@@ -120,12 +128,12 @@ if ('IntersectionObserver' in window) {
  earth.addEventListener('pointercancel',()=>{didDrag=true;endDrag()});
  earth.addEventListener('click',e=>{
   if(didDrag){didDrag=false;return}
-  scene.dispatchEvent(new Event('rocketlaunch'));
+  launchOnce();
  });
  earth.addEventListener('keydown',e=>{
   if(e.key==='Enter'||e.key===' '){
    e.preventDefault();
-   scene.dispatchEvent(new Event('rocketlaunch'));
+   launchOnce();
   }
  });
 })();
@@ -193,15 +201,17 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  if(scene&&slot&&scene.parentElement!==slot)slot.appendChild(scene);
 })();
 
-/* Moon landing: one continuous path, a 180-degree braking flip, and a fixed surface position. */
+/* One-time Moon landing: anchor the rocket to the surface and spin with its orbit. */
 (() => {
  const scene=document.querySelector('.solar-background');
  const stage=document.querySelector('.hero-art-spacer');
  const earth=scene?.querySelector('.earth-planet');
+ const earthOrbit=scene?.querySelector('.earth-orbit');
+ const earthPosition=scene?.querySelector('.earth-position');
  const moonOrbit=scene?.querySelector('.moon-orbit');
  const moon=scene?.querySelector('.moon-body');
  const rocket=scene?.querySelector('.moon-rocket');
- if(!scene||!stage||!earth||!moonOrbit||!moon||!rocket)return;
+ if(!scene||!stage||!earth||!earthOrbit||!earthPosition||!moonOrbit||!moon||!rocket)return;
 
  const fit=()=>{
   const rect=stage.getBoundingClientRect();
@@ -218,34 +228,38 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  };
  const clamp01=value=>Math.max(0,Math.min(1,value));
  const smooth=value=>value*value*(3-2*value);
+ const angleOf=element=>{
+  const transform=getComputedStyle(element).transform;
+  if(!transform||transform==='none')return 0;
+  const matrix=new DOMMatrixReadOnly(transform);
+  return Math.atan2(matrix.b,matrix.a);
+ };
+ const moonRotation=()=>angleOf(earthOrbit)+angleOf(earthPosition)+angleOf(moonOrbit);
  const flightDuration=5000;
  let flight=null;
-
+ let attached=null;
  rocket.style.display='none';
  rocket.classList.remove('landed');
 
- function render(x,y,angle,scale,landed){
+ const render=(x,y,angle,scale,landed)=>{
   rocket.classList.toggle('landed',landed);
   rocket.style.display='block';
   rocket.style.left='0px';
   rocket.style.top='0px';
   rocket.style.transform='translate3d('+x+'px,'+y+'px,0) translate(-50%,-50%) rotate('+angle+'deg) scale('+scale+')';
- }
+ };
 
  scene.addEventListener('rocketlaunch',()=>{
-  if(rocket.parentElement!==scene)scene.appendChild(rocket);
+  if(flight||attached)return;
   const rect=stage.getBoundingClientRect();
-  const start=center(earth,rect);
-  const destination=center(moon,rect);
+  const start=center(earth,rect),destination=center(moon,rect);
   const dx=destination.x-start.x,dy=destination.y-start.y;
   const distance=Math.max(1,Math.hypot(dx,dy));
   const ux=dx/distance,uy=dy/distance;
-
   flight={
    started:performance.now(),
    fromX:start.x+ux*start.size*.46,
    fromY:start.y+uy*start.size*.46,
-   // Target the same near-side patch throughout the Moon's orbit.
    normalX:-ux,
    normalY:-uy,
    heading:Math.atan2(dy,dx)*180/Math.PI+45
@@ -254,26 +268,40 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  });
 
  function frame(now){
-  if(flight){
+  if(flight||attached){
    const rect=stage.getBoundingClientRect();
    if(rect.width&&rect.height){
-    const target=center(moon,rect);
-    const contactRadius=target.size*.5+3;
-    const targetX=target.x+flight.normalX*contactRadius;
-    const targetY=target.y+flight.normalY*contactRadius;
-    const progress=clamp01((now-flight.started)/flightDuration);
-    const travel=smooth(progress);
-
-    // The final 2.25 seconds perform one smooth, full half-turn.
-    const flip=smooth(clamp01((progress-.55)/.45));
-    const heading=flight.heading+180*flip;
-    const scale=1-.3*travel;
-
-    // Offset fades to zero at touchdown, so there's no position jump.
-    const curve=Math.sin(Math.PI*travel)*Math.min(8,target.size*.34);
-    const x=flight.fromX+(targetX-flight.fromX)*travel-flight.normalY*curve;
-    const y=flight.fromY+(targetY-flight.fromY)*travel+flight.normalX*curve;
-    render(x,y,heading,scale,progress>=1);
+    const moonCenter=center(moon,rect);
+    if(attached){
+     const angleDifference=moonRotation()-attached.angle;
+     const cos=Math.cos(angleDifference),sin=Math.sin(angleDifference);
+     const dx=attached.offsetX*moonCenter.size,dy=attached.offsetY*moonCenter.size;
+     const x=moonCenter.x+dx*cos-dy*sin;
+     const y=moonCenter.y+dx*sin+dy*cos;
+     render(x,y,attached.heading+angleDifference*180/Math.PI,.7,true);
+    }else{
+     const radius=moonCenter.size*.5+3;
+     const tx=moonCenter.x+flight.normalX*radius;
+     const ty=moonCenter.y+flight.normalY*radius;
+     const progress=clamp01((now-flight.started)/flightDuration);
+     const travel=smooth(progress);
+     const flip=smooth(clamp01((progress-.55)/.45));
+     const heading=flight.heading+180*flip;
+     const scale=1-.3*travel;
+     const curve=Math.sin(Math.PI*travel)*Math.min(8,moonCenter.size*.34);
+     const x=flight.fromX+(tx-flight.fromX)*travel-flight.normalY*curve;
+     const y=flight.fromY+(ty-flight.fromY)*travel+flight.normalX*curve;
+     render(x,y,heading,scale,progress>=1);
+     if(progress>=1){
+      attached={
+       angle:moonRotation(),
+       offsetX:(x-moonCenter.x)/moonCenter.size,
+       offsetY:(y-moonCenter.y)/moonCenter.size,
+       heading
+      };
+      flight=null;
+     }
+    }
    }
   }
   requestAnimationFrame(frame);
