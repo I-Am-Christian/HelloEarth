@@ -155,58 +155,65 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  if(scene&&slot&&scene.parentElement!==slot)slot.appendChild(scene);
 })();
 
-/* Fit the Moon's complete path inside the scene and fly a rocket to it in 30 seconds. */
+/* Keep the solar system fully in view. Wait 30 seconds, then fly from Earth to the moving Moon in 10 seconds. */
 (() => {
  const scene=document.querySelector('.solar-background');
  const stage=document.querySelector('.hero-art-spacer');
  const earth=scene?.querySelector('.earth-planet');
  const moonOrbit=scene?.querySelector('.moon-orbit');
  const moon=scene?.querySelector('.moon-body');
- const orbit=scene?.querySelector('.earth-orbit');
  const rocket=scene?.querySelector('.moon-rocket');
- if(!scene||!stage||!earth||!moon||!moonOrbit||!orbit||!rocket)return;
+ if(!scene||!stage||!earth||!moonOrbit||!moon||!rocket)return;
+
  const fit=()=>{
   const rect=stage.getBoundingClientRect();
   const moonReach=moonOrbit.offsetWidth;
   const moonSize=moon.offsetWidth;
-  const safeSize=Math.max(100,Math.min(425,Math.floor(Math.min(rect.width,rect.height)-moonReach-moonSize-36)));
-  stage.style.setProperty('--safe-orbit-size',safeSize+'px');
+  const diameter=Math.max(100,Math.min(425,Math.floor(Math.min(rect.width,rect.height)-moonReach-moonSize-36)));
+  stage.style.setProperty('--safe-orbit-size',diameter+'px');
  };
  fit();
- if('ResizeObserver' in window) new ResizeObserver(fit).observe(stage);
+ if('ResizeObserver' in window)new ResizeObserver(fit).observe(stage);
  else window.addEventListener('resize',fit,{passive:true});
- const flightTime=30000;
+
+ const delay=30000;
+ const flight=10000;
  const started=performance.now();
+ rocket.style.display='none';
+
+ const center=(element,reference)=>{
+  const r=element.getBoundingClientRect();
+  return {x:r.left+r.width/2-reference.left,y:r.top+r.height/2-reference.top,size:r.width};
+ };
  function animateRocket(now){
-  const elapsed=Math.max(0,now-started);
-  const stageRect=stage.getBoundingClientRect();
-  if(stageRect.width>0&&stageRect.height>0){
-   const earthRect=earth.getBoundingClientRect();
-   const moonRect=moon.getBoundingClientRect();
-   const ex=earthRect.left+earthRect.width/2-stageRect.left;
-   const ey=earthRect.top+earthRect.height/2-stageRect.top;
-   const mx=moonRect.left+moonRect.width/2-stageRect.left;
-   const my=moonRect.top+moonRect.height/2-stageRect.top;
-   const angle=Math.atan2(my-ey,mx-ex);
-   const maxDistance=Math.hypot(mx-ex,my-ey);
-   const travelling=elapsed<flightTime;
-   const resting=elapsed>=flightTime;
-   if(travelling||resting){
-    const p=Math.min(1,elapsed/flightTime);
-    const ease=p*p*(3-2*p);
-    const surface=earthRect.width*.42;
-    const radius=surface+(maxDistance-surface-moonRect.width*.18)*ease;
-    const flightAngle=angle-(1-ease)*Math.PI*.82;
-    const x=ex+Math.cos(flightAngle)*radius;
-    const y=ey+Math.sin(flightAngle)*radius;
-    const scale=1-.55*ease;
-    const heading=flightAngle*180/Math.PI+135;
+  const elapsed=now-started;
+  if(elapsed<delay){
+   rocket.style.display='none';
+  }else{
+   const reference=stage.getBoundingClientRect();
+   if(reference.width>0&&reference.height>0){
+    const e=center(earth,reference);
+    const m=center(moon,reference);
+    const dx=m.x-e.x,dy=m.y-e.y;
+    const distance=Math.max(1,Math.hypot(dx,dy));
+    const ux=dx/distance,uy=dy/distance;
+    const p=Math.min(1,(elapsed-delay)/flight);
+    const easing=p*p*(3-2*p);
+    const startX=e.x+ux*(e.size*.47);
+    const startY=e.y+uy*(e.size*.47);
+    const endX=m.x-ux*(m.size*.52);
+    const endY=m.y-uy*(m.size*.52);
+    const arc=Math.sin(Math.PI*easing)*Math.min(18,distance*.14);
+    const x=startX+(endX-startX)*easing-uy*arc;
+    const y=startY+(endY-startY)*easing+ux*arc;
+    const heading=Math.atan2(dy,dx)*180/Math.PI+45;
+    const landed=p>=1;
+    rocket.classList.toggle('landed',landed);
     rocket.style.display='block';
-    rocket.classList.toggle('landed',resting);
-    rocket.style.transform='translate3d('+x+'px,'+y+'px,0) translate(-50%,-50%) rotate('+heading+'deg) scale('+scale+')';
-   }else rocket.style.display='none';
+    rocket.style.transform='translate3d('+x+'px,'+y+'px,0) translate(-50%,-50%) rotate('+heading+'deg) scale('+(landed?.7:1)+')';
+   }
   }
   requestAnimationFrame(animateRocket);
  }
  requestAnimationFrame(animateRocket);
-})();
+})();;
