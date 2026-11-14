@@ -102,14 +102,16 @@ if ('IntersectionObserver' in window) {
  });
  earth.addEventListener('pointerdown',e=>{
   if(e.pointerType==='mouse'&&e.button!==0)return;
-  pointerStart={x:e.clientX,y:e.clientY};
+  pointerStart={x:e.clientX,y:e.clientY,id:e.pointerId};
   didDrag=false;
+  if(earth.setPointerCapture)earth.setPointerCapture(e.pointerId);
  });
  earth.addEventListener('pointermove',e=>{
   if(!pointerStart)return;
   if(Math.hypot(e.clientX-pointerStart.x,e.clientY-pointerStart.y)>9)didDrag=true;
   if(!didDrag)return;
   earth.classList.add('dragging');
+  scene.classList.add('steering-earth');
   orbit.style.animationPlayState='paused';
   earth.style.animationPlayState='paused';
   const rect=orbit.getBoundingClientRect();
@@ -119,8 +121,10 @@ if ('IntersectionObserver' in window) {
   earth.style.animationDelay=delay;
  });
  function endDrag(){
+  if(pointerStart&&earth.hasPointerCapture?.(pointerStart.id))earth.releasePointerCapture(pointerStart.id);
   pointerStart=null;
   earth.classList.remove('dragging');
+  scene.classList.remove('steering-earth');
   orbit.style.animationPlayState='running';
   earth.style.animationPlayState='running';
  }
@@ -201,7 +205,7 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  if(scene&&slot&&scene.parentElement!==slot)slot.appendChild(scene);
 })();
 
-/* One-time Moon landing: anchor the rocket to the surface and spin with its orbit. */
+/* One-time HelloEarth moon mission: steer the flying rocket by dragging Earth. */
 (() => {
  const scene=document.querySelector('.solar-background');
  const stage=document.querySelector('.hero-art-spacer');
@@ -211,6 +215,9 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  const moonOrbit=scene?.querySelector('.moon-orbit');
  const moon=scene?.querySelector('.moon-body');
  const rocket=scene?.querySelector('.moon-rocket');
+ const hud=scene?.querySelector('.mission-hud');
+ const hudLabel=hud?.querySelector('.mission-hud-label');
+ const hudProgress=hud?.querySelector('.mission-hud-progress');
  if(!scene||!stage||!earth||!earthOrbit||!earthPosition||!moonOrbit||!moon||!rocket)return;
 
  const fit=()=>{
@@ -235,9 +242,9 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
   return Math.atan2(matrix.b,matrix.a);
  };
  const moonRotation=()=>angleOf(earthOrbit)+angleOf(earthPosition)+angleOf(moonOrbit);
- const flightDuration=5000;
- let flight=null;
- let attached=null;
+ // A slightly longer flight gives the player time to steer.
+ const flightDuration=8000;
+ let flight=null,attached=null,lastFrame=performance.now();
  rocket.style.display='none';
  rocket.classList.remove('landed');
 
@@ -248,9 +255,12 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
   rocket.style.top='0px';
   rocket.style.transform='translate3d('+x+'px,'+y+'px,0) translate(-50%,-50%) rotate('+angle+'deg) scale('+scale+')';
  };
+ const status=(text)=>{
+  if(hudLabel&&hudLabel.textContent!==text)hudLabel.textContent=text;
+ };
 
  scene.addEventListener('rocketlaunch',()=>{
-  if(flight||attached)return;
+  if(flight||attached)return; // Only one mission per page load.
   const rect=stage.getBoundingClientRect();
   const start=center(earth,rect),destination=center(moon,rect);
   const dx=destination.x-start.x,dy=destination.y-start.y;
@@ -260,19 +270,27 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
    started:performance.now(),
    fromX:start.x+ux*start.size*.46,
    fromY:start.y+uy*start.size*.46,
-   normalX:-ux,
-   normalY:-uy,
+   launchEarthX:start.x,
+   launchEarthY:start.y,
+   normalX:-ux,normalY:-uy,
+   steerX:0,steerY:0,
    heading:Math.atan2(dy,dx)*180/Math.PI+45
   };
+  hud?.classList.add('in-flight');
+  status('IN FLIGHT · DRAG EARTH TO STEER');
+  moon.classList.remove('flag-planted');
   render(flight.fromX,flight.fromY,flight.heading,1,false);
  });
 
  function frame(now){
+  const dt=Math.max(0,Math.min(100,now-lastFrame));
+  lastFrame=now;
   if(flight||attached){
    const rect=stage.getBoundingClientRect();
    if(rect.width&&rect.height){
     const moonCenter=center(moon,rect);
     if(attached){
+     // Preserve the exact touchdown position while rotating with the Moon.
      const angleDifference=moonRotation()-attached.angle;
      const cos=Math.cos(angleDifference),sin=Math.sin(angleDifference);
      const dx=attached.offsetX*moonCenter.size,dy=attached.offsetY*moonCenter.size;
@@ -280,18 +298,32 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
      const y=moonCenter.y+dx*sin+dy*cos;
      render(x,y,attached.heading+angleDifference*180/Math.PI,.7,true);
     }else{
+     const earthCenter=center(earth,rect);
+     const dx=earthCenter.x-moonCenter.x,dy=earthCenter.y-moonCenter.y;
+     const distance=Math.max(1,Math.hypot(dx,dy));
+     const desiredNormalX=dx/distance,desiredNormalY=dy/distance;
+     // Low-pass the aim so dragging Earth steers the rocket smoothly.
+     const alpha=1-Math.exp(-dt/260);
+     flight.normalX+=(desiredNormalX-flight.normalX)*alpha;
+     flight.normalY+=(desiredNormalY-flight.normalY)*alpha;
+     const normalLength=Math.max(.001,Math.hypot(flight.normalX,flight.normalY));
+     const nx=flight.normalX/normalLength,ny=flight.normalY/normalLength;
+     // Earth motion also bends the mid-flight trajectory, fading at touchdown.
+     flight.steerX+=((earthCenter.x-flight.launchEarthX)*.24-flight.steerX)*alpha;
+     flight.steerY+=((earthCenter.y-flight.launchEarthY)*.24-flight.steerY)*alpha;
      const radius=moonCenter.size*.5+3;
-     const tx=moonCenter.x+flight.normalX*radius;
-     const ty=moonCenter.y+flight.normalY*radius;
+     const targetX=moonCenter.x+nx*radius;
+     const targetY=moonCenter.y+ny*radius;
      const progress=clamp01((now-flight.started)/flightDuration);
      const travel=smooth(progress);
-     const flip=smooth(clamp01((progress-.55)/.45));
+     const flip=smooth(clamp01((progress-.7)/.3));
      const heading=flight.heading+180*flip;
      const scale=1-.3*travel;
-     const curve=Math.sin(Math.PI*travel)*Math.min(8,moonCenter.size*.34);
-     const x=flight.fromX+(tx-flight.fromX)*travel-flight.normalY*curve;
-     const y=flight.fromY+(ty-flight.fromY)*travel+flight.normalX*curve;
+     const curve=Math.sin(Math.PI*travel);
+     const x=flight.fromX+(targetX-flight.fromX)*travel+curve*(-ny*Math.min(8,moonCenter.size*.34)+flight.steerX);
+     const y=flight.fromY+(targetY-flight.fromY)*travel+curve*(nx*Math.min(8,moonCenter.size*.34)+flight.steerY);
      render(x,y,heading,scale,progress>=1);
+     if(hudProgress)hudProgress.style.width=Math.round(progress*100)+'%';
      if(progress>=1){
       attached={
        angle:moonRotation(),
@@ -300,6 +332,9 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
        heading
       };
       flight=null;
+      moon.classList.add('flag-planted');
+      hud?.classList.remove('in-flight');
+      status('TOUCHDOWN · HELLOEARTH FLAG PLANTED');
      }
     }
    }
