@@ -132,11 +132,13 @@ if ('IntersectionObserver' in window) {
   }
  };
 
+ const mobileLaunch=document.querySelector('.mobile-launch-control');
  const launchOnce=()=>{
   if(launched)return;
   launched=true;
   earth.classList.add('rocket-launched');
   earth.setAttribute('aria-label','Rocket already launched toward the Moon');
+  if(mobileLaunch)mobileLaunch.hidden=true;
   playLaunchSound();
   scene.dispatchEvent(new Event('rocketlaunch'));
  };
@@ -174,6 +176,21 @@ if ('IntersectionObserver' in window) {
    if(t&&touchStart&&Math.hypot(t.clientX-touchStart.x,t.clientY-touchStart.y)<17)launchOnce();
    touchStart=null;
   },{passive:true});
+ }
+ // A stationary launch control stays reliably tappable even while Earth moves.
+ if(mobileLaunch)mobileLaunch.addEventListener('click',launchOnce);
+ // Touch fallback on the solar stage for browsers that miss taps on moving transforms.
+ const stage=document.querySelector('.hero-art-spacer');
+ if(stage){
+  stage.addEventListener('pointerup',event=>{
+   if(launched||event.pointerType!=='touch')return;
+   const box=earth.getBoundingClientRect();
+   const padding=18;
+   if(event.clientX>=box.left-padding&&event.clientX<=box.right+padding&&
+      event.clientY>=box.top-padding&&event.clientY<=box.bottom+padding){
+    launchOnce();
+   }
+  });
  }
  sun.addEventListener('click',()=>{
   sun.classList.toggle('sun-boost');
@@ -286,6 +303,10 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  const hudProgress=hud?.querySelector('.mission-hud-progress');
  if(!scene||!stage||!earth||!earthOrbit||!earthPosition||!moonOrbit||!moon||!rocket)return;
 
+ // A sibling overlay avoids mobile Safari hiding the rocket inside the orbit's
+ // animated stacking context. The transform coordinates are already stage-relative.
+ if(rocket.parentElement!==stage)stage.appendChild(rocket);
+
  let lastOrbitSize=-1;
  const fit=()=>{
   const rect=stage.getBoundingClientRect();
@@ -329,7 +350,10 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  const render=(x,y,heading,scale,landed)=>{
   if(!rocketVisible){
    rocketVisible=true;
+   rocket.classList.add('mission-active');
    rocket.style.display='block';
+   rocket.style.visibility='visible';
+   rocket.style.opacity='1';
    rocket.style.left='0px';
    rocket.style.top='0px';
   }
