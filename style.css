@@ -998,3 +998,18 @@ body > footer,body > .site-footer{position:relative;z-index:2}
  .hero .hero-art-spacer .moon-rocket,
  .hero .hero-art-spacer .moon-rocket.landed{font-size:15px!important}
 }
+
+/* Small black smile on the Moon's softly shaded surface */
+.hero .hero-art-spacer .moon-body .moon-face{
+ position:absolute;inset:0;display:block;border-radius:50%;z-index:4;pointer-events:none
+}
+.hero .hero-art-spacer .moon-face .moon-eye{
+ position:absolute;top:31%;width:13%;height:14%;border-radius:50%;background:#10131c
+}
+.hero .hero-art-spacer .moon-face .moon-eye-left{left:29%}
+.hero .hero-art-spacer .moon-face .moon-eye-right{right:28%}
+.hero .hero-art-spacer .moon-face .moon-smile{
+ position:absolute;left:29%;top:49%;width:42%;height:23%;box-sizing:border-box;
+ border-bottom:2px solid #10131c;border-radius:0 0 55% 55%
+}
+.hero .hero-art-spacer .earth-position.rocket-launched{cursor:grab!important}
