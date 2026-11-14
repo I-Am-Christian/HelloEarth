@@ -44,7 +44,13 @@ document.addEventListener('click', event => {
 });
 
 const header = document.querySelector('.site-header');
-const updateHeader = () => header.classList.toggle('scrolled', window.scrollY > 12);
+let lastHeaderState;
+const updateHeader = () => {
+  const scrolled = window.scrollY > 12;
+  if (scrolled === lastHeaderState) return;
+  lastHeaderState = scrolled;
+  header.classList.toggle('scrolled', scrolled);
+};
 window.addEventListener('scroll', updateHeader, {passive:true});
 updateHeader();
 const navLinks = [...nav.querySelectorAll('a[href^="#"]')];
@@ -145,7 +151,15 @@ if ('IntersectionObserver' in window) {
      e.preventDefault();show(active+(e.key==='ArrowRight'?1:-1));
    }
  });
- window.addEventListener('resize',()=>show(active));
+ let carouselResizeQueued=false;
+ window.addEventListener('resize',()=>{
+   if(carouselResizeQueued)return;
+   carouselResizeQueued=true;
+   requestAnimationFrame(()=>{
+     carouselResizeQueued=false;
+     show(active);
+   });
+ },{passive:true});
  show(0);
 })();
 
@@ -183,9 +197,12 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  const hudProgress=hud?.querySelector('.mission-hud-progress');
  if(!scene||!stage||!earth||!earthOrbit||!earthPosition||!moonOrbit||!moon||!rocket)return;
 
+ let lastOrbitSize=-1;
  const fit=()=>{
   const rect=stage.getBoundingClientRect();
   const safe=Math.max(100,Math.min(425,Math.floor(Math.min(rect.width,rect.height)-moonOrbit.offsetWidth-moon.offsetWidth-36)));
+  if(safe===lastOrbitSize)return;
+  lastOrbitSize=safe;
   stage.style.setProperty('--safe-orbit-size',safe+'px');
  };
  fit();
@@ -204,22 +221,49 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
   const matrix=new DOMMatrixReadOnly(transform);
   return Math.atan2(matrix.b,matrix.a);
  };
- const moonRotation=()=>angleOf(earthOrbit)+angleOf(earthPosition)+angleOf(moonOrbit);
+ // The Earth orbit and its counter-rotation cancel; only the Moon's own turn remains.
+ const moonRotation=()=>angleOf(moonOrbit);
  const flightDuration=5000;
  let flight=null;
  let attached=null;
+ let rocketVisible=false;
+ let wasLanded=false;
+ let frameQueued=false;
+ let stageVisible=!('IntersectionObserver' in window);
 
  rocket.style.display='none';
  rocket.classList.remove('landed');
  moon.classList.remove('flag-planted');
 
  const render=(x,y,heading,scale,landed)=>{
-  rocket.classList.toggle('landed',landed);
-  rocket.style.display='block';
-  rocket.style.left='0px';
-  rocket.style.top='0px';
+  if(!rocketVisible){
+   rocketVisible=true;
+   rocket.style.display='block';
+   rocket.style.left='0px';
+   rocket.style.top='0px';
+  }
+  if(wasLanded!==landed){
+   wasLanded=landed;
+   rocket.classList.toggle('landed',landed);
+  }
   rocket.style.transform='translate3d('+x+'px,'+y+'px,0) translate(-50%,-50%) rotate('+heading+'deg) scale('+scale+')';
  };
+
+ const canAnimate=()=>!document.hidden&&stageVisible&&(flight!==null||attached!==null);
+ const scheduleFrame=()=>{
+  if(frameQueued||!canAnimate())return;
+  frameQueued=true;
+  requestAnimationFrame(frame);
+ };
+ if('IntersectionObserver' in window){
+  const observer=new IntersectionObserver(entries=>{
+   stageVisible=entries.some(entry=>entry.isIntersecting);
+   if(stageVisible)scheduleFrame();
+  },{rootMargin:'160px 0px'});
+  observer.observe(stage);
+ }
+ document.addEventListener('visibilitychange',scheduleFrame);
+ window.addEventListener('pageshow',scheduleFrame);
  const status=text=>{
   if(hudLabel&&hudLabel.textContent!==text)hudLabel.textContent=text;
  };
@@ -243,9 +287,12 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
   hud?.classList.add('in-flight');
   status('ROCKET EN ROUTE · MOON LANDING');
   render(flight.fromX,flight.fromY,flight.heading,1,false);
+  scheduleFrame();
  });
 
  function frame(now){
+  frameQueued=false;
+  if(!canAnimate())return;
   if(flight||attached){
    const rect=stage.getBoundingClientRect();
    if(rect.width&&rect.height){
@@ -288,7 +335,6 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
     }
    }
   }
-  requestAnimationFrame(frame);
+  scheduleFrame();
  }
- requestAnimationFrame(frame);
 })();
