@@ -193,7 +193,7 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  if(scene&&slot&&scene.parentElement!==slot)slot.appendChild(scene);
 })();
 
-/* Five-second Moon flight. Dock in the Moon's own coordinate system so landing never bounces. */
+/* Moon landing: one continuous path, a 180-degree braking flip, and a fixed surface position. */
 (() => {
  const scene=document.querySelector('.solar-background');
  const stage=document.querySelector('.hero-art-spacer');
@@ -205,100 +205,75 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
 
  const fit=()=>{
   const rect=stage.getBoundingClientRect();
-  const diameter=Math.max(100,Math.min(425,Math.floor(Math.min(rect.width,rect.height)-moonOrbit.offsetWidth-moon.offsetWidth-36)));
-  stage.style.setProperty('--safe-orbit-size',diameter+'px');
+  const size=Math.max(100,Math.min(425,Math.floor(Math.min(rect.width,rect.height)-moonOrbit.offsetWidth-moon.offsetWidth-36)));
+  stage.style.setProperty('--safe-orbit-size',size+'px');
  };
  fit();
  if('ResizeObserver' in window)new ResizeObserver(fit).observe(stage);
  else window.addEventListener('resize',fit,{passive:true});
 
- const position=(el,reference)=>{
-  const rect=el.getBoundingClientRect();
+ const center=(element,reference)=>{
+  const rect=element.getBoundingClientRect();
   return {x:rect.left+rect.width/2-reference.left,y:rect.top+rect.height/2-reference.top,size:rect.width};
  };
- let launchTime=null;
- let launchPoint=null;
- let docked=false;
+ const clamp01=value=>Math.max(0,Math.min(1,value));
+ const smooth=value=>value*value*(3-2*value);
+ const flightDuration=5000;
+ let flight=null;
+
  rocket.style.display='none';
+ rocket.classList.remove('landed');
 
- const draw=(x,y,heading,scale=1)=>{
+ function render(x,y,angle,scale,landed){
+  rocket.classList.toggle('landed',landed);
   rocket.style.display='block';
-  rocket.style.transform='translate3d('+x+'px,'+y+'px,0) translate(-50%,-50%) rotate('+heading+'deg) scale('+scale+')';
- };
-
- // Measure the Moon's rotated local axes in screen space before reparenting.
- // Inverting these axes keeps position AND orientation identical at touchdown.
- const dock=(x,y,heading)=>{
-  const reference=stage.getBoundingClientRect();
-  const probe=document.createElement('span');
-  probe.style.cssText='position:absolute;left:0;top:0;width:0;height:0;pointer-events:none;visibility:hidden;';
-  moon.appendChild(probe);
-  const read=()=>{
-   const rect=probe.getBoundingClientRect();
-   return {x:rect.left,y:rect.top};
-  };
-  const base=read();
-  probe.style.left='10px';
-  const right=read();
-  probe.style.left='0';
-  probe.style.top='10px';
-  const down=read();
-  probe.remove();
-  const ax=(right.x-base.x)/10,ay=(right.y-base.y)/10;
-  const bx=(down.x-base.x)/10,by=(down.y-base.y)/10;
-  const determinant=ax*by-ay*bx;
-  if(Math.abs(determinant)<0.00001)return;
-  const dx=reference.left+x-base.x,dy=reference.top+y-base.y;
-  const localX=(dx*by-dy*bx)/determinant;
-  const localY=(dy*ax-dx*ay)/determinant;
-  const rotation=Math.atan2(ay,ax)*180/Math.PI;
-  moon.appendChild(rocket);
-  rocket.style.left=localX+'px';
-  rocket.style.top=localY+'px';
-  rocket.style.transform='translate(-50%,-50%) rotate('+(heading-rotation)+'deg) scale(.7)';
-  rocket.classList.add('landed');
-  rocket.style.display='block';
-  docked=true;
- };
+  rocket.style.left='0px';
+  rocket.style.top='0px';
+  rocket.style.transform='translate3d('+x+'px,'+y+'px,0) translate(-50%,-50%) rotate('+angle+'deg) scale('+scale+')';
+ }
 
  scene.addEventListener('rocketlaunch',()=>{
-  // Re-launches are allowed: bring the same rocket back from its Moon docking point.
   if(rocket.parentElement!==scene)scene.appendChild(rocket);
-  const reference=stage.getBoundingClientRect();
-  const e=position(earth,reference),m=position(moon,reference);
-  const vx=m.x-e.x,vy=m.y-e.y;
-  const distance=Math.max(1,Math.hypot(vx,vy));
-  launchPoint={x:e.x+vx/distance*e.size*.46,y:e.y+vy/distance*e.size*.46};
-  rocket.style.left='0';
-  rocket.style.top='0';
-  rocket.classList.remove('landed');
-  docked=false;
-  launchTime=performance.now();
-  const heading=Math.atan2(vy,vx)*180/Math.PI+45;
-  draw(launchPoint.x,launchPoint.y,heading);
+  const rect=stage.getBoundingClientRect();
+  const start=center(earth,rect);
+  const destination=center(moon,rect);
+  const dx=destination.x-start.x,dy=destination.y-start.y;
+  const distance=Math.max(1,Math.hypot(dx,dy));
+  const ux=dx/distance,uy=dy/distance;
+
+  flight={
+   started:performance.now(),
+   fromX:start.x+ux*start.size*.46,
+   fromY:start.y+uy*start.size*.46,
+   // Target the same near-side patch throughout the Moon's orbit.
+   normalX:-ux,
+   normalY:-uy,
+   heading:Math.atan2(dy,dx)*180/Math.PI+45
+  };
+  render(flight.fromX,flight.fromY,flight.heading,1,false);
  });
 
- const flightDuration=5000;
  function frame(now){
-  if(launchTime!==null&&!docked){
-   const reference=stage.getBoundingClientRect();
-   if(reference.width&&reference.height){
-    const e=position(earth,reference),m=position(moon,reference);
-    const dx=e.x-m.x,dy=e.y-m.y;
-    const distance=Math.max(1,Math.hypot(dx,dy));
-    const ux=dx/distance,uy=dy/distance;
-    const targetX=m.x+ux*(m.size*.5+3);
-    const targetY=m.y+uy*(m.size*.5+3);
-    const p=Math.max(0,Math.min(1,(now-launchTime)/flightDuration));
-    const smooth=p*p*(3-2*p);
-    // A small curved approach ends exactly at the current contact point.
-    const arc=Math.sin(Math.PI*smooth)*Math.min(9,distance*.08);
-    const x=launchPoint.x+(targetX-launchPoint.x)*smooth-uy*arc;
-    const y=launchPoint.y+(targetY-launchPoint.y)*smooth+ux*arc;
-    const heading=Math.atan2(m.y-y,m.x-x)*180/Math.PI+45;
-    const scale=1-.3*smooth;
-    draw(x,y,heading,scale);
-    if(p>=1)dock(x,y,heading);
+  if(flight){
+   const rect=stage.getBoundingClientRect();
+   if(rect.width&&rect.height){
+    const target=center(moon,rect);
+    const contactRadius=target.size*.5+3;
+    const targetX=target.x+flight.normalX*contactRadius;
+    const targetY=target.y+flight.normalY*contactRadius;
+    const progress=clamp01((now-flight.started)/flightDuration);
+    const travel=smooth(progress);
+
+    // The final 2.25 seconds perform one smooth, full half-turn.
+    const flip=smooth(clamp01((progress-.55)/.45));
+    const heading=flight.heading+180*flip;
+    const scale=1-.3*travel;
+
+    // Offset fades to zero at touchdown, so there's no position jump.
+    const curve=Math.sin(Math.PI*travel)*Math.min(8,target.size*.34);
+    const x=flight.fromX+(targetX-flight.fromX)*travel-flight.normalY*curve;
+    const y=flight.fromY+(targetY-flight.fromY)*travel+flight.normalX*curve;
+    render(x,y,heading,scale,progress>=1);
    }
   }
   requestAnimationFrame(frame);
