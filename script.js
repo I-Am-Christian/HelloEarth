@@ -84,20 +84,63 @@ if ('IntersectionObserver' in window) {
   }
 }
 
-/* A single click or tap on Earth launches the Moon mission. No dragging. */
+/* Earth launches the mission once by mouse click, keyboard or direct phone tap. */
 (() => {
  const scene=document.querySelector('.solar-background');
  const earth=scene?.querySelector('.earth-position');
  const sun=scene?.querySelector('.distant-sun');
  if(!scene||!earth||!sun)return;
  let launched=false;
+ let touchStart=null;
+
+ // Only produce audio from a user gesture; never autoplay on page load.
+ const playLaunchSound=()=>{
+  const AudioClass=window.AudioContext||window.webkitAudioContext;
+  if(!AudioClass)return;
+  let context;
+  try {
+   context=new AudioClass();
+   const start=()=>{
+    const t=context.currentTime+.015, duration=1.35;
+    const output=context.createGain();
+    output.gain.setValueAtTime(.0001,t);
+    output.gain.exponentialRampToValueAtTime(.055,t+.15);
+    output.gain.exponentialRampToValueAtTime(.0001,t+duration);
+    output.connect(context.destination);
+
+    // A soft low-pitched, rising whoosh rather than an abrupt alert.
+    const oscillator=context.createOscillator();
+    oscillator.type='sawtooth';
+    oscillator.frequency.setValueAtTime(95,t);
+    oscillator.frequency.exponentialRampToValueAtTime(225,t+.56);
+    oscillator.frequency.exponentialRampToValueAtTime(135,t+duration);
+    const filter=context.createBiquadFilter();
+    filter.type='lowpass';
+    filter.frequency.setValueAtTime(380,t);
+    filter.frequency.exponentialRampToValueAtTime(1600,t+.65);
+    filter.frequency.exponentialRampToValueAtTime(330,t+duration);
+    oscillator.connect(filter);
+    filter.connect(output);
+    oscillator.start(t);
+    oscillator.stop(t+duration+.03);
+    oscillator.onended=()=>context.close().catch(()=>{});
+   };
+   if(context.state==='suspended')context.resume().then(start).catch(()=>{});
+   else start();
+  } catch(error) {
+   if(context)context.close().catch(()=>{});
+  }
+ };
+
  const launchOnce=()=>{
   if(launched)return;
   launched=true;
   earth.classList.add('rocket-launched');
   earth.setAttribute('aria-label','Rocket already launched toward the Moon');
+  playLaunchSound();
   scene.dispatchEvent(new Event('rocketlaunch'));
  };
+
  earth.addEventListener('click',launchOnce);
  earth.addEventListener('keydown',event=>{
   if(event.key==='Enter'||event.key===' '){
@@ -105,6 +148,33 @@ if ('IntersectionObserver' in window) {
    launchOnce();
   }
  });
+ // Some mobile browsers miss the synthesized click on a transformed div.
+ // A short touch ending over Earth also launches, without launching on scrolling.
+ if('PointerEvent' in window){
+  earth.addEventListener('pointerdown',event=>{
+   if(event.pointerType==='touch'||event.pointerType==='pen')touchStart={x:event.clientX,y:event.clientY,id:event.pointerId};
+  },{passive:true});
+  earth.addEventListener('pointerup',event=>{
+   if(!touchStart||event.pointerId!==touchStart.id)return;
+   const distance=Math.hypot(event.clientX-touchStart.x,event.clientY-touchStart.y);
+   touchStart=null;
+   if(distance<17){
+    event.preventDefault();
+    launchOnce();
+   }
+  });
+  earth.addEventListener('pointercancel',()=>{touchStart=null});
+ }else{
+  earth.addEventListener('touchstart',event=>{
+   const t=event.changedTouches[0];
+   if(t)touchStart={x:t.clientX,y:t.clientY};
+  },{passive:true});
+  earth.addEventListener('touchend',event=>{
+   const t=event.changedTouches[0];
+   if(t&&touchStart&&Math.hypot(t.clientX-touchStart.x,t.clientY-touchStart.y)<17)launchOnce();
+   touchStart=null;
+  },{passive:true});
+ }
  sun.addEventListener('click',()=>{
   sun.classList.toggle('sun-boost');
   sun.setAttribute('aria-pressed',String(sun.classList.contains('sun-boost')));
@@ -218,8 +288,11 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  const angleOf=element=>{
   const transform=getComputedStyle(element).transform;
   if(!transform||transform==='none')return 0;
-  const matrix=new DOMMatrixReadOnly(transform);
-  return Math.atan2(matrix.b,matrix.a);
+  // Read matrix values directly, including on mobile Safari versions without DOMMatrixReadOnly.
+  const match=transform.match(/^matrix(?:3d)?\(([^)]+)\)$/);
+  if(!match)return 0;
+  const values=match[1].split(',').map(Number);
+  return values.length>=2?Math.atan2(values[1],values[0]):0;
  };
  // The Earth orbit and its counter-rotation cancel; only the Moon's own turn remains.
  const moonRotation=()=>angleOf(moonOrbit);
@@ -249,7 +322,13 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
   rocket.style.transform='translate3d('+x+'px,'+y+'px,0) translate(-50%,-50%) rotate('+heading+'deg) scale('+scale+')';
  };
 
- const canAnimate=()=>!document.hidden&&stageVisible&&(flight!==null||attached!==null);
+ // Finish every active flight on phones, even when IntersectionObserver briefly
+ // thinks the stage is offscreen (common when the mobile toolbar resizes).
+ // Keep pausing the already-landed rocket on offscreen desktop sections.
+ const canAnimate=()=>!document.hidden&&(
+  flight!==null||
+  (attached!==null&&(stageVisible||window.innerWidth<=700))
+ );
  const scheduleFrame=()=>{
   if(frameQueued||!canAnimate())return;
   frameQueued=true;
@@ -286,6 +365,8 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
   };
   hud?.classList.add('in-flight');
   status('ROCKET EN ROUTE · MOON LANDING');
+  // Make the mobile flight independent of observer callback timing.
+  stageVisible=true;
   render(flight.fromX,flight.fromY,flight.heading,1,false);
   scheduleFrame();
  });
