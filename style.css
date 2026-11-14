@@ -927,7 +927,8 @@ body > footer,body > .site-footer{position:relative;z-index:2}
  .hero .hero-art-spacer .moon-rocket.landed{font-size:10px!important}
 }
 
-/* Detailed cratered moon and final, slower orbital speeds. */
+
+/* Smooth lunar material: softly mottled mineral surface, spherical shading, no raised craters. */
 .hero .hero-art-spacer .earth-orbit,
 .hero .hero-art-spacer .earth-position{animation-duration:260s!important}
 .hero .hero-art-spacer .moon-orbit{animation-duration:18.75s!important}
@@ -937,52 +938,48 @@ body > footer,body > .site-footer{position:relative;z-index:2}
  width:clamp(22px,2.7vw,29px)!important;
  aspect-ratio:1;
  overflow:visible!important;
- border-radius:47% 53% 49% 51% / 50% 48% 52% 50%;
- background:radial-gradient(circle at 30% 24%,#ffffff 0%,#e7e9f2 30%,#b2b9ce 67%,#79839f 100%)!important;
- box-shadow:0 0 11px #dbe3fa55,inset -5px -5px 7px #5d6883aa,inset 3px 3px 5px #ffffff88!important;
+ border-radius:50%!important;
+ background:
+  radial-gradient(ellipse at 22% 20%,#ffffff94 0%,transparent 56%),
+  radial-gradient(ellipse at 75% 76%,#66718a33 0%,transparent 48%),
+  radial-gradient(circle at 33% 25%,#f2f4fa 0%,#d9deec 31%,#aab4cd 65%,#66748f 100%)!important;
+ box-shadow:
+  0 0 12px #dbe6ff44,
+  inset -5px -4px 9px #45536d88,
+  inset 3px 3px 5px #ffffff77!important;
 }
 .hero .hero-art-spacer .moon-body::before{
  content:"";
  position:absolute;
- width:32%;
- height:32%;
- top:8%;
- left:-8%;
- z-index:-1;
- border-radius:49% 51% 58% 42%;
- background:radial-gradient(circle at 20% 25%,#f1f2f8,#aab1c8 75%,#7d879f);
- box-shadow:0 0 1px #969db4,2px 1px 0 -1px #e3e5f1;
+ inset:0;
+ width:auto;
+ height:auto;
+ top:0;
+ left:0;
+ border-radius:50%;
+ background:
+  radial-gradient(ellipse at 38% 59%,#7a869a24 0%,transparent 23%),
+  radial-gradient(ellipse at 63% 36%,#8d99b124 0%,transparent 19%),
+  radial-gradient(ellipse at 19% 43%,#79879b21 0%,transparent 15%),
+  radial-gradient(ellipse at 73% 69%,#dbe1ed41 0%,transparent 25%);
+ box-shadow:none!important;
+ z-index:0;
  pointer-events:none;
 }
 .hero .hero-art-spacer .moon-body::after{
  content:"";
  position:absolute;
- width:26%;
- height:30%;
- bottom:7%;
- right:-6%;
- z-index:-1;
- border-radius:48% 52% 43% 57%;
- background:radial-gradient(circle at 20% 20%,#d9dce9,#929bb4 85%);
- box-shadow:-1px -1px 1px #d8ddef;
- pointer-events:none;
-}
-.hero .hero-art-spacer .moon-crater{
- position:absolute;
- display:block;
+ inset:0;
+ width:auto;
+ height:auto;
+ top:0;
+ right:0;
+ bottom:0;
  border-radius:50%;
- border:1px solid #d5dae8a8;
- background:radial-gradient(circle at 66% 68%,#8f99b3 0%,#adb5c9 42%,#e7e9f1 72%,#bdc3d6 100%);
- box-shadow:inset 1px 1px 2px #626f8eaa,-1px -1px 1px #ffffffa0,1px 1px 1px #4e5b7866;
+ background:radial-gradient(circle at 28% 24%,transparent 33%,#3d496c24 73%,#26334f60 100%);
+ box-shadow:none!important;
+ z-index:0;
  pointer-events:none;
- z-index:1;
 }
-.hero .hero-art-spacer .crater-a{width:27%;height:27%;left:17%;top:17%}
-.hero .hero-art-spacer .crater-b{width:21%;height:21%;right:14%;top:25%}
-.hero .hero-art-spacer .crater-c{width:32%;height:32%;left:36%;bottom:13%}
-.hero .hero-art-spacer .crater-d{width:15%;height:15%;left:13%;bottom:24%}
-.hero .hero-art-spacer .crater-e{width:14%;height:14%;right:14%;bottom:12%}
-@media(max-width:700px){
- .hero .hero-art-spacer .moon-body{width:21px!important}
- .hero .hero-art-spacer .moon-crater{border-width:.7px}
-}
+.hero .hero-art-spacer .moon-rocket.landed{z-index:8}
+@media(max-width:700px){.hero .hero-art-spacer .moon-body{width:21px!important}}
