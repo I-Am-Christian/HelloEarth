@@ -154,3 +154,61 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  const slot=document.querySelector('.hero-art-spacer');
  if(scene&&slot&&scene.parentElement!==slot)slot.appendChild(scene);
 })();
+
+/* Fit the Moon's complete path inside the scene and fly a rocket to it in 30 seconds. */
+(() => {
+ const scene=document.querySelector('.solar-background');
+ const stage=document.querySelector('.hero-art-spacer');
+ const earth=scene?.querySelector('.earth-planet');
+ const moonOrbit=scene?.querySelector('.moon-orbit');
+ const moon=scene?.querySelector('.moon-body');
+ const orbit=scene?.querySelector('.earth-orbit');
+ const rocket=scene?.querySelector('.moon-rocket');
+ if(!scene||!stage||!earth||!moon||!moonOrbit||!orbit||!rocket)return;
+ const fit=()=>{
+  const rect=stage.getBoundingClientRect();
+  const moonReach=moonOrbit.offsetWidth;
+  const moonSize=moon.offsetWidth;
+  const safeSize=Math.max(100,Math.min(425,Math.floor(Math.min(rect.width,rect.height)-moonReach-moonSize-36)));
+  stage.style.setProperty('--safe-orbit-size',safeSize+'px');
+ };
+ fit();
+ if('ResizeObserver' in window) new ResizeObserver(fit).observe(stage);
+ else window.addEventListener('resize',fit,{passive:true});
+ const flightTime=30000;
+ const landingTime=7500;
+ const cycleTime=44000;
+ const started=performance.now();
+ function animateRocket(now){
+  const elapsed=(now-started)%cycleTime;
+  const stageRect=stage.getBoundingClientRect();
+  if(stageRect.width>0&&stageRect.height>0){
+   const earthRect=earth.getBoundingClientRect();
+   const moonRect=moon.getBoundingClientRect();
+   const ex=earthRect.left+earthRect.width/2-stageRect.left;
+   const ey=earthRect.top+earthRect.height/2-stageRect.top;
+   const mx=moonRect.left+moonRect.width/2-stageRect.left;
+   const my=moonRect.top+moonRect.height/2-stageRect.top;
+   const angle=Math.atan2(my-ey,mx-ex);
+   const maxDistance=Math.hypot(mx-ex,my-ey);
+   const travelling=elapsed<flightTime;
+   const resting=elapsed>=flightTime&&elapsed<flightTime+landingTime;
+   if(travelling||resting){
+    const p=Math.min(1,elapsed/flightTime);
+    const ease=p*p*(3-2*p);
+    const surface=earthRect.width*.42;
+    const radius=surface+(maxDistance-surface-moonRect.width*.18)*ease;
+    const flightAngle=angle-(1-ease)*Math.PI*.82;
+    const x=ex+Math.cos(flightAngle)*radius;
+    const y=ey+Math.sin(flightAngle)*radius;
+    const scale=1-.55*ease;
+    const heading=flightAngle*180/Math.PI+135;
+    rocket.style.display='block';
+    rocket.classList.toggle('landed',resting);
+    rocket.style.transform='translate3d('+x+'px,'+y+'px,0) translate(-50%,-50%) rotate('+heading+'deg) scale('+scale+')';
+   }else rocket.style.display='none';
+  }
+  requestAnimationFrame(animateRocket);
+ }
+ requestAnimationFrame(animateRocket);
+})();
