@@ -210,7 +210,7 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
     const landed=p>=1;
     rocket.classList.toggle('landed',landed);
     rocket.style.display='block';
-    rocket.style.transform='translate3d('+x+'px,'+y+'px,0) translate(-50%,-50%) rotate('+heading+'deg) scale('+(landed?.7:1)+')';
+    rocket.style.transform='translate3d('+x+'px,'+y+'px,0) translate(-50%,-50%) rotate('+heading+'deg) scale('+(landed ? 0.7 : 1)+')';
    }
   }
   requestAnimationFrame(animateRocket);
