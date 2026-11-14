@@ -85,7 +85,7 @@ if ('IntersectionObserver' in window) {
  const earth=scene?.querySelector('.earth-position');
  const sun=scene?.querySelector('.distant-sun');
  if(!scene||!orbit||!earth||!sun)return;
- const duration=173.334;
+ const duration=260;
  let pointerStart=null;
  let didDrag=false;
  sun.addEventListener('click',()=>{
@@ -193,7 +193,7 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  if(scene&&slot&&scene.parentElement!==slot)slot.appendChild(scene);
 })();
 
-/* Rocket remains hidden until an Earth click; flies for 10 seconds and docks to the Moon. */
+/* Five-second rocket flight with continuous approach and permanent lunar docking. */
 (() => {
  const scene=document.querySelector('.solar-background');
  const stage=document.querySelector('.hero-art-spacer');
@@ -210,58 +210,65 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  fit();
  if('ResizeObserver' in window)new ResizeObserver(fit).observe(stage);
  else window.addEventListener('resize',fit,{passive:true});
- const location=(element,reference)=>{
-  const r=element.getBoundingClientRect();
-  return {x:r.left+r.width/2-reference.left,y:r.top+r.height/2-reference.top,size:r.width};
+ const getPosition=(element,reference)=>{
+  const rect=element.getBoundingClientRect();
+  return {x:rect.left+rect.width/2-reference.left,y:rect.top+rect.height/2-reference.top,size:rect.width};
  };
- let started=null;
- let origin=null;
- let docked=false;
+ let launchTime=null;
+ let launchPoint=null;
+ let dockOffset=null;
+ let dockHeading=0;
  rocket.style.display='none';
- scene.addEventListener('rocketlaunch',()=>{
-  if(rocket.parentElement!==scene)scene.appendChild(rocket);
-  const stageRect=stage.getBoundingClientRect();
-  const e=location(earth,stageRect);
-  const m=location(moon,stageRect);
-  const dx=m.x-e.x,dy=m.y-e.y;
-  const length=Math.max(1,Math.hypot(dx,dy));
-  origin={x:e.x+dx/length*e.size*.47,y:e.y+dy/length*e.size*.47};
-  started=performance.now();
-  docked=false;
-  rocket.classList.remove('landed');
-  rocket.style.left='0';
-  rocket.style.top='0';
+ const draw=(x,y,heading,landed)=>{
   rocket.style.display='block';
- });
- const dock=()=>{
-  docked=true;
-  rocket.classList.add('landed');
-  moon.appendChild(rocket);
-  rocket.style.left='50%';
-  rocket.style.top='0';
-  rocket.style.transform='translate(-50%,-65%) rotate(-35deg) scale(.65)';
+  rocket.classList.toggle('landed',landed);
+  rocket.style.transform='translate3d('+x+'px,'+y+'px,0) translate(-50%,-50%) rotate('+heading+'deg) scale('+(landed?0.7:1)+')';
  };
- function frame(now){
-  if(started!==null&&!docked){
+ scene.addEventListener('rocketlaunch',()=>{
+  const stageRect=stage.getBoundingClientRect();
+  const e=getPosition(earth,stageRect),m=getPosition(moon,stageRect);
+  const vx=m.x-e.x,vy=m.y-e.y;
+  const d=Math.max(1,Math.hypot(vx,vy));
+  launchPoint={x:e.x+vx/d*e.size*.46,y:e.y+vy/d*e.size*.46};
+  launchTime=performance.now();
+  dockOffset=null;
+  const initialHeading=Math.atan2(vy,vx)*180/Math.PI+45;
+  draw(launchPoint.x,launchPoint.y,initialHeading,false);
+ });
+ const flightDuration=5000;
+ function animate(now){
+  if(launchTime!==null){
    const stageRect=stage.getBoundingClientRect();
-   if(stageRect.width&&stageRect.height){
-    const m=location(moon,stageRect);
-    const e=location(earth,stageRect);
-    const vx=m.x-e.x,vy=m.y-e.y;
-    const d=Math.max(1,Math.hypot(vx,vy));
-    const endX=m.x-vx/d*m.size*.48;
-    const endY=m.y-vy/d*m.size*.48;
-    const progress=Math.min(1,(now-started)/10000);
-    const t=progress*progress*(3-2*progress);
-    const arc=Math.sin(Math.PI*t)*Math.min(18,d*.14);
-    const x=origin.x+(endX-origin.x)*t-vy/d*arc;
-    const y=origin.y+(endY-origin.y)*t+vx/d*arc;
-    const heading=Math.atan2(endY-origin.y,endX-origin.x)*180/Math.PI+45;
-    rocket.style.transform='translate3d('+x+'px,'+y+'px,0) translate(-50%,-50%) rotate('+heading+'deg)';
-    if(progress>=1)dock();
+   if(stageRect.width>0&&stageRect.height>0){
+    const m=getPosition(moon,stageRect);
+    if(dockOffset){
+     draw(m.x+dockOffset.x*m.size,m.y+dockOffset.y*m.size,dockHeading,true);
+    }else{
+     const e=getPosition(earth,stageRect);
+     const dx=e.x-m.x,dy=e.y-m.y;
+     const distance=Math.max(1,Math.hypot(dx,dy));
+     const ux=dx/distance,uy=dy/distance;
+     const targetX=m.x+ux*(m.size*.5+4);
+     const targetY=m.y+uy*(m.size*.5+4);
+     const p=Math.max(0,Math.min(1,(now-launchTime)/flightDuration));
+     const smooth=p*p*(3-2*p);
+     const arc=Math.sin(Math.PI*smooth)*Math.min(11,distance*.11);
+     const x=launchPoint.x+(targetX-launchPoint.x)*smooth-uy*arc;
+     const y=launchPoint.y+(targetY-launchPoint.y)*smooth+ux*arc;
+     const heading=Math.atan2(m.y-y,m.x-x)*180/Math.PI+45;
+     if(p>=1){
+      // Capture the precise contact position and approach orientation.
+      // The Moon moves, but the rocket stays anchored to that same patch of surface.
+      dockOffset={x:(x-m.x)/m.size,y:(y-m.y)/m.size};
+      dockHeading=heading;
+      draw(x,y,heading,true);
+     }else{
+      draw(x,y,heading,false);
+     }
+    }
    }
   }
-  requestAnimationFrame(frame);
+  requestAnimationFrame(animate);
  }
- requestAnimationFrame(frame);
+ requestAnimationFrame(animate);
 })();
