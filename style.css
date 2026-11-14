@@ -2370,3 +2370,13 @@ body { -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
  .preview-section .floating-desktop{min-height:475px!important}
  .site-footer .footer-main{width:calc(100% - 26px)!important}
 }
+
+/* Fit the Russian language label in the compact mobile header. */
+@media(max-width:700px){
+ html[lang="ru"] .site-header .language-picker{max-width:107px!important}
+ html[lang="ru"] .site-header .language-picker select{max-width:77px!important;font-size:10px!important}
+}
+@media(max-width:390px){
+ html[lang="ru"] .site-header .language-picker{max-width:95px!important}
+ html[lang="ru"] .site-header .language-picker select{max-width:70px!important}
+}
