@@ -78,7 +78,7 @@ if ('IntersectionObserver' in window) {
   }
 }
 
-/* Interactive solar system: click Earth to launch, drag to adjust its orbit, click Sun to glow. */
+/* Earth click launches the rocket; dragging Earth adjusts its orbit without launching. */
 (() => {
  const scene=document.querySelector('.solar-background');
  const orbit=scene?.querySelector('.earth-orbit');
@@ -86,46 +86,47 @@ if ('IntersectionObserver' in window) {
  const sun=scene?.querySelector('.distant-sun');
  if(!scene||!orbit||!earth||!sun)return;
  const duration=173.334;
- let pointerStart=null, dragged=false;
+ let pointerStart=null;
+ let didDrag=false;
  sun.addEventListener('click',()=>{
   sun.classList.toggle('sun-boost');
   sun.setAttribute('aria-pressed',String(sun.classList.contains('sun-boost')));
  });
- function setPhase(degrees){
-  const delay=-(degrees/360*duration)+'s';
-  orbit.style.animationDelay=delay;
-  earth.style.animationDelay=delay;
- }
- earth.addEventListener('pointerdown',event=>{
-  if(event.pointerType==='mouse'&&event.button!==0)return;
-  pointerStart={x:event.clientX,y:event.clientY};
-  dragged=false;
-  earth.setPointerCapture(event.pointerId);
+ earth.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='mouse'&&e.button!==0)return;
+  pointerStart={x:e.clientX,y:e.clientY};
+  didDrag=false;
  });
- earth.addEventListener('pointermove',event=>{
+ earth.addEventListener('pointermove',e=>{
   if(!pointerStart)return;
-  if(Math.hypot(event.clientX-pointerStart.x,event.clientY-pointerStart.y)>8)dragged=true;
-  if(!dragged)return;
+  if(Math.hypot(e.clientX-pointerStart.x,e.clientY-pointerStart.y)>9)didDrag=true;
+  if(!didDrag)return;
   earth.classList.add('dragging');
   orbit.style.animationPlayState='paused';
   earth.style.animationPlayState='paused';
   const rect=orbit.getBoundingClientRect();
-  const degrees=(Math.atan2(event.clientY-(rect.top+rect.height/2),event.clientX-(rect.left+rect.width/2))*180/Math.PI+450)%360;
-  setPhase(degrees);
+  const degrees=(Math.atan2(e.clientY-(rect.top+rect.height/2),e.clientX-(rect.left+rect.width/2))*180/Math.PI+450)%360;
+  const delay=-(degrees/360*duration)+'s';
+  orbit.style.animationDelay=delay;
+  earth.style.animationDelay=delay;
  });
- function finish(event,cancelled=false){
-  if(!pointerStart)return;
-  const launch=!dragged&&!cancelled;
+ function endDrag(){
   pointerStart=null;
   earth.classList.remove('dragging');
   orbit.style.animationPlayState='running';
   earth.style.animationPlayState='running';
-  if(launch)scene.dispatchEvent(new Event('rocketlaunch'));
  }
- earth.addEventListener('pointerup',event=>finish(event));
- earth.addEventListener('pointercancel',event=>finish(event,true));
- earth.addEventListener('keydown',event=>{
-  if(event.key==='Enter'||event.key===' '){event.preventDefault();scene.dispatchEvent(new Event('rocketlaunch'))}
+ earth.addEventListener('pointerup',endDrag);
+ earth.addEventListener('pointercancel',()=>{didDrag=true;endDrag()});
+ earth.addEventListener('click',e=>{
+  if(didDrag){didDrag=false;return}
+  scene.dispatchEvent(new Event('rocketlaunch'));
+ });
+ earth.addEventListener('keydown',e=>{
+  if(e.key==='Enter'||e.key===' '){
+   e.preventDefault();
+   scene.dispatchEvent(new Event('rocketlaunch'));
+  }
  });
 })();
 
@@ -192,7 +193,7 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  if(scene&&slot&&scene.parentElement!==slot)slot.appendChild(scene);
 })();
 
-/* The rocket launches only when Earth is clicked, taking 10 seconds to reach the moving Moon. */
+/* Rocket remains hidden until an Earth click; flies for 10 seconds and docks to the Moon. */
 (() => {
  const scene=document.querySelector('.solar-background');
  const stage=document.querySelector('.hero-art-spacer');
@@ -209,38 +210,58 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  fit();
  if('ResizeObserver' in window)new ResizeObserver(fit).observe(stage);
  else window.addEventListener('resize',fit,{passive:true});
- let launchedAt=null;
- scene.addEventListener('rocketlaunch',()=>{
-  launchedAt=performance.now();
-  rocket.classList.remove('landed');
-  rocket.style.display='block';
- });
- rocket.style.display='none';
- const center=(element,reference)=>{
+ const location=(element,reference)=>{
   const r=element.getBoundingClientRect();
   return {x:r.left+r.width/2-reference.left,y:r.top+r.height/2-reference.top,size:r.width};
  };
- function animate(now){
-  if(launchedAt!==null){
-   const rect=stage.getBoundingClientRect();
-   if(rect.width&&rect.height){
-    const e=center(earth,rect),m=center(moon,rect);
-    const dx=m.x-e.x,dy=m.y-e.y,distance=Math.max(1,Math.hypot(dx,dy));
-    const ux=dx/distance,uy=dy/distance;
-    const p=Math.min(1,(now-launchedAt)/10000);
-    const t=p*p*(3-2*p);
-    const fromX=e.x+ux*e.size*.47,fromY=e.y+uy*e.size*.47;
-    const toX=m.x-ux*m.size*.52,toY=m.y-uy*m.size*.52;
-    const arc=Math.sin(Math.PI*t)*Math.min(18,distance*.14);
-    const x=fromX+(toX-fromX)*t-uy*arc,y=fromY+(toY-fromY)*t+ux*arc;
-    const heading=Math.atan2(dy,dx)*180/Math.PI+45;
-    const landed=p>=1;
-    rocket.classList.toggle('landed',landed);
-    rocket.style.display='block';
-    rocket.style.transform='translate3d('+x+'px,'+y+'px,0) translate(-50%,-50%) rotate('+heading+'deg) scale('+(landed?0.7:1)+')';
+ let started=null;
+ let origin=null;
+ let docked=false;
+ rocket.style.display='none';
+ scene.addEventListener('rocketlaunch',()=>{
+  if(rocket.parentElement!==scene)scene.appendChild(rocket);
+  const stageRect=stage.getBoundingClientRect();
+  const e=location(earth,stageRect);
+  const m=location(moon,stageRect);
+  const dx=m.x-e.x,dy=m.y-e.y;
+  const length=Math.max(1,Math.hypot(dx,dy));
+  origin={x:e.x+dx/length*e.size*.47,y:e.y+dy/length*e.size*.47};
+  started=performance.now();
+  docked=false;
+  rocket.classList.remove('landed');
+  rocket.style.left='0';
+  rocket.style.top='0';
+  rocket.style.display='block';
+ });
+ const dock=()=>{
+  docked=true;
+  rocket.classList.add('landed');
+  moon.appendChild(rocket);
+  rocket.style.left='50%';
+  rocket.style.top='0';
+  rocket.style.transform='translate(-50%,-65%) rotate(-35deg) scale(.65)';
+ };
+ function frame(now){
+  if(started!==null&&!docked){
+   const stageRect=stage.getBoundingClientRect();
+   if(stageRect.width&&stageRect.height){
+    const m=location(moon,stageRect);
+    const e=location(earth,stageRect);
+    const vx=m.x-e.x,vy=m.y-e.y;
+    const d=Math.max(1,Math.hypot(vx,vy));
+    const endX=m.x-vx/d*m.size*.48;
+    const endY=m.y-vy/d*m.size*.48;
+    const progress=Math.min(1,(now-started)/10000);
+    const t=progress*progress*(3-2*progress);
+    const arc=Math.sin(Math.PI*t)*Math.min(18,d*.14);
+    const x=origin.x+(endX-origin.x)*t-vy/d*arc;
+    const y=origin.y+(endY-origin.y)*t+vx/d*arc;
+    const heading=Math.atan2(endY-origin.y,endX-origin.x)*180/Math.PI+45;
+    rocket.style.transform='translate3d('+x+'px,'+y+'px,0) translate(-50%,-50%) rotate('+heading+'deg)';
+    if(progress>=1)dock();
    }
   }
-  requestAnimationFrame(animate);
+  requestAnimationFrame(frame);
  }
- requestAnimationFrame(animate);
+ requestAnimationFrame(frame);
 })();
