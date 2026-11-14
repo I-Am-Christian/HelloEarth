@@ -1774,3 +1774,24 @@ body > footer,body > .site-footer{position:relative;z-index:2}
  .about-section .about-contact-button{transition:none}
  .about-section .about-contact-button:hover{transform:none}
 }
+
+/* Mobile Moon mission reliability: larger invisible tap target, same visual size. */
+.hero .hero-art-spacer .earth-position{
+ pointer-events:auto!important;
+ touch-action:manipulation!important;
+}
+.hero .hero-art-spacer .earth-position::before{
+ content:"";
+ position:absolute;
+ inset:-8px;
+ border-radius:50%;
+ background:transparent;
+ pointer-events:auto;
+}
+@media(max-width:700px){
+ .hero .hero-art-spacer .earth-position::before{inset:-12px}
+ .hero .hero-art-spacer .moon-rocket{
+  z-index:9!important;
+  backface-visibility:hidden;
+ }
+}
