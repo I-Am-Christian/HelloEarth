@@ -1322,3 +1322,71 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 @media(prefers-reduced-motion:reduce){
  .hero .hero-art-spacer .moon-body.flag-planted .moon-flag{animation:none;opacity:1;transform:none}
 }
+
+/* Moon mission cleanup: a small planted pennant rather than an oversized floating flag. */
+.hero .hero-art-spacer .earth-position{touch-action:manipulation!important;cursor:pointer!important}
+.hero .hero-art-spacer .earth-position.rocket-launched{cursor:default!important}
+.hero .hero-art-spacer .moon-body .moon-flag{
+ left:64%!important;
+ bottom:73%!important;
+ width:15px!important;
+ height:17px!important;
+ transform-origin:2px 100%!important;
+ transform:translateY(7px) scaleY(0);
+ opacity:0;
+ filter:drop-shadow(0 1px 2px #0a0d1b88);
+}
+.hero .hero-art-spacer .moon-flagpole{
+ left:1px!important;
+ bottom:0!important;
+ height:100%!important;
+ width:1.5px!important;
+ background:linear-gradient(90deg,#7583a6,#f6f4ff)!important;
+ box-shadow:0 0 1px #d2c3ff88!important;
+}
+.hero .hero-art-spacer .moon-flagcloth{
+ left:2px!important;
+ top:0!important;
+ width:13px!important;
+ height:10px!important;
+ border-radius:1px 3px 2px 0!important;
+ border:1px solid #d0bcff9e!important;
+ background:linear-gradient(115deg,#53399f,#8e65de)!important;
+ transform:none!important;
+ box-shadow:0 1px 3px #09081b5e!important;
+}
+.hero .hero-art-spacer .moon-flagcloth img{
+ width:9px!important;
+ height:9px!important;
+ object-fit:contain!important;
+}
+.hero .hero-art-spacer .moon-body.flag-planted .moon-flag{
+ animation:moon-flag-rise 1.2s cubic-bezier(.17,.68,.25,1) both!important;
+}
+.hero .hero-art-spacer .moon-body.flag-planted .moon-flagcloth{
+ transform-origin:0 50%!important;
+ animation:moon-flag-unfurl .65s .48s cubic-bezier(.2,.8,.3,1) both!important;
+}
+@keyframes moon-flag-rise{
+ 0%{opacity:0;transform:translateY(9px) scaleY(0)}
+ 30%{opacity:1;transform:translateY(7px) scaleY(.15)}
+ 72%{opacity:1;transform:translateY(0) scaleY(1)}
+ 100%{opacity:1;transform:translateY(0) scaleY(1)}
+}
+@keyframes moon-flag-unfurl{
+ from{opacity:0;transform:scaleX(.05) skewY(-3deg)}
+ to{opacity:1;transform:scaleX(1) skewY(-3deg)}
+}
+@media(max-width:700px){
+ .hero .hero-art-spacer .moon-body .moon-flag{
+  width:12px!important;height:14px!important;left:62%!important;bottom:76%!important
+ }
+ .hero .hero-art-spacer .moon-flagcloth{width:11px!important;height:8px!important}
+ .hero .hero-art-spacer .moon-flagcloth img{width:7px!important;height:7px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .hero .hero-art-spacer .moon-body.flag-planted .moon-flag{
+  animation:none!important;opacity:1!important;transform:none!important
+ }
+ .hero .hero-art-spacer .moon-body.flag-planted .moon-flagcloth{animation:none!important}
+}
