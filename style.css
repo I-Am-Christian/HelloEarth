@@ -889,3 +889,40 @@ body > footer,body > .site-footer{position:relative;z-index:2}
 }
 .earth-orbit,.earth-position{animation-duration:173.334s!important}
 .hero .hero-art-spacer .earth-position{cursor:pointer!important}
+
+/* Final solar cleanup: unclip circular light, no rectangular light boundary or rays. */
+.hero .hero-art-spacer,
+.hero .hero-art-spacer > .solar-background{
+ overflow:visible!important;
+}
+.hero .hero-art-spacer .distant-sun{
+ isolation:auto!important;
+ animation:none!important;
+ background:radial-gradient(circle at 34% 28%,#fff9d9 0%,#ffe7aa 28%,#ffc36c 68%,#ffae58 100%)!important;
+ box-shadow:0 0 24px 10px #ffd48480,0 0 70px 28px #ffa8412e,0 0 135px 50px #fa9c2112!important;
+ filter:none!important;
+}
+.hero .hero-art-spacer .distant-sun::before,
+.hero .hero-art-spacer .distant-sun::after{
+ display:none!important;
+ content:none!important;
+ background:none!important;
+ box-shadow:none!important;
+}
+.hero .hero-art-spacer .distant-sun.sun-boost{
+ box-shadow:0 0 34px 14px #ffe2a6a0,0 0 85px 38px #ffb74d55,0 0 165px 62px #ffa23621!important;
+}
+.hero .hero-art-spacer .moon-orbit{
+ animation-duration:12.5s!important;
+}
+.hero .hero-art-spacer .moon-body{
+ position:relative;
+ overflow:visible!important;
+}
+.hero .hero-art-spacer .moon-rocket.landed{
+ font-size:12px!important;
+ filter:drop-shadow(0 0 4px #c9baff);
+}
+@media(max-width:700px){
+ .hero .hero-art-spacer .moon-rocket.landed{font-size:10px!important}
+}
