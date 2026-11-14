@@ -1390,3 +1390,31 @@ body > footer,body > .site-footer{position:relative;z-index:2}
  }
  .hero .hero-art-spacer .moon-body.flag-planted .moon-flagcloth{animation:none!important}
 }
+
+/* Smoothness improvements: only keep the few continuously moving surfaces composited. */
+.hero .hero-art-spacer .earth-orbit,
+.hero .hero-art-spacer .earth-position,
+.hero .hero-art-spacer .moon-orbit,
+.hero .hero-art-spacer .moon-rocket,
+.preview-track {will-change:transform}
+
+/* Let the browser skip layout and painting for sections far outside the viewport.
+   These sections remain fully present, interactive and accessible when reached. */
+@supports (content-visibility:auto){
+ .features,.preview-section,.workflow-section,.atlas-section,.faq-section,.about-section{
+  content-visibility:auto;
+  contain-intrinsic-size:auto 740px;
+ }
+ .features{contain-intrinsic-size:auto 1160px}
+ .preview-section{contain-intrinsic-size:auto 850px}
+ .workflow-section{contain-intrinsic-size:auto 770px}
+ .atlas-section{contain-intrinsic-size:auto 560px}
+ .faq-section{contain-intrinsic-size:auto 740px}
+ .about-section{contain-intrinsic-size:auto 490px}
+ @media(max-width:700px){
+  .features{contain-intrinsic-size:auto 1840px}
+  .preview-section{contain-intrinsic-size:auto 1000px}
+  .workflow-section{contain-intrinsic-size:auto 1280px}
+  .faq-section{contain-intrinsic-size:auto 950px}
+ }
+}
