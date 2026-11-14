@@ -176,11 +176,9 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  if('ResizeObserver' in window) new ResizeObserver(fit).observe(stage);
  else window.addEventListener('resize',fit,{passive:true});
  const flightTime=30000;
- const landingTime=7500;
- const cycleTime=44000;
  const started=performance.now();
  function animateRocket(now){
-  const elapsed=(now-started)%cycleTime;
+  const elapsed=Math.max(0,now-started);
   const stageRect=stage.getBoundingClientRect();
   if(stageRect.width>0&&stageRect.height>0){
    const earthRect=earth.getBoundingClientRect();
@@ -192,7 +190,7 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
    const angle=Math.atan2(my-ey,mx-ex);
    const maxDistance=Math.hypot(mx-ex,my-ey);
    const travelling=elapsed<flightTime;
-   const resting=elapsed>=flightTime&&elapsed<flightTime+landingTime;
+   const resting=elapsed>=flightTime;
    if(travelling||resting){
     const p=Math.min(1,elapsed/flightTime);
     const ease=p*p*(3-2*p);
