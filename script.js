@@ -224,7 +224,7 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
 
  const center=(element,reference)=>{
   const rect=element.getBoundingClientRect();
-  return {x:rect.left+rect.width/2-reference.left,y:rect.top+rect.height/2-reference.top,size:rect.width};
+  return {x:rect.left+rect.width/2-reference.left,y:rect.top+rect.height/2-reference.top,size:element.offsetWidth||rect.width};
  };
  const clamp01=value=>Math.max(0,Math.min(1,value));
  const smooth=value=>value*value*(3-2*value);
