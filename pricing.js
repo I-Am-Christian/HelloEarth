@@ -25,6 +25,7 @@ function plannedAiFeatures(plan) {
 function card(plan) {
   const article = document.createElement("article");
   article.className = "plan-card" + (plan.code === "growth" ? " is-popular" : "");
+  article.dataset.tier = ["free","starter","growth","studio"].includes(plan.code) ? plan.code : "other";
   if (plan.code === "growth") {
     const badge = document.createElement("div");
     badge.className = "plan-popular";
