@@ -280,9 +280,10 @@ function setLanguage(lang){
  });
  document.documentElement.lang=lang;picker.value=lang;
  document.title=lang==='ru'?'Главная | HelloEarth':lang==='zh'?'首页 | HelloEarth':'Home | HelloEarth';
+ document.dispatchEvent(new CustomEvent('helloearth:languagechanged',{detail:{language:lang}}));
  try{localStorage.setItem('helloearth-language',lang)}catch(e){}
 }
-let saved;try{saved=localStorage.getItem('helloearth-language')}catch(e){}const browser=(navigator.languages?.[0]||navigator.language||'en').toLowerCase().split('-')[0];setLanguage(translations[saved]?saved:(translations[browser]?browser:'en'));
+let saved;try{saved=localStorage.getItem('helloearth-language')}catch(e){}const browser=(navigator.languages?.[0]||navigator.language||'en').toLowerCase().split('-')[0];setLanguage(saved==='en'||translations[saved]?saved:(translations[browser]?browser:'en'));
 picker.addEventListener('change',()=>setLanguage(picker.value));
 })();
 
