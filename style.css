@@ -2512,3 +2512,90 @@ body { -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
 .nav-dashboard[hidden],.nav-signin[hidden]{display:none!important}
 
 @media(max-width:700px){.hero .hero-actions{display:flex!important;flex-direction:column!important;align-items:center!important;gap:13px!important;max-width:360px!important}.hero .hero-actions>.button,.hero .hero-actions>.he-hero-secondary{width:100%!important;max-width:360px!important;box-sizing:border-box!important;text-align:center!important}.hero .hero-actions>.button{min-height:51px!important;display:flex!important;justify-content:center!important;order:0}.hero .hero-actions>.he-hero-secondary{display:block!important;order:1;min-height:30px!important;padding:5px 8px!important;white-space:normal!important}}
+
+/* Compact mobile benefit cards — horizontal icon/text layout. */
+@media (max-width:760px){
+ .features .value-strip.essentials-benefits{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  gap:11px!important;
+  margin-top:21px!important;
+  padding:0!important;
+  background:none!important;
+  border:0!important;
+  border-radius:0!important;
+  overflow:visible!important;
+  box-shadow:none!important;
+ }
+ .features .value-strip.essentials-benefits>div{
+  position:relative!important;
+  display:grid!important;
+  grid-template-columns:46px minmax(0,1fr)!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  justify-content:start!important;
+  gap:14px!important;
+  height:auto!important;
+  min-height:91px!important;
+  padding:15px 17px!important;
+  margin:0!important;
+  border:1px solid rgba(160,138,222,.34)!important;
+  border-radius:17px!important;
+  background:linear-gradient(120deg,rgba(45,42,77,.96),rgba(27,33,59,.98))!important;
+  box-shadow:0 8px 22px rgba(8,9,30,.18),inset 0 1px rgba(255,255,255,.045)!important;
+  text-align:left!important;
+  overflow:hidden!important;
+ }
+ .features .value-strip.essentials-benefits>div:not(:last-child){border-right:1px solid rgba(160,138,222,.34)!important;border-bottom:1px solid rgba(160,138,222,.34)!important}
+ .features .value-strip.essentials-benefits>div:nth-child(2){background:linear-gradient(120deg,rgba(36,44,76,.96),rgba(30,32,59,.98))!important}
+ .features .value-strip.essentials-benefits>div:nth-child(3){background:linear-gradient(120deg,rgba(45,37,75,.97),rgba(28,34,62,.98))!important}
+ .features .value-strip.essentials-benefits .benefit-icon{
+  display:grid!important;
+  place-items:center!important;
+  width:46px!important;
+  height:46px!important;
+  min-width:46px!important;
+  margin:0!important;
+  border:1px solid rgba(191,163,255,.22)!important;
+  border-radius:14px!important;
+  background:linear-gradient(140deg,#594584,#3b3264)!important;
+  color:#e5d4ff!important;
+  font-size:23px!important;
+  line-height:1!important;
+ }
+ .features .value-strip.essentials-benefits>div:nth-child(2) .benefit-icon{background:linear-gradient(140deg,#385572,#343c68)!important;color:#c4e0ff!important;border-color:rgba(145,199,255,.22)!important}
+ .features .value-strip.essentials-benefits>div:nth-child(3) .benefit-icon{background:linear-gradient(140deg,#655078,#433765)!important;color:#f2d5ff!important}
+ .features .value-strip.essentials-benefits>div>span:last-child{
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  align-items:flex-start!important;
+  gap:4px!important;
+  min-width:0!important;
+  width:auto!important;
+  text-align:left!important;
+ }
+ .features .value-strip.essentials-benefits strong{
+  display:block!important;
+  margin:0!important;
+  font-size:15px!important;
+  line-height:1.35!important;
+  font-weight:750!important;
+  letter-spacing:-.15px!important;
+  color:#f5f0ff!important;
+  text-align:left!important;
+ }
+ .features .value-strip.essentials-benefits>div>span:last-child>span{
+  display:block!important;
+  font-size:12px!important;
+  line-height:1.5!important;
+  color:#bfc1dc!important;
+  text-align:left!important;
+ }
+}
+@media(max-width:360px){
+ .features .value-strip.essentials-benefits>div{grid-template-columns:42px minmax(0,1fr)!important;gap:12px!important;padding:13px!important;min-height:83px!important}
+ .features .value-strip.essentials-benefits .benefit-icon{width:42px!important;height:42px!important;min-width:42px!important}
+ .features .value-strip.essentials-benefits strong{font-size:14px!important}
+ .features .value-strip.essentials-benefits>div>span:last-child>span{font-size:11.5px!important}
+}
