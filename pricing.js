@@ -54,6 +54,7 @@ function card(plan) {
 
   const action = document.createElement("a");
   action.className = "plan-action";
+  if (plan.code === "free") action.dataset.authStart = "plan";
   action.href = plan.code === "free" ? "register.html"
     : "mailto:helloearthsupport@gmail.com?subject=" + encodeURIComponent("HelloEarth " + plan.name + " plan interest");
   action.textContent = plan.code === "free" ? "Get started →" : "Ask about launch →";
@@ -87,6 +88,7 @@ async function loadPrices() {
     if (!data?.length) throw new Error("No plans published");
     loadedPlans = data;
     root.replaceChildren(...data.map(card));
+    document.dispatchEvent(new Event("helloearth:pricingcardsupdated"));
   } catch (_) {
     root.replaceChildren();
     const notice = document.createElement("p");
@@ -97,4 +99,8 @@ async function loadPrices() {
 }
 loadPrices();
 
-document.addEventListener("helloearth:languagechanged", () => { if (loadedPlans) root.replaceChildren(...loadedPlans.map(card)); });
+document.addEventListener("helloearth:languagechanged", () => {
+  if (!loadedPlans) return;
+  root.replaceChildren(...loadedPlans.map(card));
+  document.dispatchEvent(new Event("helloearth:pricingcardsupdated"));
+});
