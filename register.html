@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0d1028">
+<title>Register | HelloEarth</title>
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="portal.css?v=20261115a">
+<script type="module" src="auth-page.js?v=20261115a"></script>
+</head>
+<body class="portal-page" data-page="register">
+<div class="portal-shell">
+<aside class="auth-aside">
+  <a class="portal-brand" href="index.html"><img src="logo.svg" alt="" width="46" height="46"><span>helloearth<span class="brand-dot">.</span></span></a>
+  <div class="auth-aside-content">
+    <span class="eyebrow">A quieter way to teach</span>
+    <h1>More teaching.<br><em>Less busywork.</em></h1>
+    <p>One secure home for your learners, lesson notes and growth. Built for the people behind every lesson.</p>
+    <div class="auth-orbit" aria-hidden="true"><span class="auth-planet"></span><span class="auth-satellite"></span><span class="auth-spark one">✧</span><span class="auth-spark two">✧</span></div>
+  </div>
+  <p class="auth-aside-foot">HelloEarth · Your students, your space.</p>
+</aside>
+<main class="auth-main">
+  <div class="auth-top"><a href="index.html">← Back to website</a><span>Secure tutor workspace <span aria-hidden="true">✦</span></span></div>
+  <div class="auth-form-wrap">
+    <span class="auth-kicker">HELLOEARTH WORKSPACE</span>
+    <h2>Create your account</h2>
+    <p class="auth-description">Start building a thoughtful learning space for your students.</p>
+    <button class="google-signin" id="google-signin" type="button">
+      <svg viewBox="0 0 48 48" aria-hidden="true" width="21" height="21"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.28 5.48-4.82 7.18l7.73 6C44.36 38.05 46.98 31.92 46.98 24.55z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.6.27-3.15.76-4.59l-7.98-6.2A24 24 0 0 0 0 24c0 3.87.93 7.52 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.9-5.8l-7.73-6c-2.13 1.43-4.86 2.3-8.17 2.3-6.22 0-11.5-4.21-13.47-9.91l-7.97 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Continue with Google
+    </button>
+    <div class="auth-separator"><span>or continue with email</span></div>
+    <form id="auth-form" class="auth-form">
+      <label for="name">Your name</label><input id="name" name="name" type="text" autocomplete="name" placeholder="How should we call you?" maxlength="120" required>
+      <label for="email">Email address</label>
+      <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+      <div class="auth-label-row"><label for="password">Password</label></div>
+      <div class="password-field"><input id="password" name="password" type="password" autocomplete="new-password" placeholder="At least 8 characters" minlength="8" required><button class="toggle-password" type="button" aria-label="Show password">Show</button></div>
+      <label class="terms-check"><input type="checkbox" id="accept-terms" required><span>I agree to the <a href="terms.html">Terms</a> and <a href="privacy.html">Privacy Policy</a>.</span></label>
+      <button class="primary-action" id="submit-auth" type="submit">Create account <span aria-hidden="true">→</span></button>
+    </form>
+    <div id="auth-feedback" class="auth-feedback" role="status" aria-live="polite"></div>
+    <p class="auth-switch">Already have an account? <a href="login.html">Log in</a></p>
+    <p class="auth-privacy">Your student records are private to your account. <a href="privacy.html">How we protect your data</a></p>
+  </div>
+  <div class="auth-bottom">© 2026 HelloEarth. Made for tutors, with care. 🌍</div>
+</main>
+</div>
+</body>
+</html>
