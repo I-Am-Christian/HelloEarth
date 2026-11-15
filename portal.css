@@ -98,3 +98,21 @@ button:disabled{cursor:wait;opacity:.65}
 @media(max-width:760px){.workspace{display:block}.ws-sidebar{position:static;min-height:0;height:auto;padding:14px 17px;flex-direction:row;gap:15px;align-items:center;justify-content:space-between}.ws-sidebar .portal-brand{font-size:20px}.ws-sidebar .portal-brand img{width:32px;height:32px}.ws-nav{display:flex;gap:5px}.ws-nav button,.ws-nav a{padding:9px 10px;font-size:12px}.ws-sidebar-foot{display:none}.ws-main{padding:25px 16px 60px}.ws-header{margin-bottom:23px}.ws-summary{gap:9px}.ws-metric{padding:13px}.ws-metric strong{font-size:26px}.ws-panel-head{align-items:stretch;flex-direction:column}.ws-controls{width:100%}.ws-search{flex:1;width:auto}.ws-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ws-card{padding:17px}}
 @media(max-width:520px){.ws-sidebar .portal-brand{font-size:18px}.ws-nav a{display:none}.ws-header{align-items:flex-start}.ws-account{gap:6px}.ws-user{display:none}.ws-account button{font-size:12px;padding:7px 9px}.ws-grid{grid-template-columns:1fr}.ws-summary{grid-template-columns:repeat(3,minmax(0,1fr))}.ws-metric span,.ws-metric small{font-size:10px}.ws-metric strong{font-size:24px}.ws-fields{grid-template-columns:1fr}.ws-form{grid-template-columns:1fr}.field{grid-column:1/-1}.ws-detail-title{font-size:21px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
+
+@media(max-width:600px){
+ .ws-controls{
+   display:grid;
+   grid-template-columns:repeat(2,minmax(0,1fr));
+   gap:9px;
+ }
+ .ws-controls .ws-search{
+   grid-column:1/-1;
+   width:100%;
+   min-height:43px;
+ }
+ .ws-controls #import-students,.ws-controls #add-student{
+   display:flex;align-items:center;justify-content:center;
+   width:100%;min-height:43px;padding:9px 8px;
+   font-size:12px;white-space:nowrap;
+ }
+}
