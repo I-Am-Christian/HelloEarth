@@ -2,24 +2,24 @@ import { db } from "./supabase-client.js";
 
 const root = document.getElementById("pricing-grid");
 const featureDescriptions = {
-  free: "The student workspace is free. The Atlas desktop prototype runs separately.",
-  starter: "For independent tutors. Bring-your-own AI API access is planned.",
-  growth: "For busier tutors. An optional managed Atlas add-on is being explored.",
-  studio: "For high-volume tutors. Managed cloud Atlas with capped usage is planned."
+  free: "Start with your students. Local Atlas is a separate desktop prototype.",
+  starter: "More student capacity with planned local Atlas integration.",
+  growth: "Planned managed cloud Atlas with a capped monthly allowance.",
+  studio: "Planned managed cloud Atlas with a larger monthly allowance."
 };
-const futureAiFeatures = {
-  free: ["Atlas local desktop app is separate from the web workspace"],
-  starter: ["Planned: use your own AI API (provider fees are separate)"],
-  growth: [
-    "Planned: use your own AI API",
-    "Planned: optional cloud Atlas add-on (extra usage charges and limits to be confirmed)"
-  ],
-  studio: [
-    "Planned: managed Atlas cloud option with monthly limits",
-    "Planned: bring your own API instead",
-    "Cloud usage allowance and final pricing will be confirmed before launch"
-  ]
-};
+function plannedAiFeatures(plan) {
+  const runtime = plan.planned_atlas_runtime === "cloud" ? "cloud" : "local";
+  const items = [
+    runtime === "local"
+      ? "Local Atlas on your own computer — planned plan integration"
+      : "Cloud-hosted Atlas included when launched — monthly usage cap to be confirmed"
+  ];
+  if (plan.planned_byo_api_support) {
+    items.push("Bring your own supported AI API — planned on every tier");
+  }
+  items.push("Your own AI provider charges you separately");
+  return items;
+}
 function card(plan) {
   const article = document.createElement("article");
   article.className = "plan-card" + (plan.code === "growth" ? " is-popular" : "");
@@ -63,7 +63,7 @@ function card(plan) {
     new Intl.NumberFormat("en-ZA").format(plan.max_notes_total) + " notes stored in total",
     "Private Google / email sign-in",
     "CEFR levels, goals and student history",
-    ...(futureAiFeatures[plan.code] || [])
+    ...plannedAiFeatures(plan)
   ];
   for (const feature of features) {
     const li = document.createElement("li");
@@ -77,7 +77,7 @@ function card(plan) {
 async function loadPrices() {
   try {
     const { data, error } = await db.from("helloearth_plans")
-      .select("code,name,monthly_price_zar,max_students,max_notes_monthly,max_notes_total,display_order")
+      .select("code,name,monthly_price_zar,max_students,max_notes_monthly,max_notes_total,display_order,planned_atlas_runtime,planned_byo_api_support")
       .eq("public_visible", true)
       .order("display_order", { ascending: true });
     if (error) throw error;
