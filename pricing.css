@@ -1,41 +1,234 @@
 
-.pricing-header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px clamp(18px,5vw,80px);border-bottom:1px solid #b1a0fa2e;max-width:1600px;margin:auto}
+.pricing-header{
+ display:flex;align-items:center;justify-content:space-between;gap:20px;
+ max-width:1600px;margin:auto;padding:20px clamp(18px,5vw,80px);
+ border-bottom:1px solid rgba(187,160,242,.23);
+}
 .pricing-header nav{display:flex;align-items:center;gap:clamp(11px,2vw,30px);font-weight:700;font-size:13px;color:#c4c9e2}
-.pricing-header .pricing-nav-primary{background:#8b6add;border-radius:11px;padding:10px 17px;color:white}
-.pricing-main{width:min(1170px,calc(100% - 38px));margin:0 auto}
-.pricing-intro{padding:80px 0 50px;text-align:center;position:relative}
-.pricing-intro:before{content:"";position:absolute;z-index:-1;inset:0 20%;background:radial-gradient(ellipse,#7053c522,transparent 70%);pointer-events:none}
-.pricing-intro h1{font:700 clamp(37px,5vw,67px)/1.11 'Space Grotesk',sans-serif;letter-spacing:-2.2px;margin:17px 0 18px}
-.pricing-intro h1 span{color:#c1a8ff}
-.pricing-intro>p{color:#b5b8d2;max-width:680px;margin:0 auto 27px;font-size:16px;line-height:1.9}
-.pricing-launch-note{font-size:13px;color:#d1c5f5;background:#9580d215;padding:11px 19px;border:1px solid #8d7eb05c;border-radius:99px;display:inline-block}
-.pricing-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}
-.plan-card{background:linear-gradient(160deg,#22243e,#171b31);border:1px solid #54527686;border-radius:21px;padding:26px 23px;display:flex;flex-direction:column;gap:17px;min-width:0;position:relative}
-.plan-card.is-popular{border-color:#b59df3;box-shadow:0 0 0 1px #7c60b44a,0 15px 60px #7d57dc1a}
-.plan-popular{position:absolute;top:-14px;left:20px;background:#a484ed;color:#170f29;border-radius:99px;padding:3px 12px;font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase}
-.plan-title{font:700 22px 'Space Grotesk',sans-serif;margin:0}
-.plan-desc{font-size:12px;color:#aab2d0;min-height:47px;line-height:1.65;margin:2px 0 0}
-.plan-price{display:flex;align-items:baseline;gap:3px;margin-top:3px}
-.plan-price strong{font:700 clamp(32px,3.4vw,44px) 'Space Grotesk',sans-serif;letter-spacing:-1.8px}
-.plan-price small{color:#a8b1d3;font-size:12px}
-.plan-tag{font-size:11px;color:#c4b0fb}
-.plan-action{display:flex;justify-content:center;align-items:center;min-height:45px;border-radius:12px;font-weight:800;font-size:13px;background:#4c4672;border:1px solid #75678d;color:white}
-.plan-card.is-popular .plan-action{background:#976de9;border-color:#bea0ff}
-.plan-action:hover{filter:brightness(1.12);color:#fff}
-.plan-features{margin:0;padding:19px 0 0;list-style:none;display:grid;gap:13px;border-top:1px solid #49496a87}
-.plan-features li{color:#c2c7e1;font-size:12px;line-height:1.6;display:flex;gap:9px;align-items:baseline}
-.plan-features li:before{content:"✓";font-weight:900;color:#bba6fc}
-.pricing-loading{grid-column:1/-1;text-align:center;color:#b8b0d5;padding:70px 18px}
-.pricing-footnote{font-size:12px;line-height:1.8;color:#939cbc;margin:22px 0 0}
-.pricing-values{margin:70px 0;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-.pricing-values>div{padding:22px 24px;background:#171c34;border:1px solid #46486c80;border-radius:17px}
-.pricing-values strong{font:700 17px 'Space Grotesk',sans-serif}
-.pricing-values p{color:#aeb5d2;font-size:13px;margin:9px 0 0}
-.pricing-faq{max-width:820px;margin:25px auto 85px}
-.pricing-faq h2{font:700 31px 'Space Grotesk',sans-serif;letter-spacing:-.9px;margin:0 0 24px;text-align:center}
-.pricing-faq details{padding:18px 0;border-bottom:1px solid #54537294}
-.pricing-faq summary{cursor:pointer;font-weight:700;color:#eae5fc}
-.pricing-faq details p{color:#b6b8d0;font-size:13px}
-.pricing-footer{border-top:1px solid #4a486b;text-align:center;padding:22px clamp(18px,5vw,80px);display:flex;justify-content:space-between;gap:20px;color:#979ebf;font-size:12px}
-@media(max-width:990px){.pricing-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.plan-desc{min-height:0}.plan-price strong{font-size:41px}}
-@media(max-width:560px){.pricing-header .portal-brand{font-size:20px}.pricing-header nav{gap:12px}.pricing-header nav a:first-child{display:none}.pricing-intro{padding:54px 0 32px}.pricing-intro h1{letter-spacing:-1.4px}.pricing-launch-note{border-radius:12px}.pricing-grid{grid-template-columns:1fr}.plan-card{padding:24px}.pricing-values{grid-template-columns:1fr;gap:10px;margin:42px 0}.pricing-footer{flex-direction:column;align-items:center}.pricing-faq{margin-bottom:50px}}
+.pricing-header .pricing-nav-primary{
+ background:linear-gradient(110deg,#8664cb,#6754ad);
+ border:1px solid rgba(190,164,248,.4);border-radius:11px;padding:10px 17px;color:#fff;
+ box-shadow:0 8px 22px rgba(57,37,104,.18);
+}
+.pricing-main{width:min(1210px,calc(100% - 42px));margin:0 auto}
+.pricing-intro{text-align:center;position:relative;padding:78px 0 56px}
+.pricing-intro:before{
+ content:"";position:absolute;z-index:-1;inset:-30px 0 0;
+ background:radial-gradient(ellipse at 50% 18%,rgba(123,83,192,.17),transparent 67%);
+ pointer-events:none;
+}
+.pricing-intro h1{font:700 clamp(37px,5vw,65px)/1.13 'Space Grotesk',sans-serif;letter-spacing:-1.8px;margin:17px 0 20px}
+.pricing-intro h1 span{color:#c3acff}
+.pricing-intro>p{max-width:750px;margin:0 auto 27px;font-size:16px;line-height:1.85;color:#bcc3df}
+.pricing-launch-note{
+ display:inline-block;max-width:780px;padding:12px 20px;
+ font-size:13px;line-height:1.65;color:#e0d4ff;
+ background:linear-gradient(105deg,rgba(109,79,164,.24),rgba(65,82,150,.18));
+ border:1px solid rgba(171,141,225,.39);border-radius:16px;
+}
+.pricing-grid{
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+ align-items:stretch;gap:16px;
+}
+.plan-card{
+ --tier-accent:#c3a5fa;
+ position:relative;isolation:isolate;overflow:visible;min-width:0;
+ display:flex;flex-direction:column;align-items:center;gap:16px;
+ height:100%;padding:30px 22px 25px;
+ border:1px solid rgba(155,138,204,.38);border-radius:23px;
+ background:linear-gradient(150deg,#272541,#1b233d 88%);
+ box-shadow:0 16px 40px rgba(6,8,25,.22),inset 0 1px rgba(255,255,255,.05);
+ text-align:center;
+ transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;
+}
+.plan-card[data-tier="free"]{
+ --tier-accent:#a7e5d9;
+ background:radial-gradient(ellipse at 50% 0,rgba(82,179,165,.16),transparent 63%),linear-gradient(148deg,#213c48,#1c2840 83%);
+ border-color:rgba(129,200,197,.44);
+}
+.plan-card[data-tier="starter"]{
+ --tier-accent:#b4cafa;
+ background:radial-gradient(ellipse at 50% 0,rgba(95,137,215,.18),transparent 65%),linear-gradient(148deg,#283654,#1e2842 83%);
+ border-color:rgba(148,176,231,.40);
+}
+.plan-card[data-tier="growth"]{
+ --tier-accent:#dfc0ff;
+ background:radial-gradient(ellipse at 50% 0,rgba(173,119,230,.22),transparent 63%),linear-gradient(148deg,#3b2955,#252642 88%);
+ border-color:rgba(205,159,252,.79);
+}
+.plan-card[data-tier="studio"]{
+ --tier-accent:#f2c6e6;
+ background:radial-gradient(ellipse at 50% 0,rgba(194,112,169,.16),transparent 65%),linear-gradient(148deg,#3c2947,#25273f 88%);
+ border-color:rgba(215,157,208,.48);
+}
+.plan-card:hover{
+ transform:translateY(-4px);
+ border-color:var(--tier-accent);
+ box-shadow:0 20px 50px rgba(9,8,30,.34),inset 0 1px rgba(255,255,255,.07);
+}
+.plan-card.is-popular{box-shadow:0 0 0 1px rgba(206,164,255,.20),0 18px 48px rgba(79,48,133,.27)}
+.plan-popular{
+ position:absolute;top:-14px;left:50%;transform:translateX(-50%);white-space:nowrap;
+ padding:6px 15px;border-radius:999px;
+ background:linear-gradient(105deg,#d5b3fc,#b89af5);color:#291c42;
+ border:1px solid rgba(249,235,255,.42);
+ font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;
+ box-shadow:0 8px 22px rgba(35,22,77,.4);
+}
+.plan-card>div:not(.plan-popular){width:100%}
+.plan-title{
+ margin:0 0 8px;font:700 clamp(23px,2.4vw,27px)/1.2 'Space Grotesk',sans-serif;
+ letter-spacing:-.5px;color:#f7f3ff;
+}
+.plan-desc{
+ max-width:260px;min-height:75px;
+ margin:0 auto;color:#c5cbe0;font-size:12.5px;line-height:1.7;
+}
+.plan-price{display:flex;align-items:baseline;justify-content:center;flex-wrap:wrap;gap:5px;margin-top:0}
+.plan-price strong{font:700 clamp(36px,3.5vw,46px)/1.1 'Space Grotesk',sans-serif;letter-spacing:-1.6px;color:#fff}
+.plan-price small{font-size:12px;color:#c5cee6}
+.plan-tag{
+ display:inline-flex;align-items:center;justify-content:center;
+ min-height:32px;padding:5px 12px;border-radius:99px;
+ border:1px solid color-mix(in srgb,var(--tier-accent) 36%,transparent);
+ background:color-mix(in srgb,var(--tier-accent) 13%,transparent);
+ color:var(--tier-accent);font-size:11px;font-weight:700;line-height:1.35;
+}
+.plan-features{
+ order:3;width:100%;margin:2px 0 4px;padding:22px 0 0;
+ border-top:1px solid rgba(202,184,242,.18);
+ display:grid;align-content:start;justify-items:center;gap:12px;list-style:none;
+}
+.plan-features li{
+ max-width:260px;min-width:0;margin:0;
+ color:#cbd1e8;font-size:12.5px;line-height:1.6;text-align:center;
+ overflow-wrap:anywhere;
+}
+.plan-features li::before{content:"✓";display:inline-block;margin-right:8px;color:var(--tier-accent);font-weight:900}
+.plan-action{
+ order:4;margin-top:auto;width:100%;min-height:49px;
+ display:flex;align-items:center;justify-content:center;
+ padding:11px 15px;border-radius:13px;
+ background:linear-gradient(110deg,#645489,#4b4e7f);
+ border:1px solid rgba(175,149,224,.55);
+ color:#fff;font-weight:800;font-size:13px;
+ transition:filter .2s ease,transform .2s ease;
+}
+.plan-card[data-tier="free"] .plan-action{background:linear-gradient(110deg,#347f83,#385b93);border-color:rgba(126,214,205,.52)}
+.plan-card.is-popular .plan-action{background:linear-gradient(110deg,#a078e5,#775bc6);border-color:#d3b0ff}
+.plan-action:hover{filter:brightness(1.12);color:white;transform:translateY(-1px)}
+.pricing-loading{grid-column:1/-1;text-align:center;color:#c5b9e5;padding:70px 18px}
+.pricing-footnote{
+ margin:25px auto 0;max-width:1050px;text-align:center;
+ font-size:12px;line-height:1.8;color:#aeb9d5;
+}
+.pricing-values{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+ align-items:stretch;gap:17px;margin:72px 0 0;
+}
+.pricing-values+.pricing-values{margin-top:53px}
+.pricing-group-title{
+ grid-column:1/-1;text-align:center;margin:0 0 9px;
+ font:700 clamp(24px,3vw,33px)/1.25 'Space Grotesk',sans-serif;
+ color:#f1ecff;letter-spacing:-.6px;
+}
+.pricing-values>div{
+ min-width:0;position:relative;
+ display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+ min-height:215px;padding:26px 24px 25px;
+ border:1px solid rgba(157,141,212,.40);border-radius:20px;
+ background:linear-gradient(140deg,#2c2849,#1d2943 87%);
+ box-shadow:0 10px 32px rgba(7,10,29,.21),inset 0 1px rgba(255,255,255,.04);
+ text-align:center;
+}
+.pricing-values>div:nth-of-type(2){
+ background:linear-gradient(140deg,#263450,#1e2641 87%);
+ border-color:rgba(139,165,223,.37);
+}
+.pricing-values>div:nth-of-type(3){
+ background:linear-gradient(140deg,#352a48,#22273e 87%);
+ border-color:rgba(192,149,215,.39);
+}
+.pricing-values>div::before{
+ content:"✧";display:grid;place-items:center;flex:none;
+ width:44px;height:44px;margin:0 auto 14px;border-radius:13px;
+ border:1px solid rgba(194,161,255,.28);
+ background:linear-gradient(135deg,rgba(125,89,190,.43),rgba(67,62,126,.45));
+ color:#dfcaff;font-size:25px;
+}
+.pricing-values>div:nth-of-type(2)::before{
+ content:"✦";background:linear-gradient(135deg,rgba(82,133,190,.42),rgba(55,77,139,.46));color:#c6deff;
+}
+.pricing-values>div:nth-of-type(3)::before{
+ content:"◇";background:linear-gradient(135deg,rgba(160,102,177,.36),rgba(78,60,127,.44));color:#f0cfff;
+}
+.pricing-values strong{
+ max-width:315px;font:700 clamp(16px,1.7vw,18px)/1.35 'Space Grotesk',sans-serif;
+ color:#f4eeff;
+}
+.pricing-values p{
+ max-width:330px;margin:12px auto 0;color:#c3cbe5;font-size:13px;line-height:1.75;
+}
+.pricing-faq{max-width:900px;margin:80px auto 94px}
+.pricing-faq h2{font:700 clamp(26px,3vw,34px)/1.2 'Space Grotesk',sans-serif;letter-spacing:-.8px;margin:0 0 25px;text-align:center}
+.pricing-faq details{
+ margin:0 0 10px;padding:19px 22px;
+ border:1px solid rgba(151,135,210,.35);border-radius:15px;
+ background:linear-gradient(120deg,rgba(41,38,69,.93),rgba(29,39,65,.95));
+}
+.pricing-faq details:nth-of-type(even){background:linear-gradient(120deg,rgba(37,45,76,.93),rgba(31,36,64,.95))}
+.pricing-faq details[open]{border-color:rgba(199,170,247,.65)}
+.pricing-faq summary{cursor:pointer;font-weight:700;color:#f0e9ff;line-height:1.6}
+.pricing-faq details p{color:#c6cce1;font-size:13px;line-height:1.8;margin:12px 0 0}
+.pricing-footer{
+ display:flex;justify-content:space-between;align-items:center;gap:20px;
+ padding:25px clamp(18px,5vw,80px);
+ border-top:1px solid rgba(159,144,208,.25);
+ text-align:center;font-size:12px;color:#a8aecb;
+}
+@media(max-width:1130px){
+ .pricing-grid{grid-template-columns:repeat(2,minmax(0,1fr));max-width:780px;margin-inline:auto;gap:24px}
+ .plan-desc{min-height:0}
+}
+@media(max-width:900px){
+ .pricing-values{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .pricing-values>div:last-child{grid-column:1/-1;max-width:100%}
+ .pricing-values>div{min-height:205px}
+ .pricing-intro{padding-top:68px}
+}
+@media(max-width:690px){
+ .pricing-main{width:calc(100% - 30px)}
+ .pricing-intro{padding:48px 0 38px}
+ .pricing-intro h1{letter-spacing:-1.2px}
+ .pricing-intro>p{font-size:14px;line-height:1.8}
+ .pricing-launch-note{font-size:12px;padding:11px 15px}
+ .pricing-grid{grid-template-columns:minmax(0,1fr);gap:22px;max-width:480px}
+ .plan-card{padding:27px 21px 22px;gap:13px}
+ .plan-desc{max-width:330px;min-height:0}
+ .plan-features{gap:10px;padding-top:17px}
+ .pricing-footnote{font-size:11.5px;line-height:1.8}
+ .pricing-values,.pricing-values+.pricing-values{
+  grid-template-columns:minmax(0,1fr);max-width:480px;
+  gap:12px;margin:48px auto 0;
+ }
+ .pricing-values>div,.pricing-values>div:last-child{
+  grid-column:auto;min-height:0;padding:22px 21px 23px;
+ }
+ .pricing-values>div::before{margin-bottom:11px}
+ .pricing-values p{max-width:410px;margin-top:8px}
+ .pricing-group-title{margin:0 0 6px}
+ .pricing-faq{margin:58px auto 70px}
+ .pricing-footer{flex-direction:column;gap:12px;padding-block:25px}
+}
+@media(max-width:430px){
+ .pricing-header .portal-brand{font-size:20px}
+ .pricing-header nav{gap:12px;font-size:12px}
+ .pricing-header nav a:first-child{display:none}
+ .plan-title{font-size:24px}
+ .pricing-values strong{font-size:17px}
+ .pricing-values p{font-size:12.5px}
+}
+@media(prefers-reduced-motion:reduce){
+ .plan-card,.plan-action{transition:none!important}
+ .plan-card:hover,.plan-action:hover{transform:none}
+}
