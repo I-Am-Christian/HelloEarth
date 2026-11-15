@@ -57,6 +57,41 @@ document.addEventListener("keydown", event => {
   }
 });
 
+async function loadPlan() {
+  const label = $("plan-label");
+  const capacity = $("plan-capacity");
+  if (!label || !capacity || !state.user) return;
+  try {
+    const { data: entitlement, error: entitlementError } = await db
+      .from("helloearth_subscriptions")
+      .select("plan_code,status,current_period_end,is_internal")
+      .eq("tutor_id", state.user.id)
+      .maybeSingle();
+    if (entitlementError) throw entitlementError;
+    if (entitlement?.is_internal === true && entitlement.status === "active") {
+      label.textContent = "Founder workspace";
+      capacity.textContent = "Internal testing access · your student profiles are preserved.";
+      return;
+    }
+    const activePaid = entitlement?.status === "active"
+      && entitlement.plan_code !== "free"
+      && Boolean(entitlement.current_period_end)
+      && Date.parse(entitlement.current_period_end) > Date.now();
+    const code = activePaid ? entitlement.plan_code : "free";
+    const { data: plan, error: planError } = await db.from("helloearth_plans")
+      .select("name,max_students,max_notes_total,max_notes_monthly")
+      .eq("code", code).single();
+    if (planError) throw planError;
+    label.textContent = plan.name + " plan";
+    capacity.textContent = state.students.length + " of " + plan.max_students
+      + " students · up to " + plan.max_notes_monthly
+      + " new notes a month";
+  } catch (_) {
+    label.textContent = "Subscription status unavailable";
+    capacity.textContent = "Your records are still private. Try refreshing.";
+  }
+}
+
 function renderStudents() {
   const grid = $("student-grid");
   grid.replaceChildren();
@@ -282,12 +317,10 @@ $("import-file").addEventListener("change", async event => {
       + "AI access will stay disabled. Imported notes have no invented lesson dates."
     )) return;
 
-    for (let i = 0; i < additions.length; i += 25) {
-      const batch = additions.slice(i, i + 25);
-      const { error } = await db.from("atlas_students").insert(batch);
-      if (error) throw error;
-    }
+    const { error } = await db.from("atlas_students").insert(additions);
+    if (error) throw error;
     await loadStudents();
+    await loadPlan();
     loadingMessage(additions.length + " students imported securely." + (skipped ? " " + skipped + " existing profiles skipped." : ""));
   } catch (err) {
     loadingMessage("Import stopped: " + message(err), true);
@@ -335,6 +368,7 @@ $("student-form").addEventListener("submit", async event => {
     }
     hideModal("student-modal");
     await loadStudents();
+    await loadPlan();
     if (state.editMode && state.selected) await openStudent(state.selected.id);
     else $("student-detail").hidden = true;
     loadingMessage("Student saved securely.");
@@ -392,6 +426,7 @@ async function init() {
     $("checking").hidden = true;
     $("workspace").hidden = false;
     await loadStudents();
+    await loadPlan();
   } catch (err) {
     $("checking").textContent = "We couldn't verify your account or load your records. Please sign in again.";
     $("checking").hidden = false;
