@@ -23,7 +23,7 @@ function setView(view,focus=false){
   tab.tabIndex=active?0:-1;
  }
  if(focus)get(view+"-tab").focus({preventScroll:true});
- history.replaceState(null,"",location.pathname+(view==="students"?"#students":"#calendar"));
+ history.replaceState(null,"",location.pathname+location.search+(view==="students"?"#students":"#calendar"));
 }
 for(const name of views)get(name+"-tab").addEventListener("click",()=>setView(name));
 document.querySelector(".ws-view-switch").addEventListener("keydown",event=>{
@@ -100,9 +100,9 @@ function renderAgenda(){
   const at=document.createElement("span");at.className="ws-event-time";
   at.textContent=event.start?.dateTime?localized(new Date(event.start.dateTime),{hour:"2-digit",minute:"2-digit"}):translate("All day");
   const body=document.createElement("div");const title=document.createElement("strong");
-  title.textContent=event.summary||translate("Busy");
+  title.textContent=event.summary||translate("Busy");if(event.summary)title.classList.add("i18n-user-content");
   body.append(title);
-  if(event.location){const loc=document.createElement("small");loc.textContent=event.location;body.append(loc)}
+  if(event.location){const loc=document.createElement("small");loc.textContent=event.location;loc.classList.add("i18n-user-content");body.append(loc)}
   if(event.htmlLink){
    try{const url=new URL(event.htmlLink);if(url.protocol==="https:"&&(url.hostname==="calendar.google.com"||url.hostname.endsWith(".google.com"))){const link=document.createElement("a");link.href=url.href;link.target="_blank";link.rel="noopener noreferrer";link.textContent=translate("View in Google Calendar");body.append(link)}}catch{}
   }
