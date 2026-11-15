@@ -148,3 +148,8 @@ body.space-theme select{
 @media(prefers-reduced-motion:reduce){
  body.space-theme *{animation-duration:.01ms!important;transition-duration:.01ms!important}
 }
+
+@media(max-width:760px){
+ body.space-theme,
+ body.space-dashboard .workspace{background-attachment:scroll}
+}
