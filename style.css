@@ -2599,3 +2599,101 @@ body { -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
  .features .value-strip.essentials-benefits strong{font-size:14px!important}
  .features .value-strip.essentials-benefits>div>span:last-child>span{font-size:11.5px!important}
 }
+
+/* Mobile workflow: compact step cards with left-aligned copy. */
+@media(max-width:760px){
+ .workflow-section .workflow-grid{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  max-width:550px!important;
+  gap:12px!important;
+ }
+ .workflow-section .workflow-card{
+  display:grid!important;
+  grid-template-columns:50px minmax(0,1fr)!important;
+  grid-template-rows:auto auto!important;
+  align-items:center!important;
+  align-content:center!important;
+  justify-items:stretch!important;
+  justify-content:stretch!important;
+  column-gap:16px!important;
+  row-gap:5px!important;
+  min-height:112px!important;
+  height:auto!important;
+  padding:17px 19px!important;
+  margin:0!important;
+  border-radius:17px!important;
+  text-align:left!important;
+  background:linear-gradient(115deg,#2c2849,#1b233b 82%)!important;
+  border:1px solid rgba(166,143,221,.35)!important;
+  box-shadow:0 9px 24px #070a1d29,inset 0 1px #ffffff0a!important;
+  transform:none!important;
+ }
+ .workflow-section .workflow-card:nth-child(2){
+  background:linear-gradient(115deg,#252b4b,#1b223c 82%)!important;
+ }
+ .workflow-section .workflow-card:nth-child(3){
+  background:linear-gradient(115deg,#302644,#1e233d 82%)!important;
+ }
+ .workflow-section .workflow-card .workflow-icon{
+  grid-column:1!important;
+  grid-row:1 / span 2!important;
+  width:50px!important;
+  height:50px!important;
+  min-width:50px!important;
+  min-height:50px!important;
+  margin:0!important;
+  align-self:center!important;
+  justify-self:center!important;
+  border-radius:14px!important;
+  font-size:24px!important;
+  background:linear-gradient(140deg,#614a90,#3c3169)!important;
+  border:1px solid #b091e34d!important;
+ }
+ .workflow-section .workflow-card:nth-child(2) .workflow-icon{
+  background:linear-gradient(140deg,#465b89,#383d70)!important;
+ }
+ .workflow-section .workflow-card:nth-child(3) .workflow-icon{
+  background:linear-gradient(140deg,#775283,#463362)!important;
+ }
+ .workflow-section .workflow-card h3{
+  grid-column:2!important;
+  grid-row:1!important;
+  align-self:end!important;
+  margin:0!important;
+  font-size:clamp(17px,4.3vw,20px)!important;
+  line-height:1.25!important;
+  letter-spacing:-.2px!important;
+  color:#f6f0ff!important;
+  text-align:left!important;
+ }
+ .workflow-section .workflow-card p{
+  grid-column:2!important;
+  grid-row:2!important;
+  align-self:start!important;
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+  font-size:12.5px!important;
+  line-height:1.55!important;
+  color:#bfc2dd!important;
+  text-align:left!important;
+ }
+ .workflow-section .workflow-card:hover{
+  transform:none!important;
+ }
+}
+@media(max-width:360px){
+ .workflow-section .workflow-card{
+  grid-template-columns:44px minmax(0,1fr)!important;
+  column-gap:12px!important;
+  padding:14px!important;
+  min-height:100px!important;
+ }
+ .workflow-section .workflow-card .workflow-icon{
+  width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;
+  font-size:22px!important;
+ }
+ .workflow-section .workflow-card h3{font-size:16px!important}
+ .workflow-section .workflow-card p{font-size:11.5px!important}
+}
