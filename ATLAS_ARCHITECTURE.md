@@ -1,86 +1,95 @@
-# Atlas AI architecture: local first, optional API, managed cloud later
+# Atlas AI: local on Free/Starter, cloud on Growth/Studio
 
-## Product boundary (15 November 2026)
+Last updated: 15 November 2026.
 
-HelloEarth is the account-based tutor workspace. Atlas AI is a separate,
-standalone Python application. Today it performs inference locally through
-Ollama. The local app signs in to Supabase for student profiles and memory.
+## Confirmed product direction
 
-Local inference is **not the same thing as a fully offline application**:
-the current prototype requires internet access for Supabase sign-in and sync.
-A truly offline mode would require local encrypted storage and later
-conflict-aware synchronization, which are not implemented yet.
+HelloEarth is the authenticated tutor workspace with student profiles,
+lesson notes, and progress. Atlas AI is a standalone Python assistant with
+a local Ollama-based prototype. The current desktop prototype uses
+Supabase Auth and data synchronization, so local **inference** does not
+mean fully offline data storage.
 
-The HelloEarth website does **not** currently run Atlas AI, accept an AI API
-key, or offer hosted inference. Do not claim these services are live.
+The future HelloEarth tier design is:
 
-## Future user-selectable inference modes
+| Plan | ZAR per month (proposed) | Atlas deployment | Bring your own AI API |
+|---|---:|---|---|
+| Free | R0 | Local on your machine | Planned: yes |
+| Starter | R99 | Local on your machine | Planned: yes |
+| Growth | R199 | Cloud-hosted by HelloEarth | Planned: yes |
+| Studio | R349 | Cloud-hosted by HelloEarth, larger allowance | Planned: yes |
 
-1. **Local Ollama — default.**
-   Tutor installs Atlas on their machine and uses a locally installed model.
-   AI inference never needs to be sent to HelloEarth's model servers. Student
-   records are still synchronized separately using Supabase authentication.
-   This reduces recurring inference expense for HelloEarth.
+The intended cloud Atlas service is **included** in the higher plans,
+subject to a separate, capped monthly usage allowance for Growth and
+a larger capped allowance for Studio. It is not described as a paid
+add-on. Exact token/request allowances and final subscription prices
+must be determined from measured inference costs before checkout opens.
 
-2. **Bring your own AI API — planned.**
-   Tutors choose a provider (for example OpenAI or another compatible
-   model API) and use their personal provider billing account.
-   If Atlas remains a desktop app, store API credentials in the OS keychain
-   or another encrypted credential store, not in plaintext configuration.
-   If future web support is added, route inference via an authenticated
-   backend with server-side encryption and documented key rotation; never
-   place user provider secrets in publicly served JavaScript or student data.
-   Support provider selection, quotas and a predictable error/fallback path.
+The existing Free web workspace is already available. The local Atlas
+prototype is a **separate application**, not integrated into the public
+HelloEarth dashboard. None of the planned subscriptions, managed cloud
+inference, or bring-your-own API integrations are live yet.
 
-3. **Managed cloud Atlas — planned premium convenience.**
-   A secure, authenticated cloud inference service managed by HelloEarth.
-   No desktop AI installation would be necessary. Access would require
-   server-verified subscription entitlements, tutor-scoped student records,
-   consent controls, logging that does NOT store sensitive model prompts by
-   default, strict token/response limits, monthly spend caps and rate limits.
-   A server-side payment webhook would grant a paid entitlement; never
-   enable cloud privileges from editable browser account metadata.
+## Bring your own API on every tier
 
-## Proposed tier positioning (not active offers)
+Every plan should be able to connect a tutor-owned AI API provider;
+this is independent of whether Atlas itself runs locally or in the
+HelloEarth cloud. User chooses a provider as an alternative model
+backend. The tutor pays that provider's usage fees directly.
 
-| Tier | ZAR/mo | Planned AI positioning |
-|---|---:|---|
-| Free | 0 | Web student workspace; Atlas local prototype remains separate |
-| Starter | 99 | Planned connect-your-own AI API; model provider bills the tutor |
-| Growth | 199 | Planned BYO API and optional managed cloud Atlas add-on, separately metered |
-| Studio | 349 | Planned hosted Atlas option with strict monthly included usage cap (size and final price TBD) |
+"Any API" is an extensible provider-adapter design goal, not a claim
+that arbitrary proprietary APIs already work out of the box. Design a
+provider-neutral model interface; support common providers, compatible
+custom endpoints, and progressively add other adapters.
 
-Do NOT sell an unlimited hosted AI plan at R199 or R349 without unit-economics
-tests. GPU compute, API token charges, retries, transcription and heavy tutor
-usage could exhaust margins. Plan prices are provisional until verified
-costs and billing functionality exist.
+A local application should store provider tokens in the OS keychain
+or another secure credential store rather than plaintext files.
+Never store third-party secrets in public JavaScript, student profiles,
+git commits, or unencrypted local configuration. For any future web
+integration, sensitive provider operations require a trusted backend,
+encrypted credentials, input validation, authenticated tutor ownership
+checks, and a private deletion/revocation path.
 
-## Where to enforce cost limits
+Do not send student data to external AI providers without a lawful
+basis and clear opt-in. Existing imported student profiles default
+to ai_context_enabled=false.
 
-- The PostgreSQL student/lesson quotas already exist. They control **data
-  storage only** and are NOT model inference quotas.
-- Future cloud AI must have its own backend-authenticated ledger with
-  request IDs, token accounting, per-account spend budgets, rate limits,
-  concurrency limits and cutoff when the available allowance is exhausted.
-- Do not allow the browser to set its own plan, AI quota, credit balance or
-  provider unit price.
-- Cache/reuse only safe, non-sensitive common materials; never share
-  one tutor's student context with another.
-- Recordings/transcripts require distinct opt-in, retention rules and
-  private storage, with additional costs. They are currently unavailable.
-- Review provider model costs immediately before committing to cloud pricing.
+## Hosted Atlas cost and security rules
+
+- Cloud service must verify an active Growth/Studio entitlement on
+  the server. Browser display text alone must not authorize requests.
+- Free and Starter must never receive managed inference through a
+  direct API request, while BYO API use remains available on all tiers
+  once implemented.
+- Define and publish request/token limits and hard spend caps per tier.
+- Use a server-side metering ledger and concurrency/rate limits;
+  do not promise unlimited GPU inference, recordings or transcripts.
+- Prevent cross-tutor context retrieval with scoped RLS and backend
+  authorization, and do not store model prompts containing student
+  information in operational logs.
+- A signed payment webhook grants subscription access after payment
+  verification; the user cannot edit their own subscription rows.
+- Provide fair grace periods and preserve existing records when a
+  plan is downgraded or usage is exhausted.
+- Price hosted plans after testing real lesson-planning workloads
+  on the intended models, including retries, token overhead, monitoring,
+  customer support and taxes.
+
+The current Supabase plan table records only **planned_atlas_runtime**
+(local/cloud) and **planned_byo_api_support** (true for all).
+Those columns are informational product metadata and do not grant
+actual model access or represent an active billable feature.
+Student-record quotas are already enforced separately by database
+triggers.
 
 ## Next engineering steps
 
-1. Decide supported local models and API providers.
-2. Build a provider-agnostic ModelGateway with a local Ollama adapter,
-   a BYO API adapter and separately authenticated cloud adapter.
-3. Keep model prompts isolated per student; consent controls default OFF.
-4. Implement OS-keychain configuration on desktop.
-5. Prototype a cloud AI service with realistic request/token logging on
-   synthetic lesson data only; use a hard budget during testing.
-6. Design a billing backend and signed payment webhooks.
-7. Fix monthly cap numbers based on measured unit costs before launch.
-8. Publish a truthful privacy notice and regional data/AI-processing policy.
+1. Make local Atlas easy to install and connect to HelloEarth login.
+2. Build one ModelGateway interface with Ollama, hosted, and BYO adapters.
+3. Provide a provider selector on each applicable client, with secure keys.
+4. Implement isolated opt-in student context and provider-specific privacy.
+5. Measure cloud workload costs; set Growth/Studio allowance caps.
+6. Build and test subscription checkout, signed webhooks and hosted quotas.
+7. Publish the final features, usage and provider compatibility before launch.
 
-Related: SUBSCRIPTIONS.md
+Related: SUBSCRIPTIONS.md and Atlas-AI/README.md.
