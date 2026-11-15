@@ -1,7 +1,8 @@
 
 .pricing-header{
  display:flex;align-items:center;justify-content:space-between;gap:20px;
- max-width:1600px;margin:auto;padding:20px clamp(18px,5vw,80px);
+ width:100%;max-width:none;min-width:0;min-height:76px;
+ box-sizing:border-box;margin:0;padding:16px clamp(18px,3.2vw,58px);
  border-bottom:1px solid rgba(187,160,242,.23);
 }
 .pricing-header nav{display:flex;align-items:center;gap:clamp(11px,2vw,30px);font-weight:700;font-size:13px;color:#c4c9e2}
@@ -231,4 +232,14 @@
 @media(prefers-reduced-motion:reduce){
  .plan-card,.plan-action{transition:none!important}
  .plan-card:hover,.plan-action:hover{transform:none}
+}
+
+@media(min-width:701px) and (max-width:960px){
+ .pricing-header{gap:12px;padding-inline:clamp(16px,2.4vw,30px)}
+ .pricing-header>.portal-brand{font-size:clamp(19px,2.4vw,23px)}
+ .pricing-header nav{gap:12px;font-size:12px}
+ .pricing-header>.page-language-picker{max-width:112px}
+}
+@media(max-width:700px){
+ .pricing-header{width:100%;min-height:0;max-width:none;margin:0}
 }
