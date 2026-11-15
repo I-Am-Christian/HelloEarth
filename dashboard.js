@@ -201,6 +201,100 @@ function startStudentForm(edit) {
   showModal("student-modal");
 }
 
+// Import never writes the uploaded file to GitHub or local browser storage.
+// The tutor reviews the count before the authenticated RLS-scoped insert.
+$("import-students").addEventListener("click", () => $("import-file").click());
+$("import-file").addEventListener("change", async event => {
+  const file = event.target.files?.[0];
+  event.target.value = "";
+  if (!file) return;
+  if (file.size > 2_000_000) {
+    loadingMessage("Import file is too large (2 MB maximum).", true);
+    return;
+  }
+  $("import-students").disabled = true;
+  try {
+    const payload = JSON.parse(await file.text());
+    const list = payload?.students;
+    if (payload?.schema_version !== 1 || !Array.isArray(list) || list.length < 1 || list.length > 250) {
+      throw new Error("Expected Atlas student JSON (schema_version 1, 1–250 students).");
+    }
+    const existingNames = new Map(state.students.map(s => [s.display_name.toLocaleLowerCase(), s]));
+    const existingIds = new Map(state.students.map(s => [s.id, s]));
+    const seenIds = new Set(), seenNames = new Set(), additions = [];
+    let skipped = 0;
+    for (const raw of list) {
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("Invalid student profile in import.");
+      const name = String(raw.display_name || "").trim();
+      const id = String(raw.student_id || "");
+      const level = String(raw.cefr_level || "").toUpperCase();
+      if (!name || name.length > 120 || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+        throw new Error("A student name or UUID is invalid.");
+      }
+      if (!["A1","A2","B1","B2","C1","C2","UNASSESSED"].includes(level)) {
+        throw new Error("Unsupported CEFR level for " + name);
+      }
+      const compareName = name.toLocaleLowerCase();
+      if (seenIds.has(id) || seenNames.has(compareName)) throw new Error("The file contains duplicate student names or IDs.");
+      seenIds.add(id); seenNames.add(compareName);
+      const byId = existingIds.get(id), byName = existingNames.get(compareName);
+      if ((byId && byId.display_name.toLocaleLowerCase() !== compareName)
+        || (byName && byName.id !== id)) {
+        throw new Error("An existing student has a matching name or ID but different identity: " + name + ". Review manually.");
+      }
+      if (byId || byName) { skipped++; continue; }
+      const items = field => {
+        const values = raw[field] ?? [];
+        if (!Array.isArray(values) || values.length > 12 || values.some(v => typeof v !== "string" || v.trim().length > 180)) {
+          throw new Error("Invalid " + field + " for " + name);
+        }
+        return values.map(v => v.trim()).filter(Boolean);
+      };
+      const text = (field, max) => {
+        const value = String(raw[field] ?? "").trim();
+        if (value.length > max) throw new Error("Field " + field + " is too long for " + name);
+        return value;
+      };
+      const status = text("record_status", 20) || "reference";
+      if (!["reference","incomplete","inquiry"].includes(status)) throw new Error("Invalid record status for " + name);
+      additions.push({
+        id, tutor_id: state.user.id, display_name: name,
+        cefr_level: level,
+        learning_goals: items("learning_goals"), focus_areas: items("focus_areas"),
+        interests: items("interests"), teaching_preferences: items("teaching_preferences"),
+        translation_language: text("translation_language", 60) || "none",
+        background_notes: text("background_notes", 2000),
+        level_notes: text("level_notes", 1200),
+        assessment_notes: text("assessment_notes", 3000),
+        lesson_history_notes: text("lesson_history_notes", 3000),
+        record_status: status,
+        source_document: text("source_document", 300),
+        ai_context_enabled: false
+      });
+    }
+    if (!additions.length) {
+      loadingMessage("All " + skipped + " profiles are already present. No changes made.");
+      return;
+    }
+    if (!window.confirm(
+      "Import " + additions.length + " new student profiles into YOUR private account?\n"
+      + skipped + " existing profiles will be skipped.\n"
+      + "AI access will stay disabled. Imported notes have no invented lesson dates."
+    )) return;
+
+    for (let i = 0; i < additions.length; i += 25) {
+      const batch = additions.slice(i, i + 25);
+      const { error } = await db.from("atlas_students").insert(batch);
+      if (error) throw error;
+    }
+    await loadStudents();
+    loadingMessage(additions.length + " students imported securely." + (skipped ? " " + skipped + " existing profiles skipped." : ""));
+  } catch (err) {
+    loadingMessage("Import stopped: " + message(err), true);
+  } finally {
+    $("import-students").disabled = false;
+  }
+});
 $("add-student").addEventListener("click", () => startStudentForm(false));
 $("edit-student").addEventListener("click", () => startStudentForm(true));
 $("close-detail").addEventListener("click", () => $("student-detail").hidden = true);
