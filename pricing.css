@@ -1,0 +1,41 @@
+
+.pricing-header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px clamp(18px,5vw,80px);border-bottom:1px solid #b1a0fa2e;max-width:1600px;margin:auto}
+.pricing-header nav{display:flex;align-items:center;gap:clamp(11px,2vw,30px);font-weight:700;font-size:13px;color:#c4c9e2}
+.pricing-header .pricing-nav-primary{background:#8b6add;border-radius:11px;padding:10px 17px;color:white}
+.pricing-main{width:min(1170px,calc(100% - 38px));margin:0 auto}
+.pricing-intro{padding:80px 0 50px;text-align:center;position:relative}
+.pricing-intro:before{content:"";position:absolute;z-index:-1;inset:0 20%;background:radial-gradient(ellipse,#7053c522,transparent 70%);pointer-events:none}
+.pricing-intro h1{font:700 clamp(37px,5vw,67px)/1.11 'Space Grotesk',sans-serif;letter-spacing:-2.2px;margin:17px 0 18px}
+.pricing-intro h1 span{color:#c1a8ff}
+.pricing-intro>p{color:#b5b8d2;max-width:680px;margin:0 auto 27px;font-size:16px;line-height:1.9}
+.pricing-launch-note{font-size:13px;color:#d1c5f5;background:#9580d215;padding:11px 19px;border:1px solid #8d7eb05c;border-radius:99px;display:inline-block}
+.pricing-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}
+.plan-card{background:linear-gradient(160deg,#22243e,#171b31);border:1px solid #54527686;border-radius:21px;padding:26px 23px;display:flex;flex-direction:column;gap:17px;min-width:0;position:relative}
+.plan-card.is-popular{border-color:#b59df3;box-shadow:0 0 0 1px #7c60b44a,0 15px 60px #7d57dc1a}
+.plan-popular{position:absolute;top:-14px;left:20px;background:#a484ed;color:#170f29;border-radius:99px;padding:3px 12px;font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase}
+.plan-title{font:700 22px 'Space Grotesk',sans-serif;margin:0}
+.plan-desc{font-size:12px;color:#aab2d0;min-height:47px;line-height:1.65;margin:2px 0 0}
+.plan-price{display:flex;align-items:baseline;gap:3px;margin-top:3px}
+.plan-price strong{font:700 clamp(32px,3.4vw,44px) 'Space Grotesk',sans-serif;letter-spacing:-1.8px}
+.plan-price small{color:#a8b1d3;font-size:12px}
+.plan-tag{font-size:11px;color:#c4b0fb}
+.plan-action{display:flex;justify-content:center;align-items:center;min-height:45px;border-radius:12px;font-weight:800;font-size:13px;background:#4c4672;border:1px solid #75678d;color:white}
+.plan-card.is-popular .plan-action{background:#976de9;border-color:#bea0ff}
+.plan-action:hover{filter:brightness(1.12);color:#fff}
+.plan-features{margin:0;padding:19px 0 0;list-style:none;display:grid;gap:13px;border-top:1px solid #49496a87}
+.plan-features li{color:#c2c7e1;font-size:12px;line-height:1.6;display:flex;gap:9px;align-items:baseline}
+.plan-features li:before{content:"✓";font-weight:900;color:#bba6fc}
+.pricing-loading{grid-column:1/-1;text-align:center;color:#b8b0d5;padding:70px 18px}
+.pricing-footnote{font-size:12px;line-height:1.8;color:#939cbc;margin:22px 0 0}
+.pricing-values{margin:70px 0;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.pricing-values>div{padding:22px 24px;background:#171c34;border:1px solid #46486c80;border-radius:17px}
+.pricing-values strong{font:700 17px 'Space Grotesk',sans-serif}
+.pricing-values p{color:#aeb5d2;font-size:13px;margin:9px 0 0}
+.pricing-faq{max-width:820px;margin:25px auto 85px}
+.pricing-faq h2{font:700 31px 'Space Grotesk',sans-serif;letter-spacing:-.9px;margin:0 0 24px;text-align:center}
+.pricing-faq details{padding:18px 0;border-bottom:1px solid #54537294}
+.pricing-faq summary{cursor:pointer;font-weight:700;color:#eae5fc}
+.pricing-faq details p{color:#b6b8d0;font-size:13px}
+.pricing-footer{border-top:1px solid #4a486b;text-align:center;padding:22px clamp(18px,5vw,80px);display:flex;justify-content:space-between;gap:20px;color:#979ebf;font-size:12px}
+@media(max-width:990px){.pricing-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.plan-desc{min-height:0}.plan-price strong{font-size:41px}}
+@media(max-width:560px){.pricing-header .portal-brand{font-size:20px}.pricing-header nav{gap:12px}.pricing-header nav a:first-child{display:none}.pricing-intro{padding:54px 0 32px}.pricing-intro h1{letter-spacing:-1.4px}.pricing-launch-note{border-radius:12px}.pricing-grid{grid-template-columns:1fr}.plan-card{padding:24px}.pricing-values{grid-template-columns:1fr;gap:10px;margin:42px 0}.pricing-footer{flex-direction:column;align-items:center}.pricing-faq{margin-bottom:50px}}
