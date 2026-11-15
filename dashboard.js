@@ -1,0 +1,307 @@
+import { db, requireUser, statusMessage } from "./supabase-client.js";
+
+const $ = id => document.getElementById(id);
+const state = { user: null, students: [], selected: null, notes: [], editMode: false, lastFocus: null };
+
+function arrayLines(id) {
+  const values = $(id).value.split(/\r?\n/).map(value => value.trim()).filter(Boolean);
+  if (values.length > 12) throw new Error("Use at most 12 items per list.");
+  if (values.some(value => value.length > 180)) throw new Error("Each list item must be 180 characters or fewer.");
+  return values;
+}
+function initials(name) {
+  return (name || "?").split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0].toUpperCase()).join("");
+}
+function labelledField(label, content) {
+  const div = document.createElement("div");
+  div.className = "ws-field";
+  const title = document.createElement("strong");
+  title.textContent = label;
+  const text = document.createElement("span");
+  text.textContent = content || "Not recorded";
+  div.append(title, text);
+  return div;
+}
+function loadingMessage(message, isError = false) {
+  statusMessage($("dashboard-feedback"), message, isError);
+}
+function message(err) {
+  const m = String(err?.message || err || "Something went wrong.");
+  if (/row.level.security|permission.denied/i.test(m)) return "Your account cannot access this record. Please sign in again.";
+  return m.length > 190 ? "Request failed. Please try again." : m;
+}
+function setBusy(id, busy) {
+  $(id).disabled = busy;
+}
+function showModal(id) {
+  state.lastFocus = document.activeElement;
+  $(id).hidden = false;
+  $(id).querySelector("input,textarea,select,button")?.focus();
+}
+function hideModal(id) {
+  $(id).hidden = true;
+  if (state.lastFocus?.focus) state.lastFocus.focus();
+}
+function bindModal(id, closeId) {
+  $(closeId).addEventListener("click", () => hideModal(id));
+  $(id).addEventListener("click", event => {
+    if (event.target === $(id)) hideModal(id);
+  });
+}
+bindModal("student-modal", "modal-close");
+bindModal("note-modal", "note-close");
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") {
+    if (!$("note-modal").hidden) hideModal("note-modal");
+    else if (!$("student-modal").hidden) hideModal("student-modal");
+  }
+});
+
+function renderStudents() {
+  const grid = $("student-grid");
+  grid.replaceChildren();
+  const q = $("student-search").value.trim().toLowerCase();
+  const visible = state.students.filter(student => [
+    student.display_name, student.cefr_level, ...(student.learning_goals || []), ...(student.interests || [])
+  ].join(" ").toLowerCase().includes(q));
+  if (!visible.length) {
+    const empty = document.createElement("div");
+    empty.className = "ws-empty";
+    const strong = document.createElement("strong");
+    strong.textContent = state.students.length ? "No matching students" : "Your new workspace awaits ✨";
+    const p = document.createElement("span");
+    p.textContent = state.students.length
+      ? "Try a different search."
+      : "Add a learner to start tracking goals, lessons and progress.";
+    empty.append(strong, p);
+    grid.append(empty);
+  }
+  for (const student of visible) {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "student-card";
+    const head = document.createElement("div");
+    head.className = "student-card-head";
+    const avatar = document.createElement("span");
+    avatar.className = "student-avatar";
+    avatar.textContent = initials(student.display_name);
+    const level = document.createElement("span");
+    level.className = "cefr-pill";
+    level.textContent = student.cefr_level === "UNASSESSED" ? "NOT ASSESSED" : student.cefr_level;
+    head.append(avatar, level);
+    const body = document.createElement("div");
+    const name = document.createElement("h3");
+    name.textContent = student.display_name;
+    const goal = document.createElement("p");
+    goal.textContent = (student.learning_goals || []).slice(0, 2).join(" · ") || "Learning goals not recorded yet";
+    body.append(name, goal);
+    const footer = document.createElement("span");
+    footer.className = "student-card-footer";
+    footer.textContent = "View student →";
+    card.append(head, body, footer);
+    card.addEventListener("click", () => openStudent(student.id));
+    grid.append(card);
+  }
+  $("stat-students").textContent = state.students.length;
+  $("stat-levels").textContent = new Set(state.students.map(s => s.cefr_level).filter(s => s !== "UNASSESSED")).size;
+  $("stat-assess").textContent = state.students.filter(s => s.cefr_level === "UNASSESSED").length;
+}
+
+async function loadStudents() {
+  loadingMessage("");
+  const pageSize = 250;
+  const results = [];
+  for (let start = 0; ; start += pageSize) {
+    const { data, error } = await db.from("atlas_students")
+      .select("*")
+      .eq("tutor_id", state.user.id)
+      .order("created_at", { ascending: false })
+      .range(start, start + pageSize - 1);
+    if (error) throw error;
+    results.push(...(data || []));
+    if (!data || data.length < pageSize) break;
+  }
+  state.students = results;
+  renderStudents();
+}
+
+async function openStudent(id) {
+  state.selected = state.students.find(s => s.id === id) || null;
+  if (!state.selected) return;
+  const s = state.selected;
+  $("student-detail").hidden = false;
+  $("selected-name").textContent = s.display_name;
+  const target = $("student-fields");
+  target.replaceChildren(
+    labelledField("CEFR level", s.cefr_level === "UNASSESSED" ? "Not assessed yet" : s.cefr_level),
+    labelledField("Learning goals", (s.learning_goals || []).join(" • ")),
+    labelledField("Focus areas", (s.focus_areas || []).join(" • ")),
+    labelledField("Interests", (s.interests || []).join(" • ")),
+    labelledField("Translation language", s.translation_language),
+    labelledField("Assessment observations", s.assessment_notes),
+    labelledField("Prior lesson references", s.lesson_history_notes),
+    labelledField("Additional background", s.background_notes),
+    labelledField("Provisional level notes", s.level_notes),
+    labelledField("Teaching preferences", (s.teaching_preferences || []).join(" • "))
+  );
+  $("lesson-notes").replaceChildren();
+  statusMessage($("detail-feedback"), "");
+  $("student-detail").scrollIntoView({ behavior: "smooth", block: "start" });
+  try {
+    const { data, error } = await db.from("atlas_lesson_notes")
+      .select("*")
+      .eq("tutor_id", state.user.id)
+      .eq("student_id", id)
+      .order("lesson_date", { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    state.notes = data || [];
+    const list = $("lesson-notes");
+    if (!state.notes.length) {
+      const p = document.createElement("p");
+      p.textContent = "No dated lesson notes yet. Add one after your next lesson.";
+      p.style.color = "#b7b8d2";
+      list.append(p);
+    }
+    for (const note of state.notes) {
+      const item = document.createElement("div");
+      item.className = "ws-note";
+      const time = document.createElement("time");
+      time.textContent = note.lesson_date;
+      const summary = document.createElement("div");
+      summary.textContent = note.summary;
+      const next = document.createElement("div");
+      if (note.next_steps?.length) next.textContent = "Next: " + note.next_steps.join(" · ");
+      item.append(time, summary, next);
+      list.append(item);
+    }
+  } catch (err) {
+    statusMessage($("detail-feedback"), message(err), true);
+  }
+}
+
+function startStudentForm(edit) {
+  state.editMode = edit;
+  const student = edit ? state.selected : null;
+  $("student-form").reset();
+  $("modal-heading").textContent = edit ? "Edit student" : "Add student";
+  $("modal-subtitle").textContent = edit
+    ? "Update this learner's goals and progress."
+    : "Only store information you have permission to keep.";
+  $("student-name").value = student?.display_name || "";
+  $("student-cefr").value = student?.cefr_level || "UNASSESSED";
+  $("student-goals").value = (student?.learning_goals || []).join("\n");
+  $("student-focus").value = (student?.focus_areas || []).join("\n");
+  $("student-interests").value = (student?.interests || []).join("\n");
+  $("student-translation").value = student?.translation_language === "none" ? "" : (student?.translation_language || "");
+  $("student-status").value = student?.record_status || "reference";
+  $("student-assessment").value = student?.assessment_notes || "";
+  $("student-history").value = student?.lesson_history_notes || "";
+  statusMessage($("modal-feedback"), "");
+  showModal("student-modal");
+}
+
+$("add-student").addEventListener("click", () => startStudentForm(false));
+$("edit-student").addEventListener("click", () => startStudentForm(true));
+$("close-detail").addEventListener("click", () => $("student-detail").hidden = true);
+$("student-search").addEventListener("input", renderStudents);
+
+$("student-form").addEventListener("submit", async event => {
+  event.preventDefault();
+  setBusy("save-student", true);
+  statusMessage($("modal-feedback"), "");
+  try {
+    const name = $("student-name").value.trim();
+    if (!name) throw new Error("A student name is required.");
+    const payload = {
+      display_name: name,
+      cefr_level: $("student-cefr").value,
+      learning_goals: arrayLines("student-goals"),
+      focus_areas: arrayLines("student-focus"),
+      interests: arrayLines("student-interests"),
+      translation_language: $("student-translation").value.trim() || "none",
+      record_status: $("student-status").value,
+      assessment_notes: $("student-assessment").value.trim(),
+      lesson_history_notes: $("student-history").value.trim(),
+      updated_at: new Date().toISOString()
+    };
+    if (state.editMode) {
+      const { data, error } = await db.from("atlas_students").update(payload)
+        .eq("id", state.selected.id).eq("tutor_id", state.user.id).select().single();
+      if (error) throw error;
+      if (!data) throw new Error("The student could not be updated.");
+      state.selected = data;
+    } else {
+      const { data, error } = await db.from("atlas_students").insert({
+        ...payload, id: crypto.randomUUID(), tutor_id: state.user.id,
+        ai_context_enabled: false
+      }).select().single();
+      if (error) throw error;
+      if (!data) throw new Error("The student could not be created.");
+    }
+    hideModal("student-modal");
+    await loadStudents();
+    if (state.editMode && state.selected) await openStudent(state.selected.id);
+    else $("student-detail").hidden = true;
+    loadingMessage("Student saved securely.");
+  } catch (err) {
+    statusMessage($("modal-feedback"), message(err), true);
+  } finally { setBusy("save-student", false); }
+});
+
+$("add-note").addEventListener("click", () => {
+  if (!state.selected) return;
+  $("note-form").reset();
+  $("note-date").value = new Date().toLocaleDateString("en-CA");
+  statusMessage($("note-feedback"), "");
+  showModal("note-modal");
+});
+$("note-form").addEventListener("submit", async event => {
+  event.preventDefault();
+  if (!state.selected) return;
+  setBusy("save-note", true);
+  statusMessage($("note-feedback"), "");
+  try {
+    const summary = $("note-summary").value.trim();
+    if (!summary) throw new Error("Please enter a lesson summary.");
+    const { error } = await db.from("atlas_lesson_notes").insert({
+      id: crypto.randomUUID(), tutor_id: state.user.id,
+      student_id: state.selected.id,
+      lesson_date: $("note-date").value,
+      summary,
+      topics: arrayLines("note-topics"),
+      strengths: arrayLines("note-strengths"),
+      challenges: arrayLines("note-challenges"),
+      next_steps: arrayLines("note-next")
+    });
+    if (error) throw error;
+    hideModal("note-modal");
+    await openStudent(state.selected.id);
+    statusMessage($("detail-feedback"), "Lesson note saved.");
+  } catch (err) { statusMessage($("note-feedback"), message(err), true); }
+  finally { setBusy("save-note", false); }
+});
+
+$("signout").addEventListener("click", async () => {
+  $("signout").disabled = true;
+  await db.auth.signOut();
+  window.location.replace("login.html");
+});
+
+async function init() {
+  try {
+    const user = await requireUser();
+    if (!user) return;
+    state.user = user;
+    $("account-email").textContent = user.email || "Tutor";
+    $("account-avatar").textContent = initials(user.user_metadata?.display_name || user.email || "H");
+    $("checking").hidden = true;
+    $("workspace").hidden = false;
+    await loadStudents();
+  } catch (err) {
+    $("checking").hidden = true;
+    $("workspace").hidden = false;
+    loadingMessage("Could not load your students. " + message(err), true);
+  }
+}
+init();
