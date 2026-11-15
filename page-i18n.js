@@ -39,7 +39,7 @@ function translateNow(){
  observer?.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:["placeholder","aria-label","title"]});
 }
 function apply(lang){
- currentLang=lang==="en"||dictionaries[lang]?lang:"en";select.value=currentLang;
+ currentLang=lang==="en"||dictionaries[lang]?lang:"en";select.value=currentLang;select.setAttribute("aria-label",({"en":"Website language","af":"Webwerftaal","es":"Idioma del sitio web","pt":"Idioma do site","fr":"Langue du site","pl":"Język strony","ru":"Язык сайта","zh":"网站语言"})[currentLang]);
  translateNow();try{localStorage.setItem("helloearth-language",currentLang)}catch(e){}
  document.dispatchEvent(new CustomEvent("helloearth:languagechanged",{detail:{language:currentLang}}))
 }
