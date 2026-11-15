@@ -2,10 +2,23 @@ import { db } from "./supabase-client.js";
 
 const root = document.getElementById("pricing-grid");
 const featureDescriptions = {
-  free: "A peaceful starting place for your first few learners.",
-  starter: "For independent tutors growing a steady student list.",
-  growth: "For busy tutors managing many learners and lessons.",
-  studio: "For high-volume independent tutors managing larger student lists."
+  free: "The student workspace is free. The Atlas desktop prototype runs separately.",
+  starter: "For independent tutors. Bring-your-own AI API access is planned.",
+  growth: "For busier tutors. An optional managed Atlas add-on is being explored.",
+  studio: "For high-volume tutors. Managed cloud Atlas with capped usage is planned."
+};
+const futureAiFeatures = {
+  free: ["Atlas local desktop app is separate from the web workspace"],
+  starter: ["Planned: use your own AI API (provider fees are separate)"],
+  growth: [
+    "Planned: use your own AI API",
+    "Planned: optional cloud Atlas add-on (extra usage charges and limits to be confirmed)"
+  ],
+  studio: [
+    "Planned: managed Atlas cloud option with monthly limits",
+    "Planned: bring your own API instead",
+    "Cloud usage allowance and final pricing will be confirmed before launch"
+  ]
 };
 function card(plan) {
   const article = document.createElement("article");
@@ -40,7 +53,7 @@ function card(plan) {
   action.className = "plan-action";
   action.href = plan.code === "free" ? "register.html"
     : "mailto:helloearthsupport@gmail.com?subject=" + encodeURIComponent("HelloEarth " + plan.name + " plan interest");
-  action.textContent = plan.code === "free" ? "Start for free →" : "Ask about launch →";
+  action.textContent = plan.code === "free" ? "Get started →" : "Ask about launch →";
 
   const list = document.createElement("ul");
   list.className = "plan-features";
@@ -49,7 +62,8 @@ function card(plan) {
     "Up to " + new Intl.NumberFormat("en-ZA").format(plan.max_notes_monthly) + " new notes per month",
     new Intl.NumberFormat("en-ZA").format(plan.max_notes_total) + " notes stored in total",
     "Private Google / email sign-in",
-    "CEFR levels, goals and student history"
+    "CEFR levels, goals and student history",
+    ...(futureAiFeatures[plan.code] || [])
   ];
   for (const feature of features) {
     const li = document.createElement("li");
