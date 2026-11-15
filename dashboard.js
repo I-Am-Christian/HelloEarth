@@ -393,9 +393,10 @@ async function init() {
     $("workspace").hidden = false;
     await loadStudents();
   } catch (err) {
-    $("checking").hidden = true;
-    $("workspace").hidden = false;
-    loadingMessage("Could not load your students. " + message(err), true);
+    $("checking").textContent = "We couldn't verify your account or load your records. Please sign in again.";
+    $("checking").hidden = false;
+    $("workspace").hidden = true;
+    console.error("Workspace initialization failed", err?.name || "unknown error");
   }
 }
 init();
