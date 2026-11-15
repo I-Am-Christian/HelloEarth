@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#101429">
+<title>My workspace | HelloEarth</title>
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="portal.css?v=20261115a">
+<script type="module" src="dashboard.js?v=20261115a"></script>
+</head>
+<body class="portal-page">
+<div id="checking" style="padding:20vh 20px;text-align:center;color:#d9cfff">Checking your secure session…</div>
+<div class="workspace" id="workspace" hidden>
+  <aside class="ws-sidebar">
+    <a href="index.html" class="portal-brand"><img src="logo.svg" alt="" width="40" height="40">helloearth<span class="brand-dot">.</span></a>
+    <nav class="ws-nav" aria-label="Workspace menu"><button class="active" type="button" id="home-tab">◈ &nbsp; My students</button><a href="index.html">↗ &nbsp; View website</a></nav>
+    <p class="ws-sidebar-foot">Your private teaching space. <br>Student data stays with your signed-in account.</p>
+  </aside>
+  <main class="ws-main">
+    <header class="ws-header"><div><span class="dash-overline">YOUR TEACHING SPACE</span><h1>My workspace<span style="color:#bc9cff">.</span></h1></div>
+      <div class="ws-account"><span class="ws-user" id="account-email"></span><span class="ws-avatar" id="account-avatar" aria-hidden="true">H</span><button type="button" id="signout">Log out</button></div>
+    </header>
+    <p class="ws-banner">✧ Your student information is private to your account. Only record learner data you have permission to store. Atlas AI lesson features are still in development.</p>
+    <div class="ws-summary">
+      <div class="ws-metric"><span>Students</span><strong id="stat-students">—</strong><small>In your workspace</small></div>
+      <div class="ws-metric"><span>Levels tracked</span><strong id="stat-levels">—</strong><small>CEFR categories</small></div>
+      <div class="ws-metric"><span>Profiles to assess</span><strong id="stat-assess">—</strong><small>Unassessed learners</small></div>
+    </div>
+    <section aria-labelledby="students-heading">
+      <div class="ws-panel-head"><div><h2 id="students-heading">Your students</h2><p>Keep goals, progress and lesson notes together.</p></div>
+        <div class="ws-controls"><label class="visually-hidden" for="student-search">Search students</label><input class="ws-search" id="student-search" type="search" placeholder="Search by name or goal…"><button class="dash-primary" type="button" id="add-student">+ Add student</button></div>
+      </div>
+      <div id="student-grid" class="ws-grid" aria-live="polite"><div class="ws-empty">Loading private profiles…</div></div>
+      <div id="dashboard-feedback" role="status" class="ws-feedback" aria-live="polite"></div>
+    </section>
+    <section class="ws-detail" id="student-detail" hidden aria-labelledby="selected-name">
+      <div class="ws-card"><div class="ws-detail-top"><div><span class="dash-overline">STUDENT PROFILE</span><h2 id="selected-name" class="ws-detail-title"></h2></div><button class="ws-mini-btn" id="close-detail" type="button">Close</button></div>
+        <div class="ws-fields" id="student-fields"></div>
+        <div class="ws-action-row"><button type="button" class="ws-mini-btn" id="edit-student">Edit profile</button><button type="button" class="ws-mini-btn" id="add-note">+ Lesson note</button></div>
+        <h3 style="margin:26px 0 12px">Lesson notes</h3><div id="lesson-notes" class="ws-note-list"></div>
+        <p id="detail-feedback" role="status" class="ws-feedback"></p>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="ws-modal" id="student-modal" hidden>
+  <div class="ws-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-heading">
+    <div class="ws-dialog-head"><h2 id="modal-heading">Add student</h2><button type="button" id="modal-close" aria-label="Close">×</button></div>
+    <p id="modal-subtitle">Create a student profile for your private workspace.</p>
+    <form id="student-form" class="ws-form">
+      <div class="field"><label for="student-name">Student name or nickname</label><input id="student-name" required maxlength="120" placeholder="e.g. Alex"></div>
+      <div class="field"><label for="student-cefr">Current CEFR level</label><select id="student-cefr"><option value="UNASSESSED">Not assessed yet</option><option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option><option>C2</option></select></div>
+      <div class="field full"><label for="student-goals">Learning goals (one per line)</label><textarea id="student-goals" rows="2" placeholder="Speak confidently&#10;Improve listening"></textarea></div>
+      <div class="field"><label for="student-focus">Focus areas</label><textarea id="student-focus" rows="2" placeholder="Conversation&#10;Grammar"></textarea></div>
+      <div class="field"><label for="student-interests">Interests</label><textarea id="student-interests" rows="2" placeholder="Travel&#10;Technology"></textarea></div>
+      <div class="field"><label for="student-translation">Vocabulary translation language</label><input id="student-translation" maxlength="60" placeholder="None / Polish / Spanish…"></div>
+      <div class="field"><label for="student-status">Record status</label><select id="student-status"><option value="reference">Student</option><option value="incomplete">Incomplete record</option><option value="inquiry">Inquiry</option></select></div>
+      <div class="field full"><label for="student-assessment">Assessment observations (optional)</label><textarea id="student-assessment" rows="2" maxlength="3000"></textarea></div>
+      <div class="field full"><label for="student-history">Previous lesson history (optional)</label><textarea id="student-history" rows="2" maxlength="3000"></textarea></div>
+      <button class="dash-primary" type="submit" id="save-student">Save student</button>
+    </form><div id="modal-feedback" class="ws-feedback" role="status"></div>
+  </div>
+</div>
+<div class="ws-modal" id="note-modal" hidden>
+  <div class="ws-dialog" role="dialog" aria-modal="true" aria-labelledby="note-heading">
+    <div class="ws-dialog-head"><h2 id="note-heading">Add lesson note</h2><button type="button" id="note-close" aria-label="Close">×</button></div>
+    <p>Record what actually happened in the lesson. These notes are private.</p>
+    <form id="note-form" class="ws-form">
+      <div class="field full"><label for="note-date">Lesson date</label><input id="note-date" type="date" required></div>
+      <div class="field full"><label for="note-summary">Summary</label><textarea id="note-summary" rows="3" required maxlength="1600"></textarea></div>
+      <div class="field"><label for="note-topics">Topics (one per line)</label><textarea id="note-topics" rows="2"></textarea></div>
+      <div class="field"><label for="note-strengths">Strengths (one per line)</label><textarea id="note-strengths" rows="2"></textarea></div>
+      <div class="field"><label for="note-challenges">Challenges (one per line)</label><textarea id="note-challenges" rows="2"></textarea></div>
+      <div class="field"><label for="note-next">Next steps (one per line)</label><textarea id="note-next" rows="2"></textarea></div>
+      <button class="dash-primary" type="submit" id="save-note">Save note</button>
+    </form><p id="note-feedback" role="status" class="ws-feedback"></p>
+  </div>
+</div>
+</body></html>
