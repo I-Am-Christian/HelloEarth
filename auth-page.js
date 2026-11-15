@@ -39,8 +39,8 @@ form.addEventListener("submit", async event => {
   busy(submit, true);
   statusMessage(feedback, "");
   try {
-    const email = form.email.value.trim();
-    const password = form.password.value;
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
     if (register) {
       if (!document.getElementById("accept-terms").checked) {
         throw new Error("Please accept the Terms and Privacy Policy.");
