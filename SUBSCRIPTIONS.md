@@ -18,6 +18,37 @@ The source of truth is the public Supabase table helloearth_plans:
 | Growth | 199 | 75 | 1,200 | 12,000 |
 | Studio | 349 | 250 | 5,000 | 50,000 |
 
+## Planned Atlas entitlement matrix (not yet live)
+
+| Plan | Atlas processing | Connect your own AI API |
+|---|---|---|
+| Free | Local Ollama-based Atlas desktop | Yes — planned |
+| Starter | Local Ollama-based Atlas desktop | Yes — planned |
+| Growth | Managed cloud Atlas with included capped usage | Yes — planned |
+| Studio | Managed cloud Atlas with a larger included capped allowance | Yes — planned |
+
+Local Atlas exists today as a separate Python prototype; it is not
+integrated with the public HelloEarth workspace. Cloud Atlas and external
+API integration remain in development and are NOT enabled by the current
+student/notes subscription system. All paid pricing is proposed.
+
+External providers may use different API protocols. Planned "bring your
+own API" support means a documented, expandable selection of supported
+AI providers plus compatible custom endpoints, not arbitrary HTTP APIs.
+Users pay their own provider charges separately, regardless of tier.
+No API credentials may be embedded in the static site or stored in
+student data.
+
+Growth and Studio are intended to INCLUDE cloud Atlas rather than require
+a separately purchased add-on; their included usage budgets and final
+prices must be set based on measured cloud inference costs before billing.
+Existing student/notes quotas do not cap inference usage.
+
+The public helloearth_plans table now includes descriptive
+planned_atlas_runtime (local/cloud) and planned_byo_api_support (true on
+every plan), solely to keep the public catalogue aligned with the
+product roadmap. These fields grant no actual AI entitlement.
+
 Student and note limits are enforced in PostgreSQL by quota triggers,
 including concurrent inserts and direct API calls. The user's existing
 internal founder account is administratively exempt from these quotas.
