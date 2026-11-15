@@ -18,6 +18,6 @@ async function refresh(){
  try{const {data:{user},error}=await db.auth.getUser();update(error?null:user)}
  catch{update(null)}
 }
-db.auth.onAuthStateChange(()=>{refresh()});
+db.auth.onAuthStateChange((_event,session)=>{update(session?.user??null)});
 document.addEventListener("helloearth:languagechanged",()=>update(currentUser));
 refresh();
