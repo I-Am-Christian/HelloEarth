@@ -3,7 +3,7 @@ for(const entries of Object.values(dictionaries)){for(const [key,value] of Objec
 const originalNodes=new WeakMap();const originalAttrs=new WeakMap();const title=document.title;let currentLang="en";
 const clean=value=>value.replace(/\s+/g," ").trim();
 function localize(node){
- if(!node?.isConnected||node.parentElement?.closest("script,style,textarea,.page-language-picker,[contenteditable]"))return;
+ if(!node?.isConnected||node.parentElement?.closest("script,style,textarea,.page-language-picker,.i18n-user-content,#selected-name,#account-email,[contenteditable]"))return;
  const now=node.nodeValue;let record=originalNodes.get(node);
  if(!record||now!==record.last){record={raw:now,clean:clean(now),last:now};originalNodes.set(node,record)}
  const translated=dictionaries[currentLang]?.[record.clean];
