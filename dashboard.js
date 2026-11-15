@@ -20,6 +20,7 @@ function labelledField(label, content) {
   title.textContent = label;
   const text = document.createElement("span");
   text.textContent = content || "Not recorded";
+  if (content && content !== "Not assessed yet") text.classList.add("i18n-user-content");
   div.append(title, text);
   return div;
 }
@@ -119,6 +120,7 @@ function renderStudents() {
     const avatar = document.createElement("span");
     avatar.className = "student-avatar";
     avatar.textContent = initials(student.display_name);
+    avatar.classList.add("i18n-user-content");
     const level = document.createElement("span");
     level.className = "cefr-pill";
     level.textContent = student.cefr_level === "UNASSESSED" ? "NOT ASSESSED" : student.cefr_level;
@@ -126,8 +128,10 @@ function renderStudents() {
     const body = document.createElement("div");
     const name = document.createElement("h3");
     name.textContent = student.display_name;
+    name.classList.add("i18n-user-content");
     const goal = document.createElement("p");
     goal.textContent = (student.learning_goals || []).slice(0, 2).join(" · ") || "Learning goals not recorded yet";
+    if (student.learning_goals?.length) goal.classList.add("i18n-user-content");
     body.append(name, goal);
     const footer = document.createElement("span");
     footer.className = "student-card-footer";
@@ -204,8 +208,9 @@ async function openStudent(id) {
       time.textContent = note.lesson_date;
       const summary = document.createElement("div");
       summary.textContent = note.summary;
+      summary.classList.add("i18n-user-content");
       const next = document.createElement("div");
-      if (note.next_steps?.length) next.textContent = tr("Next: {steps}", {steps:note.next_steps.join(" · ")});
+      if (note.next_steps?.length) {next.textContent = tr("Next: {steps}", {steps:note.next_steps.join(" · ")});next.classList.add("i18n-user-content")}
       item.append(time, summary, next);
       list.append(item);
     }
