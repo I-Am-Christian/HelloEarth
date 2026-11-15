@@ -1,0 +1,150 @@
+
+/* Shared lightweight space theme. Static CSS stars keep pages fast on phones. */
+body.space-theme{
+ --sky-purple:rgba(114,76,185,.19);
+ --sky-blue:rgba(64,105,177,.16);
+ --sky-pink:rgba(145,82,149,.10);
+ background-color:#0b1024;
+ background-image:
+  radial-gradient(ellipse 55% 47% at 6% 5%,var(--sky-purple),transparent 80%),
+  radial-gradient(ellipse 57% 52% at 97% 77%,var(--sky-blue),transparent 80%),
+  radial-gradient(ellipse 42% 40% at 68% 20%,var(--sky-pink),transparent 85%),
+  radial-gradient(circle at 31px 66px,rgba(219,205,255,.32) .8px,transparent 1.4px),
+  radial-gradient(circle at 137px 19px,rgba(176,215,255,.28) .85px,transparent 1.45px),
+  radial-gradient(circle at 81px 151px,rgba(231,211,255,.19) .65px,transparent 1.3px);
+ background-size:100% 100%,100% 100%,100% 100%,273px 317px,349px 283px,211px 269px;
+ background-attachment:fixed;
+}
+body.space-pricing{--sky-purple:rgba(139,91,204,.20);--sky-blue:rgba(80,125,200,.18);--sky-pink:rgba(158,82,159,.13)}
+body.space-auth{--sky-purple:rgba(108,83,181,.19);--sky-blue:rgba(67,127,182,.16)}
+body.space-dashboard{--sky-purple:rgba(107,79,169,.13);--sky-blue:rgba(53,106,182,.13)}
+body.space-legal{--sky-purple:rgba(111,84,162,.16);--sky-blue:rgba(61,100,164,.12)}
+body.space-home{--sky-purple:rgba(105,74,164,.14);--sky-blue:rgba(64,94,154,.11)}
+
+body.space-pricing .pricing-header{
+ background:linear-gradient(100deg,rgba(29,30,57,.83),rgba(27,34,60,.77));
+ backdrop-filter:blur(13px);
+ -webkit-backdrop-filter:blur(13px);
+}
+body.space-auth .auth-main{
+ background:
+  radial-gradient(ellipse at 98% 4%,rgba(127,92,197,.17),transparent 48%),
+  radial-gradient(ellipse at 4% 90%,rgba(65,114,178,.15),transparent 55%),
+  radial-gradient(circle at 43px 93px,rgba(226,211,255,.24) .8px,transparent 1.4px),
+  radial-gradient(circle at 109px 39px,rgba(174,218,255,.18) .7px,transparent 1.2px),
+  #0b1024;
+ background-size:100% 100%,100% 100%,257px 293px,347px 311px,auto;
+}
+body.space-auth .auth-aside{
+ background:
+  radial-gradient(ellipse at 22% 27%,rgba(113,70,164,.55),transparent 57%),
+  radial-gradient(ellipse at 80% 88%,rgba(45,100,163,.44),transparent 55%),
+  linear-gradient(160deg,#141631,#10182f);
+}
+body.space-auth .auth-form-wrap{
+ position:relative;
+ padding:clamp(21px,3.4vw,34px);
+ border:1px solid rgba(157,136,213,.29);
+ border-radius:24px;
+ background:linear-gradient(140deg,rgba(48,40,81,.67),rgba(25,37,67,.79) 84%);
+ box-shadow:0 19px 55px rgba(4,6,25,.25),inset 0 1px rgba(255,255,255,.045);
+}
+body.space-auth .auth-form input:not([type=checkbox]),
+body.space-auth .auth-form select{
+ background:linear-gradient(125deg,#252a48,#1b2945);
+}
+body.space-auth .primary-action{
+ background:linear-gradient(110deg,#a27deb,#6f65bf);
+ box-shadow:0 11px 30px rgba(78,50,148,.28);
+}
+
+body.space-dashboard .workspace{
+ background-color:#0b1126;
+ background-image:
+  radial-gradient(ellipse 57% 36% at 6% 9%,rgba(104,71,163,.17),transparent 74%),
+  radial-gradient(ellipse 54% 40% at 95% 72%,rgba(60,107,170,.13),transparent 80%),
+  radial-gradient(circle at 34px 89px,rgba(219,207,255,.16) .7px,transparent 1.35px),
+  radial-gradient(circle at 103px 49px,rgba(171,204,255,.14) .7px,transparent 1.25px);
+ background-size:100% 100%,100% 100%,287px 303px,371px 263px;
+ background-attachment:fixed;
+}
+body.space-dashboard .ws-sidebar{
+ background:linear-gradient(160deg,rgba(33,28,62,.96),rgba(18,29,54,.97));
+}
+body.space-dashboard .ws-metric:nth-child(3n + 1){
+ background:linear-gradient(138deg,rgba(54,39,83,.94),rgba(29,38,69,.96));
+ border-color:rgba(169,144,223,.38);
+}
+body.space-dashboard .ws-metric:nth-child(3n + 2){
+ background:linear-gradient(138deg,rgba(37,50,82,.94),rgba(27,35,62,.96));
+ border-color:rgba(139,168,220,.32);
+}
+body.space-dashboard .ws-metric:nth-child(3n + 3){
+ background:linear-gradient(138deg,rgba(56,41,74,.94),rgba(28,37,67,.96));
+ border-color:rgba(187,151,217,.34);
+}
+body.space-dashboard .student-card:nth-child(3n + 1){
+ background:linear-gradient(140deg,#292641,#1b2842);
+}
+body.space-dashboard .student-card:nth-child(3n + 2){
+ background:linear-gradient(140deg,#253451,#1c2540);
+}
+body.space-dashboard .student-card:nth-child(3n + 3){
+ background:linear-gradient(140deg,#352946,#20253e);
+}
+body.space-dashboard .ws-card,
+body.space-dashboard .ws-empty,
+body.space-dashboard .ws-note{
+ background:linear-gradient(130deg,rgba(43,40,76,.87),rgba(25,38,66,.92));
+}
+body.space-dashboard .ws-banner,
+body.space-dashboard .ws-plan-strip{
+ background:linear-gradient(115deg,rgba(86,56,115,.62),rgba(44,77,125,.48));
+}
+body.space-dashboard .ws-dialog{
+ background:linear-gradient(140deg,#302747,#1c2742);
+}
+
+body.space-legal .legal-main{
+ background:
+  radial-gradient(ellipse 56% 46% at 88% 8%,rgba(123,80,185,.18),transparent 79%),
+  radial-gradient(ellipse 56% 60% at 5% 82%,rgba(66,100,180,.16),transparent 80%),
+  radial-gradient(circle at 29px 66px,rgba(227,212,255,.19) .8px,transparent 1.35px),
+  radial-gradient(circle at 147px 35px,rgba(166,210,255,.15) .7px,transparent 1.25px),
+  #101525;
+ background-size:100% 100%,100% 100%,301px 323px,359px 283px,auto;
+}
+body.space-legal .legal-content{
+ background:linear-gradient(145deg,rgba(42,37,68,.97),rgba(24,37,65,.98) 85%);
+ border-color:rgba(171,147,225,.38);
+ box-shadow:0 20px 58px rgba(5,7,27,.27),inset 0 1px rgba(255,255,255,.04);
+}
+body.space-legal .legal-date{
+ background:rgba(101,75,150,.16);
+ border-color:rgba(177,151,226,.38);
+}
+body.space-legal .site-header,
+body.space-home .site-header{
+ background:linear-gradient(110deg,rgba(24,23,47,.95),rgba(15,27,49,.94))!important;
+}
+body.space-legal .site-footer{
+ background:linear-gradient(140deg,#12162a,#101c31);
+}
+
+/* Keep stars out of sensitive controls and accessible text. */
+body.space-theme input,
+body.space-theme textarea,
+body.space-theme select{
+ background-clip:padding-box;
+}
+@media(max-width:700px){
+ body.space-auth .auth-form-wrap{
+  padding:22px 18px;border-radius:20px;
+ }
+ body.space-pricing .pricing-header{
+  border-bottom-color:rgba(188,160,235,.24);
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ body.space-theme *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
