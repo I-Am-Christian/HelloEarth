@@ -5,7 +5,7 @@ const featureDescriptions = {
   free: "A peaceful starting place for your first few learners.",
   starter: "For independent tutors growing a steady student list.",
   growth: "For busy tutors managing many learners and lessons.",
-  studio: "For established tutors and small teaching studios."
+  studio: "For high-volume independent tutors managing larger student lists."
 };
 function card(plan) {
   const article = document.createElement("article");
