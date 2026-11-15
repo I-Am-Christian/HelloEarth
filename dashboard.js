@@ -1,6 +1,7 @@
 import { db, requireUser, statusMessage } from "./supabase-client.js";
 
 const $ = id => document.getElementById(id);
+const tr = (key, values = {}) => window.HelloEarthI18n?.t(key, values) ?? key.replace(/\{([^}]+)\}/g, (_, field) => String(values[field] ?? ""));
 const state = { user: null, students: [], selected: null, notes: [], editMode: false, lastFocus: null };
 
 function arrayLines(id) {
@@ -82,10 +83,8 @@ async function loadPlan() {
       .select("name,max_students,max_notes_total,max_notes_monthly")
       .eq("code", code).single();
     if (planError) throw planError;
-    label.textContent = plan.name + " plan";
-    capacity.textContent = state.students.length + " of " + plan.max_students
-      + " students · up to " + plan.max_notes_monthly
-      + " new notes a month";
+    label.textContent = tr("{plan} plan", {plan:tr(plan.name)});
+    capacity.textContent = tr("{used} of {limit} students · up to {notes} new notes a month", {used:state.students.length,limit:plan.max_students,notes:plan.max_notes_monthly});
   } catch (_) {
     label.textContent = "Subscription status unavailable";
     capacity.textContent = "Your records are still private. Try refreshing.";
@@ -206,7 +205,7 @@ async function openStudent(id) {
       const summary = document.createElement("div");
       summary.textContent = note.summary;
       const next = document.createElement("div");
-      if (note.next_steps?.length) next.textContent = "Next: " + note.next_steps.join(" · ");
+      if (note.next_steps?.length) next.textContent = tr("Next: {steps}", {steps:note.next_steps.join(" · ")});
       item.append(time, summary, next);
       list.append(item);
     }
@@ -267,7 +266,7 @@ $("import-file").addEventListener("change", async event => {
         throw new Error("A student name or UUID is invalid.");
       }
       if (!["A1","A2","B1","B2","C1","C2","UNASSESSED"].includes(level)) {
-        throw new Error("Unsupported CEFR level for " + name);
+        throw new Error(tr("Unsupported CEFR level for {name}",{name}));
       }
       const compareName = name.toLocaleLowerCase();
       if (seenIds.has(id) || seenNames.has(compareName)) throw new Error("The file contains duplicate student names or IDs.");
@@ -275,23 +274,23 @@ $("import-file").addEventListener("change", async event => {
       const byId = existingIds.get(id), byName = existingNames.get(compareName);
       if ((byId && byId.display_name.toLocaleLowerCase() !== compareName)
         || (byName && byName.id !== id)) {
-        throw new Error("An existing student has a matching name or ID but different identity: " + name + ". Review manually.");
+        throw new Error(tr("An existing student has a matching name or ID but different identity: {name}. Review manually.",{name}));
       }
       if (byId || byName) { skipped++; continue; }
       const items = field => {
         const values = raw[field] ?? [];
         if (!Array.isArray(values) || values.length > 12 || values.some(v => typeof v !== "string" || v.trim().length > 180)) {
-          throw new Error("Invalid " + field + " for " + name);
+          throw new Error(tr("Invalid {field} for {name}",{field,name}));
         }
         return values.map(v => v.trim()).filter(Boolean);
       };
       const text = (field, max) => {
         const value = String(raw[field] ?? "").trim();
-        if (value.length > max) throw new Error("Field " + field + " is too long for " + name);
+        if (value.length > max) throw new Error(tr("Field {field} is too long for {name}",{field,name}));
         return value;
       };
       const status = text("record_status", 20) || "reference";
-      if (!["reference","incomplete","inquiry"].includes(status)) throw new Error("Invalid record status for " + name);
+      if (!["reference","incomplete","inquiry"].includes(status)) throw new Error(tr("Invalid record status for {name}",{name}));
       additions.push({
         id, tutor_id: state.user.id, display_name: name,
         cefr_level: level,
@@ -308,22 +307,20 @@ $("import-file").addEventListener("change", async event => {
       });
     }
     if (!additions.length) {
-      loadingMessage("All " + skipped + " profiles are already present. No changes made.");
+      loadingMessage(tr("All {count} profiles are already present. No changes made.",{count:skipped}));
       return;
     }
     if (!window.confirm(
-      "Import " + additions.length + " new student profiles into YOUR private account?\n"
-      + skipped + " existing profiles will be skipped.\n"
-      + "AI access will stay disabled. Imported notes have no invented lesson dates."
+      tr("Import {count} new student profiles into YOUR private account?\n{skipped} existing profiles will be skipped.\nAI access will stay disabled. Imported notes have no invented lesson dates.",{count:additions.length,skipped})
     )) return;
 
     const { error } = await db.from("atlas_students").insert(additions);
     if (error) throw error;
     await loadStudents();
     await loadPlan();
-    loadingMessage(additions.length + " students imported securely." + (skipped ? " " + skipped + " existing profiles skipped." : ""));
+    loadingMessage(tr("{count} students imported securely.",{count:additions.length})+(skipped ? " "+tr("{count} existing profiles skipped.",{count:skipped}) : ""));
   } catch (err) {
-    loadingMessage("Import stopped: " + message(err), true);
+    loadingMessage(tr("Import stopped: {reason}",{reason:message(err)}), true);
   } finally {
     $("import-students").disabled = false;
   }
@@ -435,3 +432,5 @@ async function init() {
   }
 }
 init();
+
+document.addEventListener("helloearth:languagechanged",()=>{if(state.user){renderStudents();loadPlan().catch(()=>{})}});
