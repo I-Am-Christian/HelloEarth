@@ -1,6 +1,8 @@
 import { db } from "./supabase-client.js";
 
 const root = document.getElementById("pricing-grid");
+let loadedPlans = null;
+const translate = (key, values = {}) => window.HelloEarthI18n?.t(key, values) ?? key.replace(/\{([^}]+)\}/g, (_, field) => String(values[field] ?? ""));
 const featureDescriptions = {
   free: "Start with your students. Local Atlas is a separate desktop prototype.",
   starter: "More student capacity with planned local Atlas integration.",
@@ -58,9 +60,9 @@ function card(plan) {
   const list = document.createElement("ul");
   list.className = "plan-features";
   const features = [
-    "Up to " + plan.max_students + " student profiles",
-    "Up to " + new Intl.NumberFormat("en-ZA").format(plan.max_notes_monthly) + " new notes per month",
-    new Intl.NumberFormat("en-ZA").format(plan.max_notes_total) + " notes stored in total",
+    translate("Up to {count} student profiles", {count:plan.max_students}),
+    translate("Up to {count} new notes per month",{count:new Intl.NumberFormat("en-ZA").format(plan.max_notes_monthly)}),
+    translate("{count} notes stored in total",{count:new Intl.NumberFormat("en-ZA").format(plan.max_notes_total)}),
     "Private Google / email sign-in",
     "CEFR levels, goals and student history",
     ...plannedAiFeatures(plan)
@@ -82,6 +84,7 @@ async function loadPrices() {
       .order("display_order", { ascending: true });
     if (error) throw error;
     if (!data?.length) throw new Error("No plans published");
+    loadedPlans = data;
     root.replaceChildren(...data.map(card));
   } catch (_) {
     root.replaceChildren();
@@ -92,3 +95,5 @@ async function loadPrices() {
   }
 }
 loadPrices();
+
+document.addEventListener("helloearth:languagechanged", () => { if (loadedPlans) root.replaceChildren(...loadedPlans.map(card)); });
