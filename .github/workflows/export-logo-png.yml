@@ -1,0 +1,40 @@
+name: Export official logo PNG
+
+on:
+  push:
+    paths:
+      - 'logo.svg'
+      - '.github/workflows/export-logo-png.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install SVG renderer
+        run: python -m pip install --disable-pip-version-check cairosvg==2.7.1
+      - name: Convert to PNG
+        run: |
+          python - <<'PY'
+          import cairosvg
+          from pathlib import Path
+          svg = Path("logo.svg")
+          if not svg.is_file():
+              raise RuntimeError("Official logo.svg is missing")
+          cairosvg.svg2png(url=str(svg),write_to="helloearth-logo.png",output_width=1024,output_height=1024)
+          cairosvg.svg2png(url=str(svg),write_to="helloearth-logo-google.png",output_width=120,output_height=120)
+          print("Created two transparent PNGs")
+          PY
+      - name: Commit PNG assets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add helloearth-logo.png helloearth-logo-google.png
+          if ! git diff --staged --quiet; then
+            git commit -m "Add official HelloEarth PNG logo exports"
+            git push
+          fi
