@@ -1,33 +1,42 @@
 # HelloEarth
 
-HelloEarth is a mobile-friendly workspace for independent tutors, deployed through GitHub Pages at https://helloearth.co.za.
+**HelloEarth** is a responsive, space-themed tutoring-workspace website, hosted on GitHub Pages at https://helloearth.co.za. Data is stored privately in Supabase and is scoped to the logged-in tutor.
 
-## Teaching dashboard
+## Current dashboard features
 
-- **Overview / My Teaching Day:** Visible-week appointments from Google Calendar, plus student profile and plan shortcuts when an event can be matched to a student. Title-only matches are marked as possible matches.
-- **Calendar:** Read all authorized calendars, select calendars, view appointments, and create Google events on writable calendars after explicit approval.
-- **Students:** Private CEFR profile data, lesson notes, strengths, challenges, optional homework and next steps.
-- **Lesson planner:** Editable, rule-based templates informed by student goals and previous notes; saved plans are scoped to the tutor account. These are not AI-generated.
-- **Progress:** Historical 1–5 tutor ratings for speaking, listening, reading, writing, grammar and confidence, plus Print → Save as PDF reports.
-- **Import:** Legacy JSON, or CSV/XLSX with column matching, duplicate-name skipping, and confirmation. ExcelJS 4.4.0 loads on demand for XLSX. Source files are not uploaded to GitHub.
-- **Atlas AI:** In development; AI and transcription are not live.
+- **Overview / My Teaching Day:** Google Calendar appointments in the currently loaded week, optional student-name matching, and quick links to a student's profile and lesson preparation. Unmatched calendar events do not automatically become students.
+- **Students:** Profiles for goals, CEFR level, interests, strengths, improvement areas, current homework, teaching preferences and lesson history. Private notes and editable details.
+- **Lesson planning:** Creates editable **template-based** draft lessons using the student profile and existing notes. Plans can be saved to the tutor's Supabase account and downloaded in Markdown. This is not an AI model.
+- **Progress:** Tutor-recorded speaking, listening, reading, writing, grammar and confidence ratings over time; CEFR-level distribution; manual attendance tracking; printable progress report (browser Print / Save PDF).
+- **Imports:** JSON v1 student import, plus CSV and .xlsx import. Recognizes common column headings, previews the first five students before confirmation, skips duplicate names, and does not upload the original spreadsheet to a separate conversion service. Template available in the Students tab. Files are limited to 2 MB and 250 rows per import.
+- **Google Calendar:** User-initiated connection, account identification, multiple-calendar reading, selection, and weekly agenda. Appointment creation uses a **separately approved** Google event-editing scope. Scheduling writes directly to the selected Google Calendar; it does not automatically mark attendance. Google access tokens are short-lived, so reconnecting can be necessary.
+- **Atlas AI:** Informational placeholder. AI lesson inference and optional transcription are not launched.
 
 ## Google Calendar setup
 
-1. Enable the Google Calendar API in your existing Google Cloud project.
-2. Add the scopes https://www.googleapis.com/auth/calendar.readonly and https://www.googleapis.com/auth/calendar.events under Google Auth Platform → Data Access.
-3. If your OAuth app is in Testing mode, allow the Google account under Test users.
-4. Keep the Google OAuth redirect URI set to the Supabase auth callback and allow https://helloearth.co.za/dashboard.html?calendar=connected in Supabase redirect URLs.
-5. On Dashboard → Calendar, choose Authorize scheduling and approve the event-editing scope, then use + Schedule appointment.
+1. In Google Cloud, enable **Google Calendar API** in the same OAuth project as your Supabase Google sign-in.
+2. Add these scopes under **Google Auth Platform → Data Access**:
+   - Read access: `https://www.googleapis.com/auth/calendar.readonly`
+   - For tutors explicitly authorizing event scheduling: `https://www.googleapis.com/auth/calendar.events`
+3. In Google Cloud OAuth client credentials, keep the authorized redirect URI:
+   `https://paziklvunckkmgrfmbhm.supabase.co/auth/v1/callback`
+4. In Supabase Auth URL Configuration, allow `https://helloearth.co.za/dashboard.html?calendar=connected`.
+5. In the dashboard, use **Connect Google Calendar** for read-only access. Choose **Authorize scheduling** to consent separately to creating events.
 
-Access tokens are temporary and stored only in the browser tab's session. You may need to reconnect after expiry. The existing login-based Google OAuth may switch your HelloEarth identity if you choose a different Google account; the dashboard detects a mismatch. A truly independent, persistent Calendar connection requires further development. Disconnect Calendar only hides events within HelloEarth; revoke Google permissions separately in Google Account settings.
+Google's unverified/Testing OAuth clients may only work for added test users and access can expire. Google Calendar synchronization after a browser or token expires is **not** a background service. Connecting an unrelated Google account to an existing Supabase account is not yet isolated from the HelloEarth login identity and should be treated cautiously.
 
-## Database and privacy
+## Security
 
-The applied SQL is documented at database/teaching-features-setup.sql. It creates atlas_skill_assessments with RLS and adds optional homework to atlas_lesson_notes, retaining the existing student ownership and plan quota rules.
-
-Never put student data, private calendar events, OAuth tokens or Supabase secrets in GitHub. The site uses a public publishable key and authenticated RLS-scoped database queries. Do not record or transcribe students without appropriate consent.
+Supabase enforces row-level security (RLS) for private student profiles, lesson notes, saved lesson plans, skill assessments and attendance. Code belongs in GitHub; **student records and calendar event contents do not**. No Supabase service-role key or Google client secret is included in public frontend files. Only record learner information you have permission to hold, and follow relevant laws on children's data.
 
 ## Development
 
-Serve these HTML, CSS and JavaScript modules over HTTP locally or through GitHub Pages. The dashboard uses Supabase authentication and Google Calendar APIs; both require corresponding project configuration.
+The site uses static HTML/CSS/JS. Key files:
+
+- `index.html`, `style.css`, `script.js`: public site.
+- `dashboard.html`, `dashboard.js`: authenticated student workspace.
+- `dashboard-navigation.js`: navigation, Google Calendar OAuth, reading and scheduling.
+- `dashboard-features.js`, `dashboard-features.css`: teaching-day summaries, plans, progress, imports.
+- `supabase-client.js`: common Supabase client with persisted authentication.
+
+Subscription billing and hosted Atlas AI remain planned, not released.
