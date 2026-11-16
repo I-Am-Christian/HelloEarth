@@ -146,7 +146,7 @@ function simpleStatus(title,description,button=false){
  empty.append(symbol,strong,p);
  if(button){
   const connect=document.createElement("button");connect.type="button";connect.className="dash-primary ws-calendar-connect";connect.id="calendar-connect";connect.textContent=translate("Connect Google Calendar");
-  connect.addEventListener("click",connectGoogle);
+  connect.addEventListener("click",()=>connectGoogle(false));
   empty.append(connect);
  }
  if(calendar.disconnected){
@@ -470,7 +470,7 @@ get("calendar-prev").addEventListener("click",()=>{calendar.week.setDate(calenda
 get("calendar-next").addEventListener("click",()=>{calendar.week.setDate(calendar.week.getDate()+7);calendar.date=new Date(calendar.week);renderWeek();if(calendar.token)refreshEvents()});
 get("calendar-today").addEventListener("click",()=>{calendar.date=toDate(new Date());calendar.week=monday(calendar.date);renderWeek();if(calendar.token)refreshEvents()});
 get("calendar-refresh").addEventListener("click",refreshEvents);
-get("calendar-connect")?.addEventListener("click",connectGoogle);
+get("calendar-connect")?.addEventListener("click",()=>connectGoogle(false));
 db.auth.onAuthStateChange((event,session)=>{
  // Capture provider tokens even if OAuth returns before getUser() has finished.
  if(session?.provider_token){
