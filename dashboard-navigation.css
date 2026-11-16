@@ -115,3 +115,6 @@
  .ws-insight-card{padding:16px}
  .ws-level-row{grid-template-columns:80px minmax(0,1fr) 19px;gap:7px}
 }
+
+.ws-calendar-revoke{display:inline-block;color:#c5b0fa;font-weight:700;font-size:12px;text-decoration:underline;text-underline-offset:3px;margin-top:4px}
+.ws-calendar-revoke:hover{color:#fff}
