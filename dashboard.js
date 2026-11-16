@@ -187,6 +187,9 @@ async function openStudent(id) {
     labelledField("CEFR level", s.cefr_level === "UNASSESSED" ? "Not assessed yet" : s.cefr_level),
     labelledField("Learning goals", (s.learning_goals || []).join(" • ")),
     labelledField("Focus areas", (s.focus_areas || []).join(" • ")),
+    labelledField("Strengths", (s.strengths || []).join(" • ")),
+    labelledField("Needs improvement", (s.weaknesses || []).join(" • ")),
+    labelledField("Current homework", s.current_homework),
     labelledField("Interests", (s.interests || []).join(" • ")),
     labelledField("Translation language", s.translation_language),
     labelledField("Assessment observations", s.assessment_notes),
@@ -256,6 +259,12 @@ function startStudentForm(edit) {
   $("student-goals").value = (student?.learning_goals || []).join("\n");
   $("student-focus").value = (student?.focus_areas || []).join("\n");
   $("student-interests").value = (student?.interests || []).join("\n");
+  $("student-strengths").value = (student?.strengths || []).join("\n");
+  $("student-weaknesses").value = (student?.weaknesses || []).join("\n");
+  $("student-homework").value = student?.current_homework || "";
+  $("student-preferences").value = (student?.teaching_preferences || []).join("\n");
+  $("student-background").value = student?.background_notes || "";
+  $("student-level-notes").value = student?.level_notes || "";
   $("student-translation").value = student?.translation_language === "none" ? "" : (student?.translation_language || "");
   $("student-status").value = student?.record_status || "reference";
   $("student-assessment").value = student?.assessment_notes || "";
@@ -371,6 +380,12 @@ $("student-form").addEventListener("submit", async event => {
       cefr_level: $("student-cefr").value,
       learning_goals: arrayLines("student-goals"),
       focus_areas: arrayLines("student-focus"),
+      strengths: arrayLines("student-strengths"),
+      weaknesses: arrayLines("student-weaknesses"),
+      current_homework: $("student-homework").value.trim(),
+      teaching_preferences: arrayLines("student-preferences"),
+      background_notes: $("student-background").value.trim(),
+      level_notes: $("student-level-notes").value.trim(),
       interests: arrayLines("student-interests"),
       translation_language: $("student-translation").value.trim() || "none",
       record_status: $("student-status").value,
