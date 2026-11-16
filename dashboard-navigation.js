@@ -11,7 +11,7 @@ const sameDay = (a,b) => a.getFullYear()===b.getFullYear()&&a.getMonth()===b.get
 const toDate = date => new Date(date.getFullYear(),date.getMonth(),date.getDate());
 const calendar = {view:"overview",date:toDate(new Date()),week:monday(new Date()),
  token:null,pendingToken:null,connected:false,events:[],sources:[],source:"all",email:"",
- request:0,userId:null,disconnected:false,restored:false,errorType:"",errorDescription:""};
+ request:0,userId:null,disconnected:false,restored:false,errorType:"",errorDescription:"",writeAuthorized:false};
 // A temporary token is retained in this browser tab only; never store a Google refresh token.
 const tokenKey = id => "helloearth-calendar-session:" + id;
 function rememberToken(id,token){
@@ -379,10 +379,11 @@ function openScheduler(){
 get("calendar-schedule").addEventListener("click",openScheduler);
 get("schedule-close").addEventListener("click",()=>{get("schedule-modal").hidden=true});
 get("schedule-modal").addEventListener("click",event=>{if(event.target===get("schedule-modal"))get("schedule-modal").hidden=true});
-get("calendar-request-write").addEventListener("click",connectGoogle);
+get("calendar-request-write").addEventListener("click",()=>connectGoogle(true));
 get("schedule-form").addEventListener("submit",async event=>{
  event.preventDefault();
  if(!calendar.token||!calendar.connected){scheduleStatus("Connect Google Calendar and authorize scheduling first.",true);return}
+ if(!calendar.writeAuthorized){scheduleStatus("Click Authorize scheduling and approve Google's event-edit permission first.",true);return}
  const selected=get("schedule-calendar").value;
  if(!calendar.sources.some(src=>src.id===selected&&src.writable)){scheduleStatus("Choose a Google calendar with write access.",true);return}
  const start=new Date(get("schedule-start").value),end=new Date(get("schedule-end").value);
@@ -428,7 +429,8 @@ function disconnectGoogle(){
  forgetToken(calendar.userId);
  calendar.token=null;calendar.pendingToken=null;
  calendar.events=[];calendar.sources=[];calendar.source="all";calendar.email="";
- calendar.connected=false;calendar.errorType="";
+ calendar.connected=false;calendar.errorType="";calendar.writeAuthorized=false;
+ try{sessionStorage.removeItem("helloearth-calendar-write:"+calendar.userId)}catch{}
  document.dispatchEvent(new CustomEvent("helloearth:calendar-disconnected"));
  sessionStorage.removeItem("helloearth-calendar-expected-user");
  setConnection("",translate("Disconnected — HelloEarth remains signed in"));
@@ -437,16 +439,20 @@ function disconnectGoogle(){
  renderAgenda();
 }
 get("calendar-disconnect").addEventListener("click",disconnectGoogle);
-async function connectGoogle(){
+async function connectGoogle(writeAccess=false){
  const button=get("calendar-connect");if(button)button.disabled=true;
  try{
   const {data:{user},error}=await db.auth.getUser();if(error||!user)throw new Error("Please log in again.");
   calendar.userId=user.id;
   const {data:{session}}=await db.auth.getSession();const hasGoogle=user.identities?.some(identity=>identity.provider==="google");
   const options={redirectTo:new URL("dashboard.html?calendar=connected",location.href).href,
-   scopes:"https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events",
+   scopes:writeAccess
+    ?"https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events"
+    :"https://www.googleapis.com/auth/calendar.readonly",
    queryParams:{prompt:"select_account consent"}};
   sessionStorage.setItem("helloearth-calendar-expected-user",user.id);
+  if(writeAccess)sessionStorage.setItem("helloearth-calendar-write-intent",user.id);
+  else sessionStorage.removeItem("helloearth-calendar-write-intent");
   const result=hasGoogle
    ?await db.auth.signInWithOAuth({provider:"google",options})
    :await db.auth.linkIdentity({provider:"google",options});
@@ -477,7 +483,7 @@ db.auth.onAuthStateChange((event,session)=>{
  }
  if(event==="SIGNED_OUT"){
   forgetToken(calendar.userId);
-  calendar.token=null;calendar.pendingToken=null;calendar.connected=false;
+  calendar.token=null;calendar.pendingToken=null;calendar.connected=false;calendar.writeAuthorized=false;
   calendar.email="";calendar.events=[];calendar.sources=[];
   document.dispatchEvent(new CustomEvent("helloearth:calendar-disconnected"));
   updateCalendarControls();setConnection("",translate("Not connected"));renderAgenda();
@@ -504,11 +510,18 @@ async function restore(){
  }
  const {data:{session}}=await db.auth.getSession();
  const token=session?.provider_token||calendar.pendingToken||(!calendar.disconnected?recalledToken(calendar.userId):null);
+ const writeExpected=sessionStorage.getItem("helloearth-calendar-write-intent");
+ if(writeExpected)sessionStorage.removeItem("helloearth-calendar-write-intent");
+ if(writeExpected===user?.id&&expected===user?.id&&token){
+  try{sessionStorage.setItem("helloearth-calendar-write:"+user.id,"1")}catch{}
+ }
  if(expected && token){
   calendar.disconnected=false;
   setCalendarOff(calendar.userId,false);
  }
  calendar.restored=true;
+ calendar.writeAuthorized=!!(!calendar.disconnected&&token&&
+  sessionStorage.getItem("helloearth-calendar-write:"+calendar.userId)==="1");
  if(!calendar.disconnected&&token){
   calendar.token=token;
   rememberToken(calendar.userId,token);
