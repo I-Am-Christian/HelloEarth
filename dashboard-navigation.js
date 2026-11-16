@@ -2,14 +2,21 @@ import { db } from "./supabase-client.js";
 
 const get = id => document.getElementById(id);
 const translate = key => window.HelloEarthI18n?.t(key) ?? key;
-const views = ["calendar","students"];
+const views = ["overview","calendar","students","progress","atlas"];
 const monday = date => {
  const day = new Date(date.getFullYear(),date.getMonth(),date.getDate());
  day.setDate(day.getDate() - ((day.getDay()+6)%7));return day;
 };
 const sameDay = (a,b) => a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
 const toDate = date => new Date(date.getFullYear(),date.getMonth(),date.getDate());
-const calendar = {view:"calendar",date:toDate(new Date()),week:monday(new Date()),token:null,connected:false,events:[],request:0};
+const calendar = {view:"overview",date:toDate(new Date()),week:monday(new Date()),token:null,connected:false,events:[],request:0,userId:null,disconnected:false,restored:false};
+const calendarStorageKey = id => "helloearth-calendar-off:" + id;
+const isCalendarOff = id => {try{return Boolean(id && localStorage.getItem(calendarStorageKey(id))==="1")}catch{return false}};
+const setCalendarOff = (id,value) => {try{if(id){if(value)localStorage.setItem(calendarStorageKey(id),"1");else localStorage.removeItem(calendarStorageKey(id))}}catch{}};
+function updateCalendarControls(){
+ get("calendar-refresh").hidden=!calendar.token||calendar.disconnected;
+ get("calendar-disconnect").hidden=!calendar.token||calendar.disconnected;
+}
 const language = () => document.documentElement.lang || "en";
 const localized = (date,options) => date.toLocaleDateString(language(),options);
 function setView(view,focus=false){
@@ -22,13 +29,29 @@ function setView(view,focus=false){
   tab.setAttribute("aria-selected",String(active));
   tab.tabIndex=active?0:-1;
  }
+ syncSideNav();
  if(focus)get(view+"-tab").focus({preventScroll:true});
- history.replaceState(null,"",location.pathname+location.search+(view==="students"?"#students":"#calendar"));
+ history.replaceState(null,"",location.pathname+location.search+"#"+view);
 }
 for(const name of views)get(name+"-tab").addEventListener("click",()=>setView(name));
+document.querySelectorAll("[data-open-view],[data-view]").forEach(button=>{
+ const target=button.dataset.openView||button.dataset.view;
+ if(!views.includes(target))return;
+ button.addEventListener("click",()=>setView(target));
+});
+function syncSideNav(){
+ document.querySelectorAll(".ws-side-nav [data-view]").forEach(button=>{
+  const active=button.dataset.view===calendar.view;
+  button.classList.toggle("active",active);
+  if(active)button.setAttribute("aria-current","page");else button.removeAttribute("aria-current");
+ });
+}
+
 document.querySelector(".ws-view-switch").addEventListener("keydown",event=>{
  if(event.key!=="ArrowLeft"&&event.key!=="ArrowRight")return;
- event.preventDefault();setView(event.key==="ArrowRight"?"students":"calendar",true);
+ event.preventDefault();
+ const index=views.indexOf(calendar.view);
+ setView(views[(index+(event.key==="ArrowRight"?1:-1)+views.length)%views.length],true);
 });
 let touchStart=null;
 const main=document.querySelector(".ws-main");
@@ -41,8 +64,9 @@ main.addEventListener("touchend",event=>{
  const dx=event.changedTouches[0].clientX-touchStart.x,dy=event.changedTouches[0].clientY-touchStart.y;
  touchStart=null;
  if(Math.abs(dx)<75||Math.abs(dx)<Math.abs(dy)*1.5)return;
- if(dx>0&&calendar.view==="calendar")setView("students");
- if(dx<0&&calendar.view==="students")setView("calendar");
+ const index=views.indexOf(calendar.view);
+ if(dx>0&&index>0)setView(views[index-1]);
+ if(dx<0&&index<views.length-1)setView(views[index+1]);
 },{passive:true});
 function renderWeek(){
  const finish=new Date(calendar.week);finish.setDate(finish.getDate()+6);
@@ -82,7 +106,11 @@ function simpleStatus(title,description,button=false){
 function renderAgenda(){
  get("calendar-day-title").textContent=localized(calendar.date,{weekday:"long",day:"numeric",month:"long"});
  if(!calendar.connected){
-  simpleStatus("Connect your Google Calendar","View your lessons and appointments here with read-only access. Your calendar events are not saved to HelloEarth.",true);
+  if(calendar.disconnected){
+   simpleStatus("Google Calendar disconnected","You can reconnect another Google Calendar anytime. Your HelloEarth account and student profiles stay signed in.",true);
+  }else{
+   simpleStatus("Connect your Google Calendar","View your lessons and appointments here with read-only access. Your calendar events are not saved to HelloEarth.",true);
+  }
   return;
  }
  const start=toDate(calendar.date);const end=new Date(start);end.setDate(end.getDate()+1);
@@ -110,9 +138,9 @@ function renderAgenda(){
  }
 }
 async function refreshEvents(){
- if(!calendar.token){calendar.connected=false;renderAgenda();return}
+ if(!calendar.token||calendar.disconnected){calendar.connected=false;updateCalendarControls();renderAgenda();return}
  const req=++calendar.request,from=calendar.week,until=new Date(from);until.setDate(until.getDate()+7);
- get("calendar-refresh").hidden=false;
+ updateCalendarControls();
  simpleStatus("Loading calendar","Reading your upcoming events from Google Calendar.");
  try{
   const url=new URL("https://www.googleapis.com/calendar/v3/calendars/primary/events");
@@ -122,20 +150,35 @@ async function refreshEvents(){
   const response=await fetch(url,{headers:{Authorization:"Bearer "+calendar.token},cache:"no-store"});
   if(!response.ok)throw new Error(response.status===401?"expired":response.status===403?"permission":"unavailable");
   const payload=await response.json();
-  if(req!==calendar.request)return;
+  if(req!==calendar.request||calendar.disconnected)return;
   calendar.events=Array.isArray(payload.items)?payload.items:[];calendar.connected=true;
-  get("calendar-refresh").hidden=false;renderAgenda();
+  updateCalendarControls();renderAgenda();
  }catch(error){
   if(req!==calendar.request)return;
-  calendar.connected=false;calendar.token=null;get("calendar-refresh").hidden=true;
+  calendar.connected=false;calendar.token=null;calendar.events=[];updateCalendarControls();
   simpleStatus(error.message==="permission"?"Calendar permission needed":error.message==="expired"?"Calendar connection expired":"Calendar unavailable",
    error.message==="permission"?"Grant read-only Calendar access to view your events. Google Cloud configuration or verification may be required.":error.message==="expired"?"Reconnect Google Calendar to refresh your permission.":"Unable to load events. Check the Google Calendar API and your connection.",true);
  }
 }
+function disconnectGoogle(){
+ // This stops access from the dashboard; it does NOT revoke Google's OAuth grant.
+ // Google access permission can separately be revoked in the Google Account settings.
+ calendar.request++; // Cancel stale in-flight fetch results.
+ calendar.disconnected=true;
+ setCalendarOff(calendar.userId,true);
+ calendar.token=null;
+ calendar.events=[];
+ calendar.connected=false;
+ sessionStorage.removeItem("helloearth-calendar-expected-user");
+ updateCalendarControls();
+ renderAgenda();
+}
+get("calendar-disconnect").addEventListener("click",disconnectGoogle);
 async function connectGoogle(){
  const button=get("calendar-connect");if(button)button.disabled=true;
  try{
   const {data:{user},error}=await db.auth.getUser();if(error||!user)throw new Error("Please log in again.");
+  calendar.userId=user.id;
   const {data:{session}}=await db.auth.getSession();const hasGoogle=user.identities?.some(identity=>identity.provider==="google");
   const options={redirectTo:new URL("dashboard.html?calendar=connected",location.href).href,scopes:"https://www.googleapis.com/auth/calendar.readonly",queryParams:{prompt:"consent"}};
   sessionStorage.setItem("helloearth-calendar-expected-user",user.id);
@@ -155,19 +198,64 @@ get("calendar-today").addEventListener("click",()=>{calendar.date=toDate(new Dat
 get("calendar-refresh").addEventListener("click",refreshEvents);
 get("calendar-connect")?.addEventListener("click",connectGoogle);
 db.auth.onAuthStateChange((_event,session)=>{
+ if(!calendar.restored || calendar.disconnected)return;
  if(session?.provider_token){
   calendar.token=session.provider_token;
   Promise.resolve().then(()=>refreshEvents());
  }
- if(!session){calendar.token=null;calendar.connected=false}
+ if(!session){calendar.token=null;calendar.connected=false;calendar.events=[];updateCalendarControls();renderAgenda()}
 });
 document.addEventListener("helloearth:languagechanged",()=>renderWeek());
 async function restore(){
  const expected=sessionStorage.getItem("helloearth-calendar-expected-user");
  const {data:{user}}=await db.auth.getUser();
- if(expected){sessionStorage.removeItem("helloearth-calendar-expected-user");if(user?.id!==expected){simpleStatus("Calendar account mismatch","Your existing HelloEarth account was not confirmed after Google authorization. No student records were changed.",false);return}}
+ calendar.userId=user?.id||null;
+ calendar.disconnected=isCalendarOff(calendar.userId);
+ if(expected){
+  sessionStorage.removeItem("helloearth-calendar-expected-user");
+  if(user?.id!==expected){
+   calendar.disconnected=true;
+   calendar.restored=true;
+   updateCalendarControls();
+   simpleStatus("Calendar account mismatch","Your existing HelloEarth account was not confirmed after Google authorization. No student records were changed.",false);
+   return;
+  }
+ }
  const {data:{session}}=await db.auth.getSession();
- if(session?.provider_token){calendar.token=session.provider_token;await refreshEvents()}
+ if(expected && session?.provider_token){
+  calendar.disconnected=false;
+  setCalendarOff(calendar.userId,false);
+ }
+ calendar.restored=true;
+ if(!calendar.disconnected&&session?.provider_token){
+  calendar.token=session.provider_token;
+  await refreshEvents();
+ }else{
+  calendar.token=null;
+  calendar.events=[];
+  calendar.connected=false;
+  updateCalendarControls();
+  renderAgenda();
+ }
 }
-setView(location.hash==="#students"?"students":"calendar");
-renderWeek();restore().catch(()=>{});
+function renderProgress(levels,total){
+ const root=get("progress-level-bars");
+ if(!root)return;
+ root.replaceChildren();
+ const order=["A1","A2","B1","B2","C1","C2","UNASSESSED"];
+ for(const level of order){
+  const count=Number(levels?.[level]||0);
+  const row=document.createElement("div");row.className="ws-level-row";
+  const label=document.createElement("span");label.textContent=level==="UNASSESSED"?"Not assessed":level;
+  const track=document.createElement("span");track.className="ws-level-track";
+  const fill=document.createElement("span");fill.className="ws-level-fill";
+  fill.style.width=(total?100*count/total:0)+"%";
+  track.append(fill);
+  const number=document.createElement("strong");number.textContent=String(count);
+  row.append(label,track,number);root.append(row);
+ }
+}
+document.addEventListener("helloearth:studentsloaded",event=>renderProgress(event.detail.levels,event.detail.total));
+const startView=location.hash.slice(1);
+setView(views.includes(startView)?startView:"overview");
+renderWeek();restore().catch(()=>{calendar.restored=true;updateCalendarControls()});
