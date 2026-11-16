@@ -192,7 +192,24 @@ if ('IntersectionObserver' in window) {
   },{passive:true});
  }
  // A stationary launch control stays reliably tappable even while Earth moves.
- if(mobileLaunch)mobileLaunch.addEventListener('click',launchOnce);
+ // iOS WebKit can miss a synthetic click when a transformed scene changes under a finger.
+ // Listen to touchend on the native button as a fallback; launchOnce de-duplicates events.
+ if(mobileLaunch){
+  mobileLaunch.addEventListener('click',launchOnce);
+  let buttonTouch=null;
+  mobileLaunch.addEventListener('touchstart',event=>{
+   const point=event.changedTouches[0];
+   if(point)buttonTouch={x:point.clientX,y:point.clientY,id:point.identifier};
+  },{passive:true});
+  mobileLaunch.addEventListener('touchend',event=>{
+   if(!buttonTouch)return;
+   const point=[...event.changedTouches].find(t=>t.identifier===buttonTouch.id);
+   const traveled=point?Math.hypot(point.clientX-buttonTouch.x,point.clientY-buttonTouch.y):Infinity;
+   buttonTouch=null;
+   if(traveled<24)launchOnce();
+  },{passive:true});
+  mobileLaunch.addEventListener('touchcancel',()=>{buttonTouch=null},{passive:true});
+ }
  // Touch fallback on the solar stage for browsers that miss taps on moving transforms.
  const stage=document.querySelector('.hero-art-spacer');
  if(stage){
