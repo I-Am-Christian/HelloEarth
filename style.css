@@ -2941,3 +2941,52 @@ body { -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
   z-index:60!important;
  }
 }
+
+/* Clear, compact homepage: available tools, short pricing and one Atlas status. */
+.he-pricing-preview .he-price-grid{
+ grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ width:min(100%,860px);
+ gap:18px;
+ margin-inline:auto;
+}
+.he-pricing-preview .he-price-card{
+ min-height:240px;
+ align-items:flex-start;
+ text-align:left;
+ padding:25px 28px;
+}
+.he-pricing-preview .he-price-card .he-price-amount{margin:2px 0}
+.he-pricing-preview .he-price-card>p:not(.he-price-amount){
+ min-height:0;
+ max-width:38ch;
+ font-size:13px;
+}
+.he-pricing-preview .he-price-card>a{margin-top:auto}
+.he-pricing-preview .he-price-disclaimer{max-width:860px;margin:20px auto 0}
+.features .he-quickstart{
+ display:flex;
+ align-items:center;
+ gap:16px;
+ margin-top:25px;
+ padding:16px 20px;
+ border-radius:14px;
+ border:1px solid #8573bc65;
+ background:#25243f9e;
+ color:#d2d1e8;
+ font-size:13px;
+ line-height:1.7;
+}
+.features .he-quickstart strong{white-space:nowrap;color:#f1e9ff;font-size:14px}
+.atlas-section .he-atlas-status{
+ margin-top:14px;
+ font-size:13px;
+ color:#bfc0da;
+ line-height:1.65;
+}
+@media(max-width:620px){
+ .he-pricing-preview .he-price-grid{grid-template-columns:1fr!important;gap:12px}
+ .he-pricing-preview .he-price-card{min-height:0;padding:20px 19px}
+ .he-pricing-preview .he-price-card>p:not(.he-price-amount){min-height:0}
+ .features .he-quickstart{display:block;padding:14px 16px;font-size:12px}
+ .features .he-quickstart strong{display:block;margin-bottom:4px}
+}
