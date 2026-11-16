@@ -2990,3 +2990,61 @@ body { -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
  .features .he-quickstart{display:block;padding:14px 16px;font-size:12px}
  .features .he-quickstart strong{display:block;margin-bottom:4px}
 }
+
+/* Four pricing tiers, compact but readable across desktop and phones. */
+.he-pricing-preview .he-price-grid{
+ grid-template-columns:repeat(4,minmax(0,1fr))!important;
+ width:100%;max-width:1200px;gap:14px;
+}
+.he-pricing-preview .he-price-card{
+ min-width:0;min-height:258px;
+ padding:21px 18px;gap:11px;align-items:flex-start;text-align:left;
+}
+.he-pricing-preview .he-price-card .he-price-amount{
+ font-size:clamp(28px,2.6vw,38px);white-space:nowrap;
+}
+.he-pricing-preview .he-price-card .he-ai-mode{
+ display:flex;align-items:center;
+ width:100%;min-height:40px;margin-top:0;font-size:11px;
+}
+.he-pricing-preview .he-price-card>a{margin-top:auto}
+@media(max-width:970px){
+ .he-pricing-preview .he-price-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .he-pricing-preview .he-price-card{min-height:215px}
+}
+@media(max-width:600px){
+ .he-pricing-preview .he-price-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px}
+ .he-pricing-preview .he-price-card{min-height:216px;padding:16px 13px;gap:9px}
+ .he-pricing-preview .he-price-card h3{font-size:20px}
+ .he-pricing-preview .he-price-card .he-price-amount{font-size:clamp(25px,6.8vw,32px)}
+ .he-pricing-preview .he-price-card .he-price-amount span{display:block;margin-top:3px}
+ .he-pricing-preview .he-price-card .he-ai-mode{min-height:43px;padding:7px;font-size:10px}
+ .he-pricing-preview .he-price-card>p:not(.he-price-amount){font-size:11px;line-height:1.45}
+}
+@media(max-width:350px){
+ .he-pricing-preview .he-price-grid{grid-template-columns:1fr!important}
+ .he-pricing-preview .he-price-card{min-height:0}
+}
+/* On touchdown the rocket becomes a CHILD of the moving Moon, rather than
+   following it through a mobile JS animation loop. */
+.hero .hero-art-spacer .moon-body>.moon-rocket.landed{
+ display:block!important;
+ visibility:visible!important;
+ opacity:1!important;
+ position:absolute!important;
+ left:24%!important;
+ top:0!important;
+ z-index:16!important;
+ font-size:14px!important;
+ transform:translate(-50%,-64%) rotate(-45deg) scale(.85)!important;
+ transform-origin:center!important;
+ pointer-events:none!important;
+ filter:drop-shadow(0 0 3px #d8e6ffb8)!important;
+ will-change:auto;
+}
+.hero .hero-art-spacer .moon-body>.moon-rocket.landed .rocket-trail{
+ display:none!important;
+}
+@media(max-width:700px){
+ .hero .hero-art-spacer .moon-body>.moon-rocket.landed{font-size:11px!important}
+}
