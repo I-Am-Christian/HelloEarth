@@ -10,13 +10,13 @@ The app is the existing HelloEarth website installed as a PWA, not a separate na
 
 ## Notifications
 
-In the dashboard **Calendar** tab, tap **Enable notifications** and approve the device permission. On iPhone you need to do this inside the installed Home Screen app. The **Send test notification** button verifies this device's push service. **Turn off notifications** unsubscribes this device and clears its tutor account's pending reminders. Signing out also disables this device's subscription.
+In the dashboard **Calendar** tab, tap **Enable notifications** and approve the device permission. On iPhone you need to do this inside the installed Home Screen app. The **Send test notification** button verifies this device's push service. **Turn off notifications** unsubscribes this device. Pending reminders are cleared only when no other devices remain subscribed to that tutor account. Signing out also disables this device's subscription.
 
 While notification opt-in is active, loading a week in connected Google Calendar queues reminders for that displayed week. The queue stores ONLY a keyed SHA-256 digest of the calendar/event identifier and the start/notification timestamps; no appointment titles, student names, private notes, Google tokens, descriptions or event URLs. Reminders are sent approximately 15 minutes before timed events. All-day events are excluded. If the browser never loads a future week, there is no reminder for events from that week. The app does not silently fetch the Google calendar in the background, because provider tokens are short-lived.
 
 A Supabase Edge Function validates the user's account for subscription, testing, and reminder synchronization. It sends encrypted standards-based Web Push messages with VAPID, supported by Chromium, Firefox and installed iOS Web Apps. A pg_cron job invokes the dispatcher every minute using a separate secret stored exclusively in Supabase. The service worker handles incoming notifications; it **never** intercepts network requests or caches private content. Notifications show generic text only. No client or VAPID private secrets are stored in GitHub.
 
-**Important:** A notification can be late, lost or blocked by a browser, OS, battery optimization, permission revocation, or connectivity issue. This is not a guaranteed alarm service. Google Calendar changes are reflected only when the matching calendar week is next loaded or refreshed. This release supports one signed-in account and up to 5 push devices per account.
+**Important:** A notification can be late, lost or blocked by a browser, OS, battery optimization, permission revocation, or connectivity issue. This is not a guaranteed alarm service. Google Calendar changes are reflected only when the matching calendar week is next loaded or refreshed. This release supports one signed-in account per browser profile and up to 5 push devices per account. Only the first 80 timed appointments from a displayed week are synchronized.
 
 ## Tests
 
