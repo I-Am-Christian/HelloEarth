@@ -224,7 +224,12 @@ async function openStudent(id) {
       summary.classList.add("i18n-user-content");
       const next = document.createElement("div");
       if (note.next_steps?.length) {next.textContent = tr("Next: {steps}", {steps:note.next_steps.join(" · ")});next.classList.add("i18n-user-content")}
-      item.append(time, summary, next);
+      if (note.homework) {
+        const homework = document.createElement("div");
+        homework.textContent = "Homework: " + note.homework;
+        homework.className = "i18n-user-content";
+        item.append(time, summary, next, homework);
+      } else item.append(time, summary, next);
       list.append(item);
     }
   } catch (err) {
@@ -415,7 +420,8 @@ $("note-form").addEventListener("submit", async event => {
       topics: arrayLines("note-topics"),
       strengths: arrayLines("note-strengths"),
       challenges: arrayLines("note-challenges"),
-      next_steps: arrayLines("note-next")
+      next_steps: arrayLines("note-next"),
+      homework: $("note-homework").value.trim()
     });
     if (error) throw error;
     hideModal("note-modal");
