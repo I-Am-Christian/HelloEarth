@@ -1,0 +1,60 @@
+/* HelloEarth teaching workflow: native responsive layouts, no heavy front-end framework. */
+.ws-feature-panel,.ws-student-workflow{border:1px solid rgba(165,143,218,.36);border-radius:21px;padding:clamp(17px,2.2vw,27px);background:radial-gradient(ellipse at 0% 0%,rgba(110,74,168,.16),transparent 75%),linear-gradient(135deg,#282640,#192641);margin:22px 0}
+.ws-feature-title{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.ws-feature-title h3,.ws-student-workflow h3{color:#f4ecff;font:700 23px/1.25 'Space Grotesk',sans-serif;margin:6px 0 7px}
+.ws-feature-title p,.ws-student-workflow p{color:#b3bfdc;line-height:1.55;font-size:13px;margin:0 0 15px}
+.ws-day-counts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:17px 0}
+.ws-day-counts>div{padding:17px;border:1px solid rgba(160,137,209,.22);background:rgba(19,22,44,.39);border-radius:14px}
+.ws-day-counts strong{display:block;color:#fff;font:700 clamp(18px,2.7vw,29px) 'Space Grotesk',sans-serif;overflow-wrap:anywhere}
+.ws-day-counts small{display:block;color:#afbbd5;font-size:11px;line-height:1.6;margin-top:5px}
+.ws-teaching-list{display:grid;gap:10px}
+.ws-lesson-row{border:1px solid rgba(158,145,212,.3);border-radius:14px;background:rgba(20,27,56,.53);padding:14px 16px;display:flex;gap:13px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.ws-lesson-row>div:first-child{min-width:0;flex:1 1 220px}
+.ws-lesson-row time{display:block;font-size:12px;font-weight:800;color:#ceb7ff}
+.ws-lesson-row strong{display:block;color:#f6f0ff;font-size:15px;margin-top:4px;overflow-wrap:anywhere}
+.ws-lesson-row small{font-size:11px;color:#b4bed6;line-height:1.5}
+.ws-lesson-row .ws-action-row{margin:0;flex:0 0 auto;display:flex;flex-wrap:wrap;gap:7px}
+.ws-lesson-row button{font-size:12px}
+.ws-scheduling-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 16px}
+.ws-scheduling-actions>span{font-size:11px;color:#afb7d1;flex:1 1 200px}
+.ws-student-workflow[hidden],.ws-feature-panel[hidden]{display:none!important}
+.ws-form-grid,.ws-skill-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}
+.ws-skill-form{grid-template-columns:repeat(auto-fit,minmax(145px,1fr))}
+.ws-form-grid label,.ws-skill-form label,.ws-editor-label{font-size:12px;font-weight:700;color:#c6cce2;display:flex;flex-direction:column;gap:7px;min-width:0}
+.ws-form-grid input,.ws-form-grid select,.ws-skill-form input,.ws-skill-form select,.ws-student-workflow textarea,.ws-editor-label select,.ws-editor-label textarea{width:100%;box-sizing:border-box;border:1px solid rgba(177,160,220,.49);background:#1a1e38;color:#f4edff;border-radius:11px;padding:11px 12px;font:inherit;min-width:0}
+.ws-form-grid input:focus,.ws-student-workflow textarea:focus,.ws-skill-form select:focus,.ws-editor-label select:focus{outline:2px solid #b798ff;outline-offset:1px}
+.ws-student-workflow textarea{resize:vertical;margin:8px 0 12px;line-height:1.6;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px}
+.ws-saved-plan-list{display:grid;gap:8px}
+.ws-saved-plan-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between;padding:12px 14px;border:1px solid rgba(158,140,203,.27);border-radius:12px;background:rgba(18,25,48,.46)}
+.ws-saved-plan-row>span{font-size:12px;color:#d8d5ee;min-width:0;overflow-wrap:anywhere}
+.ws-assessment-history{display:grid;gap:12px;margin:15px 0 20px}
+.ws-assessment-history p{color:#b8c1d9;font-size:13px}
+.ws-assessment-entry{border:1px solid rgba(162,139,213,.34);border-radius:14px;padding:14px;background:rgba(21,26,52,.48)}
+.ws-assessment-entry time{color:#cdb8ff;font-weight:800;font-size:12px}
+.ws-assessment-entry p{color:#b7c5df;font-size:12px;margin:8px 0}
+.ws-skill-bars{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 15px;margin-top:9px}
+.ws-skill-score{display:grid;grid-template-columns:75px minmax(0,1fr) 26px;align-items:center;gap:7px;font-size:11px;color:#c7cae0}
+.ws-skill-score i{display:block;height:8px;border-radius:99px;background:linear-gradient(90deg,#7862c8,#b495fa)}
+.ws-skill-score b{display:block;height:8px;border-radius:99px;background:rgba(121,111,165,.25);overflow:hidden}
+.ws-skill-score strong{font-size:11px}
+.ws-import-preview{border:1px solid rgba(173,140,221,.4);border-radius:13px;padding:13px;color:#c9d0ea;font-size:12px;margin-top:8px}
+.ws-print-report[hidden]{display:none!important}
+@media(max-width:760px){
+ .ws-day-counts{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+ .ws-day-counts>div{padding:12px 9px}
+ .ws-day-counts small{font-size:10px}
+ .ws-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ws-lesson-row .ws-action-row{flex:1 1 100%}
+ .ws-skill-bars{grid-template-columns:1fr}
+ .ws-lesson-row{padding:13px 12px}
+ .ws-scheduling-actions .dash-primary{min-height:42px}
+}
+@media(max-width:380px){.ws-form-grid{grid-template-columns:1fr}.ws-day-counts strong{font-size:17px}}
+@media print{
+ body *{visibility:hidden!important}
+ #progress-print,#progress-print *{visibility:visible!important}
+ #progress-print{display:block!important;position:absolute;inset:0;width:100%;background:#fff!important;color:#16172a!important;padding:30px;box-sizing:border-box}
+ #progress-print *{color:#16172a!important;background:transparent!important;border-color:#ddd!important}
+ #progress-print .ws-assessment-entry{break-inside:avoid;margin-bottom:12px}
+ @page{size:A4;margin:14mm}
+}
