@@ -143,6 +143,14 @@ function renderStudents() {
   $("stat-students").textContent = state.students.length;
   $("stat-levels").textContent = new Set(state.students.map(s => s.cefr_level).filter(s => s !== "UNASSESSED")).size;
   $("stat-assess").textContent = state.students.filter(s => s.cefr_level === "UNASSESSED").length;
+  const levels = {};
+  for (const student of state.students) {
+    const level = ["A1","A2","B1","B2","C1","C2"].includes(student.cefr_level) ? student.cefr_level : "UNASSESSED";
+    levels[level] = (levels[level] || 0) + 1;
+  }
+  document.dispatchEvent(new CustomEvent("helloearth:studentsloaded", {
+    detail: { total: state.students.length, levels }
+  }));
 }
 
 async function loadStudents() {
