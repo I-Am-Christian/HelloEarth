@@ -214,29 +214,123 @@ function renderAgenda(){
   item.append(at,body);root.append(item);
  }
 }
+async function googleGet(url,token){
+ const response=await fetch(url,{headers:{Authorization:"Bearer "+token},cache:"no-store"});
+ if(!response.ok){
+  const error=new Error("Google API request failed");
+  error.status=response.status;
+  throw error;
+ }
+ return response.json();
+}
+async function calendarList(token){
+ const calendars=[];
+ let page;
+ for(let n=0;n<4;n++){
+  const url=new URL("https://www.googleapis.com/calendar/v3/users/me/calendarList");
+  url.searchParams.set("maxResults","250");
+  if(page)url.searchParams.set("pageToken",page);
+  const data=await googleGet(url,token);
+  calendars.push(...(Array.isArray(data.items)?data.items:[]));
+  page=data.nextPageToken;
+  if(!page)break;
+ }
+ return calendars.filter(c=>c.id&&!c.deleted&&!c.hidden).map(c=>({
+  id:c.id,name:c.summaryOverride||c.summary||c.id,primary:Boolean(c.primary)
+ }));
+}
+async function eventsForSource(source,from,until,token){
+ const events=[];let page;
+ for(let n=0;n<4;n++){
+  const url=new URL("https://www.googleapis.com/calendar/v3/calendars/"+encodeURIComponent(source.id)+"/events");
+  url.searchParams.set("timeMin",from.toISOString());
+  url.searchParams.set("timeMax",until.toISOString());
+  url.searchParams.set("singleEvents","true");
+  url.searchParams.set("orderBy","startTime");
+  url.searchParams.set("maxResults","250");
+  if(page)url.searchParams.set("pageToken",page);
+  const data=await googleGet(url,token);
+  for(const event of data.items||[]){
+   if(event.status==="cancelled")continue;
+   events.push({...event,calendarName:source.name});
+  }
+  page=data.nextPageToken;
+  if(!page)break;
+ }
+ return events;
+}
 async function refreshEvents(){
- if(!calendar.token||calendar.disconnected){calendar.connected=false;updateCalendarControls();renderAgenda();return}
- const req=++calendar.request,from=calendar.week,until=new Date(from);until.setDate(until.getDate()+7);
+ if(!calendar.token||calendar.disconnected){
+  calendar.connected=false;updateCalendarControls();renderAgenda();return;
+ }
+ const req=++calendar.request,token=calendar.token;
+ const from=new Date(calendar.week),until=new Date(from);until.setDate(until.getDate()+7);
+ calendar.errorType="";
+ setConnection(calendar.email||"",translate("Syncing calendars…"));
  updateCalendarControls();
  simpleStatus("Loading calendar","Reading your upcoming events from Google Calendar.");
  try{
-  const url=new URL("https://www.googleapis.com/calendar/v3/calendars/primary/events");
-  url.searchParams.set("timeMin",from.toISOString());
-  url.searchParams.set("timeMax",until.toISOString());
-  url.searchParams.set("singleEvents","true");url.searchParams.set("orderBy","startTime");url.searchParams.set("maxResults","150");
-  const response=await fetch(url,{headers:{Authorization:"Bearer "+calendar.token},cache:"no-store"});
-  if(!response.ok)throw new Error(response.status===401?"expired":response.status===403?"permission":"unavailable");
-  const payload=await response.json();
+  // This is the actual Google identity behind the provider token, not the HelloEarth login email.
+  const [profileResult,sourcesResult]=await Promise.allSettled([
+   googleGet("https://www.googleapis.com/oauth2/v3/userinfo",token),
+   calendarList(token)
+  ]);
   if(req!==calendar.request||calendar.disconnected)return;
-  calendar.events=Array.isArray(payload.items)?payload.items:[];calendar.connected=true;
-  updateCalendarControls();renderAgenda();
+  if(profileResult.status==="fulfilled"&&profileResult.value?.email){
+   calendar.email=profileResult.value.email;
+  }
+  if(sourcesResult.status==="rejected")throw sourcesResult.reason;
+  calendar.sources=sourcesResult.value;
+  const primary=calendar.sources.find(c=>c.primary);
+  // A primary calendar ID can be an email, but display it only as a calendar ID fallback.
+  if(!calendar.sources.length){
+   const err=new Error("No readable Google calendars were found for this account");
+   err.status=404;throw err;
+  }
+  const chosen=calendar.source==="all"
+    ?calendar.sources.slice(0,24)
+    :calendar.sources.filter(c=>c.id===calendar.source);
+  if(!chosen.length)calendar.source="all";
+  const toRead=chosen.length?chosen:calendar.sources.slice(0,24);
+  const settled=await Promise.allSettled(toRead.map(c=>eventsForSource(c,from,until,token)));
+  if(req!==calendar.request||calendar.disconnected)return;
+  const successes=settled.filter(x=>x.status==="fulfilled");
+  if(!successes.length)throw settled.find(x=>x.status==="rejected")?.reason||new Error("No accessible calendars");
+  calendar.events=successes.flatMap(x=>x.value).sort((a,b)=>
+   eventDate(a.start)-eventDate(b.start));
+  calendar.connected=true;calendar.errorType="";calendar.errorDescription="";
+  const problems=settled.length-successes.length;
+  const accountLabel=calendar.email||translate("Email unavailable — check Google account");
+  const count=calendar.events.length;
+  const label=count+" "+(count===1?translate("event"):translate("events"))+" "+translate("this week");
+  setConnection(accountLabel,problems
+   ?label+" · "+problems+" "+translate("calendars could not be read")
+   :label+" · "+successes.length+" "+translate("calendars synced"),true);
+  updateCalendarControls();setCalendarSources();renderWeek();
  }catch(error){
-  if(req!==calendar.request)return;
-  calendar.connected=false;calendar.token=null;calendar.events=[];updateCalendarControls();
-  simpleStatus(error.message==="permission"?"Calendar permission needed":error.message==="expired"?"Calendar connection expired":"Calendar unavailable",
-   error.message==="permission"?"Grant read-only Calendar access to view your events. Google Cloud configuration or verification may be required.":error.message==="expired"?"Reconnect Google Calendar to refresh your permission.":"Unable to load events. Check the Google Calendar API and your connection.",true);
+  if(req!==calendar.request||calendar.disconnected)return;
+  const status=Number(error?.status||0);
+  calendar.connected=false;calendar.events=[];
+  calendar.errorType=status===401?"Google Calendar connection expired"
+   :status===403?"Calendar permission needed"
+   :status===404?"No calendars available":"Calendar unavailable";
+  calendar.errorDescription=status===401
+   ?"Google Calendar access has expired. Reconnect to authorize the account again."
+   :status===403
+   ?"Google denied access. Confirm that the Calendar API is enabled, the email is an approved test user, and you granted calendar.readonly permission."
+   :status===404
+   ?"No readable calendars were found for this Google account. Check which Google email was selected."
+   :"Google Calendar could not be loaded. Check your connection and try Refresh or reconnect.";
+  // Bad or expired tokens cannot be used again.
+  if(status===401){calendar.token=null;forgetToken(calendar.userId)}
+  setConnection(calendar.email||"",calendar.errorType);
+  updateCalendarControls();renderAgenda();
  }
 }
+get("calendar-source-select").addEventListener("change",event=>{
+ calendar.source=event.target.value;
+ if(calendar.token)refreshEvents();
+});
 function disconnectGoogle(){
  // This stops access from the dashboard; it does NOT revoke Google's OAuth grant.
  // Google access permission can separately be revoked in the Google Account settings.
