@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="solar-booting">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -21,9 +21,35 @@
 <meta name="twitter:image" content="https://helloearth.co.za/social-preview.png">
 <title>helloearth. | For tutors</title>
 <link rel="canonical" href="https://helloearth.co.za/">
+<style id="solar-startup-styles">
+/* Prevent orbit speed/layout changes being visible during initial page rendering. */
+html.solar-booting .solar-background,
+html.solar-booting .moon-rocket { visibility:hidden!important;opacity:0!important }
+html.solar-booting .earth-orbit,
+html.solar-booting .earth-position,
+html.solar-booting .moon-orbit,
+html.solar-booting .earth-continents { animation-play-state:paused!important }
+.hero-art-spacer>.solar-background { transition:opacity .42s ease }
+html.solar-booting .hero-art-spacer::after {
+ content:"Preparing the planets…";position:absolute;inset:0;z-index:40;
+ display:grid;place-items:center;pointer-events:none;
+ color:#b3a6dc;font:600 12px/1.4 Arial,sans-serif;letter-spacing:.5px;
+ opacity:0;animation:solar-boot-hint .25s .65s forwards;
+}
+@keyframes solar-boot-hint {to{opacity:.85}}
+@media(prefers-reduced-motion:reduce){
+ .hero-art-spacer>.solar-background {transition:none!important}
+ html.solar-booting .hero-art-spacer::after{animation:none}
+}
+</style>
+<noscript><style>html.solar-booting .solar-background{visibility:visible!important;opacity:1!important}html.solar-booting .hero-art-spacer::after{display:none!important}</style></noscript>
+<script>
+/* If a JavaScript asset fails, never leave the solar system hidden forever. */
+window.addEventListener("load",()=>setTimeout(()=>document.documentElement.classList.remove("solar-booting"),1700),{once:true});
+</script>
 <script>if(/\/index\.html$/i.test(location.pathname)){history.replaceState(null,"",location.pathname.replace(/index\.html$/i,"")+location.search+location.hash)}</script>
-<link rel="icon" type="image/svg+xml" href="logo.svg"><link rel="stylesheet" href="style.css?v=20261117-moon-dock4">
-<script src="homepage-copy-translations.js?v=20261117-moon-dock4" defer></script><script src="script.js?v=20261117-moon-dock4" defer></script><script type="module" src="homepage-session.js?v=20261115-session-nav4"></script>
+<link rel="icon" type="image/svg+xml" href="logo.svg"><link rel="stylesheet" href="style.css?v=20261117-steady-orbit1">
+<script src="homepage-copy-translations.js?v=20261117-moon-dock4" defer></script><script src="script.js?v=20261117-steady-orbit1" defer></script><script type="module" src="homepage-session.js?v=20261115-session-nav4"></script>
 <link rel="stylesheet" href="space-theme.css?v=20261115-global-space2"><link rel="manifest" href="/site.webmanifest">
 <link rel="apple-touch-icon" href="/helloearth-logo.png">
 <meta name="apple-mobile-web-app-title" content="HelloEarth">
