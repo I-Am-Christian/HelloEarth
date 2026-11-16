@@ -457,5 +457,6 @@ function renderProgress(levels,total){
 document.addEventListener("helloearth:studentsloaded",event=>renderProgress(event.detail.levels,event.detail.total));
 if(window.HelloEarthDashboardSummary)renderProgress(window.HelloEarthDashboardSummary.levels,window.HelloEarthDashboardSummary.total);
 const startView=location.hash.slice(1);
-setView(views.includes(startView)?startView:"overview");
+const justAuthorized=new URLSearchParams(location.search).get("calendar")==="connected";
+setView(views.includes(startView)?startView:justAuthorized?"calendar":"overview");
 renderWeek();restore().catch(()=>{calendar.restored=true;updateCalendarControls()});
