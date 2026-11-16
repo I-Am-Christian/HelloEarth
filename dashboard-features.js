@@ -329,7 +329,11 @@ function mappedColumns(header){
  const names={name:["name","student","studentname","displayname","fullname","learner","learnername"],
   cefr:["cefr","cefrlevel","level","englishlevel","proficiencylevel"],
   goals:["goals","learninggoals","goal","objectives","learningobjectives"],
-  focus:["focus","focusareas","weaknesses","needs","areasforimprovement"],
+  focus:["focus","focusareas","needs","areasforimprovement"],
+  strengths:["strengths","strongpoints","strongskills"],
+  weaknesses:["weaknesses","challenges","improvementareas","skillgaps"],
+  homework:["homework","currenthomework","independentpractice","practice"],
+  preferences:["preferences","teachingpreferences","learningpreferences"],
   interests:["interests","hobbies","topics"],language:["language","translationlanguage","nativelanguage"],
   notes:["notes","background","backgroundnotes","studentnotes"]};
  const columns={};header.forEach((value,index)=>{
@@ -358,7 +362,11 @@ async function importSpreadsheet(file){
   newRows.push({
    id:crypto.randomUUID(),tutor_id:entries.userId,display_name:name,
    cefr_level:level,learning_goals:splitList(read(row,"goals")),
-   focus_areas:splitList(read(row,"focus")),interests:splitList(read(row,"interests")),
+   focus_areas:splitList(read(row,"focus")),
+   strengths:splitList(read(row,"strengths")),weaknesses:splitList(read(row,"weaknesses")),
+   teaching_preferences:splitList(read(row,"preferences")),
+   current_homework:read(row,"homework").slice(0,3000),
+   interests:splitList(read(row,"interests")),
    translation_language:read(row,"language").slice(0,60)||"none",
    background_notes:read(row,"notes").slice(0,2000),
    record_status:"reference",source_document:file.name.slice(0,300),ai_context_enabled:false
@@ -374,7 +382,7 @@ async function importSpreadsheet(file){
 }
 el("spreadsheet-import-button").addEventListener("click",()=>el("spreadsheet-import-file").click());
 el("download-import-template").addEventListener("click",()=>{
- const csv="Name,CEFR,Learning Goals,Focus Areas,Interests,Language,Notes\nExample Student,B1,Speak confidently,Fluency; grammar,Travel,Spanish,Replace this example with your student";
+ const csv="Name,CEFR,Learning Goals,Focus Areas,Strengths,Weaknesses,Current Homework,Teaching Preferences,Interests,Language,Notes\nExample Student,B1,Speak confidently,Fluency,Clear pronunciation,Listening practice,Review past tense,Conversation focused,Travel,Spanish,Replace this example with your student";
  const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
  const url=URL.createObjectURL(blob);
  const link=document.createElement("a");link.href=url;link.download="helloearth-student-template.csv";link.click();
