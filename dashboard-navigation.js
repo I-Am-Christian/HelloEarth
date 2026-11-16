@@ -236,7 +236,8 @@ async function calendarList(token){
   if(!page)break;
  }
  return calendars.filter(c=>c.id&&!c.deleted&&!c.hidden).map(c=>({
-  id:c.id,name:c.summaryOverride||c.summary||c.id,primary:Boolean(c.primary)
+  id:c.id,name:c.summaryOverride||c.summary||c.id,primary:Boolean(c.primary),
+  accessRole:c.accessRole||"reader",writable:["owner","writer","writerWithoutPrivateAccess"].includes(c.accessRole)
  }));
 }
 async function eventsForSource(source,from,until,token){
@@ -310,6 +311,12 @@ async function refreshEvents(){
    ?label+" · "+problems+" "+translate("calendars could not be read")
    :label+" · "+successes.length+" "+translate("calendars synced"),true);
   updateCalendarControls();setCalendarSources();renderWeek();
+  document.dispatchEvent(new CustomEvent("helloearth:calendar-events",{detail:{
+   connected:true,events:calendar.events.map(e=>({
+    summary:e.summary,start:e.start,end:e.end,calendarName:e.calendarName,
+    extendedProperties:e.extendedProperties
+   }))
+  }}));
  }catch(error){
   if(req!==calendar.request||calendar.disconnected)return;
   const status=Number(error?.status||0);
@@ -326,6 +333,7 @@ async function refreshEvents(){
    :"Google Calendar could not be loaded. Check your connection and try Refresh or reconnect.";
   // Bad or expired tokens cannot be used again.
   if(status===401){calendar.token=null;forgetToken(calendar.userId)}
+  document.dispatchEvent(new CustomEvent("helloearth:calendar-disconnected"));
   setConnection(calendar.email||"",calendar.errorType);
   updateCalendarControls();renderAgenda();
  }
@@ -334,6 +342,83 @@ get("calendar-source-select").addEventListener("change",event=>{
  calendar.source=event.target.value;
  if(calendar.token)refreshEvents();
 });
+function scheduleStatus(message,error=false){
+ const feedback=get("schedule-feedback");
+ feedback.textContent=message;feedback.classList.toggle("is-error",error);
+}
+const localField=date=>{
+ const d=new Date(date.getTime()-date.getTimezoneOffset()*60000);
+ return d.toISOString().slice(0,16);
+};
+function openScheduler(){
+ const modal=get("schedule-modal");
+ const select=get("schedule-calendar");select.replaceChildren();
+ const writable=calendar.sources.filter(src=>src.writable);
+ for(const source of writable){
+  const option=document.createElement("option");option.value=source.id;option.textContent=source.name;
+  select.append(option);
+ }
+ const previously=calendar.source;
+ if(writable.some(c=>c.id===previously))select.value=previously;
+ else if(writable.find(c=>c.primary))select.value=writable.find(c=>c.primary).id;
+ const next=new Date(calendar.date);
+ next.setHours(new Date().getHours()+1,0,0,0);
+ if(next<new Date())next.setDate(next.getDate()+1);
+ const finish=new Date(next.getTime()+50*60*1000);
+ get("schedule-start").value=localField(next);
+ get("schedule-end").value=localField(finish);
+ get("schedule-title").value="English lesson";
+ get("schedule-student").value="";
+ get("schedule-description").value="";
+ scheduleStatus("");
+ modal.hidden=false;
+ get("schedule-title").focus();
+ if(!calendar.connected||!writable.length)
+  scheduleStatus("Connect Google Calendar and select a calendar where you have permission to create events.",true);
+}
+get("calendar-schedule").addEventListener("click",openScheduler);
+get("schedule-close").addEventListener("click",()=>{get("schedule-modal").hidden=true});
+get("schedule-modal").addEventListener("click",event=>{if(event.target===get("schedule-modal"))get("schedule-modal").hidden=true});
+get("calendar-request-write").addEventListener("click",connectGoogle);
+get("schedule-form").addEventListener("submit",async event=>{
+ event.preventDefault();
+ if(!calendar.token||!calendar.connected){scheduleStatus("Connect Google Calendar and authorize scheduling first.",true);return}
+ const selected=get("schedule-calendar").value;
+ if(!calendar.sources.some(src=>src.id===selected&&src.writable)){scheduleStatus("Choose a Google calendar with write access.",true);return}
+ const start=new Date(get("schedule-start").value),end=new Date(get("schedule-end").value);
+ if(!Number.isFinite(start.getTime())||!Number.isFinite(end.getTime())||end<=start){scheduleStatus("End must be after the start time.",true);return}
+ if(end-start>8*60*60*1000||end-start<15*60*1000){scheduleStatus("Choose an appointment between 15 minutes and 8 hours.",true);return}
+ const title=get("schedule-title").value.trim(),description=get("schedule-description").value.trim();
+ if(!title||title.length>200){scheduleStatus("Enter a short appointment title.",true);return}
+ const body={summary:title,description,start:{dateTime:start.toISOString()},end:{dateTime:end.toISOString()}};
+ const studentId=get("schedule-student").value;
+ // An explicit student choice links the Google event without publishing learner notes.
+ if(studentId)body.extendedProperties={private:{helloearth_student_id:studentId}};
+ const button=get("schedule-submit");button.disabled=true;scheduleStatus("Creating event in Google Calendar…");
+ try{
+  const url="https://www.googleapis.com/calendar/v3/calendars/"+encodeURIComponent(selected)+"/events";
+  const response=await fetch(url,{method:"POST",headers:{
+   Authorization:"Bearer "+calendar.token,"Content-Type":"application/json"
+  },body:JSON.stringify(body)});
+  if(!response.ok){
+   let problem={};try{problem=await response.json()}catch{}
+   const error=new Error(response.status===403
+    ?"Google has not granted event editing. Choose Authorize scheduling and approve the additional events permission."
+    :response.status===401?"Google access expired. Reconnect Calendar and retry."
+    :problem.error?.message||"Google rejected the event ("+response.status+").");
+   throw error;
+  }
+  get("schedule-modal").hidden=true;
+  calendar.date=new Date(start.getFullYear(),start.getMonth(),start.getDate());
+  calendar.week=monday(calendar.date);
+  await refreshEvents();
+  get("calendar-tab").click();
+  const heading=get("calendar-day-title");
+  heading.textContent=heading.textContent+" · Appointment created";
+ }catch(error){scheduleStatus(error.message||"Unable to schedule the appointment.",true)}
+ finally{button.disabled=false}
+});
+
 function disconnectGoogle(){
  // This stops access from the dashboard; it does NOT revoke Google's OAuth grant.
  // Google access permission can separately be revoked in the Google Account settings.
@@ -344,6 +429,7 @@ function disconnectGoogle(){
  calendar.token=null;calendar.pendingToken=null;
  calendar.events=[];calendar.sources=[];calendar.source="all";calendar.email="";
  calendar.connected=false;calendar.errorType="";
+ document.dispatchEvent(new CustomEvent("helloearth:calendar-disconnected"));
  sessionStorage.removeItem("helloearth-calendar-expected-user");
  setConnection("",translate("Disconnected — HelloEarth remains signed in"));
  get("calendar-source-row").hidden=true;
@@ -357,7 +443,9 @@ async function connectGoogle(){
   const {data:{user},error}=await db.auth.getUser();if(error||!user)throw new Error("Please log in again.");
   calendar.userId=user.id;
   const {data:{session}}=await db.auth.getSession();const hasGoogle=user.identities?.some(identity=>identity.provider==="google");
-  const options={redirectTo:new URL("dashboard.html?calendar=connected",location.href).href,scopes:"https://www.googleapis.com/auth/calendar.readonly",queryParams:{prompt:"select_account consent"}};
+  const options={redirectTo:new URL("dashboard.html?calendar=connected",location.href).href,
+   scopes:"https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events",
+   queryParams:{prompt:"select_account consent"}};
   sessionStorage.setItem("helloearth-calendar-expected-user",user.id);
   const result=hasGoogle
    ?await db.auth.signInWithOAuth({provider:"google",options})
@@ -391,6 +479,7 @@ db.auth.onAuthStateChange((event,session)=>{
   forgetToken(calendar.userId);
   calendar.token=null;calendar.pendingToken=null;calendar.connected=false;
   calendar.email="";calendar.events=[];calendar.sources=[];
+  document.dispatchEvent(new CustomEvent("helloearth:calendar-disconnected"));
   updateCalendarControls();setConnection("",translate("Not connected"));renderAgenda();
  }
 });
@@ -430,6 +519,7 @@ async function restore(){
    calendar.errorType="Calendar authorization incomplete";
    calendar.errorDescription="Google Calendar did not return an access token. Please connect again and approve read-only Calendar access.";
   }
+  document.dispatchEvent(new CustomEvent("helloearth:calendar-disconnected"));
   setConnection("",calendar.disconnected
    ?translate("Disconnected — HelloEarth remains signed in")
    :calendar.errorType||translate("Connect to see your lessons"));
