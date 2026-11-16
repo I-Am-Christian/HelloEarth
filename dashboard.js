@@ -224,6 +224,12 @@ async function openStudent(id) {
       summary.classList.add("i18n-user-content");
       const next = document.createElement("div");
       if (note.next_steps?.length) {next.textContent = tr("Next: {steps}", {steps:note.next_steps.join(" · ")});next.classList.add("i18n-user-content")}
+      const observation = document.createElement("div");
+      const strong = (note.strengths || []).join(" · ");
+      const difficult = (note.challenges || []).join(" · ");
+      observation.textContent = [strong ? "Strengths: "+strong : "", difficult ? "Needs practice: "+difficult : ""].filter(Boolean).join("  |  ");
+      observation.className = "i18n-user-content";
+      if (observation.textContent) item.append(observation);
       if (note.homework) {
         const homework = document.createElement("div");
         homework.textContent = "Homework: " + note.homework;
