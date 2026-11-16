@@ -9,7 +9,49 @@ const monday = date => {
 };
 const sameDay = (a,b) => a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
 const toDate = date => new Date(date.getFullYear(),date.getMonth(),date.getDate());
-const calendar = {view:"overview",date:toDate(new Date()),week:monday(new Date()),token:null,connected:false,events:[],request:0,userId:null,disconnected:false,restored:false};
+const calendar = {view:"overview",date:toDate(new Date()),week:monday(new Date()),
+ token:null,pendingToken:null,connected:false,events:[],sources:[],source:"all",email:"",
+ request:0,userId:null,disconnected:false,restored:false,errorType:"",errorDescription:""};
+// A temporary token is retained in this browser tab only; never store a Google refresh token.
+const tokenKey = id => "helloearth-calendar-session:" + id;
+function rememberToken(id,token){
+ if(!id||!token)return;
+ try{sessionStorage.setItem(tokenKey(id),JSON.stringify({token,expires:Date.now()+45*60*1000}))}catch{}
+}
+function recalledToken(id){
+ if(!id)return null;
+ try{
+  const raw=sessionStorage.getItem(tokenKey(id));if(!raw)return null;
+  const saved=JSON.parse(raw);
+  if(saved.expires>Date.now()&&typeof saved.token==="string")return saved.token;
+  sessionStorage.removeItem(tokenKey(id));
+ }catch{}
+ return null;
+}
+function forgetToken(id){if(!id)return;try{sessionStorage.removeItem(tokenKey(id))}catch{}}
+function setConnection(email,status,active=false){
+ const emailNode=get("calendar-account-email");
+ const statusNode=get("calendar-sync-status");
+ emailNode.textContent=email||translate("Not connected");
+ statusNode.textContent=status;
+ get("calendar-connection-indicator").classList.toggle("is-connected",active);
+}
+function setCalendarSources(){
+ const select=get("calendar-source-select");
+ const row=get("calendar-source-row");
+ select.replaceChildren();
+ const all=document.createElement("option");all.value="all";all.textContent=translate("All my calendars");
+ select.append(all);
+ for(const source of calendar.sources){
+  const option=document.createElement("option");option.value=source.id;
+  option.textContent=(source.primary?"★ ":"")+source.name;
+  select.append(option);
+ }
+ if(!calendar.sources.some(s=>s.id===calendar.source))calendar.source="all";
+ select.value=calendar.source;
+ row.hidden=!calendar.connected||!calendar.sources.length;
+ get("calendar-source-count").textContent=calendar.sources.length+" "+translate("calendars available");
+}
 const calendarStorageKey = id => "helloearth-calendar-off:" + id;
 const isCalendarOff = id => {try{return Boolean(id && localStorage.getItem(calendarStorageKey(id))==="1")}catch{return false}};
 const setCalendarOff = (id,value) => {try{if(id){if(value)localStorage.setItem(calendarStorageKey(id),"1");else localStorage.removeItem(calendarStorageKey(id))}}catch{}};
@@ -83,7 +125,13 @@ function renderWeek(){
   button.setAttribute("aria-pressed",String(sameDay(date,calendar.date)));
   const weekday=document.createElement("span");weekday.textContent=localized(date,{weekday:"short"});
   const number=document.createElement("strong");number.textContent=date.getDate();
-  button.append(weekday,number);
+  const dot=document.createElement("i");dot.className="ws-day-event-dot";dot.setAttribute("aria-hidden","true");
+  const dayEnd=new Date(date);dayEnd.setDate(dayEnd.getDate()+1);
+  dot.hidden=!calendar.connected||!calendar.events.some(event=>{
+   const a=eventDate(event.start),b=eventDate(event.end);
+   return a<dayEnd&&b>date;
+  });
+  button.append(weekday,number,dot);
   button.addEventListener("click",()=>{calendar.date=date;renderWeek();renderAgenda()});
   grid.append(button);
  }
@@ -112,25 +160,41 @@ function simpleStatus(title,description,button=false){
  }
  root.append(empty);
 }
+function eventDate(field){
+ if(!field)return new Date(NaN);
+ if(field.dateTime)return new Date(field.dateTime);
+ if(field.date){
+  const [y,m,d]=field.date.split("-").map(Number);
+  return new Date(y,m-1,d);
+ }
+ return new Date(NaN);
+}
 function renderAgenda(){
  get("calendar-day-title").textContent=localized(calendar.date,{weekday:"long",day:"numeric",month:"long"});
  if(!calendar.connected){
+  get("calendar-source-row").hidden=true;
   if(calendar.disconnected){
    simpleStatus("Google Calendar disconnected","Calendar events are hidden here. Your HelloEarth login and student profiles are unchanged. To fully revoke access, use your Google Account settings.",true);
+  }else if(calendar.errorType){
+   simpleStatus(calendar.errorType,calendar.errorDescription,true);
   }else{
    simpleStatus("Connect your Google Calendar","View your lessons and appointments here with read-only access. Your calendar events are not saved to HelloEarth.",true);
   }
   return;
  }
+ setCalendarSources();
  const start=toDate(calendar.date);const end=new Date(start);end.setDate(end.getDate()+1);
  const events=calendar.events.filter(event=>{
-  const st=new Date(event.start?.dateTime||event.start?.date);
-  const en=new Date(event.end?.dateTime||event.end?.date||event.start?.dateTime||event.start?.date);
+  const st=eventDate(event.start),en=eventDate(event.end);
   return st<end&&en>start;
  });
  const root=get("calendar-agenda");root.replaceChildren();
  if(!events.length){
-  simpleStatus("No events on this day","Your connected Google Calendar has no scheduled events for this date.");return;
+  const available=calendar.events.length;
+  simpleStatus("No events on this day",available
+   ?"No events on the selected day. Other dates in this week have events — choose a day with a dot."
+   :"No events in the selected week. Check the connected Google email, calendar selection, or another week.");
+  return;
  }
  for(const event of events){
   const item=document.createElement("article");item.className="ws-event";
@@ -139,6 +203,10 @@ function renderAgenda(){
   const body=document.createElement("div");const title=document.createElement("strong");
   title.textContent=event.summary||translate("Busy");if(event.summary)title.classList.add("i18n-user-content");
   body.append(title);
+  if(event.calendarName){
+   const cal=document.createElement("small");cal.textContent=event.calendarName;
+   cal.className="ws-event-calendar";cal.classList.add("i18n-user-content");body.append(cal);
+  }
   if(event.location){const loc=document.createElement("small");loc.textContent=event.location;loc.classList.add("i18n-user-content");body.append(loc)}
   if(event.htmlLink){
    try{const url=new URL(event.htmlLink);if(url.protocol==="https:"&&(url.hostname==="calendar.google.com"||url.hostname.endsWith(".google.com"))){const link=document.createElement("a");link.href=url.href;link.target="_blank";link.rel="noopener noreferrer";link.textContent=translate("View in Google Calendar");body.append(link)}}catch{}
