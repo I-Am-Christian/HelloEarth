@@ -1,0 +1,42 @@
+name: Build HelloEarth social preview
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - logo.svg
+      - scripts/build_social_preview.py
+      - .github/workflows/build-social-preview.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install image builder dependencies
+        run: python -m pip install "Pillow>=10,<13" "CairoSVG>=2.7,<3"
+      - name: Render social sharing image
+        run: python scripts/build_social_preview.py
+      - name: Commit social preview
+        shell: bash
+        run: |
+          git add social-preview.png
+          if git diff --cached --quiet; then
+            echo "Social preview is already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Generate HelloEarth social preview PNG"
+          git push
