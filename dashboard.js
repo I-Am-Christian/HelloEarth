@@ -148,8 +148,9 @@ function renderStudents() {
     const level = ["A1","A2","B1","B2","C1","C2"].includes(student.cefr_level) ? student.cefr_level : "UNASSESSED";
     levels[level] = (levels[level] || 0) + 1;
   }
+  window.HelloEarthDashboardSummary = { total: state.students.length, levels };
   document.dispatchEvent(new CustomEvent("helloearth:studentsloaded", {
-    detail: { total: state.students.length, levels }
+    detail: window.HelloEarthDashboardSummary
   }));
 }
 
