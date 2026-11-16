@@ -456,6 +456,7 @@ $("note-form").addEventListener("submit", async event => {
 
 $("signout").addEventListener("click", async () => {
   $("signout").disabled = true;
+  await window.HelloEarthNotifications?.signout?.();
   await db.auth.signOut();
   window.location.replace("login.html");
 });

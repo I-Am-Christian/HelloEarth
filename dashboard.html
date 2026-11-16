@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="page-i18n.css?v=20261115full4"><script src="page-i18n.js?v=20261116-suite7" defer></script><link rel="stylesheet" href="space-theme.css?v=20261115-global-space2"><link rel="stylesheet" href="dashboard-navigation.css?v=20261116-scheduling3"><link rel="stylesheet" href="dashboard-features.css?v=20261116-suite7"><link rel="manifest" href="/site.webmanifest">
 <link rel="apple-touch-icon" href="/helloearth-logo.png">
 <meta name="apple-mobile-web-app-title" content="HelloEarth">
-</head>
+<link rel="stylesheet" href="notifications.css?v=20261116-push1"><script type="module" src="notifications.js?v=20261116-push1"></script><script src="pwa-register.js?v=20261116-push1" defer></script></head>
 <body class="space-theme space-dashboard portal-page">
 <div id="checking" style="padding:20vh 20px;text-align:center;color:#d9cfff">Checking your secure session…</div>
 <div class="workspace" id="workspace" hidden>
@@ -66,6 +66,16 @@
         <div class="ws-connection-identity"><span>CONNECTED GOOGLE CALENDAR</span><strong id="calendar-account-email">Not connected</strong></div>
         <span class="ws-connection-status" id="calendar-sync-status" role="status">Connect a calendar to see your lessons</span>
       </div>
+      <section class="he-notice-card" aria-labelledby="notifications-heading">
+        <div class="he-notice-head"><div><h3 id="notifications-heading">🔔 Lesson notifications</h3><p>Get a reminder about 15 minutes before each timed appointment in your connected Google Calendar. Notifications still arrive while the app is closed. No student names or lesson details are sent.</p></div></div>
+        <div class="he-notice-actions">
+          <button type="button" id="notifications-enable" class="dash-primary">Enable notifications</button>
+          <button type="button" id="notifications-test" class="ws-mini-btn" hidden>Send test notification</button>
+          <button type="button" id="notifications-disable" class="ws-mini-btn" hidden>Turn off notifications</button>
+        </div>
+        <p class="he-notice-status" id="notifications-status" role="status" aria-live="polite">Checking notification availability…</p>
+        <p class="he-notice-footnote">Calendar events are only queued for the week displayed when your calendar loads or refreshes. For iPhone notifications, first add HelloEarth to the Home Screen. You can disable notifications at any time.</p>
+      </section>
       <div id="calendar-source-row" class="ws-calendar-source" hidden>
         <label for="calendar-source-select">Show events from</label>
         <select id="calendar-source-select"><option value="all">All my calendars</option></select>

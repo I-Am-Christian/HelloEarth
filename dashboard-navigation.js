@@ -300,7 +300,7 @@ async function eventsForSource(source,from,until,token){
   const data=await googleGet(url,token);
   for(const event of data.items||[]){
    if(event.status==="cancelled")continue;
-   events.push({...event,calendarName:source.name});
+   events.push({...event,calendarName:source.name,calendarId:source.id});
   }
   page=data.nextPageToken;
   if(!page)break;
@@ -360,8 +360,8 @@ async function refreshEvents(){
   rememberConnection(calendar.userId,calendar.email);
   updateCalendarControls();setCalendarSources();renderWeek();
   document.dispatchEvent(new CustomEvent("helloearth:calendar-events",{detail:{
-   connected:true,events:calendar.events.map(e=>({
-    summary:e.summary,start:e.start,end:e.end,calendarName:e.calendarName,
+   connected:true,windowStart:from.toISOString(),windowEnd:until.toISOString(),events:calendar.events.map(e=>({
+    id:e.id,calendarId:e.calendarId,summary:e.summary,start:e.start,end:e.end,calendarName:e.calendarName,
     extendedProperties:e.extendedProperties
    }))
   }}));

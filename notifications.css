@@ -1,0 +1,11 @@
+.he-notice-card{margin:20px 0;padding:20px 22px;border:1px solid rgba(172,143,255,.25);border-radius:18px;background:linear-gradient(110deg,rgba(88,68,152,.14),rgba(16,20,44,.75))}
+.he-notice-head{display:flex;gap:16px;justify-content:space-between;align-items:flex-start}
+.he-notice-head h3{margin:0 0 7px;font-size:1.07rem}
+.he-notice-head p{margin:0;max-width:700px;color:#c5c1d7;font-size:.92rem;line-height:1.55}
+.he-notice-actions{display:flex;gap:9px;flex-wrap:wrap;margin:17px 0 6px}
+.he-notice-actions button[hidden]{display:none}
+.he-notice-card button:disabled{opacity:.55;cursor:wait}
+.he-notice-status{font-size:.91rem;color:#b7e5cb;margin:12px 0 0;min-height:22px;line-height:1.5}
+.he-notice-status.is-error{color:#ffbfbc}
+.he-notice-footnote{color:#b7afcb;font-size:.79rem;line-height:1.45;margin:10px 0 0}
+@media(max-width:600px){.he-notice-card{padding:16px}.he-notice-actions{flex-direction:column}.he-notice-actions button{width:100%}}

@@ -31,7 +31,7 @@ Supabase enforces row-level security (RLS) for private student profiles, lesson 
 
 ## Installable app
 
-HelloEarth now provides a web app manifest for supported browsers. Tutors can add it to their home screen or desktop and launch the dashboard in an app-style window. This is **online-only** and does not cache private tutor or student data. See [PWA_SETUP.md](PWA_SETUP.md) for installation and testing details.
+HelloEarth now provides a web app manifest for supported browsers. Tutors can add it to their home screen or desktop and launch the dashboard in an app-style window. This is **online-only**, with opt-in web push notifications for Google Calendar appointments, and it does not cache private tutor or student data. See [PWA_SETUP.md](PWA_SETUP.md) for installation, notification behavior, and testing details.
 
 ## Development
 
