@@ -29,6 +29,10 @@ Google's unverified/Testing OAuth clients may only work for added test users and
 
 Supabase enforces row-level security (RLS) for private student profiles, lesson notes, saved lesson plans, skill assessments and attendance. Code belongs in GitHub; **student records and calendar event contents do not**. No Supabase service-role key or Google client secret is included in public frontend files. Only record learner information you have permission to hold, and follow relevant laws on children's data.
 
+## Installable app
+
+HelloEarth now provides a web app manifest for supported browsers. Tutors can add it to their home screen or desktop and launch the dashboard in an app-style window. This is **online-only** and does not cache private tutor or student data. See [PWA_SETUP.md](PWA_SETUP.md) for installation and testing details.
+
 ## Development
 
 The site uses static HTML/CSS/JS. Key files:
