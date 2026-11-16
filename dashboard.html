@@ -115,6 +115,19 @@
           </form>
           <div id="student-skills-history" class="ws-assessment-history"></div>
         </section>
+        <section class="ws-student-workflow" id="attendance-workflow">
+          <div class="ws-feature-title"><div><h3>Lesson attendance</h3><p>Record attendance only after a lesson. Scheduling a calendar event does not mark it attended.</p></div></div>
+          <form id="attendance-form">
+            <div class="ws-form-grid">
+              <label>Lesson date<input type="date" id="attendance-date" required></label>
+              <label>Status<select id="attendance-status" required><option value="attended">Attended</option><option value="missed">Missed</option><option value="cancelled">Cancelled</option></select></label>
+              <label>Note (optional)<input id="attendance-note" maxlength="500" placeholder="Rescheduled, late arrival…"></label>
+            </div>
+            <button class="ws-mini-btn" type="submit" id="attendance-save">Save attendance</button>
+            <p id="attendance-feedback" class="ws-feedback" role="status"></p>
+          </form>
+          <div id="student-attendance-history" class="ws-attendance-history"></div>
+        </section>
         <section class="ws-student-workflow ws-saved-plans"><h3>Saved lesson plans</h3><div id="saved-plans-list" class="ws-saved-plan-list"><p>Choose Prepare lesson to make your first plan.</p></div></section>
         <h3 style="margin:26px 0 12px">Lesson notes</h3><div id="lesson-notes" class="ws-note-list"></div>
         <p id="detail-feedback" role="status" class="ws-feedback"></p>
@@ -128,6 +141,7 @@
         <div class="ws-feature-title"><div><h3>Skill development history</h3><p>Compare your recorded assessments over time, per student.</p></div><button class="ws-mini-btn" type="button" id="download-progress-report">Print / Save PDF</button></div>
         <label class="ws-editor-label">Student<select id="progress-student-select"><option value="">Choose student</option></select></label>
         <div id="progress-history" class="ws-assessment-history"><p>Choose a student to view assessment history.</p></div>
+        <div id="progress-attendance" class="ws-attendance-summary"></div>
         <div id="progress-print" class="ws-print-report" hidden></div>
       </section>
 <button type="button" class="ws-mini-btn" data-open-view="students">View student profiles</button>
