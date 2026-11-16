@@ -106,7 +106,7 @@ function draftLesson(s){
  const focus=(s.focus_areas||[]).slice(0,3).join("; ")||"Vocabulary, sentence structure and fluency";
  const interests=(s.interests||[]).slice(0,2).join("; ")||"Student-selected everyday examples";
  const previous=entries.lastNote;
- const revisit=previous?[(previous.challenges||[]).join("; "),(previous.next_steps||[]).join("; "),""].filter(Boolean).join(" | "):"No previous lesson observations recorded";
+ const revisit=previous?[(previous.challenges||[]).join("; "),(previous.next_steps||[]).join("; "),previous.homework||""].filter(Boolean).join(" | "):"No previous lesson observations recorded";
  const mins=[Math.round(duration*.15),Math.round(duration*.2),Math.round(duration*.4)];
  const wrap=duration-mins.reduce((a,b)=>a+b,0);
  return `# ${topic} — ${level} | ${duration} minutes
@@ -168,7 +168,7 @@ el("generate-plan").addEventListener("click",async()=>{
 });
 async function loadLatestNote(id){
  const {data,error}=await db.from("atlas_lesson_notes")
-  .select("summary,challenges,next_steps,lesson_date")
+  .select("summary,challenges,next_steps,homework,lesson_date")
   .eq("student_id",id).eq("tutor_id",entries.userId)
   .order("lesson_date",{ascending:false}).limit(1);
  if(entries.selected?.id===id)entries.lastNote=!error&&data?.length?data[0]:null;
