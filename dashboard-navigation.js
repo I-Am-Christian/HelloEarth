@@ -282,7 +282,10 @@ async function refreshEvents(){
   if(sourcesResult.status==="rejected")throw sourcesResult.reason;
   calendar.sources=sourcesResult.value;
   const primary=calendar.sources.find(c=>c.primary);
-  // A primary calendar ID can be an email, but display it only as a calendar ID fallback.
+  // When Google UserInfo is unavailable, avoid claiming a calendar ID is a verified email.
+  if(!calendar.email && primary && /^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(primary.id)){
+   calendar.email="Calendar ID: "+primary.id;
+  }
   if(!calendar.sources.length){
    const err=new Error("No readable Google calendars were found for this account");
    err.status=404;throw err;
@@ -337,10 +340,13 @@ function disconnectGoogle(){
  calendar.request++; // Cancel stale in-flight fetch results.
  calendar.disconnected=true;
  setCalendarOff(calendar.userId,true);
- calendar.token=null;
- calendar.events=[];
- calendar.connected=false;
+ forgetToken(calendar.userId);
+ calendar.token=null;calendar.pendingToken=null;
+ calendar.events=[];calendar.sources=[];calendar.source="all";calendar.email="";
+ calendar.connected=false;calendar.errorType="";
  sessionStorage.removeItem("helloearth-calendar-expected-user");
+ setConnection("",translate("Disconnected — HelloEarth remains signed in"));
+ get("calendar-source-row").hidden=true;
  updateCalendarControls();
  renderAgenda();
 }
@@ -351,7 +357,7 @@ async function connectGoogle(){
   const {data:{user},error}=await db.auth.getUser();if(error||!user)throw new Error("Please log in again.");
   calendar.userId=user.id;
   const {data:{session}}=await db.auth.getSession();const hasGoogle=user.identities?.some(identity=>identity.provider==="google");
-  const options={redirectTo:new URL("dashboard.html?calendar=connected",location.href).href,scopes:"https://www.googleapis.com/auth/calendar.readonly",queryParams:{prompt:"consent"}};
+  const options={redirectTo:new URL("dashboard.html?calendar=connected",location.href).href,scopes:"https://www.googleapis.com/auth/calendar.readonly",queryParams:{prompt:"select_account consent"}};
   sessionStorage.setItem("helloearth-calendar-expected-user",user.id);
   const result=hasGoogle
    ?await db.auth.signInWithOAuth({provider:"google",options})
@@ -368,13 +374,22 @@ get("calendar-next").addEventListener("click",()=>{calendar.week.setDate(calenda
 get("calendar-today").addEventListener("click",()=>{calendar.date=toDate(new Date());calendar.week=monday(calendar.date);renderWeek();if(calendar.token)refreshEvents()});
 get("calendar-refresh").addEventListener("click",refreshEvents);
 get("calendar-connect")?.addEventListener("click",connectGoogle);
-db.auth.onAuthStateChange((_event,session)=>{
- if(!calendar.restored || calendar.disconnected)return;
+db.auth.onAuthStateChange((event,session)=>{
+ // Capture provider tokens even if OAuth returns before getUser() has finished.
  if(session?.provider_token){
-  calendar.token=session.provider_token;
-  Promise.resolve().then(()=>refreshEvents());
+  calendar.pendingToken=session.provider_token;
+  if(calendar.restored&&!calendar.disconnected&&!calendar.token){
+   calendar.token=session.provider_token;
+   rememberToken(calendar.userId,calendar.token);
+   Promise.resolve().then(()=>refreshEvents());
+  }
  }
- if(!session){calendar.token=null;calendar.connected=false;calendar.events=[];updateCalendarControls();renderAgenda()}
+ if(event==="SIGNED_OUT"){
+  forgetToken(calendar.userId);
+  calendar.token=null;calendar.pendingToken=null;calendar.connected=false;
+  calendar.email="";calendar.events=[];calendar.sources=[];
+  updateCalendarControls();setConnection("",translate("Not connected"));renderAgenda();
+ }
 });
 document.addEventListener("helloearth:languagechanged",()=>renderWeek());
 async function restore(){
@@ -386,25 +401,35 @@ async function restore(){
   sessionStorage.removeItem("helloearth-calendar-expected-user");
   if(user?.id!==expected){
    calendar.disconnected=true;
+   calendar.errorType="Calendar account mismatch";
+   calendar.errorDescription="The Google account changed your HelloEarth login. Sign back into your original HelloEarth account before reconnecting Calendar.";
    calendar.restored=true;
    updateCalendarControls();
-   simpleStatus("Calendar account mismatch","Your existing HelloEarth account was not confirmed after Google authorization. No student records were changed.",false);
+   setConnection("",translate("Google account mismatch"));
+   renderAgenda();
    return;
   }
  }
  const {data:{session}}=await db.auth.getSession();
- if(expected && session?.provider_token){
+ const token=session?.provider_token||calendar.pendingToken||(!calendar.disconnected?recalledToken(calendar.userId):null);
+ if(expected && token){
   calendar.disconnected=false;
   setCalendarOff(calendar.userId,false);
  }
  calendar.restored=true;
- if(!calendar.disconnected&&session?.provider_token){
-  calendar.token=session.provider_token;
+ if(!calendar.disconnected&&token){
+  calendar.token=token;
+  rememberToken(calendar.userId,token);
   await refreshEvents();
  }else{
-  calendar.token=null;
-  calendar.events=[];
-  calendar.connected=false;
+  calendar.token=null;calendar.events=[];calendar.sources=[];calendar.connected=false;
+  if(expected&&!token){
+   calendar.errorType="Calendar authorization incomplete";
+   calendar.errorDescription="Google Calendar did not return an access token. Please connect again and approve read-only Calendar access.";
+  }
+  setConnection("",calendar.disconnected
+   ?translate("Disconnected — HelloEarth remains signed in")
+   :calendar.errorType||translate("Connect to see your lessons"));
   updateCalendarControls();
   renderAgenda();
  }
