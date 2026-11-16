@@ -333,6 +333,8 @@ $("import-file").addEventListener("change", async event => {
         id, tutor_id: state.user.id, display_name: name,
         cefr_level: level,
         learning_goals: items("learning_goals"), focus_areas: items("focus_areas"),
+        strengths: items("strengths"), weaknesses: items("weaknesses"),
+        current_homework: text("current_homework", 3000),
         interests: items("interests"), teaching_preferences: items("teaching_preferences"),
         translation_language: text("translation_language", 60) || "none",
         background_notes: text("background_notes", 2000),
