@@ -466,3 +466,37 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
   else schedule();
  });
 })();
+
+/* Reveal the solar system only after the page, orbital layout and globe texture
+   are ready. This prevents the initial fast-spin / reflow flash on mobile. */
+(() => {
+ const root=document.documentElement;
+ if(!root.classList.contains('solar-booting'))return;
+ const stage=document.querySelector('.hero-art-spacer');
+ const scene=document.querySelector('.solar-background');
+ let released=false;
+ let scheduled=false;
+ const reveal=()=>{
+  if(released||scheduled)return;
+  scheduled=true;
+  // Defer removal until the scene has completed two stable paint/layout frames.
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+   if(released)return;
+   released=true;
+   root.classList.remove('solar-booting');
+  }));
+ };
+ // Earlier homepage initializers already moved the scene and sized the orbit.
+ if(scene&&stage&&scene.parentElement!==stage)stage.appendChild(scene);
+ const deadline=setTimeout(reveal,900);
+ const texture=new Image();
+ texture.onload=texture.onerror=()=>{
+  clearTimeout(deadline);
+  reveal();
+ };
+ texture.src='earth-map.svg';
+ if(texture.complete){
+  clearTimeout(deadline);
+  reveal();
+ }
+})();
