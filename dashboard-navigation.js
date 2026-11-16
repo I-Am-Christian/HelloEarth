@@ -101,13 +101,22 @@ function simpleStatus(title,description,button=false){
   connect.addEventListener("click",connectGoogle);
   empty.append(connect);
  }
+ if(calendar.disconnected){
+  const revoke=document.createElement("a");
+  revoke.href="https://myaccount.google.com/connections";
+  revoke.target="_blank";
+  revoke.rel="noopener noreferrer";
+  revoke.className="ws-calendar-revoke";
+  revoke.textContent=translate("Manage Google access ↗");
+  empty.append(revoke);
+ }
  root.append(empty);
 }
 function renderAgenda(){
  get("calendar-day-title").textContent=localized(calendar.date,{weekday:"long",day:"numeric",month:"long"});
  if(!calendar.connected){
   if(calendar.disconnected){
-   simpleStatus("Google Calendar disconnected","You can reconnect another Google Calendar anytime. Your HelloEarth account and student profiles stay signed in.",true);
+   simpleStatus("Google Calendar disconnected","Calendar events are hidden here. Your HelloEarth login and student profiles are unchanged. To fully revoke access, use your Google Account settings.",true);
   }else{
    simpleStatus("Connect your Google Calendar","View your lessons and appointments here with read-only access. Your calendar events are not saved to HelloEarth.",true);
   }
