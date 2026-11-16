@@ -58,3 +58,12 @@
  #progress-print .ws-assessment-entry{break-inside:avoid;margin-bottom:12px}
  @page{size:A4;margin:14mm}
 }
+.ws-attendance-history{display:grid;gap:8px;margin-top:16px}
+.ws-attendance-entry{display:grid;grid-template-columns:95px 95px minmax(0,1fr);gap:12px;align-items:center;border:1px solid rgba(168,146,215,.25);padding:10px 14px;border-radius:12px;background:rgba(24,29,56,.5);font-size:12px}
+.ws-attendance-entry strong{color:#eee5ff}.ws-attendance-entry span{color:#c4adff;text-transform:capitalize;font-weight:700}
+.ws-attendance-entry small{color:#bfc9e5;overflow-wrap:anywhere}
+.ws-attendance-summary{margin:18px 0;border:1px solid rgba(177,150,235,.28);background:rgba(42,37,70,.65);border-radius:16px;padding:17px}
+.ws-attendance-summary h3{margin:0 0 8px;color:#f0e7ff;font-size:17px}
+.ws-attendance-summary p{color:#e7dcfa;margin:0 0 5px;font-size:14px}
+.ws-attendance-summary small{color:#aebbd5}
+@media(max-width:600px){.ws-attendance-entry{grid-template-columns:90px minmax(0,1fr)}.ws-attendance-entry small{grid-column:1/-1}}
