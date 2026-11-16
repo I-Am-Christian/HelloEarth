@@ -57,6 +57,12 @@ async function hashEvent(value) {
 async function syncWeek(week) {
   if (!state.enabled || !state.userId || !week?.connected || !state.subscription) return;
   const requestId = ++state.syncId;
+  const start = Date.parse(week.windowStart), end = Date.parse(week.windowEnd), now = Date.now();
+  if (!Number.isFinite(start) || !Number.isFinite(end) ||
+      start < now - 8 * 86400000 || end > now + 16 * 86400000) {
+    status("Reminders are queued for the current and nearby upcoming weeks. Select a more recent calendar week.");
+    return;
+  }
   const events = Array.isArray(week.events) ? week.events : [];
   const dedup = new Set(), batch = [];
   for (const entry of events) {
@@ -71,7 +77,7 @@ async function syncWeek(week) {
   if (requestId !== state.syncId || !state.enabled) return;
   try {
     const result = await api({ action: "sync-reminders", windowStart: week.windowStart,
-      windowEnd: week.windowEnd, events: batch });
+      windowEnd: week.windowEnd, events: batch.slice(0, 80) });
     if (requestId !== state.syncId || !state.enabled) return;
     const count = Number(result?.scheduled ?? 0);
     status("Reminders active. " + count + " upcoming timed appointment" +
