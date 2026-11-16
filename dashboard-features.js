@@ -263,6 +263,7 @@ el("progress-student-select").addEventListener("change",async ev=>{
  const {data,error}=await db.from("atlas_skill_assessments").select("*").eq("tutor_id",entries.userId).eq("student_id",id).order("assessed_on",{ascending:false}).limit(80);
  if(error){el("progress-history").textContent=safeError(error);return}
  renderHistory(el("progress-history"),data||[]);
+ await loadAttendance(id);
 });
 el("download-progress-report").addEventListener("click",()=>{
  const id=el("progress-student-select").value,s=studentById(id);
@@ -380,9 +381,61 @@ el("spreadsheet-import-file").addEventListener("change",async ev=>{
  finally{btn.disabled=false}
 });
 
+// Manual attendance: separate from Calendar scheduling; never infer attendance.
+async function loadAttendance(id){
+ if(!id||!entries.userId)return;
+ const {data,error}=await db.from("atlas_lesson_attendance")
+  .select("lesson_date,status,note").eq("tutor_id",entries.userId).eq("student_id",id)
+  .order("lesson_date",{ascending:false}).limit(150);
+ if(error){status("attendance-feedback",safeError(error),true);return}
+ const rows=data||[];
+ if(entries.selected?.id===id){
+  const list=el("student-attendance-history");clear(list);
+  if(!rows.length){list.append(text("p","No attendance recorded yet."));}
+  for(const row of rows.slice(0,15)){
+   const item=text("div","","ws-attendance-entry");
+   item.append(text("strong",row.lesson_date),text("span",row.status),
+    text("small",row.note||"","i18n-user-content"));list.append(item);
+  }
+ }
+ if(el("progress-student-select").value===id)renderAttendanceProgress(rows);
+}
+function renderAttendanceProgress(rows){
+ const target=el("progress-attendance");clear(target);
+ const attended=rows.filter(x=>x.status==="attended").length;
+ const missed=rows.filter(x=>x.status==="missed").length;
+ const cancelled=rows.filter(x=>x.status==="cancelled").length;
+ const rate=(attended+missed)?Math.round(100*attended/(attended+missed)):null;
+ target.append(text("h3","Recorded attendance"),text("p",
+  "Attended: "+attended+" · Missed: "+missed+" · Cancelled: "+cancelled+
+  (rate===null?" · No attendance rate yet":" · Attendance rate: "+rate+"%")));
+ target.append(text("small","Attendance is manually recorded by the tutor. Cancelled lessons are excluded from the rate."));
+}
+el("attendance-date").value=today();
+el("attendance-form").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const s=entries.selected;if(!s||!entries.userId)return;
+ const date=el("attendance-date").value;
+ const note=el("attendance-note").value.trim();
+ const value=el("attendance-status").value;
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!["attended","missed","cancelled"].includes(value)){
+  status("attendance-feedback","Choose a valid date and attendance status.",true);return
+ }
+ const button=el("attendance-save");button.disabled=true;
+ try{
+  const {error}=await db.from("atlas_lesson_attendance").upsert({
+   tutor_id:entries.userId,student_id:s.id,lesson_date:date,status:value,note
+  },{onConflict:"tutor_id,student_id,lesson_date"});
+  if(error)throw error;
+  status("attendance-feedback","Attendance saved.");
+  await loadAttendance(s.id);
+ }catch(err){status("attendance-feedback",safeError(err),true)}
+ finally{button.disabled=false}
+});
+
 // Keep per-profile history and saved plans current.
 document.addEventListener("helloearth:student-opened",async ev=>{
  entries.selected=ev.detail.student;entries.lastNote=null;
  el("student-workflow").hidden=true;el("assessment-workflow").hidden=true;
- await Promise.allSettled([loadPlans(entries.selected.id),loadSkillHistory(entries.selected.id),loadLatestNote(entries.selected.id)]);
+ await Promise.allSettled([loadPlans(entries.selected.id),loadSkillHistory(entries.selected.id),loadLatestNote(entries.selected.id),loadAttendance(entries.selected.id)]);
 });
