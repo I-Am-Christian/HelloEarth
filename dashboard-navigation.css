@@ -118,3 +118,30 @@
 
 .ws-calendar-revoke{display:inline-block;color:#c5b0fa;font-weight:700;font-size:12px;text-decoration:underline;text-underline-offset:3px;margin-top:4px}
 .ws-calendar-revoke:hover{color:#fff}
+
+/* Connected Google identity, sync state and the actual calendars being queried. */
+.ws-calendar-connection{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:15px 19px;margin:0 0 14px;border:1px solid rgba(160,143,224,.42);border-radius:17px;background:linear-gradient(110deg,rgba(51,42,85,.77),rgba(29,47,79,.77))}
+.ws-connection-indicator{width:12px;height:12px;border-radius:50%;background:#8b88aa;box-shadow:0 0 0 5px rgba(128,120,160,.15);flex:none}
+.ws-connection-indicator.is-connected{background:#70d6ad;box-shadow:0 0 0 5px rgba(75,194,143,.16)}
+.ws-connection-identity{display:flex;flex-direction:column;min-width:0;gap:4px}
+.ws-connection-identity>span{font-size:10px;color:#ac9ccc;letter-spacing:1.3px;font-weight:800}
+.ws-connection-identity>strong{font-size:15px;color:#faf6ff;overflow-wrap:anywhere;line-height:1.45}
+.ws-connection-status{margin-left:auto;font-size:12px;color:#c4c9e0;line-height:1.45}
+.ws-calendar-source{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin:0 0 15px}
+.ws-calendar-source[hidden]{display:none!important}
+.ws-calendar-source label{color:#b5bce0;font-size:12px;font-weight:700}
+.ws-calendar-source select{color:#f5f1ff;background:#292c4f;border:1px solid rgba(177,152,232,.54);border-radius:11px;padding:9px 13px;max-width:min(100%,350px);font-size:13px}
+.ws-calendar-source #calendar-source-count{font-size:11px;color:#a6b0d1}
+.ws-day{position:relative}
+.ws-day-event-dot{display:block;background:#c7a5fd;border-radius:100%;height:5px;width:5px;margin-top:-5px}
+.ws-day-event-dot[hidden]{display:none!important}
+.ws-event-calendar{color:#c3a5f2!important;font-weight:700}
+@media(max-width:760px){
+ .ws-calendar-connection{align-items:flex-start;padding:13px 14px;gap:10px}
+ .ws-connection-status{flex-basis:100%;margin-left:22px}
+ .ws-connection-identity>strong{font-size:13px}
+ .ws-calendar-source{align-items:stretch;gap:6px}
+ .ws-calendar-source label{flex-basis:100%}
+ .ws-calendar-source select{max-width:100%;flex:1 1 190px;min-width:0}
+ .ws-calendar-source #calendar-source-count{align-self:center}
+}
