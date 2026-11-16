@@ -12,23 +12,67 @@ const toDate = date => new Date(date.getFullYear(),date.getMonth(),date.getDate(
 const calendar = {view:"overview",date:toDate(new Date()),week:monday(new Date()),
  token:null,pendingToken:null,connected:false,events:[],sources:[],source:"all",email:"",
  request:0,userId:null,disconnected:false,restored:false,errorType:"",errorDescription:"",writeAuthorized:false};
-// A temporary token is retained in this browser tab only; never store a Google refresh token.
+// Google access is short-lived. Persist only the access token (not any Google refresh token)
+// so a reload, tab switch or browser restart within its lifespan does not drop Calendar.
+// JS-accessible storage is not a secure home for long-lived Google credentials.
+// Full automatic renewal requires an authenticated server-side token vault.
 const tokenKey = id => "helloearth-calendar-session:" + id;
-function rememberToken(id,token){
- if(!id||!token)return;
- try{sessionStorage.setItem(tokenKey(id),JSON.stringify({token,expires:Date.now()+45*60*1000}))}catch{}
+const linkKey = id => "helloearth-calendar-link:" + id;
+const googleTokenLifetime = 45 * 60 * 1000;
+function storageRead(storage,key){
+ try{return storage.getItem(key)}catch{return null}
 }
-function recalledToken(id){
+function storageRemove(storage,key){
+ try{storage.removeItem(key)}catch{}
+}
+function readStoredToken(id){
  if(!id)return null;
+ const key=tokenKey(id);
+ const raw=storageRead(localStorage,key)||storageRead(sessionStorage,key);
+ if(!raw)return null;
  try{
-  const raw=sessionStorage.getItem(tokenKey(id));if(!raw)return null;
   const saved=JSON.parse(raw);
-  if(saved.expires>Date.now()&&typeof saved.token==="string")return saved.token;
-  sessionStorage.removeItem(tokenKey(id));
- }catch{}
- return null;
+  if(typeof saved.token!=="string" || !saved.token ||
+     !Number.isFinite(saved.expires) || saved.expires<=Date.now()+10_000){
+   storageRemove(localStorage,key);storageRemove(sessionStorage,key);return null;
+  }
+  // Migrate older same-tab connections while keeping the ORIGINAL expiry.
+  if(!storageRead(localStorage,key)){
+   try{localStorage.setItem(key,JSON.stringify({
+    token:saved.token,expires:saved.expires,
+    canWrite:Boolean(saved.canWrite||storageRead(sessionStorage,"helloearth-calendar-write:"+id)==="1")
+   }))}catch{}
+  }
+  storageRemove(sessionStorage,key);
+  return {token:saved.token,expires:saved.expires,
+   canWrite:Boolean(saved.canWrite||storageRead(sessionStorage,"helloearth-calendar-write:"+id)==="1")};
+ }catch{
+  storageRemove(localStorage,key);storageRemove(sessionStorage,key);return null;
+ }
 }
-function forgetToken(id){if(!id)return;try{sessionStorage.removeItem(tokenKey(id))}catch{}}
+function rememberToken(id,token,canWrite=false){
+ if(!id||typeof token!=="string"||!token)return;
+ const entry=JSON.stringify({
+  token,expires:Date.now()+googleTokenLifetime,canWrite:Boolean(canWrite)
+ });
+ try{localStorage.setItem(tokenKey(id),entry);storageRemove(sessionStorage,tokenKey(id))}
+ catch{try{sessionStorage.setItem(tokenKey(id),entry)}catch{}}
+}
+function forgetToken(id){
+ if(!id)return;
+ storageRemove(localStorage,tokenKey(id));
+ storageRemove(sessionStorage,tokenKey(id));
+ storageRemove(sessionStorage,"helloearth-calendar-write:"+id);
+}
+function connectionLabel(id){
+ if(!id)return "";
+ try{return JSON.parse(localStorage.getItem(linkKey(id))||"null")?.email||""}catch{return ""}
+}
+function rememberConnection(id,email){
+ if(!id||!email)return;
+ try{localStorage.setItem(linkKey(id),JSON.stringify({email,linkedAt:Date.now()}))}catch{}
+}
+function forgetConnection(id){if(id)storageRemove(localStorage,linkKey(id))}
 function setConnection(email,status,active=false){
  const emailNode=get("calendar-account-email");
  const statusNode=get("calendar-sync-status");
