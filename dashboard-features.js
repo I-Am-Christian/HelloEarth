@@ -145,7 +145,20 @@ Previous lesson follow-up: ${revisit}
 `;
 }
 function setPlanVisibility(panel){el("student-workflow").hidden=panel!=="plan";el("assessment-workflow").hidden=panel!=="skills"}
-el("plan-student-lesson").addEventListener("click",()=>{const s=entries.selected;if(!s)return;setPlanVisibility("plan");el("workflow-heading").textContent="Prepare a lesson for "+s.display_name;el("plan-level").value=s.cefr_level==="UNASSESSED"?"A2":s.cefr_level;el("plan-topic").value=s.focus_areas?.[0]||s.learning_goals?.[0]||"";el("plan-editor").value="";status("planner-feedback",s.cefr_level==="UNASSESSED"?"Level not assessed: A2 is a placeholder. Choose an appropriate level before drafting.":"");});
+el("plan-student-lesson").addEventListener("click",async()=>{
+ const student=entries.selected;if(!student)return;
+ const id=student.id;setPlanVisibility("plan");
+ el("workflow-heading").textContent="Prepare a lesson for "+student.display_name;
+ el("plan-level").value=student.cefr_level==="UNASSESSED"?"A2":student.cefr_level;
+ el("plan-topic").value=student.focus_areas?.[0]||student.learning_goals?.[0]||"";
+ status("planner-feedback","Preparing your editable lesson template…");
+ await loadLatestNote(id);
+ if(entries.selected?.id!==id)return;
+ el("plan-editor").value=draftLesson(student);
+ status("planner-feedback",student.cefr_level==="UNASSESSED"
+  ?"Draft ready. Level is not assessed: A2 is a placeholder; choose the right level and regenerate."
+  :"Draft ready from this student’s goals and last recorded lesson. Review and save when ready.");
+});
 el("assess-student").addEventListener("click",()=>{if(!entries.selected)return;setPlanVisibility("skills");el("skill-date").value=today();});
 el("generate-plan").addEventListener("click",async()=>{
  const s=entries.selected;if(!s)return;
