@@ -170,12 +170,16 @@ async function loadStudents() {
   }
   state.students = results;
   renderStudents();
+  document.dispatchEvent(new CustomEvent("helloearth:workspace-data", {
+    detail: { userId: state.user.id, students: state.students }
+  }));
 }
 
 async function openStudent(id) {
   state.selected = state.students.find(s => s.id === id) || null;
   if (!state.selected) return;
   const s = state.selected;
+  document.dispatchEvent(new CustomEvent("helloearth:student-opened", {detail:{student:s}}));
   $("student-detail").hidden = false;
   $("selected-name").textContent = s.display_name;
   const target = $("student-fields");
@@ -445,6 +449,13 @@ async function init() {
     console.error("Workspace initialization failed", err?.name || "unknown error");
   }
 }
+window.HelloEarthWorkspace = {
+ get userId(){return state.user?.id||null},
+ get students(){return state.students.slice()},
+ get selectedStudent(){return state.selected},
+ openStudent,
+ reloadStudents:loadStudents
+};
 init();
 
 document.addEventListener("helloearth:languagechanged",()=>{if(state.user){renderStudents();loadPlan().catch(()=>{})}});
