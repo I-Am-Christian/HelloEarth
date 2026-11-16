@@ -541,8 +541,9 @@ db.auth.onAuthStateChange((event,session)=>{
   }
  }
  if(event==="SIGNED_OUT"){
-  forgetToken(calendar.userId);
-  forgetConnection(calendar.userId);
+  const owner=calendar.userId||window.HelloEarthWorkspace?.userId;
+  forgetToken(owner);
+  forgetConnection(owner);
   calendar.token=null;calendar.pendingToken=null;calendar.connected=false;calendar.writeAuthorized=false;
   calendar.email="";calendar.events=[];calendar.sources=[];
   document.dispatchEvent(new CustomEvent("helloearth:calendar-disconnected"));
