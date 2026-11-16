@@ -1,0 +1,21 @@
+/* Slide navigation out of view while scrolling down. */
+body.space-home>.site-header,
+body.space-legal>.site-header,
+body.space-pricing>.pricing-header{
+ position:sticky!important;
+ top:0!important;
+ z-index:150!important;
+ transform:translate3d(0,0,0);
+ transition:transform .25s ease,box-shadow .25s ease!important;
+}
+body.space-home>.site-header.scroll-header-hidden,
+body.space-legal>.site-header.scroll-header-hidden,
+body.space-pricing>.pricing-header.scroll-header-hidden{
+ transform:translate3d(0,calc(-100% - 10px),0)!important;
+ pointer-events:none!important;
+}
+@media(prefers-reduced-motion:reduce){
+ body.space-home>.site-header,body.space-legal>.site-header,body.space-pricing>.pricing-header{
+  transition:none!important;
+ }
+}
