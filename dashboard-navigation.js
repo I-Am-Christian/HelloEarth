@@ -45,7 +45,7 @@ function setCalendarSources(){
  for(const source of calendar.sources){
   const option=document.createElement("option");option.value=source.id;
   option.textContent=(source.primary?"★ ":"")+source.name;
-  select.append(option);
+  option.classList.add("i18n-user-content");select.append(option);
  }
  if(!calendar.sources.some(s=>s.id===calendar.source))calendar.source="all";
  select.value=calendar.source;
@@ -283,7 +283,7 @@ async function refreshEvents(){
   calendar.sources=sourcesResult.value;
   const primary=calendar.sources.find(c=>c.primary);
   // When Google UserInfo is unavailable, avoid claiming a calendar ID is a verified email.
-  if(!calendar.email && primary && /^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(primary.id)){
+  if(!calendar.email && primary && primary.id.includes("@") && !primary.id.includes(" ")){
    calendar.email="Calendar ID: "+primary.id;
   }
   if(!calendar.sources.length){
