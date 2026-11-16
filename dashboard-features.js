@@ -104,6 +104,9 @@ function draftLesson(s){
  el("plan-topic").value=String(topic).slice(0,200);
  const goals=(s.learning_goals||[]).slice(0,2).join("; ")||"Improve communicative confidence";
  const focus=(s.focus_areas||[]).slice(0,3).join("; ")||"Vocabulary, sentence structure and fluency";
+ const strengths=(s.strengths||[]).slice(0,3).join("; ")||"Not yet recorded";
+ const weaknesses=(s.weaknesses||[]).slice(0,3).join("; ")||"Use observation during warm-up";
+ const currentHomework=s.current_homework||"No current homework recorded";
  const interests=(s.interests||[]).slice(0,2).join("; ")||"Student-selected everyday examples";
  const previous=entries.lastNote;
  const revisit=previous?[(previous.challenges||[]).join("; "),(previous.next_steps||[]).join("; "),previous.homework||""].filter(Boolean).join(" | "):"No previous lesson observations recorded";
@@ -114,6 +117,9 @@ function draftLesson(s){
 Student: ${s.display_name}
 Goal: ${goals}
 Areas to practise: ${focus}
+Known strengths: ${strengths}
+Needs improvement: ${weaknesses}
+Current homework: ${currentHomework}
 Context to personalize: ${interests}
 Previous lesson follow-up: ${revisit}
 
@@ -273,6 +279,7 @@ el("download-progress-report").addEventListener("click",()=>{
  print.append(text("p","Goals: "+((s.learning_goals||[]).join("; ")||"Not recorded")));
  print.append(text("p","Generated: "+new Date().toLocaleDateString()));
  const copy=el("progress-history").cloneNode(true);print.append(copy);
+ print.append(el("progress-attendance").cloneNode(true));
  window.print();
 });
 
