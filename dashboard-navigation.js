@@ -173,10 +173,10 @@ function renderAgenda(){
  get("calendar-day-title").textContent=localized(calendar.date,{weekday:"long",day:"numeric",month:"long"});
  if(!calendar.connected){
   get("calendar-source-row").hidden=true;
-  if(calendar.disconnected){
-   simpleStatus("Google Calendar disconnected","Calendar events are hidden here. Your HelloEarth login and student profiles are unchanged. To fully revoke access, use your Google Account settings.",true);
-  }else if(calendar.errorType){
+  if(calendar.errorType){
    simpleStatus(calendar.errorType,calendar.errorDescription,true);
+  }else if(calendar.disconnected){
+   simpleStatus("Google Calendar disconnected","Calendar events are hidden here. Your HelloEarth login and student profiles are unchanged. To fully revoke access, use your Google Account settings.",true);
   }else{
    simpleStatus("Connect your Google Calendar","View your lessons and appointments here with read-only access. Your calendar events are not saved to HelloEarth.",true);
   }
@@ -366,7 +366,10 @@ async function connectGoogle(){
   if(result.data?.url)window.location.assign(result.data.url);
   else if(!session)throw new Error("Unable to start Google authorization.");
  }catch(error){
-  simpleStatus("Google Calendar connection could not start",error.message||"Please try again.",true);
+  calendar.errorType="Google Calendar connection could not start";
+  calendar.errorDescription=error.message||"Please try again.";
+  setConnection(calendar.email||"",translate("Calendar connection failed"));
+  renderAgenda();
  }
 }
 get("calendar-prev").addEventListener("click",()=>{calendar.week.setDate(calendar.week.getDate()-7);calendar.date=new Date(calendar.week);renderWeek();if(calendar.token)refreshEvents()});
