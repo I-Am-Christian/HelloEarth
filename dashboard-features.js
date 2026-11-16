@@ -4,7 +4,7 @@ import { db } from "./supabase-client.js";
 // GitHub stores implementation code, never learner profiles or lesson contents.
 const el=id=>document.getElementById(id);
 const workspace=()=>window.HelloEarthWorkspace;
-const entries={students:[],userId:null,selected:null,assessment:[],plans:[],events:[],calendarReady:false};
+const entries={students:[],userId:null,selected:null,assessment:[],plans:[],events:[],calendarReady:false,lastNote:null};
 const skills=["speaking","listening","reading","writing","grammar","confidence"];
 const toLocalDate=d=>new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
 const today=()=>toLocalDate(new Date());
@@ -105,6 +105,8 @@ function draftLesson(s){
  const goals=(s.learning_goals||[]).slice(0,2).join("; ")||"Improve communicative confidence";
  const focus=(s.focus_areas||[]).slice(0,3).join("; ")||"Vocabulary, sentence structure and fluency";
  const interests=(s.interests||[]).slice(0,2).join("; ")||"Student-selected everyday examples";
+ const previous=entries.lastNote;
+ const revisit=previous?[(previous.challenges||[]).join("; "),(previous.next_steps||[]).join("; "),previous.homework||""].filter(Boolean).join(" | "):"No previous lesson observations recorded";
  const mins=[Math.round(duration*.15),Math.round(duration*.2),Math.round(duration*.4)];
  const wrap=duration-mins.reduce((a,b)=>a+b,0);
  return `# ${topic} — ${level} | ${duration} minutes
@@ -113,6 +115,7 @@ Student: ${s.display_name}
 Goal: ${goals}
 Areas to practise: ${focus}
 Context to personalize: ${interests}
+Previous lesson follow-up: ${revisit}
 
 ## Warm-up (${mins[0]} min)
 - Ask what the learner remembers from the last lesson.
@@ -144,7 +147,19 @@ Context to personalize: ${interests}
 function setPlanVisibility(panel){el("student-workflow").hidden=panel!=="plan";el("assessment-workflow").hidden=panel!=="skills"}
 el("plan-student-lesson").addEventListener("click",()=>{const s=entries.selected;if(!s)return;setPlanVisibility("plan");el("workflow-heading").textContent="Prepare a lesson for "+s.display_name;el("plan-level").value=s.cefr_level==="UNASSESSED"?"A2":s.cefr_level;el("plan-topic").value=s.focus_areas?.[0]||s.learning_goals?.[0]||"";el("plan-editor").value="";status("planner-feedback",s.cefr_level==="UNASSESSED"?"Level not assessed: A2 is a placeholder. Choose an appropriate level before drafting.":"");});
 el("assess-student").addEventListener("click",()=>{if(!entries.selected)return;setPlanVisibility("skills");el("skill-date").value=today();});
-el("generate-plan").addEventListener("click",()=>{const s=entries.selected;if(s){el("plan-editor").value=draftLesson(s);status("planner-feedback","Editable template created from current profile context. Review before using.");}});
+el("generate-plan").addEventListener("click",async()=>{
+ const s=entries.selected;if(!s)return;
+ const id=s.id;await loadLatestNote(id);if(entries.selected?.id!==id)return;
+ el("plan-editor").value=draftLesson(s);
+ status("planner-feedback","Editable lesson template created from the student profile and latest recorded lesson. Review before using.");
+});
+async function loadLatestNote(id){
+ const {data,error}=await db.from("atlas_lesson_notes")
+  .select("summary,challenges,next_steps,homework,lesson_date")
+  .eq("student_id",id).eq("tutor_id",entries.userId)
+  .order("lesson_date",{ascending:false}).limit(1);
+ if(entries.selected?.id===id)entries.lastNote=!error&&data?.length?data[0]:null;
+}
 el("save-plan").addEventListener("click",async()=>{
  const s=entries.selected;if(!s||!entries.userId)return;
  const markdown=el("plan-editor").value.trim(),topic=el("plan-topic").value.trim();
@@ -337,6 +352,13 @@ async function importSpreadsheet(file){
  status("dashboard-feedback",newRows.length+" students imported successfully. "+skipped+" duplicates skipped.");
 }
 el("spreadsheet-import-button").addEventListener("click",()=>el("spreadsheet-import-file").click());
+el("download-import-template").addEventListener("click",()=>{
+ const csv="Name,CEFR,Learning Goals,Focus Areas,Interests,Language,Notes\nExample Student,B1,Speak confidently,Fluency; grammar,Travel,Spanish,Replace this example with your student";
+ const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
+ const url=URL.createObjectURL(blob);
+ const link=document.createElement("a");link.href=url;link.download="helloearth-student-template.csv";link.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
 el("spreadsheet-import-file").addEventListener("change",async ev=>{
  const file=ev.target.files?.[0];ev.target.value="";if(!file)return;
  const btn=el("spreadsheet-import-button");btn.disabled=true;status("dashboard-feedback","Reading student spreadsheet…");
@@ -347,7 +369,7 @@ el("spreadsheet-import-file").addEventListener("change",async ev=>{
 
 // Keep per-profile history and saved plans current.
 document.addEventListener("helloearth:student-opened",async ev=>{
- entries.selected=ev.detail.student;
+ entries.selected=ev.detail.student;entries.lastNote=null;
  el("student-workflow").hidden=true;el("assessment-workflow").hidden=true;
- await Promise.allSettled([loadPlans(entries.selected.id),loadSkillHistory(entries.selected.id)]);
+ await Promise.allSettled([loadPlans(entries.selected.id),loadSkillHistory(entries.selected.id),loadLatestNote(entries.selected.id)]);
 });
