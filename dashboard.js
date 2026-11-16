@@ -269,9 +269,6 @@ function startStudentForm(edit) {
   $("student-status").value = student?.record_status || "reference";
   $("student-assessment").value = student?.assessment_notes || "";
   $("student-history").value = student?.lesson_history_notes || "";
-  $("student-background").value = student?.background_notes || "";
-  $("student-preferences").value = (student?.teaching_preferences || []).join("\n");
-  $("student-level-notes").value = student?.level_notes || "";
   statusMessage($("modal-feedback"), "");
   showModal("student-modal");
 }
@@ -394,9 +391,6 @@ $("student-form").addEventListener("submit", async event => {
       record_status: $("student-status").value,
       assessment_notes: $("student-assessment").value.trim(),
       lesson_history_notes: $("student-history").value.trim(),
-      background_notes: $("student-background").value.trim(),
-      teaching_preferences: arrayLines("student-preferences"),
-      level_notes: $("student-level-notes").value.trim(),
       updated_at: new Date().toISOString()
     };
     if (state.editMode) {
