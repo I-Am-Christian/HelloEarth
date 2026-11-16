@@ -6,8 +6,8 @@
 <title>My workspace | HelloEarth</title>
 <link rel="icon" href="logo.svg" type="image/svg+xml">
 <link rel="stylesheet" href="portal.css?v=20261115pricing1">
-<script type="module" src="dashboard.js?v=20261116-features1"></script>
-<link rel="stylesheet" href="page-i18n.css?v=20261115full4"><script src="page-i18n.js?v=20261116-features1" defer></script><link rel="stylesheet" href="space-theme.css?v=20261115-global-space2"><link rel="stylesheet" href="dashboard-navigation.css?v=20261116-scheduling1"><link rel="stylesheet" href="dashboard-features.css?v=20261116-features1"></head>
+<script type="module" src="dashboard.js?v=20261116-features3"></script>
+<link rel="stylesheet" href="page-i18n.css?v=20261115full4"><script src="page-i18n.js?v=20261116-features1" defer></script><link rel="stylesheet" href="space-theme.css?v=20261115-global-space2"><link rel="stylesheet" href="dashboard-navigation.css?v=20261116-scheduling3"><link rel="stylesheet" href="dashboard-features.css?v=20261116-features1"></head>
 <body class="space-theme space-dashboard portal-page">
 <div id="checking" style="padding:20vh 20px;text-align:center;color:#d9cfff">Checking your secure session…</div>
 <div class="workspace" id="workspace" hidden>
@@ -83,7 +83,7 @@
     <div id="students-view" class="ws-view" role="tabpanel" aria-labelledby="students-tab" hidden>
     <section aria-labelledby="students-heading">
       <div class="ws-panel-head"><div><h2 id="students-heading">Your students</h2><p>Keep goals, progress and lesson notes together.</p></div>
-        <div class="ws-controls"><label class="visually-hidden" for="student-search">Search students</label><input class="ws-search" id="student-search" type="search" placeholder="Search by name or goal…"><button class="ws-mini-btn" type="button" id="import-students">Import students</button><input class="visually-hidden" type="file" id="import-file" accept=".json,application/json" aria-label="Import private student JSON file"><button type="button" class="ws-mini-btn" id="spreadsheet-import-button">Import CSV / Excel</button><input type="file" id="spreadsheet-import-file" class="visually-hidden" accept=".csv,text/csv,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" aria-label="Import student spreadsheet"><button class="dash-primary" type="button" id="add-student">+ Add student</button></div>
+        <div class="ws-controls"><label class="visually-hidden" for="student-search">Search students</label><input class="ws-search" id="student-search" type="search" placeholder="Search by name or goal…"><button class="ws-mini-btn" type="button" id="import-students">Import students</button><input class="visually-hidden" type="file" id="import-file" accept=".json,application/json" aria-label="Import private student JSON file"><button type="button" class="ws-mini-btn" id="spreadsheet-import-button">Import CSV / Excel</button><button type="button" class="ws-mini-btn" id="download-import-template">CSV template</button><input type="file" id="spreadsheet-import-file" class="visually-hidden" accept=".csv,text/csv,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" aria-label="Import student spreadsheet"><button class="dash-primary" type="button" id="add-student">+ Add student</button></div>
       </div>
       <div id="student-grid" class="ws-grid" aria-live="polite"><div class="ws-empty">Loading private profiles…</div></div>
       <div id="dashboard-feedback" role="status" class="ws-feedback" aria-live="polite"></div>
@@ -192,4 +192,4 @@
     </form>
   </div>
 </div>
-<script type="module" src="dashboard-navigation.js?v=20261116-scheduling1"></script><script type="module" src="dashboard-features.js?v=20261116-features1"></script></body></html>
+<script type="module" src="dashboard-navigation.js?v=20261116-scheduling3"></script><script type="module" src="dashboard-features.js?v=20261116-features3"></script></body></html>
