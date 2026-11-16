@@ -38,12 +38,14 @@ function readStoredToken(id){
   }
   // Migrate older same-tab connections while keeping the ORIGINAL expiry.
   if(!storageRead(localStorage,key)){
-   try{localStorage.setItem(key,JSON.stringify({
-    token:saved.token,expires:saved.expires,
-    canWrite:Boolean(saved.canWrite||storageRead(sessionStorage,"helloearth-calendar-write:"+id)==="1")
-   }))}catch{}
-  }
-  storageRemove(sessionStorage,key);
+   try{
+    localStorage.setItem(key,JSON.stringify({
+     token:saved.token,expires:saved.expires,
+     canWrite:Boolean(saved.canWrite||storageRead(sessionStorage,"helloearth-calendar-write:"+id)==="1")
+    }));
+    storageRemove(sessionStorage,key);
+   }catch{/* Some private browsers disallow persistent storage; keep the tab copy. */}
+  }else storageRemove(sessionStorage,key);
   return {token:saved.token,expires:saved.expires,
    canWrite:Boolean(saved.canWrite||storageRead(sessionStorage,"helloearth-calendar-write:"+id)==="1")};
  }catch{
@@ -101,7 +103,8 @@ const isCalendarOff = id => {try{return Boolean(id && localStorage.getItem(calen
 const setCalendarOff = (id,value) => {try{if(id){if(value)localStorage.setItem(calendarStorageKey(id),"1");else localStorage.removeItem(calendarStorageKey(id))}}catch{}};
 function updateCalendarControls(){
  get("calendar-refresh").hidden=!calendar.token||calendar.disconnected;
- get("calendar-disconnect").hidden=!calendar.token||calendar.disconnected;
+ // Even an expired connected account can be forgotten without signing out of HelloEarth.
+ get("calendar-disconnect").hidden=calendar.disconnected||(!calendar.token&&!connectionLabel(calendar.userId));
 }
 const language = () => document.documentElement.lang || "en";
 const localized = (date,options) => date.toLocaleDateString(language(),options);
