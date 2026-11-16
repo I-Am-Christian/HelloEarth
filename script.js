@@ -105,7 +105,6 @@ if ('IntersectionObserver' in window) {
  const sun=scene?.querySelector('.distant-sun');
  if(!scene||!earth||!sun)return;
  let launched=false;
- let touchStart=null;
 
  // Only produce audio from a user gesture; never autoplay on page load.
  const playLaunchSound=()=>{
@@ -146,17 +145,18 @@ if ('IntersectionObserver' in window) {
   }
  };
 
- const mobileLaunch=document.querySelector('.mobile-launch-control');
  const launchOnce=()=>{
   if(launched)return;
   launched=true;
   earth.classList.add('rocket-launched');
   earth.setAttribute('aria-label','Rocket already launched toward the Moon');
-  if(mobileLaunch)mobileLaunch.hidden=true;
   playLaunchSound();
   scene.dispatchEvent(new Event('rocketlaunch'));
  };
 
+
+ // Earth is the launch control. The artwork stage is stationary while the planet
+ // moves under the user's finger, so remember where the gesture STARTED.
  earth.addEventListener('click',launchOnce);
  earth.addEventListener('keydown',event=>{
   if(event.key==='Enter'||event.key===' '){
@@ -164,64 +164,46 @@ if ('IntersectionObserver' in window) {
    launchOnce();
   }
  });
- // Some mobile browsers miss the synthesized click on a transformed div.
- // A short touch ending over Earth also launches, without launching on scrolling.
- if('PointerEvent' in window){
-  earth.addEventListener('pointerdown',event=>{
-   if(event.pointerType==='touch'||event.pointerType==='pen')touchStart={x:event.clientX,y:event.clientY,id:event.pointerId};
-  },{passive:true});
-  earth.addEventListener('pointerup',event=>{
-   if(!touchStart||event.pointerId!==touchStart.id)return;
-   const distance=Math.hypot(event.clientX-touchStart.x,event.clientY-touchStart.y);
-   touchStart=null;
-   if(distance<17){
-    event.preventDefault();
-    launchOnce();
-   }
-  });
-  earth.addEventListener('pointercancel',()=>{touchStart=null});
- }else{
-  earth.addEventListener('touchstart',event=>{
-   const t=event.changedTouches[0];
-   if(t)touchStart={x:t.clientX,y:t.clientY};
-  },{passive:true});
-  earth.addEventListener('touchend',event=>{
-   const t=event.changedTouches[0];
-   if(t&&touchStart&&Math.hypot(t.clientX-touchStart.x,t.clientY-touchStart.y)<17)launchOnce();
-   touchStart=null;
-  },{passive:true});
- }
- // A stationary launch control stays reliably tappable even while Earth moves.
- // iOS WebKit can miss a synthetic click when a transformed scene changes under a finger.
- // Listen to touchend on the native button as a fallback; launchOnce de-duplicates events.
- if(mobileLaunch){
-  mobileLaunch.addEventListener('click',launchOnce);
-  let buttonTouch=null;
-  mobileLaunch.addEventListener('touchstart',event=>{
-   const point=event.changedTouches[0];
-   if(point)buttonTouch={x:point.clientX,y:point.clientY,id:point.identifier};
-  },{passive:true});
-  mobileLaunch.addEventListener('touchend',event=>{
-   if(!buttonTouch)return;
-   const point=[...event.changedTouches].find(t=>t.identifier===buttonTouch.id);
-   const traveled=point?Math.hypot(point.clientX-buttonTouch.x,point.clientY-buttonTouch.y):Infinity;
-   buttonTouch=null;
-   if(traveled<24)launchOnce();
-  },{passive:true});
-  mobileLaunch.addEventListener('touchcancel',()=>{buttonTouch=null},{passive:true});
- }
- // Touch fallback on the solar stage for browsers that miss taps on moving transforms.
  const stage=document.querySelector('.hero-art-spacer');
  if(stage){
-  stage.addEventListener('pointerup',event=>{
-   if(launched||event.pointerType!=='touch')return;
-   const box=earth.getBoundingClientRect();
-   const padding=18;
-   if(event.clientX>=box.left-padding&&event.clientX<=box.right+padding&&
-      event.clientY>=box.top-padding&&event.clientY<=box.bottom+padding){
-    launchOnce();
-   }
-  });
+  const nearEarth=(x,y)=>{
+   const r=earth.getBoundingClientRect();
+   const padding=window.matchMedia('(pointer:coarse)').matches?26:10;
+   return Math.hypot(x-r.left-r.width/2,y-r.top-r.height/2)<=Math.max(r.width,r.height)/2+padding;
+  };
+  const finish=(gesture,x,y)=>{
+   if(!gesture||launched)return;
+   if(performance.now()-gesture.time>1000)return;
+   if(Math.hypot(x-gesture.x,y-gesture.y)>25)return;
+   launchOnce();
+  };
+  let press=null, touch=null;
+  stage.addEventListener('pointerdown',event=>{
+   if(launched||(event.button!==undefined&&event.button!==0))return;
+   press=nearEarth(event.clientX,event.clientY)
+    ?{id:event.pointerId,x:event.clientX,y:event.clientY,time:performance.now()}:null;
+  },true);
+  window.addEventListener('pointerup',event=>{
+   if(!press||press.id!==event.pointerId)return;
+   const start=press;press=null;
+   finish(start,event.clientX,event.clientY);
+  },true);
+  window.addEventListener('pointercancel',()=>{press=null},true);
+  // iOS fallback for WebKit builds that do not emit matching pointer events.
+  stage.addEventListener('touchstart',event=>{
+   if(launched||event.touches.length!==1){touch=null;return}
+   const p=event.changedTouches[0];
+   touch=p&&nearEarth(p.clientX,p.clientY)
+    ?{id:p.identifier,x:p.clientX,y:p.clientY,time:performance.now()}:null;
+  },{capture:true,passive:true});
+  window.addEventListener('touchend',event=>{
+   if(!touch)return;
+   const p=[...event.changedTouches].find(point=>point.identifier===touch.id);
+   if(!p)return;
+   const start=touch;touch=null;
+   finish(start,p.clientX,p.clientY);
+  },{capture:true,passive:true});
+  window.addEventListener('touchcancel',()=>{touch=null},{capture:true,passive:true});
  }
  sun.addEventListener('click',()=>{
   sun.classList.toggle('sun-boost');
@@ -426,7 +408,12 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
 
  scene.addEventListener('rocketlaunch',()=>{
   if(flight||attached)return;
+  fit();
   const rect=stage.getBoundingClientRect();
+  if(!rect.width||!rect.height){
+   requestAnimationFrame(()=>scene.dispatchEvent(new Event('rocketlaunch')));
+   return;
+  }
   const start=center(earth,rect);
   const moonCenter=center(moon,rect);
   const dx=moonCenter.x-start.x,dy=moonCenter.y-start.y;
