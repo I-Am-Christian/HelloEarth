@@ -232,7 +232,8 @@
   function render(resetScroll=true){
     for(const btn of mini.querySelectorAll('[data-demo-go]')){
       if(!btn.classList.contains('he-mini-nav')&&!btn.classList.contains('he-demo-mobile-tab'))continue;
-      const active=btn.dataset.demoGo===state.view;
+      const current=['notes','plan'].includes(state.view)?'students':state.view;
+      const active=btn.dataset.demoGo===current;
       btn.classList.toggle('is-active',active);
       btn.setAttribute('aria-pressed',String(active));
     }
@@ -257,7 +258,16 @@
     if(t.dataset.demoReset!==undefined){state=initial();render();return}
     if(t.dataset.demoAddEvent!==undefined){state.calendarForm=!state.calendarForm;render(false);return}
     if(t.dataset.demoGo){go(t.dataset.demoGo,t.dataset.demoPerson);return}
-    if(t.dataset.demoStudent){state.selected=t.dataset.demoStudent;state.status='';go('students',state.selected);return}
+    if(t.dataset.demoStudent){
+      state.selected=t.dataset.demoStudent;state.status='';go('students',state.selected);
+      const scroll=mini.querySelector('.he-demo-scroll');
+      const detail=mini.querySelector('.he-demo-profile-real');
+      if(scroll&&detail&&scroll.getBoundingClientRect&&detail.getBoundingClientRect){
+        const dy=detail.getBoundingClientRect().top-scroll.getBoundingClientRect().top;
+        scroll.scrollTop+=Math.max(0,dy-16);
+      }
+      return;
+    }
     if(t.dataset.demoDay!==undefined){state.day=Number(t.dataset.demoDay);render();return}
     if(t.dataset.demoAddStudent!==undefined){state.studentForm=!state.studentForm;render(false);return}
     if(t.dataset.demoCancel!==undefined){state.studentForm=false;state.calendarForm=false;render(false);return}
