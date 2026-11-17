@@ -1,0 +1,132 @@
+/* Optional features added to the fictional homepage dashboard only. */
+.preview-section .he-demo-real{position:relative}
+.he-demo-real .he-demo-utility-btn{
+ display:inline-flex;align-items:center;justify-content:center;
+ padding:7px 9px;min-height:31px;white-space:nowrap;
+ border:1px solid rgba(176,143,228,.4);border-radius:9px;
+ background:rgba(102,76,165,.21);color:#e5d5ff;font-size:10px;font-weight:700;
+}
+.he-demo-real .he-demo-utility-btn:hover{background:rgba(127,94,188,.35);color:#fff}
+.he-demo-real .he-demo-account{flex-wrap:wrap;justify-content:flex-end}
+.he-demo-real .he-demo-tour{
+ position:absolute;z-index:30;
+ left:186px;right:13px;bottom:43px;
+ padding:14px 17px;
+ border:1px solid rgba(189,161,247,.73);border-radius:14px;
+ background:linear-gradient(135deg,rgba(56,42,94,.98),rgba(25,39,68,.98));
+ box-shadow:0 16px 45px rgba(0,0,0,.45);
+ color:#f3edff;
+}
+.he-demo-real .he-demo-tour-top,.he-demo-real .he-demo-tour-actions{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.he-demo-real .he-demo-tour-top small{font-size:9px;letter-spacing:1.2px;color:#d6bcff;font-weight:800}
+.he-demo-real .he-demo-tour-top button{border:0;background:transparent;color:#fff;font-size:20px}
+.he-demo-real .he-demo-tour>strong{display:block;font:700 18px 'Space Grotesk',sans-serif;margin:7px 0}
+.he-demo-real .he-demo-tour>p{font-size:11px;line-height:1.55;margin:0 0 12px;color:#d2cfe8}
+.he-demo-real .he-demo-tour-actions{justify-content:flex-end}
+.he-demo-real .he-demo-tour-actions button{background:rgba(136,103,199,.3);border:1px solid rgba(193,162,245,.46);border-radius:9px;padding:8px 14px;color:#fff;font-weight:700;font-size:10px}
+.he-demo-real .he-demo-tour-actions button:last-child{background:linear-gradient(105deg,#9571e2,#7356bb)}
+.he-demo-real .he-demo-tour-actions button:disabled{opacity:.4;cursor:not-allowed}
+.he-demo-real .he-demo-tour-highlight{box-shadow:inset 0 0 0 1px #d1acff!important}
+.he-demo-real .he-demo-import-panel,.he-demo-real .he-demo-timeline{
+ margin:13px 0;padding:15px;
+ border:1px solid rgba(170,151,214,.44);
+ border-radius:13px;
+ background:linear-gradient(135deg,rgba(39,39,70,.9),rgba(28,41,68,.92));
+}
+.he-demo-real .he-demo-import-panel h4,.he-demo-real .he-demo-timeline h4,
+.he-demo-real .he-demo-sample-chart h4{margin:0 0 6px;color:#f2eaff;font:700 17px 'Space Grotesk',sans-serif}
+.he-demo-real .he-demo-import-panel p,.he-demo-real .he-demo-timeline p,
+.he-demo-real .he-demo-sample-chart p{font-size:10px;line-height:1.6;color:#bfc9df;margin:0 0 9px}
+.he-demo-real .he-demo-import-text{
+ width:100%;min-height:100px;padding:11px;margin:8px 0;
+ border-radius:9px;border:1px solid #8874b977;
+ color:#e7e7fa;background:#171e35;resize:vertical;
+ font:11px/1.5 monospace;white-space:pre;
+}
+.he-demo-real .he-demo-import-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:8px 0}
+.he-demo-real .he-demo-import-actions label{
+ display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:10px;color:#d0cae8;
+}
+.he-demo-real .he-demo-import-actions input{max-width:165px;min-width:0;font-size:9px}
+.he-demo-real .he-demo-import-map{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}
+.he-demo-real .he-demo-import-map label,.he-demo-real .he-demo-timeline label,
+.he-demo-real .he-demo-sample-chart label{display:grid;gap:4px;font-size:10px;color:#c9c9e0}
+.he-demo-real .he-demo-import-map select,.he-demo-real .he-demo-timeline select,
+.he-demo-real .he-demo-sample-chart select{
+ width:100%;padding:8px 6px;color:#f6edff;background:#1b223b;
+ border:1px solid rgba(163,141,218,.42);border-radius:8px;font-size:10px;
+}
+.he-demo-real .he-demo-import-results p{font-size:10px;margin:8px 0;color:#d3c7f2}
+.he-demo-real .he-demo-import-table{overflow:auto;max-height:170px;margin:9px 0}
+.he-demo-real .he-demo-import-table table{border-collapse:collapse;width:100%;font-size:10px;text-align:left}
+.he-demo-real .he-demo-import-table th,.he-demo-real .he-demo-import-table td{
+ padding:8px 6px;border-bottom:1px solid #9286b33d;vertical-align:top;overflow-wrap:anywhere;
+}
+.he-demo-real .he-demo-import-table th{color:#ded6f4}
+.he-demo-real .he-demo-import-panel>small{display:block;font-size:9px;color:#aab4cf;line-height:1.5;margin-top:10px}
+.he-demo-real .he-demo-timeline{margin-top:16px}
+.he-demo-real .he-demo-timeline .he-demo-feature-title{align-items:center}
+.he-demo-real .he-demo-timeline-events{display:grid;gap:8px}
+.he-demo-real .he-demo-timeline-events article{
+ padding:11px 12px;border:1px solid #9886bd44;
+ border-radius:10px;background:#19243c99;
+}
+.he-demo-real .he-demo-timeline-events article>div{display:flex;gap:10px;align-items:center;margin-bottom:6px}
+.he-demo-real .he-demo-timeline-events article span{
+ text-transform:capitalize;padding:3px 7px;border-radius:6px;
+ background:#7758ad44;border:1px solid #a17bd05e;color:#eadbff;font-size:9px;
+}
+.he-demo-real .he-demo-timeline-events article small{font-size:9px;color:#aab8d6}
+.he-demo-real .he-demo-timeline-events article strong{font-size:11px;color:#f4edff}
+.he-demo-real .he-demo-timeline-events article p{margin:4px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.he-demo-real .he-demo-sample-chart{
+ border-top:1px solid rgba(169,147,214,.3);margin-top:15px;padding-top:14px;
+}
+.he-demo-real .he-demo-sample-chart svg{width:100%;max-height:225px;display:block}
+.he-demo-real .he-demo-companion{
+ position:absolute;z-index:35;right:12px;top:70px;bottom:44px;
+ width:min(350px,calc(100% - 24px));overflow-y:auto;
+ display:flex;flex-direction:column;gap:11px;
+ padding:16px;border-radius:15px;
+ background:linear-gradient(140deg,#292343,#18233d);
+ border:1px solid rgba(194,162,251,.67);
+ box-shadow:0 18px 45px rgba(0,0,0,.6);
+ color:#f3edff;scrollbar-width:thin;
+}
+.he-demo-real .he-demo-companion header{display:flex;justify-content:space-between;align-items:start;gap:10px}
+.he-demo-real .he-demo-companion header>div{display:grid;gap:5px}
+.he-demo-real .he-demo-companion header small{font-size:9px;color:#bda2ed;letter-spacing:.9px}
+.he-demo-real .he-demo-companion header strong{font:700 18px 'Space Grotesk',sans-serif}
+.he-demo-real .he-demo-companion header button{
+ width:30px;height:30px;border:1px solid #927ac463;border-radius:8px;
+ background:#5d468262;color:#fff;font-size:20px;
+}
+.he-demo-real .he-demo-companion label{display:grid;gap:6px;font-size:11px;color:#d6c9f1}
+.he-demo-real .he-demo-companion select,.he-demo-real .he-demo-companion textarea{
+ width:100%;color:#fff;background:#181f39;border:1px solid #8b77b466;border-radius:9px;padding:10px;font-size:11px;
+}
+.he-demo-real .he-demo-companion textarea{resize:vertical;min-height:75px}
+.he-demo-real .he-demo-companion-clock{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:12px;border:1px solid #9e8ab04d;border-radius:11px;background:#141e36}
+.he-demo-real .he-demo-companion-clock strong{margin-right:auto;font:700 26px 'Space Grotesk',sans-serif;font-variant-numeric:tabular-nums}
+.he-demo-real .he-demo-companion-clock button{
+ padding:8px;border:1px solid #a58cce65;border-radius:8px;color:#fff;background:#6851964b;font-size:10px;
+}
+.he-demo-real .he-demo-companion details{padding:9px;border:1px solid #8972ae4d;border-radius:9px;background:#222947}
+.he-demo-real .he-demo-companion summary{font-size:11px;font-weight:700;cursor:pointer}
+.he-demo-real .he-demo-companion details p,.he-demo-real .he-extra-companion-message{font-size:10px;line-height:1.6;color:#bec8e2}
+@media(max-width:900px){
+ .he-demo-real .he-demo-utility-btn{font-size:9px;padding:7px}
+}
+@media(max-width:680px){
+ .he-demo-real .he-demo-tour{left:8px;right:8px;bottom:42px;padding:12px}
+ .he-demo-real .he-demo-companion{top:55px;bottom:43px;right:7px;width:min(350px,calc(100% - 14px))}
+ .he-demo-real .he-demo-account{gap:5px}
+ .he-demo-real .he-demo-utility-btn{font-size:9px;padding:6px}
+ .he-demo-real .he-demo-import-map{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:490px){
+ .he-demo-real .he-demo-account-label{display:none}
+ .he-demo-real .he-demo-workspace-header h2{font-size:21px!important}
+ .he-demo-real .he-demo-utility-btn{min-height:29px;font-size:8.5px}
+ .he-demo-real .he-demo-import-table{max-height:140px}
+}
