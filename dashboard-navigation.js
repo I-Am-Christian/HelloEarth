@@ -3,7 +3,7 @@ import { db } from "./supabase-client.js";
 
 const get = id => document.getElementById(id);
 const translate = key => window.HelloEarthI18n?.t(key) ?? key;
-const views = ["overview","calendar","students","progress","atlas"];
+const views = ["overview","calendar","students","progress","tools","atlas"];
 const monday = date => {
  const day = new Date(date.getFullYear(),date.getMonth(),date.getDate());
  day.setDate(day.getDate() - ((day.getDay()+6)%7));return day;
