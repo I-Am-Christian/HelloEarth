@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="page-i18n.css?v=20261115full4"><script src="page-i18n.js?v=20261116-suite7" defer></script><link rel="stylesheet" href="space-theme.css?v=20261115-global-space2"><link rel="stylesheet" href="dashboard-navigation.css?v=20261116-scheduling3"><link rel="stylesheet" href="dashboard-features.css?v=20261116-suite7"><link rel="manifest" href="/site.webmanifest">
 <link rel="apple-touch-icon" href="/helloearth-logo.png">
 <meta name="apple-mobile-web-app-title" content="HelloEarth">
-<link rel="stylesheet" href="notifications.css?v=20261116-push1"><script type="module" src="notifications.js?v=20261116-push1"></script><script src="pwa-register.js?v=20261116-push1" defer></script></head>
+<link rel="stylesheet" href="dashboard-extras.css?v=20261117-extras1"><link rel="stylesheet" href="notifications.css?v=20261116-push1"><script type="module" src="notifications.js?v=20261116-push1"></script><script src="pwa-register.js?v=20261116-push1" defer></script></head>
 <body class="space-theme space-dashboard portal-page">
 <div id="checking" style="padding:20vh 20px;text-align:center;color:#d9cfff">Checking your secure session…</div>
 <div class="workspace" id="workspace" hidden>
@@ -28,7 +28,7 @@
   </aside>
   <main class="ws-main">
     <header class="ws-header"><div><span class="dash-overline">YOUR TEACHING SPACE</span><h1>My workspace<span style="color:#bc9cff">.</span></h1></div>
-      <div class="ws-account"><span class="ws-user" id="account-email"></span><span class="ws-avatar" id="account-avatar" aria-hidden="true">H</span><button type="button" id="signout">Log out</button></div>
+      <div class="ws-account"><span class="ws-user" id="account-email"></span><span class="ws-avatar" id="account-avatar" aria-hidden="true">H</span><button type="button" class="ws-mini-btn ws-companion-launch" id="ws-companion-open" aria-controls="ws-companion-panel" aria-expanded="false">▶ Start lesson</button><button type="button" id="signout">Log out</button></div>
     </header>
     <nav class="ws-view-switch" role="tablist" aria-label="Dashboard sections">
       <button id="overview-tab" class="ws-view-tab is-current" type="button" role="tab" aria-selected="true" aria-controls="overview-view" tabindex="0"><span aria-hidden="true">⌂</span> Overview</button>
@@ -142,7 +142,12 @@
           <div id="student-attendance-history" class="ws-attendance-history"></div>
         </section>
         <section class="ws-student-workflow ws-saved-plans"><h3>Saved lesson plans</h3><div id="saved-plans-list" class="ws-saved-plan-list"><p>Choose Prepare lesson to make your first plan.</p></div></section>
-        <h3 style="margin:26px 0 12px">Lesson notes</h3><div id="lesson-notes" class="ws-note-list"></div>
+        <section class="ws-extra-timeline ws-student-workflow" aria-labelledby="ws-timeline-title">
+  <div class="ws-extra-toolbar"><div><span class="dash-overline">YOUR LEARNER'S HISTORY</span><h3 id="ws-timeline-title">Learning timeline</h3><p>Real saved lesson notes, attendance, assessments and plans in one chronological view.</p></div>
+    <div class="ws-extra-controls"><label>Show <select id="ws-timeline-filter"><option value="all">All events</option><option value="note">Lesson notes</option><option value="assessment">Skill assessments</option><option value="attendance">Attendance</option><option value="plan">Lesson plans</option></select></label><button class="ws-mini-btn" id="ws-timeline-refresh" type="button">Refresh</button></div>
+  </div><p id="ws-timeline-feedback" class="ws-extra-feedback" role="status"></p><div id="ws-timeline-list" class="ws-timeline-list" aria-live="polite"><p>Open a student to view their recorded history.</p></div>
+</section>
+<h3 style="margin:26px 0 12px">Lesson notes</h3><div id="lesson-notes" class="ws-note-list"></div>
         <p id="detail-feedback" role="status" class="ws-feedback"></p>
       </div>
     </section>
@@ -153,7 +158,14 @@
             <section class="ws-feature-panel" id="progress-skill-panel">
         <div class="ws-feature-title"><div><h3>Skill development history</h3><p>Compare your recorded assessments over time, per student.</p></div><button class="ws-mini-btn" type="button" id="download-progress-report">Print / Save PDF</button></div>
         <label class="ws-editor-label">Student<select id="progress-student-select"><option value="">Choose student</option></select></label>
-        <div id="progress-history" class="ws-assessment-history"><p>Choose a student to view assessment history.</p></div>
+        <section class="ws-chart-card" aria-label="Interactive skill progress chart">
+  <div class="ws-extra-toolbar"><div><h3>Skill progress over time</h3><p>Only actual dated tutor assessments are plotted; no generated scores.</p></div><div class="ws-extra-controls">
+    <label>Skill <select id="ws-chart-skill"><option value="speaking">Speaking</option><option value="listening">Listening</option><option value="reading">Reading</option><option value="writing">Writing</option><option value="grammar">Grammar</option><option value="confidence">Confidence</option></select></label>
+    <label>Period <select id="ws-chart-range"><option value="90">90 days</option><option value="365">1 year</option><option value="all" selected>All time</option></select></label></div></div>
+  <div id="ws-progress-chart" class="ws-progress-chart" aria-live="polite"><p class="ws-extra-empty">Choose a student to view recorded ratings.</p></div>
+  <div id="ws-progress-summary" class="ws-progress-summary"></div>
+</section>
+<div id="progress-history" class="ws-assessment-history"><p>Choose a student to view assessment history.</p></div>
         <div id="progress-attendance" class="ws-attendance-summary"></div>
         <div id="progress-print" class="ws-print-report" hidden></div>
       </section>
@@ -171,6 +183,17 @@
     </section>
   </main>
 </div>
+<aside class="ws-companion-panel" id="ws-companion-panel" role="dialog" aria-modal="false" aria-label="Live lesson companion" hidden>
+ <div class="ws-companion-heading"><div><span class="dash-overline">IN-LESSON ASSISTANT</span><h2>Live lesson companion</h2></div><button id="ws-companion-close" type="button" aria-label="Close companion">×</button></div>
+ <p class="ws-companion-info">A simple local session timer, saved lesson-plan reference and quick notes. The timer runs only while this browser tab remains open.</p>
+ <label class="ws-companion-label">Student <select id="ws-companion-student"><option value="">Choose student</option></select></label>
+ <div class="ws-companion-timer"><strong id="ws-companion-clock" aria-live="off">00:00:00</strong><div><button type="button" id="ws-companion-toggle" class="dash-primary">Start</button><button type="button" id="ws-companion-reset" class="ws-mini-btn">Reset</button></div></div>
+ <details class="ws-companion-plan"><summary>Latest saved lesson plan</summary><pre id="ws-companion-plan">Choose a student to see their latest saved lesson plan.</pre></details>
+ <label class="ws-companion-label">Quick lesson note<textarea id="ws-companion-note" rows="5" maxlength="4000" placeholder="What did you work on today?"></textarea></label>
+ <label class="ws-companion-label">Follow-up / next step<textarea id="ws-companion-next" rows="2" maxlength="350" placeholder="What to practise next time…"></textarea></label>
+ <button type="button" id="ws-companion-save" class="dash-primary">Save to student's lesson notes</button>
+ <p id="ws-companion-feedback" class="ws-extra-feedback" role="status" aria-live="polite"></p>
+</aside>
 <div class="ws-modal" id="student-modal" hidden>
   <div class="ws-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-heading">
     <div class="ws-dialog-head"><h2 id="modal-heading">Add student</h2><button type="button" id="modal-close" aria-label="Close">×</button></div>
@@ -225,4 +248,4 @@
     </form>
   </div>
 </div>
-<script type="module" src="dashboard-navigation.js?v=20261116-calendar-persist2"></script><script type="module" src="dashboard-features.js?v=20261116-suite9"></script></body></html>
+<script type="module" src="dashboard-extras.js?v=20261117-extras1"></script><script type="module" src="dashboard-navigation.js?v=20261116-calendar-persist2"></script><script type="module" src="dashboard-features.js?v=20261116-suite9"></script></body></html>
