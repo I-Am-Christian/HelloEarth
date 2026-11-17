@@ -1,4 +1,4 @@
-import "./dashboard-scheduler-ui.js?v=20261117-scheduler2";
+import "./dashboard-scheduler-ui.js?v=20261118-suite-tz1";
 import { db } from "./supabase-client.js";
 
 const get = id => document.getElementById(id);
