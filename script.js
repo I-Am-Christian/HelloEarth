@@ -315,8 +315,9 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  if(scene&&slot&&scene.parentElement!==slot)slot.appendChild(scene);
 })();
 
-/* Five-second Moon mission. On touchdown, DOM docking binds the rocket to
-   the Moon's CSS orbit, so mobile Safari cannot leave it suspended in space. */
+/* Five-second guided Moon landing, with a seamless surface attachment.
+   Docking converts the exact flight position and angle into Moon-local
+   coordinates. It never teleports to a fixed spot on the lunar surface. */
 (() => {
  const scene=document.querySelector('.solar-background');
  const stage=document.querySelector('.hero-art-spacer');
@@ -329,7 +330,6 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  const progressBar=hud?.querySelector('.mission-hud-progress');
  if(!scene||!stage||!earth||!moonOrbit||!moon||!rocket)return;
 
- // Keep flight coordinates in the same reference frame on every screen size.
  if(rocket.parentElement!==stage)stage.appendChild(rocket);
  rocket.style.display='none';
  rocket.classList.remove('landed');
@@ -341,13 +341,13 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  let pendingFrame=false;
  let safetyTimeout=null;
  let lastOrbitSize=-1;
- const center=(element,rect)=>{
-  const r=element.getBoundingClientRect();
-  return {x:r.left+r.width/2-rect.left,y:r.top+r.height/2-rect.top,
-   size:r.width||element.offsetWidth||16};
- };
  const clamp01=n=>Math.max(0,Math.min(1,n));
  const smooth=n=>n*n*(3-2*n);
+ const center=(element,reference)=>{
+  const r=element.getBoundingClientRect();
+  return {x:r.left+r.width/2-reference.left,y:r.top+r.height/2-reference.top,
+   size:r.width||element.offsetWidth||16};
+ };
  const status=text=>{if(label)label.textContent=text};
  const fit=()=>{
   if(docked)return;
@@ -365,50 +365,122 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  if('ResizeObserver' in window)new ResizeObserver(fit).observe(stage);
  else window.addEventListener('resize',fit,{passive:true});
 
- function paint(x,y,heading,scale){
+ function paint(pose){
   rocket.style.display='block';
   rocket.style.visibility='visible';
   rocket.style.opacity='1';
   rocket.style.left='0px';
   rocket.style.top='0px';
   rocket.classList.add('mission-active');
-  rocket.style.transform='translate3d('+x+'px,'+y+'px,0) translate(-50%,-50%) rotate('+heading+'deg) scale('+scale+')';
+  rocket.style.transform='translate3d('+pose.x+'px,'+pose.y+'px,0) translate(-50%,-50%) rotate('+pose.heading+'deg) scale('+pose.scale+')';
+ }
+
+ // The touchdown position is on the *current* moving Moon, not where it was
+ // when the rocket launched. Its surface normal is the actual approach side.
+ function poseAt(progress,stageRect){
+  const p=clamp01(progress);
+  const moonCenter=center(moon,stageRect);
+  const radius=moonCenter.size*.5 + 3;
+  const targetX=moonCenter.x+flight.normalX*radius;
+  const targetY=moonCenter.y+flight.normalY*radius;
+  const travel=smooth(p);
+  const turn=smooth(clamp01((p-.58)/.36)); // face outward to brake before touchdown
+  const curve=Math.sin(Math.PI*travel)*Math.min(9,moonCenter.size*.35);
+  return {
+   x:flight.fromX+(targetX-flight.fromX)*travel-flight.normalY*curve,
+   y:flight.fromY+(targetY-flight.fromY)*travel+flight.normalX*curve,
+   heading:flight.heading+180*turn,
+   scale:1-.3*travel
+  };
+ }
+
+ // Use three zero-size measuring points on the transformed Moon to learn its
+ // actual local X/Y axes. This works even if nested CSS orbit rotations have
+ // different animation phases (common during mobile startup/resume).
+ function moonCoordinates(worldX,worldY){
+  const distance=24;
+  const points=[['50%','50%'],['calc(50% + 24px)','50%'],['50%','calc(50% + 24px)']];
+  const probes=points.map(([left,top])=>{
+   const point=document.createElement('span');
+   point.setAttribute('aria-hidden','true');
+   point.style.cssText='position:absolute;display:block;width:0;height:0;padding:0;border:0;visibility:hidden;pointer-events:none;';
+   point.style.left=left;
+   point.style.top=top;
+   moon.appendChild(point);
+   return point;
+  });
+  const measured=probes.map(point=>point.getBoundingClientRect());
+  for(const probe of probes)probe.remove();
+  const o=measured[0],x=measured[1],y=measured[2];
+  const exX=(x.left-o.left)/distance,exY=(x.top-o.top)/distance;
+  const eyX=(y.left-o.left)/distance,eyY=(y.top-o.top)/distance;
+  const det=exX*eyY-exY*eyX;
+  const inverse=(dx,dy)=>{
+   if(Math.abs(det)<.0001)return {x:dx,y:dy};
+   return {x:(dx*eyY-dy*eyX)/det,y:(dy*exX-dx*exY)/det};
+  };
+  const local=inverse(worldX-o.left,worldY-o.top);
+  return {x:local.x,y:local.y,
+   rotation:Math.atan2(exY,exX)*180/Math.PI,inverse};
  }
 
  function dock(){
   if(docked||!flight)return;
+  const rect=stage.getBoundingClientRect();
+  if(!rect.width||!rect.height)return;
+  // Always finish the same path, including when iOS throttles animation frames.
+  const touchdown=poseAt(1,rect);
+  paint(touchdown);
+  const before=rocket.getBoundingClientRect();
+  const origin=moonCoordinates(rect.left+touchdown.x,rect.top+touchdown.y);
+  let localX=origin.x,localY=origin.y;
+  const setLandingPosition=()=>{
+   rocket.style.setProperty('--dock-x',localX+'px');
+   rocket.style.setProperty('--dock-y',localY+'px');
+  };
+  // The rocket maintains its exact world-space facing when becoming the
+  // Moon's child, compensating for the rotation of the parent orbit.
+  rocket.style.setProperty('--dock-heading',(touchdown.heading-origin.rotation)+'deg');
+  rocket.style.setProperty('--dock-scale',touchdown.scale);
+  setLandingPosition();
+
+  moon.appendChild(rocket);
+  rocket.classList.add('landed','mission-active');
+  rocket.style.willChange='auto';
+
+  // Account for font glyph bearings and transform-origin differences, too.
+  // Both measurements happen synchronously, before another screen paint.
+  const after=rocket.getBoundingClientRect();
+  const correction=origin.inverse(
+   before.left+before.width/2-after.left-after.width/2,
+   before.top+before.height/2-after.top-after.height/2
+  );
+  if(Number.isFinite(correction.x)&&Number.isFinite(correction.y)){
+   localX+=correction.x;
+   localY+=correction.y;
+   setLandingPosition();
+  }
+
   docked=true;
   flight=null;
   if(safetyTimeout!==null){clearTimeout(safetyTimeout);safetyTimeout=null}
-  // Critical fix: landing no longer requires a permanent JS animation loop.
-  // The Moon's own orbit and counter-rotation carry the landed rocket.
-  moon.appendChild(rocket);
-  rocket.classList.add('landed','mission-active');
-  rocket.style.position='absolute';
-  rocket.style.display='block';
-  rocket.style.visibility='visible';
-  rocket.style.opacity='1';
-  rocket.style.left='24%';
-  rocket.style.top='0px';
-  rocket.style.transform='translate(-50%,-64%) rotate(-45deg) scale(.85)';
-  rocket.style.willChange='auto';
   if(progressBar)progressBar.style.width='100%';
   hud?.classList.remove('in-flight');
   moon.classList.add('flag-planted');
   status('TOUCHDOWN · FLAG PLANTED');
  }
 
- function schedule(){
+ const schedule=()=>{
   if(pendingFrame||!flight)return;
   pendingFrame=true;
   requestAnimationFrame(frame);
- }
+ };
 
  scene.addEventListener('rocketlaunch',()=>{
   if(flight||docked)return;
   fit();
   const rect=stage.getBoundingClientRect();
-  if(rect.width<=0||rect.height<=0)return;
+  if(!rect.width||!rect.height)return;
   const from=center(earth,rect),target=center(moon,rect);
   const dx=target.x-from.x,dy=target.y-from.y;
   const distance=Math.max(1,Math.hypot(dx,dy));
@@ -423,8 +495,9 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
   hud?.classList.add('in-flight');
   if(progressBar)progressBar.style.width='0%';
   status('ROCKET EN ROUTE · MOON LANDING');
-  paint(flight.fromX,flight.fromY,flight.heading,1);
-  // Failsafe for iOS when requestAnimationFrame is suspended by browser UI.
+  paint(poseAt(0,rect));
+  // If Safari stalls requestAnimationFrame, land at the same calculated
+  // approach point instead of snapping to a hard-coded spot.
   safetyTimeout=setTimeout(dock,duration+180);
   schedule();
  });
@@ -432,28 +505,16 @@ picker.addEventListener('change',()=>setLanguage(picker.value));
  function frame(now){
   pendingFrame=false;
   if(!flight)return;
-  const elapsed=Math.max(0,now-flight.started);
-  const progress=clamp01(elapsed/duration);
+  const progress=clamp01(Math.max(0,now-flight.started)/duration);
   const rect=stage.getBoundingClientRect();
-  if(rect.width>0&&rect.height>0){
-   const moonCenter=center(moon,rect);
-   const radius=moonCenter.size*.48+2;
-   const targetX=moonCenter.x+flight.normalX*radius;
-   const targetY=moonCenter.y+flight.normalY*radius;
-   const t=smooth(progress);
-   const flip=smooth(clamp01((progress-.62)/.38));
-   const curve=Math.sin(Math.PI*t)*Math.min(9,moonCenter.size*.4);
-   const x=flight.fromX+(targetX-flight.fromX)*t-flight.normalY*curve;
-   const y=flight.fromY+(targetY-flight.fromY)*t+flight.normalX*curve;
-   paint(x,y,flight.heading+180*flip,1-.3*t);
+  if(rect.width&&rect.height){
+   paint(poseAt(progress,rect));
    if(progressBar)progressBar.style.width=Math.round(progress*100)+'%';
   }
   if(progress>=1){dock();return}
   schedule();
  }
 
- // The timer can finish offscreen. If not, the next frame uses elapsed time
- // rather than assuming uninterrupted screen refreshes.
  document.addEventListener('visibilitychange',()=>{
   if(!document.hidden&&flight){
    if(performance.now()-flight.started>=duration)dock();
