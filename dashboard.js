@@ -449,6 +449,7 @@ $("note-form").addEventListener("submit", async event => {
     if (error) throw error;
     hideModal("note-modal");
     await openStudent(state.selected.id);
+    document.dispatchEvent(new CustomEvent("helloearth:note-saved",{detail:{studentId:state.selected.id}}));
     statusMessage($("detail-feedback"), "Lesson note saved.");
   } catch (err) { statusMessage($("note-feedback"), message(err), true); }
   finally { setBusy("save-note", false); }
