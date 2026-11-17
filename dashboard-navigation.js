@@ -418,7 +418,11 @@ function formatScheduleEvent(event,overlap){
  // A linked ID is stronger evidence than a name in the event title. For
  // unlinked events, show the actual Google title without guessing a student.
  const summary=String(event.summary||"Busy").slice(0,130);
- const label=student?"Student booked: "+student.display_name+" · "+summary:summary;
+ const visibleName=summary.toLocaleLowerCase();
+ const candidates=!student?(window.HelloEarthWorkspace?.students||[]).filter(s=>
+  s.display_name?.length>=4&&visibleName.includes(s.display_name.toLocaleLowerCase())):[];
+ const label=student?"Student booked: "+student.display_name+" · "+summary:
+  candidates.length===1?"Possible student booking: "+candidates[0].display_name+" · "+summary:summary;
  const dateLabel=event.start?.date
   ?"All day"
   :dateStart.toLocaleDateString([],{weekday:"short",day:"numeric",month:"short"})+" "+
@@ -539,7 +543,8 @@ function checkScheduleAvailability(){
   try{
    const result=await readScheduleRange(startDay,until);
    if(request!==schedulePreviewRequest||!activeSchedule())return;
-   if(scheduleKey(range)!==scheduleKey(scheduleUI.range()))return;
+   const current=scheduleUI.range();
+   if(!current.valid||scheduleKey(range)!==scheduleKey(current))return;
    notifyScheduleEvents(result.events,result.complete,range);
   }catch(error){
    if(request!==schedulePreviewRequest||!activeSchedule())return;
