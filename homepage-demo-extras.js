@@ -34,7 +34,6 @@
   tour=n;
   if(tour===2)showImport=true;
   api.go(steps[n][0],n===5?api.state.selected:undefined);
-  drawExtras();
  }
  function parseCSV(source){
   const rows=[];let current=[],value='',quotes=false;
