@@ -1,0 +1,205 @@
+/* HelloEarth scheduling: calm, visual month picker for lessons & time off. */
+.ws-modal .ws-scheduler-dialog{width:min(100%,780px);max-height:min(94dvh,1000px);overflow-y:auto;overscroll-behavior:contain;padding:clamp(16px,2.6vw,30px);scrollbar-width:thin;scrollbar-color:#7d67b4 #202543}
+.ws-scheduler-dialog .ws-dialog-head{align-items:flex-start}
+.ws-scheduler-dialog .ws-dialog-head h2{font-size:clamp(23px,3.2vw,32px);margin:4px 0 5px;color:#f3efff}
+.ws-scheduler-dialog .ws-dialog-head p.ws-schedule-subtitle{margin:0;font-size:12px;color:#b9bfd8}
+.ws-scheduler-dialog .ws-form{gap:15px 15px;margin-top:20px}
+.ws-scheduler-dialog .field[hidden],.ws-scheduler-dialog [hidden]{display:none!important}
+.ws-scheduler-dialog .ws-schedule-kind{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ws-scheduler-dialog .ws-schedule-kind-button{
+ display:grid;grid-template-columns:42px 1fr;grid-template-rows:auto auto;
+ gap:4px 10px;align-content:center;align-items:center;
+ padding:15px 16px;min-height:81px;
+ background:linear-gradient(135deg,rgba(40,42,73,.83),rgba(28,37,65,.9));
+ border:1px solid rgba(159,144,198,.42);border-radius:15px;
+ color:#d2d1e8;text-align:left;cursor:pointer;
+ transition:border-color .18s ease,background .18s ease,transform .18s ease;
+}
+.ws-scheduler-dialog .ws-schedule-kind-button>span{grid-row:1/3;display:grid;place-items:center;width:42px;height:42px;background:rgba(117,85,183,.22);border-radius:12px;font-size:21px}
+.ws-scheduler-dialog .ws-schedule-kind-button strong{font-size:14px;color:#f4efff}
+.ws-scheduler-dialog .ws-schedule-kind-button small{font-size:11px;color:#aebbd4}
+.ws-scheduler-dialog .ws-schedule-kind-button.active{border-color:#bca0fd;background:linear-gradient(128deg,rgba(105,68,167,.49),rgba(45,62,105,.56));box-shadow:0 0 0 1px #9479d550}
+.ws-scheduler-dialog .ws-schedule-kind-button:hover{transform:translateY(-1px);border-color:#bea6f0}
+.ws-scheduler-dialog .ws-schedule-picker{
+ display:flex;flex-direction:column;gap:11px;
+ padding:17px 19px;
+ background:linear-gradient(135deg,rgba(32,37,67,.89),rgba(39,34,70,.9));
+ border:1px solid rgba(163,145,211,.35);border-radius:17px;
+}
+.ws-scheduler-dialog .ws-schedule-picker-head{
+ display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:11px;
+}
+.ws-scheduler-dialog .ws-schedule-picker-head strong{font-size:15px;color:#f4efff}
+.ws-scheduler-dialog .ws-schedule-picker-head p{margin:4px 0 0;font-size:11px;line-height:1.6;color:#afb8d5;max-width:410px}
+.ws-scheduler-dialog .ws-schedule-month-nav{display:flex;gap:8px;align-items:center}
+.ws-scheduler-dialog .ws-schedule-month-nav span{
+ display:block;min-width:137px;text-align:center;font-size:13px;font-weight:750;color:#eee9ff;
+}
+.ws-scheduler-dialog .ws-schedule-month-nav button{
+ width:34px;height:34px;border:1px solid rgba(156,142,207,.46);
+ border-radius:10px;background:#272948;color:#e6deff;font-size:22px;
+}
+.ws-scheduler-dialog .ws-schedule-month-nav button:hover{background:#534279}
+.ws-scheduler-dialog .ws-schedule-target{display:flex;gap:7px}
+.ws-scheduler-dialog .ws-schedule-target button{
+ border:1px solid rgba(153,139,190,.39);border-radius:9px;
+ background:rgba(62,57,100,.27);color:#bdbbd5;
+ padding:8px 13px;font-size:11px;font-weight:750;
+}
+.ws-scheduler-dialog .ws-schedule-target button.is-selected{
+ color:#f0e8ff;background:#70539a8e;border-color:#aa8bea;
+}
+.ws-scheduler-dialog .ws-schedule-weekdays,
+.ws-scheduler-dialog .ws-schedule-month-grid{
+ display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;
+}
+.ws-scheduler-dialog .ws-schedule-weekdays span{
+ text-align:center;font-size:10px;font-weight:800;letter-spacing:.4px;color:#a5accb;
+}
+.ws-scheduler-dialog .ws-schedule-month-pad{min-height:43px}
+.ws-scheduler-dialog .ws-schedule-date-button{
+ position:relative;display:grid;place-items:center;
+ min-height:45px;min-width:0;
+ border:1px solid rgba(151,142,188,.18);border-radius:11px;
+ background:rgba(29,33,60,.6);color:#e2e3f5;
+ font-size:13px;font-weight:650;cursor:pointer;
+ transition:background .12s,border-color .12s;
+}
+.ws-scheduler-dialog .ws-schedule-date-button:hover{
+ border-color:#b89bf4;background:rgba(112,83,163,.31);
+}
+.ws-scheduler-dialog .ws-schedule-date-button.is-today:before{
+ content:"";position:absolute;left:50%;bottom:4px;
+ width:4px;height:4px;border-radius:50%;transform:translateX(-50%);background:#f8edff;
+}
+.ws-scheduler-dialog .ws-schedule-date-button.is-in-range{
+ background:rgba(111,90,162,.29);border-color:rgba(175,145,228,.32);
+}
+.ws-scheduler-dialog .ws-schedule-date-button.is-start,
+.ws-scheduler-dialog .ws-schedule-date-button.is-end{
+ color:#fff;border-color:#cfb5ff;
+ background:linear-gradient(145deg,#8868c3,#5766a9);
+ box-shadow:0 0 0 2px #a084dc24;
+}
+.ws-scheduler-dialog .ws-schedule-busy-dot{
+ position:absolute;top:4px;right:5px;height:6px;width:6px;
+ border-radius:50%;background:#e5ad85;
+ box-shadow:0 0 6px #e5ad8540;
+}
+.ws-scheduler-dialog .ws-schedule-month-status{
+ margin:0;font-size:11px;color:#bed3d9;line-height:1.55;
+}
+.ws-scheduler-dialog .ws-schedule-month-status.has-warning{color:#e0cba1}
+.ws-scheduler-dialog #schedule-date,
+.ws-scheduler-dialog #schedule-date-end,
+.ws-scheduler-dialog #schedule-time-start,
+.ws-scheduler-dialog #schedule-time-end{
+ color-scheme:dark;cursor:pointer;
+}
+.ws-scheduler-dialog .ws-schedule-all-day{
+ display:flex;align-items:center;gap:12px;
+ padding:13px 15px;border:1px solid rgba(145,129,185,.38);
+ background:rgba(37,43,75,.65);border-radius:12px;
+}
+.ws-scheduler-dialog .ws-schedule-all-day span{display:grid;gap:3px}
+.ws-scheduler-dialog .ws-schedule-all-day strong{font-size:12px;color:#f2ecff}
+.ws-scheduler-dialog .ws-schedule-all-day small{font-size:11px;color:#adb9d2}
+.ws-scheduler-dialog #schedule-all-day,
+.ws-scheduler-dialog #schedule-override{
+ appearance:auto;accent-color:#ab8ce8;
+ width:19px!important;height:19px!important;min-height:0!important;flex:none;
+ padding:0!important;margin:0!important;
+}
+.ws-scheduler-dialog .ws-schedule-preview{
+ padding:13px 15px;
+ border:1px solid rgba(177,142,219,.41);border-radius:13px;
+ color:#dfd2fc;font-size:13px;font-weight:750;line-height:1.5;
+ background:linear-gradient(110deg,rgba(73,56,112,.28),rgba(37,50,85,.41));
+}
+.ws-scheduler-dialog .ws-schedule-preview.invalid{color:#f7c7c8;border-color:#bd7e99}
+.ws-scheduler-dialog .ws-schedule-availability{
+ display:block;padding:15px 16px;border:1px solid rgba(157,136,198,.34);
+ border-radius:14px;background:linear-gradient(135deg,rgba(36,43,70,.87),rgba(33,38,66,.91));
+}
+.ws-scheduler-dialog .ws-schedule-availability strong{font-size:13px;color:#f0eaff}
+.ws-scheduler-dialog .ws-schedule-availability p{
+ color:#bfc9e1;line-height:1.55;font-size:11px;margin:6px 0 0;
+}
+.ws-scheduler-dialog .ws-schedule-availability.is-free,
+.ws-scheduler-dialog .ws-schedule-availability.is-busy-day{
+ border-color:rgba(111,190,168,.48);
+ background:linear-gradient(120deg,rgba(27,72,76,.32),rgba(39,47,76,.62));
+}
+.ws-scheduler-dialog .ws-schedule-availability.is-conflict,
+.ws-scheduler-dialog .ws-schedule-availability.is-unverified{
+ border-color:rgba(230,162,114,.56);
+ background:linear-gradient(110deg,rgba(92,56,54,.54),rgba(57,43,67,.77));
+}
+.ws-scheduler-dialog .ws-schedule-conflicts{
+ display:grid;gap:7px;margin:12px 0 0;padding:0;
+ list-style:none;max-height:230px;overflow-y:auto;
+}
+.ws-scheduler-dialog .ws-schedule-conflicts li{
+ display:flex;align-items:start;gap:10px;padding:10px 11px;
+ background:rgba(13,19,38,.3);border:1px solid rgba(157,141,193,.21);
+ border-radius:10px;min-width:0;
+}
+.ws-scheduler-dialog .ws-schedule-conflicts li.is-overlap{
+ border-color:rgba(229,166,114,.45);
+ background:rgba(123,71,59,.19);
+}
+.ws-scheduler-dialog .ws-schedule-conflicts li>span:first-child{font-size:14px;color:#e5ad85;flex:none}
+.ws-scheduler-dialog .ws-schedule-conflicts li>span:last-child{display:grid;gap:4px;min-width:0}
+.ws-scheduler-dialog .ws-schedule-conflicts li strong{
+ font-size:11px;line-height:1.5;overflow-wrap:anywhere;
+}
+.ws-scheduler-dialog .ws-schedule-conflicts li small{
+ color:#aeb8d2;font-size:10px;line-height:1.45;overflow-wrap:anywhere;
+}
+.ws-scheduler-dialog .ws-schedule-confirm label{
+ display:flex;gap:10px;align-items:start;
+ padding:13px 15px;border:1px solid rgba(223,158,113,.57);
+ border-radius:12px;background:rgba(102,70,57,.31);
+ color:#f4dfca;font-size:12px;font-weight:600;line-height:1.65;cursor:pointer;
+}
+.ws-scheduler-dialog .ws-schedule-footer{
+ display:flex;flex-direction:column;gap:7px;padding:10px 0 0;
+}
+.ws-scheduler-dialog .ws-schedule-footer .dash-primary{
+ min-height:49px;margin:0;width:100%;
+}
+.ws-scheduler-dialog .ws-schedule-footer .dash-primary:disabled{cursor:not-allowed;opacity:.48;filter:grayscale(.3)}
+.ws-scheduler-dialog .ws-schedule-disclaimer{
+ font-size:10px!important;color:#9fa9c8!important;line-height:1.55!important;margin:0!important;
+}
+.ws-scheduler-dialog .ws-schedule-footer .ws-feedback{
+ font-size:11px;line-height:1.6;margin:2px 0 0;
+}
+@media(max-width:680px){
+ .ws-modal:has(.ws-scheduler-dialog){padding:8px;align-items:center}
+ .ws-modal .ws-scheduler-dialog{max-height:96dvh;border-radius:17px;padding:17px 14px}
+ .ws-scheduler-dialog .ws-form{grid-template-columns:1fr 1fr!important;gap:12px 10px}
+ .ws-scheduler-dialog .ws-schedule-kind{grid-template-columns:1fr 1fr;gap:8px}
+ .ws-scheduler-dialog .ws-schedule-kind-button{grid-template-columns:31px 1fr;padding:11px 9px;gap:5px 7px;min-height:74px;border-radius:12px}
+ .ws-scheduler-dialog .ws-schedule-kind-button>span{width:31px;height:32px;font-size:17px;border-radius:9px}
+ .ws-scheduler-dialog .ws-schedule-kind-button strong{font-size:12px}
+ .ws-scheduler-dialog .ws-schedule-kind-button small{font-size:9px}
+ .ws-scheduler-dialog .ws-schedule-picker{padding:12px;gap:10px}
+ .ws-scheduler-dialog .ws-schedule-weekdays,.ws-scheduler-dialog .ws-schedule-month-grid{gap:4px}
+ .ws-scheduler-dialog .ws-schedule-date-button{min-height:39px;border-radius:9px;font-size:12px}
+ .ws-scheduler-dialog .ws-schedule-month-pad{min-height:39px}
+ .ws-scheduler-dialog .ws-schedule-month-nav span{min-width:105px;font-size:12px}
+ .ws-scheduler-dialog .ws-schedule-month-nav button{width:30px;height:30px}
+ .ws-scheduler-dialog .ws-schedule-busy-dot{top:3px;right:3px;height:5px;width:5px}
+ .ws-scheduler-dialog .ws-schedule-all-day{padding:12px 10px}
+}
+@media(max-width:410px){
+ .ws-scheduler-dialog .ws-schedule-picker-head{flex-direction:column}
+ .ws-scheduler-dialog .ws-schedule-kind-button small{display:none}
+ .ws-scheduler-dialog .ws-schedule-date-button{min-height:38px}
+ .ws-scheduler-dialog .ws-schedule-month-nav{width:100%;justify-content:space-between}
+ .ws-scheduler-dialog #schedule-date-end-row,.ws-scheduler-dialog #schedule-time-start-row,.ws-scheduler-dialog #schedule-time-end-row,.ws-scheduler-dialog #schedule-duration-row{grid-column:1/-1}
+}
+@media(prefers-reduced-motion:reduce){
+ .ws-scheduler-dialog .ws-schedule-kind-button,.ws-scheduler-dialog .ws-schedule-date-button{transition:none}
+}
