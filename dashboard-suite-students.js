@@ -82,12 +82,34 @@ function openStudent(id){
  $("students-tab").click();
  W()?.openStudent(id);
 }
+function displayScheduleTimezones(){
+ const target=$("he-suite-schedule-timezones");
+ if(!target)return;
+ const ui=window.HelloEarthSchedulingUI,range=ui?.range();
+ const sid=$("schedule-student")?.value||"";
+ const student=studentFor(sid);
+ if(!range?.valid){target.textContent="Choose a date and valid time to see the timezone comparison.";return}
+ if(!student){target.textContent="Appointment time is based on your browser timezone. Choose a student to compare their local time.";return}
+ const preference=state.preferences.find(p=>p.student_id===sid);
+ const zone=preference?.timezone;
+ if(!zone){target.textContent=student.display_name+" has no saved timezone. Set it under Tutor tools → Student care.";return}
+ try{
+  const fmt=tz=>new Intl.DateTimeFormat("en",{
+   timeZone:tz,weekday:"short",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",
+   timeZoneName:"short"
+  }).format(range.start);
+  const tutor=state.settings?.timezone||Intl.DateTimeFormat().resolvedOptions().timeZone;
+  target.textContent="Tutor: "+fmt(tutor)+" · "+student.display_name+": "+fmt(zone)+
+   (range.allDay?" · All-day calendar event":"");
+ }catch{target.textContent="Timezone could not be displayed. Check the saved student timezone."}
+}
 export function setupStudents(){
  homeworkForm=$("he-suite-homework-form");
  prepForm=$("he-suite-prep");
  prefsForm=$("he-suite-student-settings");
  searchInput=$("he-suite-search-input");
- onRender(renderHomework);
+ onRender(()=>{renderHomework();displayScheduleTimezones()});
+ document.addEventListener("helloearth:schedule-changed",displayScheduleTimezones);
  $("he-suite-homework-form").addEventListener("submit",async e=>{
   e.preventDefault();const data=formData(e.currentTarget);
   if(!studentFor(data.student_id)){message("Choose a student.",true);return}
