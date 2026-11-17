@@ -1,8 +1,5 @@
 import {db,$,W,state,esc,dateOnly,friendlyDate,formData,message,refresh,onRender,nameFor,studentFor,options} from "./dashboard-suite-shared.js";
-const homeworkForm=$("he-suite-homework-form");
-const prepForm=$("he-suite-prep");
-const prefsForm=$("he-suite-student-settings");
-const searchInput=$("he-suite-search-input");
+let homeworkForm,prepForm,prefsForm,searchInput;
 const prepKeys=["review_notes","check_homework","confirm_goals","prepare_materials","confirm_schedule"];
 function renderHomework(){
  const root=$("he-suite-homework-list");
@@ -86,6 +83,10 @@ function openStudent(id){
  W()?.openStudent(id);
 }
 export function setupStudents(){
+ homeworkForm=$("he-suite-homework-form");
+ prepForm=$("he-suite-prep");
+ prefsForm=$("he-suite-student-settings");
+ searchInput=$("he-suite-search-input");
  onRender(renderHomework);
  $("he-suite-homework-form").addEventListener("submit",async e=>{
   e.preventDefault();const data=formData(e.currentTarget);
