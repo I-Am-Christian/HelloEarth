@@ -465,3 +465,19 @@
  .he-demo-app .he-mini-metrics>div{padding:9px 8px}
  .he-demo-app .he-mini-metrics strong{font-size:19px}
 }
+
+/* Useful static fallback if the interactive sample cannot initialize. */
+.he-demo-app .he-demo-fallback{
+ display:flex;
+ flex-direction:column;
+ justify-content:center;
+ align-items:center;
+ text-align:center;
+ gap:14px;
+ height:100%;
+ min-height:0;
+ padding:28px;
+}
+.he-demo-app .he-demo-fallback strong{font-size:22px;color:#f5edff}
+.he-demo-app .he-demo-fallback p{max-width:340px;margin:0;color:#b8c2df;font-size:13px}
+.he-demo-app .he-demo-fallback a{color:#c5aff8;text-decoration:underline;font-size:12px}
