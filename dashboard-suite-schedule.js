@@ -1,4 +1,4 @@
-import {db,$,W,state,esc,dateOnly,friendlyDate,formData,message,refresh,onRender,nameFor,studentFor} from "./dashboard-suite-shared.js";
+import {db,$,W,state,esc,dateOnly,friendlyDate,formData,message,refresh,onRender,nameFor,studentFor,options} from "./dashboard-suite-shared.js";
 let settingsFilled=false;
 const time=s=>String(s||"").slice(0,5);
 const eventText=e=>new Date(e).toLocaleString([],{weekday:"short",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
@@ -24,12 +24,17 @@ function renderSettings(){
 function renderBookings(){
  const root=$("he-suite-bookings");if(!root)return;
  const list=[...state.bookings].sort((a,b)=>(a.status==="pending"?-1:1)-(b.status==="pending"?-1:1)||Date.parse(a.starts_at)-Date.parse(b.starts_at));
- root.innerHTML=list.length?list.slice(0,70).map(b=>
-  '<div class="he-suite-row"><div><strong>'+esc(b.requester_name)+'</strong><small>'+esc(eventText(b.starts_at))+' · '+esc(b.requester_email)+'</small><p>'+esc(b.customer_note||"No note")+'</p></div>'+
-  '<div class="he-suite-row-actions"><span>'+esc(b.status)+'</span>'+
-  (b.status==="pending"?'<button type="button" data-booking-id="'+esc(b.id)+'" data-status="confirmed">Approve</button><button type="button" data-booking-id="'+esc(b.id)+'" data-status="declined">Decline</button>':"")+
-  (b.status==="confirmed"?'<a href="'+draftGoogle(b)+'" target="_blank" rel="noopener noreferrer">Add to Google ↗</a>':"")+
-  '</div></div>').join(""):'<p class="he-suite-empty">No booking requests yet.</p>';
+ root.innerHTML=list.length?list.slice(0,70).map(b=>{
+  const matches=state.students.filter(s=>s.display_name.toLocaleLowerCase()===String(b.requester_name||"").toLocaleLowerCase());
+  const linked=b.student_id||matches.length===1?b.student_id||matches[0]?.id||"":"";
+  return '<div class="he-suite-row"><div><strong>'+esc(b.requester_name)+'</strong><small>'+esc(eventText(b.starts_at))+' · '+esc(b.requester_email)+'</small><p>'+esc(b.customer_note||"No note")+'</p>'+
+   (b.status==="pending"?'<label class="he-suite-booking-student">Link to student (optional)<select data-booking-student="'+esc(b.id)+'">'+options(linked,"New / external student")+'</select></label>':"")+
+   '</div><div class="he-suite-row-actions"><span>'+esc(b.status)+'</span>'+
+   (b.status==="pending"?'<button type="button" data-booking-id="'+esc(b.id)+'" data-status="confirmed">Approve</button><button type="button" data-booking-id="'+esc(b.id)+'" data-status="declined">Decline</button>':"")+
+   (b.status==="confirmed"&&!b.google_event_id?'<button type="button" data-create-google-booking="'+esc(b.id)+'">Add to Google Calendar</button>':"")+
+   (b.google_event_id?'<span>Google Calendar linked ✓</span>':"")+
+   '</div></div>';
+ }).join(""):'<p class="he-suite-empty">No booking requests yet.</p>';
 }
 function draftGoogle(b){
  const date=s=>new Date(s).toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"");
@@ -115,10 +120,24 @@ export function setupSchedule(){
   const button=e.target.closest("[data-booking-id]");if(!button)return;
   if(button.dataset.status==="confirmed"&&!confirm("Have you checked your Google Calendar for conflicts? Approval does not create a Google event."))return;
   try{
-   const {error}=await db.from("he_booking_requests").update({status:button.dataset.status,updated_at:new Date().toISOString()})
-    .eq("tutor_id",state.userId).eq("id",button.dataset.bookingId).eq("status","pending");
+   const linked=$("he-suite-bookings").querySelector('[data-booking-student="'+button.dataset.bookingId+'"]')?.value||null;
+   const {error}=await db.from("he_booking_requests").update({
+    status:button.dataset.status,student_id:button.dataset.status==="confirmed"?linked:null,
+    updated_at:new Date().toISOString()
+   }).eq("tutor_id",state.userId).eq("id",button.dataset.bookingId).eq("status","pending");
    if(error)throw error;await refresh(["bookings"]);message("Request "+button.dataset.status+". Add approved requests to Google Calendar separately.");
   }catch(err){message(err.message,true)}
+ });
+ $("he-suite-bookings").addEventListener("click",e=>{
+  const btn=e.target.closest("[data-create-google-booking]");if(!btn)return;
+  const booking=state.bookings.find(b=>b.id===btn.dataset.createGoogleBooking);
+  if(!booking||booking.status!=="confirmed"||booking.google_event_id)return;
+  if(!confirm("Create an appointment in your Google Calendar for this approved booking? Check the time and selected student first."))return;
+  document.dispatchEvent(new CustomEvent("helloearth:create-approved-booking",{detail:{booking}}));
+ });
+ document.addEventListener("helloearth:approved-booking-result",async e=>{
+  if(e.detail?.success)await refresh(["bookings"]);
+  message(e.detail?.message||"Could not add the approved booking to Google Calendar.",!e.detail?.success);
  });
  $("he-suite-recurring").elements.namedItem("starts_on").value=dateOnly();
  $("he-suite-recurring").addEventListener("submit",async e=>{
