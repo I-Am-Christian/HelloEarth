@@ -1,0 +1,80 @@
+/* HelloEarth private workspace — authenticated timeline, chart and in-lesson tools.
+   No CSS for these modules is used on public pages. */
+.ws-extra-timeline{margin-top:24px}
+.ws-extra-toolbar{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:13px}
+.ws-extra-toolbar h3{margin:4px 0 6px;font:700 clamp(18px,2vw,24px)/1.18 'Space Grotesk',sans-serif;color:#f4edff}
+.ws-extra-toolbar p{margin:0;max-width:58ch;font-size:12px;line-height:1.6;color:#b6bfdc}
+.ws-extra-controls{display:flex;align-items:end;flex-wrap:wrap;gap:9px}
+.ws-extra-controls label{display:grid;gap:5px;font-size:11px;font-weight:700;color:#c9c4df}
+.ws-extra-controls select{min-height:37px;max-width:180px;padding:8px 10px;background:#1c243e;color:#f4efff;border:1px solid rgba(164,142,214,.47);border-radius:9px}
+.ws-extra-controls button{min-height:37px}
+.ws-extra-feedback{font-size:11px;line-height:1.5;color:#abbdde;min-height:14px;margin:8px 0 12px}
+.ws-extra-empty{color:#adb7d6;font-size:12px;padding:15px 12px;margin:0}
+.ws-timeline-list{display:grid;gap:10px;max-height:550px;overflow:auto;scrollbar-width:thin;padding:2px}
+.ws-timeline-entry{position:relative;display:grid;gap:7px;padding:13px 17px 13px 20px;border:1px solid rgba(159,142,204,.31);border-radius:13px;background:linear-gradient(115deg,rgba(50,43,82,.55),rgba(28,42,68,.6))}
+.ws-timeline-entry:before{position:absolute;content:"";left:0;top:13px;bottom:13px;width:3px;background:#9d79e4;border-radius:0 4px 4px 0}
+.ws-timeline-entry-head{display:flex;align-items:center;flex-wrap:wrap;gap:12px}
+.ws-timeline-kind{padding:4px 8px;border-radius:7px;font-size:10px;color:#e7d7ff;background:rgba(127,90,191,.3);border:1px solid rgba(158,125,217,.38)}
+.ws-timeline-attendance{color:#aee5d9;background:rgba(61,126,118,.28);border-color:rgba(96,179,160,.38)}
+.ws-timeline-assessment{color:#b5d5ff;background:rgba(74,115,180,.25);border-color:rgba(98,155,211,.38)}
+.ws-timeline-plan{color:#f8dbb3;background:rgba(167,117,56,.2);border-color:rgba(195,148,90,.33)}
+.ws-timeline-entry time{font-size:10px;color:#9da9cc}
+.ws-timeline-entry>strong{font-size:13px;color:#f4edff;line-height:1.45;overflow-wrap:anywhere}
+.ws-timeline-entry>p{font-size:12px;line-height:1.6;margin:0;color:#bbc5de;white-space:pre-wrap;overflow-wrap:anywhere}
+.ws-chart-card{padding:18px 19px;margin:18px 0;border:1px solid rgba(165,143,218,.34);border-radius:17px;background:linear-gradient(135deg,rgba(43,39,70,.75),rgba(24,39,66,.73))}
+.ws-progress-chart{min-height:170px}
+.ws-chart-svg{width:100%;height:auto;max-height:280px;display:block;overflow:visible}
+.ws-chart-grid-line{stroke:rgba(183,163,218,.19);stroke-width:1}
+.ws-chart-axis{fill:#bac6e3;font:12px 'DM Sans',sans-serif}
+.ws-chart-line{stroke:#ae89fc;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;fill:none}
+.ws-chart-dot{fill:#d8c3ff;stroke:#7352b0;stroke-width:2;outline:none}
+.ws-chart-dot:focus-visible{stroke:#fff;stroke-width:4}
+.ws-progress-summary{font-size:12px;color:#d2c9eb;line-height:1.65}
+.ws-progress-summary p{margin:9px 0}
+.ws-chart-data{width:100%;border-collapse:collapse;margin-top:11px;text-align:left}
+.ws-chart-data caption{text-align:left;font-weight:700;color:#d7c8ee;margin-bottom:7px}
+.ws-chart-data th,.ws-chart-data td{padding:8px 10px;border-bottom:1px solid rgba(145,132,181,.22)}
+.ws-chart-data th{color:#e5dcf9}
+.ws-companion-launch{min-height:38px;padding:9px 12px;white-space:nowrap;color:#f5eaff!important;border-color:rgba(184,151,241,.5)!important;background:rgba(113,77,181,.28)!important}
+.ws-companion-panel[hidden]{display:none!important}
+.ws-companion-panel{
+ position:fixed;z-index:990;right:16px;bottom:16px;
+ display:flex;flex-direction:column;gap:13px;
+ width:min(440px,calc(100vw - 32px));
+ max-height:min(88dvh,780px);
+ overflow-y:auto;overscroll-behavior:contain;
+ padding:19px 20px;
+ border:1px solid rgba(185,157,241,.62);
+ border-radius:19px;
+ background:linear-gradient(145deg,#242240,#161d36 69%,#1a2840);
+ box-shadow:0 24px 75px rgba(1,4,20,.75);
+ color:#f6f0ff;
+ scrollbar-width:thin;
+}
+.ws-companion-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.ws-companion-heading h2{font:700 21px 'Space Grotesk',sans-serif;margin:5px 0 0}
+.ws-companion-heading button{background:rgba(133,112,173,.25);color:#fff;border:1px solid rgba(162,142,205,.35);border-radius:9px;font-size:22px;width:33px;height:33px}
+.ws-companion-info{font-size:11px;line-height:1.6;color:#bbc6df;margin:0}
+.ws-companion-label{display:grid;gap:7px;font-size:12px;font-weight:700;color:#c9cee6}
+.ws-companion-label select,.ws-companion-label textarea{
+ width:100%;padding:11px;color:#fff;background:#171e35;border:1px solid rgba(169,142,217,.42);border-radius:10px;
+ outline:none;
+}
+.ws-companion-label textarea{resize:vertical;min-height:68px}
+.ws-companion-timer{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px;border-radius:13px;border:1px solid rgba(159,141,213,.34);background:#181b34}
+.ws-companion-timer>strong{font:750 clamp(24px,4vw,33px) 'Space Grotesk',sans-serif;letter-spacing:1px;font-variant-numeric:tabular-nums}
+.ws-companion-timer>div{display:flex;gap:6px}
+.ws-companion-timer button{width:auto;min-height:35px;padding:8px 12px}
+.ws-companion-plan{padding:12px 13px;background:rgba(40,43,74,.68);border:1px solid rgba(156,140,212,.32);border-radius:10px}
+.ws-companion-plan summary{font-size:12px;font-weight:700;cursor:pointer;color:#d4c8f2}
+.ws-companion-plan pre{font:11px/1.7 'DM Sans',monospace;white-space:pre-wrap;overflow-wrap:anywhere;color:#c9d4eb;max-height:200px;overflow:auto;margin:12px 0 2px}
+.ws-companion-panel #ws-companion-save{width:100%;min-height:43px}
+@media(max-width:650px){
+ .ws-companion-panel{right:8px;bottom:8px;width:calc(100vw - 16px);max-height:87dvh;padding:14px}
+ .ws-extra-toolbar{flex-direction:column}
+ .ws-extra-controls{width:100%}
+ .ws-chart-card{padding:13px 11px}
+ .ws-chart-axis{font-size:11px}
+ .ws-timeline-entry{padding:12px 13px}
+ .ws-companion-launch{padding:8px;font-size:11px}
+}
