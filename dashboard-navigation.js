@@ -873,6 +873,42 @@ document.addEventListener("helloearth:create-recurring",async e=>{
 });
 
 
+document.addEventListener("helloearth:create-approved-booking",async e=>{
+ const booking=e.detail?.booking;
+ const result=(success,message)=>document.dispatchEvent(new CustomEvent("helloearth:approved-booking-result",{detail:{success,message}}));
+ if(!booking||booking.status!=="confirmed"||booking.google_event_id){
+  result(false,"Only approved bookings that have not been added to Google Calendar can be created.");return;
+ }
+ if(!calendar.connected||!calendar.writeAuthorized||!calendar.token){
+  result(false,"Connect Google Calendar and authorize scheduling first.");return;
+ }
+ const target=calendar.sources.find(s=>s.primary&&s.writable)||calendar.sources.find(s=>s.writable);
+ if(!target){result(false,"No writable Google Calendar is available.");return}
+ const student=window.HelloEarthWorkspace?.students?.find(s=>s.id===booking.student_id);
+ const body={
+  summary:student?"English lesson · "+student.display_name:"English lesson · "+booking.requester_name,
+  description:"Approved HelloEarth booking request. Verify any recurring or unrelated calendar conflicts.",
+  start:{dateTime:booking.starts_at},end:{dateTime:booking.ends_at}
+ };
+ if(student)body.extendedProperties={private:{helloearth_student_id:student.id}};
+ try{
+  const url="https://www.googleapis.com/calendar/v3/calendars/"+encodeURIComponent(target.id)+"/events";
+  const response=await fetch(url,{method:"POST",headers:{
+   Authorization:"Bearer "+calendar.token,"Content-Type":"application/json"
+  },body:JSON.stringify(body)});
+  if(!response.ok){let data={};try{data=await response.json()}catch{}
+   throw Error(data.error?.message||"Google Calendar rejected the lesson.");}
+  const created=await response.json();
+  const {error}=await db.from("he_booking_requests").update({
+   google_event_id:created.id||null,google_calendar_id:target.id,updated_at:new Date().toISOString()
+  }).eq("id",booking.id).eq("tutor_id",window.HelloEarthWorkspace?.userId);
+  if(error){result(false,"Google event created, but its HelloEarth reference could not be saved. Check your Google Calendar to avoid duplicates.");return}
+  result(true,"Approved lesson added to "+target.name+(student?" and linked to "+student.display_name:"")+".");
+  calendar.date=new Date(booking.starts_at);calendar.week=monday(calendar.date);
+  await refreshEvents();
+ }catch(error){result(false,"Could not create the approved Google Calendar event: "+error.message)}
+});
+
 function disconnectGoogle(){
  // This stops access from the dashboard; it does NOT revoke Google's OAuth grant.
  // Google access permission can separately be revoked in the Google Account settings.
