@@ -22,33 +22,6 @@ close.addEventListener('click', () => toggleChat(false));
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && panel.classList.contains('open')) toggleChat(false); });
 document.getElementById('year').textContent = new Date().getFullYear();
 
-// Interactive homepage miniature of the actual dashboard. All sample data is illustrative.
-(() => {
- const mini=document.getElementById("mini-dashboard");
- if(!mini)return;
- const tabs=[...mini.querySelectorAll("[data-mini-view]")];
- const panes=[...mini.querySelectorAll("[data-mini-pane]")];
- function show(name){
-  if(!panes.some(pane=>pane.dataset.miniPane===name))return;
-  for(const tab of tabs){
-   const active=tab.dataset.miniView===name;
-   tab.classList.toggle("is-active",active);
-   tab.setAttribute("aria-pressed",String(active));
-  }
-  for(const pane of panes){
-   const active=pane.dataset.miniPane===name;
-   pane.hidden=!active;
-   pane.classList.toggle("is-active",active);
-  }
- }
- mini.addEventListener("click",event=>{
-  const action=event.target.closest("[data-mini-view],[data-mini-open]");
-  if(!action||!mini.contains(action))return;
-  show(action.dataset.miniView||action.dataset.miniOpen);
- });
- show("overview");
-})();
-
 document.addEventListener('click', event => {
   if (!nav.contains(event.target) && !menu.contains(event.target)) {
     nav.classList.remove('open');
