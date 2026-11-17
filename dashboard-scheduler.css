@@ -203,3 +203,15 @@
 @media(prefers-reduced-motion:reduce){
  .ws-scheduler-dialog .ws-schedule-kind-button,.ws-scheduler-dialog .ws-schedule-date-button{transition:none}
 }
+
+@media(max-width:500px){
+ .ws-scheduler-dialog #schedule-form>.field:not(.full){
+  grid-column:1/-1;
+ }
+ .ws-scheduler-dialog .ws-schedule-kind-button{
+  min-width:0;
+ }
+ .ws-scheduler-dialog .ws-schedule-month-grid{
+  touch-action:manipulation;
+ }
+}
