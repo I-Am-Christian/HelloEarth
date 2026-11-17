@@ -26,7 +26,7 @@ function renderBookings(){
  const list=[...state.bookings].sort((a,b)=>(a.status==="pending"?-1:1)-(b.status==="pending"?-1:1)||Date.parse(a.starts_at)-Date.parse(b.starts_at));
  root.innerHTML=list.length?list.slice(0,70).map(b=>{
   const matches=state.students.filter(s=>s.display_name.toLocaleLowerCase()===String(b.requester_name||"").toLocaleLowerCase());
-  const linked=b.student_id||matches.length===1?b.student_id||matches[0]?.id||"":"";
+  const linked=b.student_id||(matches.length===1?matches[0].id:"");
   return '<div class="he-suite-row"><div><strong>'+esc(b.requester_name)+'</strong><small>'+esc(eventText(b.starts_at))+' · '+esc(b.requester_email)+'</small><p>'+esc(b.customer_note||"No note")+'</p>'+
    (b.status==="pending"?'<label class="he-suite-booking-student">Link to student (optional)<select data-booking-student="'+esc(b.id)+'">'+options(linked,"New / external student")+'</select></label>':"")+
    '</div><div class="he-suite-row-actions"><span>'+esc(b.status)+'</span>'+
