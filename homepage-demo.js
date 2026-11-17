@@ -93,34 +93,42 @@
   function calendar(){
     const chosen=state.lessons.filter(l=>l.day===state.day).sort((a,b)=>a.time.localeCompare(b.time));
     return [
-      title('SAMPLE SCHEDULE','Teaching calendar','Select a weekday or add a lesson to this temporary calendar.','Demo week'),
-      '<div class="he-demo-calendar-notice"><span class="he-mini-status-dot"></span><span><strong>Practice calendar</strong><small>Fictional appointments. No Google account connected.</small></span>'+button('Add sample lesson','calendar','data-demo-add-event="true"')+'</div>',
-      '<div class="he-mini-days he-demo-week">'+days.map((day,i)=>'<button type="button" data-demo-day="'+i+'" class="'+(state.day===i?'active':'')+'" aria-pressed="'+(state.day===i)+'">'+day+'<small>'+state.lessons.filter(l=>l.day===i).length+'</small></button>').join('')+'</div>',
+      title('YOUR SCHEDULE','Teaching calendar','See upcoming lessons and appointments in one place.','Sample calendar'),
+      '<div class="he-demo-calendar-identity"><span class="he-demo-connection-light"></span><div><small>SAMPLE CALENDAR</small><strong>Fictional tutoring schedule</strong></div><span class="he-demo-calendar-identity-status">Demo only · Not connected</span></div>',
+      '<div class="he-demo-scheduling-actions"><button type="button" class="he-demo-primary" data-demo-add-event="true">+ Schedule appointment</button><small>New lessons are added only to this sample workspace.</small></div>',
       state.calendarForm?'<form class="he-demo-form he-demo-inline-form" data-demo-form="event"><label>Student<select name="student" required>'+studentOptions(state.selected)+'</select></label><label>Day<select name="day">'+days.map((d,i)=>'<option value="'+i+'" '+(i===state.day?'selected':'')+'>'+d+'</option>').join('')+'</select></label><label>Time<input name="time" type="time" value="16:00" required></label><label class="he-demo-field-wide">Lesson topic<input name="title" value="Conversation practice" maxlength="65" required></label><div class="he-demo-form-actions"><button type="submit">Add to demo</button><button type="button" data-demo-cancel="true">Cancel</button></div></form>':'',
-      '<div class="he-mini-section-title"><strong>'+days[state.day]+' appointments</strong><span>'+chosen.length+' sample '+(chosen.length===1?'lesson':'lessons')+'</span></div>',
-      '<div class="he-mini-lessons">'+(chosen.length?chosen.map(lessonRow).join(''):'<div class="he-demo-empty">No lessons on this sample day. Add one using the button above.</div>')+'</div>',
-      '<div class="he-mini-actions">'+button('Back to overview','overview')+button('Student profiles','students')+'</div>',
+      '<div class="he-demo-calendar-card"><div class="he-demo-calendar-head"><div><strong>Sample teaching week</strong><p>Choose a day to view its appointments</p></div><button type="button" class="he-demo-button" data-demo-day="2">Today (sample)</button></div>',
+      '<div class="he-mini-days he-demo-week">'+days.map((day,i)=>'<button type="button" data-demo-day="'+i+'" class="'+(state.day===i?'active':'')+'" aria-pressed="'+(state.day===i)+'"><span>'+day+'</span><strong>'+state.lessons.filter(l=>l.day===i).length+'</strong></button>').join('')+'</div></div>',
+      '<div class="he-demo-agenda-card"><div class="he-demo-agenda-head"><div><h4>'+days[state.day]+' · Upcoming lessons</h4><p>Appointments in the selected sample day.</p></div><span>'+chosen.length+' '+(chosen.length===1?'lesson':'lessons')+'</span></div>',
+      '<div class="he-mini-lessons">'+(chosen.length?chosen.map(lessonRow).join(''):'<div class="he-demo-empty">No sample lessons on this day. Try scheduling one.</div>')+'</div></div>',
       sampleMessage
     ].join('');
   }
   const studentList=()=>state.students.filter(s=>(s.name+' '+s.level+' '+s.goal).toLowerCase().includes(state.search.toLowerCase())).map(s=>
-    '<button type="button" class="he-mini-student he-demo-student-row '+(state.selected===s.id?'chosen':'')+'" data-demo-student="'+clean(s.id)+'" aria-pressed="'+(state.selected===s.id)+'"><span class="he-mini-avatar">'+avatar(s)+'</span><span class="he-demo-student-text"><strong>'+clean(s.name)+'</strong><small>'+clean(s.goal)+'</small></span>'+level(s)+'</button>'
+    '<button type="button" class="he-demo-student-card '+(state.selected===s.id?'chosen':'')+'" data-demo-student="'+clean(s.id)+'" aria-pressed="'+(state.selected===s.id)+'"><span class="he-demo-card-top"><span class="he-mini-avatar">'+avatar(s)+'</span>'+level(s)+'</span><strong>'+clean(s.name)+'</strong><small>'+clean(s.goal)+'</small><span class="he-demo-card-footer">View student profile →</span></button>'
   ).join('')||'<p class="he-demo-empty">No matching sample students.</p>';
   function students(){
     const s=lookup(state.selected);
     return [
-      title('STUDENT DIRECTORY','Student profiles','Search learners, view their goals or follow up on homework.',state.students.length+' sample students'),
-      '<div class="he-demo-toolbar"><label class="he-demo-search"><span>⌕</span><input type="search" data-demo-search aria-label="Find a sample student" placeholder="Find a student or CEFR level…" value="'+clean(state.search)+'"></label><button type="button" class="he-demo-button" data-demo-add-student="true">+ Add demo student</button></div>',
+      title('YOUR STUDENTS','Your students','Keep goals, progress and lesson notes together.',state.students.length+' sample profiles'),
+      '<div class="he-demo-toolbar"><label class="he-demo-search"><span>⌕</span><input type="search" data-demo-search aria-label="Search fictional students" placeholder="Search by name or goal…" value="'+clean(state.search)+'"></label><button type="button" class="he-demo-primary" data-demo-add-student="true">+ Add student</button></div>',
       state.studentForm?'<form class="he-demo-form he-demo-inline-form" data-demo-form="student"><label>Student name<input name="name" required maxlength="55" placeholder="Example Student"></label><label>CEFR level<select name="level"><option>A1</option><option>A2</option><option selected>B1</option><option>B2</option><option>C1</option></select></label><label class="he-demo-field-wide">Learning goal<input name="goal" required maxlength="90" placeholder="Build speaking confidence"></label><div class="he-demo-form-actions"><button type="submit">Add to demo</button><button type="button" data-demo-cancel="true">Cancel</button></div></form>':'',
-      '<div class="he-demo-student-layout"><div class="he-mini-students" id="he-demo-student-list">'+studentList()+'</div><div class="he-demo-profile">',
-      '<div class="he-demo-profile-head"><span class="he-mini-avatar">'+avatar(s)+'</span><span><strong>'+clean(s.name)+'</strong><small>Sample learner · '+clean(s.level)+'</small></span>'+level(s)+'</div>',
-      '<div class="he-demo-detail-line"><small>Learning goal</small><strong>'+clean(s.goal)+'</strong></div>',
-      '<div class="he-demo-detail-line"><small>Next lesson focus</small><strong>'+clean(s.focus)+'</strong></div>',
-      '<div class="he-demo-detail-line"><small>Current strength</small><strong>'+clean(s.strength)+'</strong></div>',
-      '<div class="he-demo-detail-line"><small>Homework</small><strong>'+clean(s.homework)+'</strong></div>',
-      '<button type="button" class="he-demo-check '+(state.completed.has(s.id)?'is-checked':'')+'" data-demo-homework="'+clean(s.id)+'" aria-pressed="'+state.completed.has(s.id)+'">'+(state.completed.has(s.id)?'✓ Completed (demo)':'○ Mark homework complete')+'</button>',
-      '<div class="he-mini-actions">'+button('Lesson notes','notes','data-demo-person="'+clean(s.id)+'"')+button('View progress','progress','data-demo-person="'+clean(s.id)+'"')+'</div>',
-      '</div></div>',
+      '<div class="he-demo-student-grid" id="he-demo-student-list">'+studentList()+'</div>',
+      '<section class="he-demo-profile-real"><div class="he-demo-profile-header"><div><span class="he-mini-overline">STUDENT PROFILE</span><h4>'+clean(s.name)+'</h4></div>'+level(s)+'</div>',
+      '<div class="he-demo-profile-fields">',
+       '<div><small>CEFR level</small><strong>'+clean(s.level)+'</strong></div>',
+       '<div><small>Learning goals</small><strong>'+clean(s.goal)+'</strong></div>',
+       '<div><small>Strengths</small><strong>'+clean(s.strength)+'</strong></div>',
+       '<div><small>Next lesson focus</small><strong>'+clean(s.focus)+'</strong></div>',
+       '<div class="he-demo-profile-homework"><small>Current homework</small><strong>'+clean(s.homework)+'</strong></div>',
+      '</div>',
+      '<div class="he-demo-profile-actions">',
+       button('+ Lesson note','notes','data-demo-person="'+clean(s.id)+'"'),
+       button('Record assessment','progress','data-demo-person="'+clean(s.id)+'"'),
+       button('Prepare lesson','plan','data-demo-person="'+clean(s.id)+'" class="he-demo-button he-demo-primary"'),
+      '</div>',
+      '<button type="button" class="he-demo-check '+(state.completed.has(s.id)?'is-checked':'')+'" data-demo-homework="'+clean(s.id)+'" aria-pressed="'+state.completed.has(s.id)+'">'+(state.completed.has(s.id)?'✓ Homework complete (demo)':'○ Mark homework complete')+'</button>',
+      '</section>',
       sampleMessage
     ].join('');
   }
