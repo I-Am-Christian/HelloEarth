@@ -3073,3 +3073,6 @@ body { -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
   line-height:1!important;
  }
 }
+
+/* Discreet legal-operator credit beneath the homepage brand. */
+.site-footer .footer-business{display:block;margin:4px 0 14px;color:#a4a5c1;font-size:12px;line-height:1.65;font-weight:400;letter-spacing:.05px}
