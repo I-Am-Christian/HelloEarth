@@ -7,7 +7,7 @@
 <link rel="icon" href="logo.svg" type="image/svg+xml">
 <link rel="stylesheet" href="portal.css?v=20261115pricing1">
 <script type="module" src="dashboard.js?v=20261117-suite10"></script>
-<link rel="stylesheet" href="page-i18n.css?v=20261115full4"><script src="page-i18n.js?v=20261116-suite7" defer></script><link rel="stylesheet" href="space-theme.css?v=20261115-global-space2"><link rel="stylesheet" href="dashboard-navigation.css?v=20261116-scheduling3"><link rel="stylesheet" href="dashboard-features.css?v=20261116-suite7"><link rel="manifest" href="/site.webmanifest">
+<link rel="stylesheet" href="page-i18n.css?v=20261115full4"><script src="page-i18n.js?v=20261116-suite7" defer></script><link rel="stylesheet" href="space-theme.css?v=20261115-global-space2"><link rel="stylesheet" href="dashboard-navigation.css?v=20261116-scheduling3"><link rel="stylesheet" href="dashboard-scheduler.css?v=20261117-scheduler1"><link rel="stylesheet" href="dashboard-features.css?v=20261116-suite7"><link rel="manifest" href="/site.webmanifest">
 <link rel="apple-touch-icon" href="/helloearth-logo.png">
 <meta name="apple-mobile-web-app-title" content="HelloEarth">
 <link rel="stylesheet" href="dashboard-extras.css?v=20261117-extras1"><link rel="stylesheet" href="notifications.css?v=20261116-push1"><script type="module" src="notifications.js?v=20261116-push1"></script><script src="pwa-register.js?v=20261116-push1" defer></script></head>
@@ -234,18 +234,36 @@
   </div>
 </div>
 <div class="ws-modal" id="schedule-modal" hidden>
-  <div class="ws-dialog" role="dialog" aria-modal="true" aria-labelledby="schedule-heading">
-    <div class="ws-dialog-head"><h2 id="schedule-heading">Schedule appointment</h2><button type="button" id="schedule-close" aria-label="Close scheduler">×</button></div>
-    <p>Create a Google Calendar event. It will be saved only to the calendar you choose, not as a HelloEarth booking.</p>
+  <div class="ws-dialog ws-scheduler-dialog" role="dialog" aria-modal="true" aria-labelledby="schedule-heading">
+    <div class="ws-dialog-head"><div><span class="dash-overline">GOOGLE CALENDAR</span><h2 id="schedule-heading">Plan your schedule</h2><p class="ws-schedule-subtitle">Check existing bookings before adding a lesson or time off.</p></div><button type="button" id="schedule-close" aria-label="Close scheduler">×</button></div>
     <form id="schedule-form" class="ws-form">
-      <div class="field full"><label>Event title<input id="schedule-title" maxlength="200" required placeholder="English lesson"></label></div>
-      <div class="field"><label>Google calendar<select id="schedule-calendar" required><option value="">Connect calendar first</option></select></label></div>
-      <div class="field"><label>Student (optional)<select id="schedule-student"><option value="">No student linked</option></select></label></div>
-      <div class="field"><label>Start date and time<input id="schedule-start" type="datetime-local" required></label></div>
-      <div class="field"><label>End date and time<input id="schedule-end" type="datetime-local" required></label></div>
-      <div class="field full"><label>Description (optional)<textarea id="schedule-description" maxlength="1200" rows="3"></textarea></label></div>
-      <button class="dash-primary" type="submit" id="schedule-submit">Create in Google Calendar</button><p class="ws-feedback" role="status" id="schedule-feedback"></p>
+      <div class="ws-schedule-kind field full" role="group" aria-label="What are you scheduling?">
+        <button type="button" id="schedule-kind-lesson" class="ws-schedule-kind-button active" aria-pressed="true" data-schedule-mode="lesson"><span aria-hidden="true">🎓</span><strong>Student lesson</strong><small>Schedule a lesson</small></button>
+        <button type="button" id="schedule-kind-timeoff" class="ws-schedule-kind-button" aria-pressed="false" data-schedule-mode="timeoff"><span aria-hidden="true">🌿</span><strong>Time off</strong><small>Block your availability</small></button>
+      </div>
+      <div class="field full"><label for="schedule-title">Event title<input id="schedule-title" maxlength="200" required placeholder="English lesson"></label></div>
+      <div class="field"><label for="schedule-calendar">Google calendar<select id="schedule-calendar" required><option value="">Connect calendar first</option></select></label></div>
+      <div class="field" id="schedule-student-row"><label for="schedule-student">Student<select id="schedule-student"><option value="">Choose a student (optional)</option></select></label></div>
+      <div class="field full ws-schedule-picker">
+        <div class="ws-schedule-picker-head"><div><strong>Choose your dates</strong><p>Booked days appear with a small dot. Select a day to see its appointments.</p></div>
+        <div class="ws-schedule-month-nav"><button type="button" id="schedule-month-prev" aria-label="Previous month">‹</button><span id="schedule-month-label" aria-live="polite">Month</span><button type="button" id="schedule-month-next" aria-label="Next month">›</button></div></div>
+        <div id="schedule-picker-target" class="ws-schedule-target"><button type="button" id="schedule-pick-start" class="is-selected" aria-pressed="true">Start date</button><button type="button" id="schedule-pick-end" aria-pressed="false" hidden>End date</button></div>
+        <div class="ws-schedule-weekdays" aria-hidden="true"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+        <div id="schedule-month-days" class="ws-schedule-month-grid" role="group" aria-label="Choose an appointment date"></div>
+        <p id="schedule-month-status" class="ws-schedule-month-status" aria-live="polite">Choose a date to check your availability.</p>
+      </div>
+      <div class="field"><label for="schedule-date">Start date<input id="schedule-date" type="date" required></label></div>
+      <div class="field" id="schedule-date-end-row" hidden><label for="schedule-date-end">Last day of time off (inclusive)<input id="schedule-date-end" type="date" required></label></div>
+      <div class="field full" id="schedule-timeoff-options" hidden><label class="ws-schedule-all-day"><input type="checkbox" id="schedule-all-day" checked><span><strong>All-day time off</strong><small>Blocks the selected day or date range on Google Calendar.</small></span></label></div>
+      <div class="field" id="schedule-time-start-row"><label for="schedule-time-start">Start time<input id="schedule-time-start" type="time" step="300" required></label></div>
+      <div class="field" id="schedule-duration-row"><label for="schedule-duration">Lesson length<select id="schedule-duration"><option value="30">30 minutes</option><option value="50" selected>50 minutes</option><option value="60">1 hour</option><option value="90">1 hour 30 minutes</option><option value="120">2 hours</option><option value="180">3 hours</option></select></label></div>
+      <div class="field" id="schedule-time-end-row" hidden><label for="schedule-time-end">End time<input id="schedule-time-end" type="time" step="300"></label></div>
+      <div class="field full ws-schedule-preview" id="schedule-preview" aria-live="polite">Choose a date to preview the appointment.</div>
+      <div class="field full ws-schedule-availability" id="schedule-availability" role="status" aria-live="polite"><strong>Checking your calendar</strong><p>Existing appointments will appear here.</p></div>
+      <div class="field full ws-schedule-confirm" id="schedule-override-row" hidden><label><input type="checkbox" id="schedule-override"><span>I understand the warning and want to schedule this event anyway.</span></label></div>
+      <div class="field full"><label for="schedule-description">Description (optional)<textarea id="schedule-description" maxlength="1200" rows="2" placeholder="Private calendar notes (optional)"></textarea></label></div>
+      <div class="field full ws-schedule-footer"><button class="dash-primary" type="submit" id="schedule-submit">Add lesson to Google Calendar</button><p class="ws-schedule-disclaimer">Saved to the selected Google Calendar only. Nothing is added to a student profile until you record it there.</p><p class="ws-feedback" role="status" id="schedule-feedback"></p></div>
     </form>
   </div>
 </div>
-<script type="module" src="dashboard-extras.js?v=20261117-extras2"></script><script type="module" src="dashboard-navigation.js?v=20261116-calendar-persist2"></script><script type="module" src="dashboard-features.js?v=20261117-suite10"></script></body></html>
+<script type="module" src="dashboard-extras.js?v=20261117-extras2"></script><script src="dashboard-scheduler-ui.js?v=20261117-scheduler1" defer></script><script type="module" src="dashboard-navigation.js?v=20261116-calendar-persist2"></script><script type="module" src="dashboard-features.js?v=20261117-suite10"></script></body></html>
