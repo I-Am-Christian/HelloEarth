@@ -130,3 +130,12 @@
  .he-demo-real .he-demo-utility-btn{min-height:29px;font-size:8.5px}
  .he-demo-real .he-demo-import-table{max-height:140px}
 }
+
+/* Keep guided-tour controls reachable on narrow phone screens. */
+@media(max-width:550px){
+ .preview-section .he-demo-real .he-demo-workspace-header{flex-wrap:wrap!important;align-items:flex-start!important;gap:8px!important}
+ .preview-section .he-demo-real .he-demo-account{display:flex!important;flex:1 1 100%!important;min-width:0!important;width:100%!important;flex-wrap:nowrap!important;justify-content:flex-start!important;gap:6px!important;overflow-x:auto!important;scrollbar-width:none}
+ .he-demo-real .he-demo-account::-webkit-scrollbar{display:none}
+ .he-demo-real .he-demo-utility-btn{flex:0 0 auto}
+ .he-demo-real .he-demo-reset{flex:0 0 auto;margin-left:auto!important}
+}
