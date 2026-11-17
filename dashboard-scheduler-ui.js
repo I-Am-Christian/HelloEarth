@@ -153,6 +153,7 @@
   get("schedule-override").checked=false;
   updatePreview();
   changed();
+  document.dispatchEvent(new CustomEvent("helloearth:schedule-changed"));
  }
  function setMonthData(events,complete,message){
   monthEvents=Array.isArray(events)?events:[];
