@@ -111,7 +111,7 @@
     const s=lookup(state.selected);
     return [
       title('YOUR STUDENTS','Your students','Keep goals, progress and lesson notes together.',state.students.length+' sample profiles'),
-      '<div class="he-demo-toolbar"><label class="he-demo-search"><span>⌕</span><input type="search" data-demo-search aria-label="Search fictional students" placeholder="Search by name or goal…" value="'+clean(state.search)+'"></label><button type="button" class="he-demo-primary" data-demo-add-student="true">+ Add student</button></div>',
+      '<div class="he-demo-toolbar"><label class="he-demo-search"><span>⌕</span><input type="search" data-demo-search aria-label="Search fictional students" placeholder="Search by name or goal…" value="'+clean(state.search)+'"></label><button type="button" class="he-demo-button" data-demo-import-open="true">Import CSV demo</button><button type="button" class="he-demo-primary" data-demo-add-student="true">+ Add student</button></div>',
       state.studentForm?'<form class="he-demo-form he-demo-inline-form" data-demo-form="student"><label>Student name<input name="name" required maxlength="55" placeholder="Example Student"></label><label>CEFR level<select name="level"><option>A1</option><option>A2</option><option selected>B1</option><option>B2</option><option>C1</option></select></label><label class="he-demo-field-wide">Learning goal<input name="goal" required maxlength="90" placeholder="Build speaking confidence"></label><div class="he-demo-form-actions"><button type="submit">Add to demo</button><button type="button" data-demo-cancel="true">Cancel</button></div></form>':'',
       '<div class="he-demo-student-grid" id="he-demo-student-list">'+studentList()+'</div>',
       '<section class="he-demo-profile-real"><div class="he-demo-profile-header"><div><span class="he-mini-overline">STUDENT PROFILE</span><h4>'+clean(s.name)+'</h4></div>'+level(s)+'</div>',
@@ -219,7 +219,7 @@
       '</aside>',
       '<div class="he-demo-main">',
         '<header class="he-demo-workspace-header"><div><span class="he-mini-overline">YOUR TEACHING SPACE</span><h2>My workspace<span>.</span></h2></div>',
-          '<div class="he-demo-account"><span class="he-demo-account-label">Demo tutor</span><span class="he-mini-account">T</span><button type="button" class="he-demo-reset" data-demo-reset="true" title="Restore the sample data">↻ Reset</button></div>',
+          '<div class="he-demo-account"><button type="button" class="he-demo-utility-btn" data-demo-tour-start="true">▶ Guided tour</button><button type="button" class="he-demo-utility-btn" data-demo-companion-open="true">◷ Lesson companion</button><span class="he-demo-account-label">Demo tutor</span><span class="he-mini-account">T</span><button type="button" class="he-demo-reset" data-demo-reset="true" title="Restore the sample data">↻ Reset</button></div>',
         '</header>',
         '<nav class="he-demo-mobile-tabs" aria-label="Sample dashboard mobile tabs">',
           sections.map(s=>'<button type="button" class="he-demo-mobile-tab" data-demo-go="'+s.id+'" aria-pressed="false"><span aria-hidden="true">'+s.icon+'</span>'+s.label+'</button>').join(''),
@@ -240,6 +240,7 @@
     mini.querySelector('#he-demo-panel').innerHTML=views[state.view]();
     mini.querySelector('.he-demo-feedback').textContent=state.status;
     if(resetScroll)mini.querySelector('.he-demo-scroll').scrollTop=0;
+    if(typeof CustomEvent==="function")mini.dispatchEvent?.(new CustomEvent("helloearth:demo-render"));
   }
   function go(view,person){
     if(!views[view])return;
@@ -340,6 +341,7 @@
     }
     render();
   });
+  window.HelloEarthDemo={get state(){return state},render,go,mini,clean};
   // Horizontal swipes inside the interactive preview should not trigger the
   // outer carousel; leave the carousel arrows/dots operational outside.
   mini.addEventListener('touchstart',e=>e.stopPropagation(),{passive:true});
