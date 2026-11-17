@@ -193,6 +193,7 @@ el("save-plan").addEventListener("click",async()=>{
   if(error)throw error;
   status("planner-feedback","Lesson plan saved to your private student workspace.");
   await loadPlans(s.id);
+  document.dispatchEvent(new CustomEvent("helloearth:plan-saved",{detail:{studentId:s.id}}));
  }catch(e){status("planner-feedback",safeError(e),true)}
  finally{btn.disabled=false}
 });
@@ -262,6 +263,7 @@ el("skill-form").addEventListener("submit",async ev=>{
   if(error)throw error;
   status("skills-feedback","Skill assessment saved to the student's private history.");
   await loadSkillHistory(s.id);
+  document.dispatchEvent(new CustomEvent("helloearth:assessment-saved",{detail:{studentId:s.id}}));
  }catch(e){status("skills-feedback",safeError(e),true)}finally{submit.disabled=false}
 });
 el("progress-student-select").addEventListener("change",async ev=>{
@@ -444,6 +446,7 @@ el("attendance-form").addEventListener("submit",async e=>{
   if(error)throw error;
   status("attendance-feedback","Attendance saved.");
   await loadAttendance(s.id);
+  document.dispatchEvent(new CustomEvent("helloearth:attendance-saved",{detail:{studentId:s.id}}));
  }catch(err){status("attendance-feedback",safeError(err),true)}
  finally{button.disabled=false}
 });
