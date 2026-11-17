@@ -1,0 +1,24 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex,nofollow"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://paziklvunckkmgrfmbhm.supabase.co; form-action 'self'; base-uri 'none'; object-src 'none'"><title>Request a lesson · Hello Earth</title><meta name="description" content="Request a tutoring appointment with a HelloEarth teacher."><link rel="icon" href="logo.svg"><link rel="stylesheet" href="public-booking.css?v=20261118-1"></head><body><header class="public-header"><a class="public-brand" href="index.html"><img src="logo.svg" alt="">helloearth<span>.</span></a><a href="index.html" class="public-home">← Back to Hello Earth</a></header><main class="public-main">
+ <span class="public-eyebrow">LESSON BOOKING REQUEST</span><h1 class="public-title" id="booking-title">Choose a lesson time.</h1>
+ <p class="public-intro" id="booking-intro">Choose a suitable date and time. Your tutor will review your request before confirming it.</p>
+ <div class="public-detail" id="booking-details"></div>
+ <p id="booking-status" class="public-status" role="status" aria-live="polite">Checking booking availability…</p>
+ <div class="public-grid">
+  <section class="public-card"><h2>Choose your date</h2>
+   <label for="booking-day" class="portal-label">Available dates are shown in the tutor's timezone</label>
+   <input type="date" class="public-date-select" id="booking-day" required>
+   <h2 style="margin:21px 0 8px">Available time slots</h2>
+   <div class="public-available" id="booking-slots" role="group" aria-label="Available lesson times"></div>
+   <p class="public-warning">The displayed slots reflect internal booking requests and recurring patterns. Other Google Calendar appointments may not be included; your tutor must confirm the time.</p>
+  </section>
+  <section class="public-card"><h2>Request this lesson</h2>
+   <form id="booking-form" class="public-form" autocomplete="on">
+    <label class="full">Your name<input name="name" autocomplete="name" minlength="2" maxlength="110" required placeholder="Full name"></label>
+    <label class="full">Your email<input name="email" type="email" autocomplete="email" maxlength="254" required placeholder="you@example.com"></label>
+    <label class="full">Message to the tutor (optional)<textarea name="note" maxlength="500" rows="3" placeholder="Anything the tutor should know?"></textarea></label>
+    <div class="full"><span class="portal-label">Selected appointment</span><p id="booking-choice" class="portal-value">Choose a slot first.</p></div>
+    <button type="submit" id="booking-request" class="public-action full" disabled>Request this time</button>
+   </form>
+   <p class="public-warning">This is a request, not a confirmed booking. Your tutor will need to respond separately. Please don't include medical, financial or other sensitive personal information.</p>
+  </section>
+ </div></main><footer class="public-footer"><span>Hello Earth · Operated by Little Universe</span><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a></footer><script type="module" src="booking.js?v=20261118-1"></script></body></html>
