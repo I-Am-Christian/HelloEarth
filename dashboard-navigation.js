@@ -892,6 +892,27 @@ document.addEventListener("helloearth:create-approved-booking",async e=>{
  };
  if(student)body.extendedProperties={private:{helloearth_student_id:student.id}};
  try{
+  // Check the actual Google calendars again, not just the local pending-request
+  // table. A failed/incomplete check requires explicit confirmation.
+  let checked=null;
+  try{
+   const first=new Date(booking.starts_at),last=new Date(booking.ends_at);
+   const from=toDate(first),until=toDate(last);until.setDate(until.getDate()+1);
+   checked=await readScheduleRange(from,until);
+  }catch{/* Google calendar cannot be verified. */}
+  if(!checked?.complete){
+   if(!confirm("Some Google calendars could not be checked for this booking. Open Google Calendar to verify there is no clash. Continue anyway?")){
+    result(false,"Google Calendar appointment was not created. Please verify availability first.");return;
+   }
+  }
+  const overlaps=(checked?.events||[]).filter(x=>
+   x.transparency!=="transparent"&&
+   eventDate(x.start)<new Date(booking.ends_at)&&eventDate(x.end)>new Date(booking.starts_at));
+  if(overlaps.length){
+   if(!confirm(overlaps.length+" existing Google Calendar appointment(s) overlap this approved request. Create the lesson anyway?")){
+    result(false,"Google Calendar appointment not created because the requested time overlaps an existing event.");return;
+   }
+  }
   const url="https://www.googleapis.com/calendar/v3/calendars/"+encodeURIComponent(target.id)+"/events";
   const response=await fetch(url,{method:"POST",headers:{
    Authorization:"Bearer "+calendar.token,"Content-Type":"application/json"
