@@ -230,8 +230,10 @@ function updateCompanionStudents(){
  const old=select.value;
  select.replaceChildren(new Option("Choose student",""));
  for(const s of W()?.students||[])select.append(new Option(s.display_name,s.id));
- if([...select.options].some(option=>option.value===old))select.value=old;
- else if([...select.options].some(option=>option.value===companion.studentId))select.value=companion.studentId;
+ const currentStudent=W()?.selectedStudent?.id||"";
+ if([...select.options].some(option=>option.value===old)&&old)select.value=old;
+ else if([...select.options].some(option=>option.value===companion.studentId)&&companion.studentId)select.value=companion.studentId;
+ else if([...select.options].some(option=>option.value===currentStudent))select.value=currentStudent;
  companion.studentId=select.value;
 }
 document.addEventListener("helloearth:workspace-data",updateCompanionStudents);
@@ -240,7 +242,7 @@ function updateCompanionVisibility(open){
  if(!panel)return;
  panel.hidden=!open;
  $("ws-companion-open")?.setAttribute("aria-expanded",String(open));
- if(open){updateCompanionStudents();$("ws-companion-student").focus();showTimer()}
+ if(open){updateCompanionStudents();loadCompanionPlan(companion.studentId);$("ws-companion-student").focus();showTimer()}
 }
 $("ws-companion-open")?.addEventListener("click",()=>updateCompanionVisibility($("ws-companion-panel").hidden));
 $("ws-companion-close")?.addEventListener("click",()=>updateCompanionVisibility(false));
