@@ -171,6 +171,7 @@ function renderWeek(){
   if(sameDay(date,calendar.date))button.classList.add("is-selected");
   button.setAttribute("aria-label",localized(date,{weekday:"long",day:"numeric",month:"long",year:"numeric"}));
   button.setAttribute("aria-pressed",String(sameDay(date,calendar.date)));
+  button.dataset.day=localField(date).slice(0,10);
   const weekday=document.createElement("span");weekday.textContent=localized(date,{weekday:"short"});
   const number=document.createElement("strong");number.textContent=date.getDate();
   const dot=document.createElement("i");dot.className="ws-day-event-dot";dot.setAttribute("aria-hidden","true");
@@ -246,6 +247,7 @@ function renderAgenda(){
  }
  for(const event of events){
   const item=document.createElement("article");item.className="ws-event";
+  if(event.id&&event.calendarId){item.dataset.eventIndex=String(calendar.events.indexOf(event));item.draggable=true;}
   const at=document.createElement("span");at.className="ws-event-time";
   at.textContent=event.start?.dateTime?localized(new Date(event.start.dateTime),{hour:"2-digit",minute:"2-digit"}):translate("All day");
   const body=document.createElement("div");const title=document.createElement("strong");
@@ -258,6 +260,18 @@ function renderAgenda(){
   if(event.location){const loc=document.createElement("small");loc.textContent=event.location;loc.classList.add("i18n-user-content");body.append(loc)}
   if(event.htmlLink){
    try{const url=new URL(event.htmlLink);if(url.protocol==="https:"&&(url.hostname==="calendar.google.com"||url.hostname.endsWith(".google.com"))){const link=document.createElement("a");link.href=url.href;link.target="_blank";link.rel="noopener noreferrer";link.textContent=translate("View in Google Calendar");body.append(link)}}catch{}
+  }
+  const source=calendar.sources.find(s=>s.id===event.calendarId);
+  if(source?.writable&&calendar.writeAuthorized&&event.id&&event.start){
+   const widget=document.createElement("details");widget.className="ws-event-move";
+   const summary=document.createElement("summary");summary.textContent="Reschedule this appointment";
+   const row=document.createElement("div");row.className="ws-event-move-row";
+   const picker=document.createElement("input");picker.type="date";
+   picker.value=localField(eventDate(event.start)).slice(0,10);
+   picker.setAttribute("aria-label","New appointment date");
+   const move=document.createElement("button");move.type="button";move.textContent="Move date";
+   move.dataset.moveEventIndex=String(calendar.events.indexOf(event));
+   row.append(picker,move);widget.append(summary,row);body.append(widget);
   }
   item.append(at,body);root.append(item);
  }
@@ -674,6 +688,190 @@ get("schedule-form").addEventListener("submit",async event=>{
  }catch(error){scheduleStatus(error.message||"Unable to schedule the appointment.",true)}
  finally{button.disabled=false;setScheduleButton()}
 });
+
+/* Explicit Google Calendar editing: a desktop drag or a mobile date picker.
+   No event is moved without fresh checks and user confirmation. */
+let draggedCalendarEvent=null;
+const googleEventURL=(calendarId,eventId)=>
+ "https://www.googleapis.com/calendar/v3/calendars/"+encodeURIComponent(calendarId)+"/events/"+encodeURIComponent(eventId);
+const googlePatch=async(calendarId,eventId,body)=>{
+ const response=await fetch(googleEventURL(calendarId,eventId),{
+  method:"PATCH",headers:{Authorization:"Bearer "+calendar.token,"Content-Type":"application/json"},
+  body:JSON.stringify(body)
+ });
+ if(!response.ok){
+  let detail={};try{detail=await response.json()}catch{}
+  throw Error(detail.error?.message||"Google Calendar update failed ("+response.status+").");
+ }
+ return response.json();
+};
+function localParts(time,timezone){
+ const parts=new Intl.DateTimeFormat("en-GB",{
+  timeZone:timezone,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",
+  minute:"2-digit",hourCycle:"h23"
+ }).formatToParts(time);
+ return Object.fromEntries(parts.map(part=>[part.type,part.value]));
+}
+const timezoneValid=zone=>{
+ try{new Intl.DateTimeFormat("en",{timeZone:zone});return true}catch{return false}
+};
+function wallTimeMove(event,newDate){
+ const start=eventDate(event.start),end=eventDate(event.end);
+ if(!Number.isFinite(start.getTime())||!Number.isFinite(end.getTime())||end<=start)throw Error("Invalid event times");
+ const duration=end-start;
+ const exact=/^\d{4}-\d{2}-\d{2}$/.test(newDate);
+ if(!exact)throw Error("Choose a valid new date");
+ if(event.start.date){
+  const days=Math.round(duration/86400000);
+  const targetEnd=new Date(newDate+"T12:00:00Z");targetEnd.setUTCDate(targetEnd.getUTCDate()+days);
+  return {start:{date:newDate},end:{date:targetEnd.toISOString().slice(0,10)}};
+ }
+ const zone=timezoneValid(event.start.timeZone)?event.start.timeZone:
+  Intl.DateTimeFormat().resolvedOptions().timeZone;
+ const parts=localParts(start,zone);
+ const localStart=newDate+"T"+parts.hour+":"+parts.minute+":00";
+ const wallEnd=new Date(Date.parse(localStart+"Z")+duration).toISOString().slice(0,19);
+ return {start:{dateTime:localStart,timeZone:zone},
+  end:{dateTime:wallEnd,timeZone:zone}};
+}
+async function moveGoogleEvent(event,newDate){
+ if(!event?.id||!event.calendarId)return;
+ if(!calendar.connected||!calendar.writeAuthorized||!calendar.token){
+  alert("Authorize Google Calendar scheduling before moving appointments.");return;
+ }
+ if(!calendar.sources.some(src=>src.id===event.calendarId&&src.writable)){
+  alert("This calendar is read-only. You cannot move appointments in it.");return;
+ }
+ const oldDay=localField(eventDate(event.start)).slice(0,10);
+ if(newDate===oldDay)return;
+ if(!confirm("Move "+(event.summary||"this event")+" to "+newDate+" while keeping its local time? This changes Google Calendar."))return;
+ try{
+  const times=wallTimeMove(event,newDate);
+  const from=new Date(newDate+"T00:00:00");
+  from.setDate(from.getDate()-1);
+  const until=new Date(newDate+"T00:00:00");until.setDate(until.getDate()+3);
+  let checked=null;
+  try{checked=await readScheduleRange(from,until)}catch{}
+  const other=checked?.events?.filter(e=>e.id!==event.id&&
+   e.iCalUID!==event.iCalUID&&
+   eventDate(e.start)<until&&eventDate(e.end)>from)||[];
+  if(!checked?.complete){
+   if(!confirm("Some Google calendars could not be checked. Move the event anyway?"))return;
+  }else if(other.length){
+   if(!confirm(other.length+" other Google appointment(s) are near the new date. Have you checked for overlaps and still want to move it?"))return;
+  }
+  await googlePatch(event.calendarId,event.id,times);
+  calendar.date=new Date(newDate+"T12:00:00");
+  calendar.week=monday(calendar.date);
+  await refreshEvents();
+  get("calendar-day-title").textContent+=" · Appointment moved";
+ }catch(error){alert("Could not move Google Calendar appointment: "+(error.message||"Unknown error"))}
+}
+get("calendar-agenda").addEventListener("dragstart",e=>{
+ const item=e.target.closest(".ws-event[data-event-index]");
+ draggedCalendarEvent=item?calendar.events[Number(item.dataset.eventIndex)]:null;
+ if(draggedCalendarEvent&&e.dataTransfer){
+  e.dataTransfer.effectAllowed="move";
+  e.dataTransfer.setData("text/plain","helloearth-calendar-event");
+ }
+});
+get("calendar-agenda").addEventListener("dragend",()=>{
+ draggedCalendarEvent=null;
+ get("calendar-days").querySelectorAll(".ws-day").forEach(button=>button.classList.remove("is-drop-target"));
+});
+get("calendar-days").addEventListener("dragover",e=>{
+ const target=e.target.closest(".ws-day[data-day]");
+ if(!target||!draggedCalendarEvent)return;
+ e.preventDefault();target.classList.add("is-drop-target");
+ if(e.dataTransfer)e.dataTransfer.dropEffect="move";
+});
+get("calendar-days").addEventListener("dragleave",e=>{
+ e.target.closest(".ws-day")?.classList.remove("is-drop-target");
+});
+get("calendar-days").addEventListener("drop",e=>{
+ const target=e.target.closest(".ws-day[data-day]");
+ if(!draggedCalendarEvent||!target)return;
+ e.preventDefault();target.classList.remove("is-drop-target");
+ const original=draggedCalendarEvent;draggedCalendarEvent=null;
+ moveGoogleEvent(original,target.dataset.day);
+});
+get("calendar-agenda").addEventListener("click",e=>{
+ const button=e.target.closest("[data-move-event-index]");if(!button)return;
+ const index=Number(button.dataset.moveEventIndex);
+ const event=calendar.events[index];
+ const date=button.parentElement.querySelector('input[type="date"]')?.value;
+ if(event&&date)moveGoogleEvent(event,date);
+});
+document.addEventListener("helloearth:link-google-event",async e=>{
+ const d=e.detail||{},student=window.HelloEarthWorkspace?.students?.find(s=>s.id===d.studentId);
+ const event=calendar.events.find(v=>v.id===d.eventId&&v.calendarId===d.calendarId);
+ if(!student||!event)return;
+ if(!calendar.writeAuthorized||!calendar.token||
+  !calendar.sources.some(c=>c.id===event.calendarId&&c.writable)){
+  alert("Authorize scheduling and choose a writable calendar to link students.");return;
+ }
+ try{
+  const previous=event.extendedProperties?.private||{};
+  await googlePatch(event.calendarId,event.id,{extendedProperties:{private:{
+   ...previous,helloearth_student_id:student.id
+  }}});
+  await refreshEvents();
+  alert("Google Calendar appointment linked to "+student.display_name+".");
+ }catch(error){alert("Student link failed: "+error.message)}
+});
+document.addEventListener("helloearth:create-recurring",async e=>{
+ const rule=e.detail?.rule,student=e.detail?.student;
+ const outcome=(success,message)=>document.dispatchEvent(new CustomEvent("helloearth:recurring-result",{detail:{success,message}}));
+ if(!rule||!student||rule.google_event_id){
+  outcome(false,"This recurring lesson is missing a student or has already been added to Google Calendar.");return;
+ }
+ if(!calendar.connected||!calendar.writeAuthorized||!calendar.token){
+  outcome(false,"Connect Google Calendar and select Authorize scheduling first.");return;
+ }
+ const target=calendar.sources.find(c=>c.primary&&c.writable)||calendar.sources.find(c=>c.writable);
+ if(!target){outcome(false,"No Google Calendar with permission to create lessons was found.");return}
+ if(!timezoneValid(rule.timezone)){outcome(false,"The recurring rule has an invalid timezone.");return}
+ const weekDays=["SU","MO","TU","WE","TH","FR","SA"];
+ const dayNames=weekDays[Number(rule.weekday)];
+ if(!dayNames){outcome(false,"Invalid recurring weekday");return}
+ const initial=new Date(rule.starts_on+"T12:00:00");
+ if(Number.isNaN(initial.getTime())){outcome(false,"Invalid first recurrence date");return}
+ while(initial.getDay()!==Number(rule.weekday))initial.setDate(initial.getDate()+1);
+ const first=localField(initial).slice(0,10);
+ let count=26;
+ if(rule.ends_on){
+  const end=new Date(rule.ends_on+"T12:00:00");
+  count=Math.min(26,Math.floor((end-initial)/(7*86400000))+1);
+ }
+ if(count<=0){outcome(false,"No recurring lessons fit within the specified dates.");return}
+ const parts=String(rule.local_start).split(":").map(Number);
+ const startWall=first+"T"+String(parts[0]).padStart(2,"0")+":"+String(parts[1]).padStart(2,"0")+":00";
+ const endWall=new Date(Date.parse(startWall+"Z")+Number(rule.duration_minutes)*60000).toISOString().slice(0,19);
+ const body={
+  summary:"English lesson · "+student.display_name,
+  description:"Recurring student lesson created in Hello Earth.",
+  start:{dateTime:startWall,timeZone:rule.timezone},
+  end:{dateTime:endWall,timeZone:rule.timezone},
+  recurrence:["RRULE:FREQ=WEEKLY;COUNT="+count+";BYDAY="+dayNames],
+  extendedProperties:{private:{helloearth_student_id:student.id}}
+ };
+ try{
+  const url="https://www.googleapis.com/calendar/v3/calendars/"+encodeURIComponent(target.id)+"/events";
+  const response=await fetch(url,{
+   method:"POST",headers:{Authorization:"Bearer "+calendar.token,"Content-Type":"application/json"},
+   body:JSON.stringify(body)
+  });
+  if(!response.ok){let data={};try{data=await response.json()}catch{}
+   throw Error(data.error?.message||"Google Calendar rejected the recurring series.");}
+  const saved=await response.json();
+  const userId=window.HelloEarthWorkspace?.userId;
+  const {error}=await db.from("he_recurring_rules").update({google_event_id:saved.id||null}).eq("tutor_id",userId).eq("id",rule.id);
+  if(error){outcome(false,"Google series created, but Hello Earth could not save its reference. Review Google Calendar before retrying.");return}
+  outcome(true,"Added "+count+" weekly lessons to "+target.name+". Future occurrences may conflict with existing Google appointments; review the series.");
+  await refreshEvents();
+ }catch(error){outcome(false,"Recurring Google Calendar event failed: "+error.message)}
+});
+
 
 function disconnectGoogle(){
  // This stops access from the dashboard; it does NOT revoke Google's OAuth grant.
