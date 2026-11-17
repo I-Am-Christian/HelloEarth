@@ -305,6 +305,7 @@ async function eventsForSource(source,from,until,token){
   page=data.nextPageToken;
   if(!page)break;
  }
+ events.incomplete=Boolean(page);
  return events;
 }
 async function refreshEvents(){
@@ -396,10 +397,163 @@ function scheduleStatus(message,error=false){
  const feedback=get("schedule-feedback");
  feedback.textContent=message;feedback.classList.toggle("is-error",error);
 }
+const scheduleUI=window.HelloEarthSchedulingUI;
 const localField=date=>{
  const d=new Date(date.getTime()-date.getTimezoneOffset()*60000);
  return d.toISOString().slice(0,16);
 };
+const scheduleCalendarLimit=24;
+let schedulePreviewRequest=0,scheduleMonthRequest=0,scheduleCheckTimer=null;
+let scheduleAvailability={checked:false,complete:false,overlaps:[],items:[],rangeKey:""};
+const scheduleReadSources=()=>calendar.sources.slice(0,scheduleCalendarLimit);
+const activeSchedule=()=>!get("schedule-modal").hidden;
+const scheduleKey=range=>range.start.toISOString()+"|"+range.end.toISOString()+"|"+scheduleUI.kind();
+function hasSchedulingConnection(){
+ return Boolean(calendar.connected&&calendar.token&&scheduleReadSources().length);
+}
+function formatScheduleEvent(event,overlap){
+ const dateStart=eventDate(event.start),dateEnd=eventDate(event.end);
+ const linked=event.extendedProperties?.private?.helloearth_student_id||"";
+ const student=window.HelloEarthWorkspace?.students?.find(s=>s.id===linked);
+ // A linked ID is stronger evidence than a name in the event title. For
+ // unlinked events, show the actual Google title without guessing a student.
+ const summary=String(event.summary||"Busy").slice(0,130);
+ const label=student?"Student booked: "+student.display_name+" · "+summary:summary;
+ const dateLabel=event.start?.date
+  ?"All day"
+  :dateStart.toLocaleDateString([],{weekday:"short",day:"numeric",month:"short"})+" "+
+   dateStart.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})+"–"+
+   dateEnd.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+ return {
+  title:label,overlap,
+  label:dateLabel+(event.calendarName?" · "+event.calendarName:"")
+ };
+}
+function uniqueScheduleEvents(events){
+ const seen=new Set();
+ return events.filter(event=>{
+  const identifier=(event.iCalUID||event.id||event.summary||"")+
+   "|"+(event.start?.dateTime||event.start?.date||"")+
+   "|"+(event.end?.dateTime||event.end?.date||"");
+  if(seen.has(identifier))return false;
+  seen.add(identifier);return true;
+ });
+}
+async function readScheduleRange(from,until){
+ const sources=scheduleReadSources();
+ const token=calendar.token;
+ if(!token||!sources.length)throw new Error("Connect a Google Calendar first.");
+ const results=await Promise.allSettled(
+  sources.map(src=>eventsForSource(src,from,until,token))
+ );
+ const success=results.filter(r=>r.status==="fulfilled");
+ if(!success.length)throw results.find(r=>r.status==="rejected")?.reason||new Error("No calendar data available.");
+ const events=uniqueScheduleEvents(success.flatMap(r=>r.value)).sort((a,b)=>eventDate(a.start)-eventDate(b.start));
+ const failures=results.length-success.length;
+ const truncated=success.some(r=>r.value.incomplete);
+ const unverified=sources.length<calendar.sources.length||failures>0||truncated;
+ return {events,complete:!unverified,failures,truncated,limited:sources.length<calendar.sources.length};
+}
+async function refreshScheduleMonth(){
+ const request=++scheduleMonthRequest;
+ if(!activeSchedule())return;
+ const month=scheduleUI.getMonthWindow();
+ if(!hasSchedulingConnection()){
+  scheduleUI.setMonthData([],false,"Connect Google Calendar to see bookings on these dates.");
+  return;
+ }
+ scheduleUI.setMonthData([],false,"Checking dates across your connected Google calendars…");
+ try{
+  const result=await readScheduleRange(month.from,month.until);
+  if(request!==scheduleMonthRequest||!activeSchedule()||scheduleUI.getMonthWindow().key!==month.key)return;
+  scheduleUI.setMonthData(result.events,result.complete,result.complete
+   ?result.events.length+" appointment"+(result.events.length===1?"":"s")+" loaded for this month. Dots mark booked dates."
+   :"Some calendars could not be checked. Dots show only the available bookings.");
+ }catch(error){
+  if(request!==scheduleMonthRequest||!activeSchedule())return;
+  scheduleUI.setMonthData([],false,"Monthly bookings unavailable. Check the Calendar connection.");
+ }
+}
+function setScheduleButton(){
+ const r=scheduleUI.range();
+ const invalid=!r.valid||!calendar.connected||!calendar.token||!calendar.writeAuthorized||
+  !calendar.sources.some(c=>c.id===get("schedule-calendar").value&&c.writable);
+ const overrideNeeded=scheduleAvailability.checked&&
+  (scheduleAvailability.overlaps.length>0||!scheduleAvailability.complete);
+ const allow=Boolean(r.valid&&!invalid&&scheduleAvailability.checked&&
+  scheduleAvailability.rangeKey===scheduleKey(r)&&
+  (!overrideNeeded||get("schedule-override").checked));
+ get("schedule-submit").disabled=!allow;
+}
+function notifyScheduleEvents(events,complete,range){
+ const all=events.filter(e=>e.transparency!=="transparent"&&e.status!=="cancelled");
+ const touching=all.filter(e=>eventDate(e.start)<range.end&&eventDate(e.end)>range.start);
+ const formatted=all.slice().sort((a,b)=>Number(touching.includes(b))-Number(touching.includes(a))||
+  eventDate(a.start)-eventDate(b.start)).map(e=>formatScheduleEvent(e,touching.includes(e)));
+ const key=scheduleKey(range);
+ scheduleAvailability={checked:true,complete,overlaps:touching,items:all,rangeKey:key};
+ let status,title,description;
+ if(touching.length){
+  status="conflict";
+  title="⚠ "+touching.length+" existing booking"+(touching.length===1?" overlaps":"s overlap")+" this time";
+  description="An appointment is already scheduled during this period. Choose another time or tick the confirmation below to proceed intentionally.";
+ }else if(!complete){
+  status="unverified";
+  title="Not all Google calendars could be checked";
+  description=all.length
+   ?all.length+" visible booking"+(all.length===1?"":"s")+" found, but other calendars could not be verified."
+   :"Availability is unverified. Reconnect or check Google Calendar, or explicitly confirm below.";
+ }else{
+  status=all.length?"busy-day":"free";
+  title=all.length?"No overlap · "+all.length+" other booking"+(all.length===1?"":"s")+" on this date":"✓ No existing appointments during this period";
+  description=all.length
+   ?"The listed bookings do not overlap the selected time. Your event can be scheduled."
+   :"Checked your connected calendars for the selected period.";
+ }
+ if(touching.length&&!complete){
+  description+=" Some calendars were not checked, so there may be additional conflicts.";
+ }
+ scheduleUI.setAvailability({status,title,description,events:formatted});
+ setScheduleButton();
+}
+function checkScheduleAvailability(){
+ clearTimeout(scheduleCheckTimer);
+ const request=++schedulePreviewRequest;
+ scheduleAvailability={checked:false,complete:false,overlaps:[],items:[],rangeKey:""};
+ const range=scheduleUI.range();
+ if(!range.valid){
+  scheduleUI.setAvailability({status:"invalid",title:range.error});
+  setScheduleButton();return;
+ }
+ if(!hasSchedulingConnection()){
+  scheduleUI.setAvailability({status:"invalid",title:"Connect your Google Calendar to check bookings."});
+  setScheduleButton();return;
+ }
+ scheduleUI.setAvailability({status:"loading",title:"Checking existing appointments…",
+  description:"Looking across your connected Google calendars for this date and time."});
+ setScheduleButton();
+ scheduleCheckTimer=setTimeout(async()=>{
+  const startDay=toDate(range.start);
+  const endDay=toDate(range.end),until=new Date(endDay);
+  until.setDate(until.getDate()+1);
+  try{
+   const result=await readScheduleRange(startDay,until);
+   if(request!==schedulePreviewRequest||!activeSchedule())return;
+   if(scheduleKey(range)!==scheduleKey(scheduleUI.range()))return;
+   notifyScheduleEvents(result.events,result.complete,range);
+  }catch(error){
+   if(request!==schedulePreviewRequest||!activeSchedule())return;
+   const reason=Number(error?.status)===401?"Google Calendar access has expired."
+    :"Could not read calendar availability. Please check your Google connection.";
+   scheduleAvailability={checked:true,complete:false,overlaps:[],items:[],rangeKey:scheduleKey(range)};
+   scheduleUI.setAvailability({status:"unverified",title:"Could not verify this date",description:reason});
+   setScheduleButton();
+  }
+ },280);
+}
+scheduleUI.onChange(checkScheduleAvailability);
+scheduleUI.onMonthChange(refreshScheduleMonth);
+get("schedule-override").addEventListener("change",setScheduleButton);
 function openScheduler(){
  const modal=get("schedule-modal");
  const select=get("schedule-calendar");select.replaceChildren();
@@ -414,40 +568,69 @@ function openScheduler(){
  const next=new Date(calendar.date);
  next.setHours(new Date().getHours()+1,0,0,0);
  if(next<new Date())next.setDate(next.getDate()+1);
- const finish=new Date(next.getTime()+50*60*1000);
- get("schedule-start").value=localField(next);
- get("schedule-end").value=localField(finish);
+ // Clear old validation and reset the picker for the selected calendar day.
  get("schedule-title").value="English lesson";
  get("schedule-student").value="";
  get("schedule-description").value="";
  scheduleStatus("");
  modal.hidden=false;
+ scheduleUI.reset(next);
  get("schedule-title").focus();
  if(!calendar.connected||!writable.length)
-  scheduleStatus("Connect Google Calendar and select a calendar where you have permission to create events.",true);
+  scheduleStatus("Connect Google Calendar and choose a writable calendar to schedule.",true);
+ else if(!calendar.writeAuthorized)
+  scheduleStatus("Select Authorize scheduling in the Calendar page to allow event creation.",true);
 }
 get("calendar-schedule").addEventListener("click",openScheduler);
-get("schedule-close").addEventListener("click",()=>{get("schedule-modal").hidden=true});
-get("schedule-modal").addEventListener("click",event=>{if(event.target===get("schedule-modal"))get("schedule-modal").hidden=true});
+get("schedule-close").addEventListener("click",()=>{
+ get("schedule-modal").hidden=true;
+ ++schedulePreviewRequest;++scheduleMonthRequest;clearTimeout(scheduleCheckTimer);
+});
+get("schedule-modal").addEventListener("click",event=>{
+ if(event.target===get("schedule-modal"))get("schedule-close").click();
+});
 get("calendar-request-write").addEventListener("click",()=>connectGoogle(true));
 get("schedule-form").addEventListener("submit",async event=>{
  event.preventDefault();
  if(!calendar.token||!calendar.connected){scheduleStatus("Connect Google Calendar and authorize scheduling first.",true);return}
  if(!calendar.writeAuthorized){scheduleStatus("Click Authorize scheduling and approve Google's event-edit permission first.",true);return}
  const selected=get("schedule-calendar").value;
- if(!calendar.sources.some(src=>src.id===selected&&src.writable)){scheduleStatus("Choose a Google calendar with write access.",true);return}
- const start=new Date(get("schedule-start").value),end=new Date(get("schedule-end").value);
- if(!Number.isFinite(start.getTime())||!Number.isFinite(end.getTime())||end<=start){scheduleStatus("End must be after the start time.",true);return}
- if(end-start>8*60*60*1000||end-start<15*60*1000){scheduleStatus("Choose an appointment between 15 minutes and 8 hours.",true);return}
+ if(!calendar.sources.some(src=>src.id===selected&&src.writable)){
+  scheduleStatus("Choose a Google calendar with write access.",true);return
+ }
+ const range=scheduleUI.range();
+ if(!range.valid){scheduleStatus(range.error||"Choose a valid date and time.",true);return}
  const title=get("schedule-title").value.trim(),description=get("schedule-description").value.trim();
- if(!title||title.length>200){scheduleStatus("Enter a short appointment title.",true);return}
- const body={summary:title,description,start:{dateTime:start.toISOString()},end:{dateTime:end.toISOString()}};
+ if(!title||title.length>200){scheduleStatus("Enter a short event title.",true);return}
+ const isTimeOff=scheduleUI.kind()==="timeoff";
+ const body={summary:title,description,transparency:"opaque"};
+ if(range.allDay){
+  // Google's all-day end date is EXCLUSIVE; the picker uses inclusive last day.
+  body.start={date:range.allDayStart};body.end={date:range.allDayEnd};
+ }else{
+  body.start={dateTime:range.start.toISOString()};
+  body.end={dateTime:range.end.toISOString()};
+ }
  const studentId=get("schedule-student").value;
- // An explicit student choice links the Google event without publishing learner notes.
- if(studentId)body.extendedProperties={private:{helloearth_student_id:studentId}};
- const button=get("schedule-submit");button.disabled=true;scheduleStatus("Creating event in Google Calendar…");
+ if(!isTimeOff&&studentId)body.extendedProperties={private:{helloearth_student_id:studentId}};
+ const button=get("schedule-submit");button.disabled=true;scheduleStatus("Rechecking Google Calendar just before scheduling…");
  try{
+  // Live recheck on submit: don't trust a stale month marker or a previous
+  // search. This also catches another lesson added between opening and saving.
+  const from=toDate(range.start),until=toDate(range.end);until.setDate(until.getDate()+1);
+  let available;
+  try{available=await readScheduleRange(from,until)}
+  catch(err){available={complete:false,events:[]}}
+  if(!available.complete||available.events.some(e=>
+   e.transparency!=="transparent"&&eventDate(e.start)<range.end&&eventDate(e.end)>range.start)){
+   notifyScheduleEvents(available.events,available.complete,range);
+   if(!get("schedule-override").checked){
+    scheduleStatus("Existing booking or unverified calendar. Choose another slot, or tick the confirmation before scheduling.",true);
+    return;
+   }
+  }
   const url="https://www.googleapis.com/calendar/v3/calendars/"+encodeURIComponent(selected)+"/events";
+  scheduleStatus("Creating "+(isTimeOff?"time off":"lesson")+" in Google Calendar…");
   const response=await fetch(url,{method:"POST",headers:{
    Authorization:"Bearer "+calendar.token,"Content-Type":"application/json"
   },body:JSON.stringify(body)});
@@ -460,14 +643,15 @@ get("schedule-form").addEventListener("submit",async event=>{
    throw error;
   }
   get("schedule-modal").hidden=true;
-  calendar.date=new Date(start.getFullYear(),start.getMonth(),start.getDate());
+  ++schedulePreviewRequest;++scheduleMonthRequest;clearTimeout(scheduleCheckTimer);
+  calendar.date=new Date(range.start.getFullYear(),range.start.getMonth(),range.start.getDate());
   calendar.week=monday(calendar.date);
   await refreshEvents();
   get("calendar-tab").click();
   const heading=get("calendar-day-title");
-  heading.textContent=heading.textContent+" · Appointment created";
+  heading.textContent=heading.textContent+(isTimeOff?" · Time off scheduled":" · Lesson scheduled");
  }catch(error){scheduleStatus(error.message||"Unable to schedule the appointment.",true)}
- finally{button.disabled=false}
+ finally{button.disabled=false;setScheduleButton()}
 });
 
 function disconnectGoogle(){
