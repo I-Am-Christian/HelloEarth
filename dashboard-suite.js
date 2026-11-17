@@ -26,6 +26,7 @@ setupSchedule();
 setupStudents();
 setupBusiness();
 setupResources();
+document.getElementById("overview-lesson-shortcut")?.addEventListener("click",()=>document.getElementById("ws-companion-open")?.click());
 
 let lastUser=null,loading=false;
 const allFields=["settings","preferences","bookings","recurring","homework","ledger","preparation",
