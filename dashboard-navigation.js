@@ -435,14 +435,18 @@ function formatScheduleEvent(event,overlap){
  };
 }
 function uniqueScheduleEvents(events){
- const seen=new Set();
- return events.filter(event=>{
+ const byId=new Map();
+ for(const event of events){
   const identifier=(event.iCalUID||event.id||event.summary||"")+
    "|"+(event.start?.dateTime||event.start?.date||"")+
    "|"+(event.end?.dateTime||event.end?.date||"");
-  if(seen.has(identifier))return false;
-  seen.add(identifier);return true;
- });
+  const previous=byId.get(identifier);
+  // Shared calendars can expose the same booking more than once. Retain
+  // the copy with a HelloEarth student link when there is one.
+  if(!previous||(!previous.extendedProperties?.private?.helloearth_student_id&&
+   event.extendedProperties?.private?.helloearth_student_id))byId.set(identifier,event);
+ }
+ return Array.from(byId.values());
 }
 async function readScheduleRange(from,until){
  const sources=scheduleReadSources();
@@ -627,6 +631,17 @@ get("schedule-form").addEventListener("submit",async event=>{
   let available;
   try{available=await readScheduleRange(from,until)}
   catch(err){available={complete:false,events:[]}}
+  // Don't create an event for an old selection if the user changed the date,
+  // student, title or Google calendar while the final check was in flight.
+  const latest=scheduleUI.range();
+  if(!latest.valid||scheduleKey(latest)!==scheduleKey(range)||
+   get("schedule-calendar").value!==selected||
+   get("schedule-student").value!==studentId||
+   get("schedule-title").value.trim()!==title||
+   get("schedule-description").value.trim()!==description){
+   scheduleStatus("The appointment details changed while checking. Review availability and try again.",true);
+   return;
+  }
   if(!available.complete||available.events.some(e=>
    e.transparency!=="transparent"&&eventDate(e.start)<range.end&&eventDate(e.end)>range.start)){
    notifyScheduleEvents(available.events,available.complete,range);
