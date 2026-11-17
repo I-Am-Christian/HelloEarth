@@ -83,14 +83,21 @@ async function availableSlots(tutor:any,day:string){
   .gt("ends_at",new Date(from-86400000).toISOString()).limit(500);
  if(bErr)throw bErr;
  const {data:recurring,error:rErr}=await admin.from("he_recurring_rules").select("weekday,local_start,duration_minutes,starts_on,ends_on,timezone")
-  .eq("tutor_id",tutor.tutor_id).eq("active",true).eq("weekday",weekday).lte("starts_on",day).limit(200);
+  .eq("tutor_id",tutor.tutor_id).eq("active",true).limit(300);
  if(rErr)throw rErr;
  const occupied=(bookings||[]).map((b:any)=>[Date.parse(b.starts_at),Date.parse(b.ends_at)]);
+ // Recurring rules may use a different timezone from the public booking page.
+ // Check the selected day and its neighbours in each rule's OWN timezone.
  for(const r of recurring||[]){
-  if(r.ends_on&&r.ends_on<day)continue;
+  const zone=timezoneExists(r.timezone)?r.timezone:tz;
   const [h,m]=String(r.local_start).split(":").map(Number);
-  const st=localToInstant(day,h,m,timezoneExists(r.timezone)?r.timezone:tz);
-  if(st!=null)occupied.push([st,st+Number(r.duration_minutes)*60000]);
+  for(const recurringDay of [advance(day,-1),day,advance(day,1)]){
+   const weekDay=new Date(recurringDay+"T12:00:00Z").getUTCDay();
+   if(weekDay!==Number(r.weekday)||recurringDay<r.starts_on||
+    (r.ends_on&&recurringDay>r.ends_on))continue;
+   const st=localToInstant(recurringDay,h,m,zone);
+   if(st!==null)occupied.push([st,st+Number(r.duration_minutes)*60000]);
+  }
  }
  const out:any[]=[];
  for(let min=begin;min+duration<=finish;min+=duration+spacing){
