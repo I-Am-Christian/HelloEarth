@@ -207,3 +207,17 @@
 @media(prefers-reduced-motion:reduce){
  .he-suite-tabs button,.he-suite-card>summary{transition:none}
 }
+
+/* Interactive calendar move affordances, with a touch-friendly date fallback. */
+.ws-calendar-agenda .ws-event[draggable="true"]{cursor:grab}
+.ws-calendar-agenda .ws-event[draggable="true"]:active{cursor:grabbing}
+.ws-calendar-days .ws-day.is-drop-target{outline:2px dashed #caadff;outline-offset:1px;background:rgba(124,89,193,.34)!important}
+.ws-event-move{margin-top:10px;padding:8px 10px;border:1px solid rgba(151,128,212,.28);border-radius:10px;background:rgba(52,47,87,.18)}
+.ws-event-move summary{font-size:11px;color:#dbc8ff;font-weight:700;cursor:pointer}
+.ws-event-move-row{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:10px}
+.ws-event-move-row input{color:#f1eaff;border:1px solid #8273b04e;background:#212947;border-radius:8px;padding:8px 9px;color-scheme:dark}
+.ws-event-move-row button{color:#efe3ff;background:#7752b34b;border:1px solid #b997e66b;border-radius:8px;padding:9px 11px;font-size:11px;font-weight:700}
+.he-suite-booking-student{display:grid;gap:6px;margin:9px 0;font-size:11px;font-weight:700;color:#d3c7e9}
+.he-suite-booking-student select{width:100%;max-width:320px;min-width:0;min-height:38px;background:#1d2540;color:#f1eaff;border:1px solid #9e80c680;border-radius:8px;padding:7px 9px}
+.he-suite-schedule-timezones{padding:11px 14px;color:#ccb8f0;background:rgba(71,57,109,.29);border-radius:11px;border:1px solid rgba(160,134,216,.42);font-size:11px;line-height:1.6}
+@media(max-width:680px){.ws-event-move-row{flex-direction:column;align-items:stretch}}
