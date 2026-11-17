@@ -86,8 +86,10 @@
    const dayEnd=advance(date,1);
    const busyCount=monthEvents.filter(e=>{
     if(e.transparency==="transparent"||e.status==="cancelled")return false;
-    const start=new Date(e.start?.dateTime||e.start?.date||"");
-    const finish=new Date(e.end?.dateTime||e.end?.date||"");
+    // All-day Google Calendar dates are calendar-local, not UTC instants.
+    // Parsing YYYY-MM-DD via new Date(string) can shift booked-day markers.
+    const start=e.start?.date?parseDate(e.start.date):new Date(e.start?.dateTime||"");
+    const finish=e.end?.date?parseDate(e.end.date):new Date(e.end?.dateTime||"");
     return Number.isFinite(start.getTime())&&Number.isFinite(finish.getTime())&&start<dayEnd&&finish>date;
    }).length;
    if(busyCount){button.classList.add("has-booking");const dot=document.createElement("i");dot.className="ws-schedule-busy-dot";dot.setAttribute("aria-hidden","true");button.append(dot)}
