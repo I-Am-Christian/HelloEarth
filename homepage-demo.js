@@ -194,10 +194,10 @@
     const t=event.target.closest('button,a');
     if(!t||!mini.contains(t))return;
     if(t.dataset.demoReset!==undefined){state=initial();render();return}
+    if(t.dataset.demoAddEvent!==undefined){state.calendarForm=!state.calendarForm;render(false);return}
     if(t.dataset.demoGo){go(t.dataset.demoGo,t.dataset.demoPerson);return}
     if(t.dataset.demoStudent){state.selected=t.dataset.demoStudent;state.status='';go('students',state.selected);return}
     if(t.dataset.demoDay!==undefined){state.day=Number(t.dataset.demoDay);render();return}
-    if(t.dataset.demoAddEvent!==undefined){state.calendarForm=!state.calendarForm;render(false);return}
     if(t.dataset.demoAddStudent!==undefined){state.studentForm=!state.studentForm;render(false);return}
     if(t.dataset.demoCancel!==undefined){state.studentForm=false;state.calendarForm=false;render(false);return}
     if(t.dataset.demoHomework!==undefined){
