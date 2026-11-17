@@ -752,8 +752,8 @@ async function moveGoogleEvent(event,newDate){
   const until=new Date(newDate+"T00:00:00");until.setDate(until.getDate()+3);
   let checked=null;
   try{checked=await readScheduleRange(from,until)}catch{}
-  const other=checked?.events?.filter(e=>e.id!==event.id&&
-   !(event.iCalUID&&e.iCalUID===event.iCalUID)&&
+  const other=checked?.events?.filter(e=>
+   !(e.id===event.id&&e.calendarId===event.calendarId)&&
    eventDate(e.start)<until&&eventDate(e.end)>from)||[];
   if(!checked?.complete){
    if(!confirm("Some Google calendars could not be checked. Move the event anyway?"))return;
