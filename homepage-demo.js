@@ -31,7 +31,6 @@
     {id:'overview',icon:'⌂',label:'Overview'},
     {id:'calendar',icon:'▦',label:'Calendar'},
     {id:'students',icon:'♧',label:'Students'},
-    {id:'notes',icon:'▤',label:'Lesson notes'},
     {id:'progress',icon:'▥',label:'Progress'},
     {id:'atlas',icon:'✦',label:'Atlas AI'}
   ];
@@ -46,7 +45,7 @@
   const avatar=s=>s.name.split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase();
   const button=(label,view,extra='')=>'<button type="button" class="he-demo-button" data-demo-go="'+view+'" '+extra+'>'+label+'</button>';
   const level=s=>'<span class="he-mini-level">'+clean(s.level)+'</span>';
-  const title=(eyebrow,heading,desc,tag)=>'<div class="he-mini-heading"><div><span class="he-mini-overline">'+eyebrow+'</span><h3>'+heading+'</h3><p>'+desc+'</p></div><span class="he-mini-pill">'+tag+'</span></div>';
+  const title=(eyebrow,heading,desc,tag)=>'<div class="he-mini-heading he-demo-section-intro"><div><span class="he-mini-overline">'+eyebrow+'</span><h3>'+heading+'</h3><p>'+desc+'</p></div><span class="he-mini-pill">'+tag+'</span></div>';
   const metric=(name,value,desc)=>'<div><span>'+name+'</span><strong>'+value+'</strong><small>'+desc+'</small></div>';
   const studentOptions=(chosen)=>state.students.map(s=>'<option value="'+clean(s.id)+'" '+(chosen===s.id?'selected':'')+'>'+clean(s.name)+' · '+clean(s.level)+'</option>').join('');
   const lessonRow=l=>{
@@ -57,24 +56,37 @@
   function overview(){
     const today=state.lessons.filter(l=>l.day===2).sort((a,b)=>a.time.localeCompare(b.time));
     const pending=state.students.filter(s=>!state.completed.has(s.id));
+    const assessed=state.students.filter(s=>s.skills.some(v=>v!==2.5)).length;
+    const levels=new Set(state.students.map(s=>s.level)).size;
+    const upcoming=state.lessons.filter(l=>l.day>=2).length;
     return [
-      title('YOUR TEACHING DAY','Welcome back, Tutor','A practical view of your sample tutoring workspace.','Demo overview'),
-      '<div class="he-mini-metrics he-demo-metrics-four">',
-      metric('Students',state.students.length,'Profiles saved'),
-      metric('Wednesday lessons',today.length,'Sample schedule'),
-      metric('Homework pending',pending.length,'Across learners'),
-      metric('Lesson notes',state.notes.length,'In this demo'),
+      title('YOUR WORKSPACE','Good to see you again.','Everything you need to manage your teaching day, all in one place.','Overview'),
+      '<section class="he-demo-feature-panel">',
+        '<div class="he-demo-feature-title"><div><span class="he-mini-overline">TODAY AT A GLANCE</span><h4>My teaching day</h4><p>Upcoming sample appointments, with quick student access.</p></div>',
+          '<button type="button" class="he-demo-button" data-demo-go="calendar">View calendar</button></div>',
+        '<div class="he-demo-day-counts">',
+          metric('Appointments today',today.length,'Wednesday'),
+          metric('Remaining this week',upcoming,'Sample schedule'),
+          metric('Next appointment',today[0]?.time||'—','Demo calendar'),
+        '</div>',
+        '<div class="he-mini-lessons">'+today.slice(0,2).map(lessonRow).join('')+'</div>',
+      '</section>',
+      '<p class="he-demo-privacy-banner">✧ Your student information is private to your account. This is an interactive preview with fictional records; Atlas AI remains in development.</p>',
+      '<div class="he-demo-plan-strip"><div><strong>Free plan · Sample workspace</strong><span>The live free plan includes up to 3 students. The demo has extra fictional learners for exploration.</span></div><a href="pricing.html">See plans →</a></div>',
+      '<div class="he-mini-metrics he-demo-summary-metrics">',
+        metric('Students',state.students.length,'In demo workspace'),
+        metric('Levels tracked',levels,'CEFR categories'),
+        metric('Profiles assessed',assessed,'Illustrative observations'),
       '</div>',
-      '<div class="he-demo-columns"><div class="he-demo-block">',
-      '<div class="he-mini-section-title"><strong>Upcoming lessons</strong><span>Wednesday · Demo</span></div>',
-      '<div class="he-mini-lessons">'+(today.length?today.map(lessonRow).join(''):'<p class="he-demo-muted">No sample lessons.</p>')+'</div>',
-      '<div class="he-mini-actions">'+button('Open calendar','calendar')+button('Write a note','notes')+'</div>',
-      '</div><div class="he-demo-block">',
-      '<div class="he-mini-section-title"><strong>Homework to follow up</strong><span>'+pending.length+' pending</span></div>',
-      '<div class="he-demo-tasks">'+pending.slice(0,4).map(s=>'<button type="button" data-demo-student="'+clean(s.id)+'"><span class="he-demo-task-dot"></span><span><strong>'+clean(s.name)+'</strong><small>'+clean(s.homework)+'</small></span><span>›</span></button>').join('')+'</div>',
-      '<div class="he-mini-actions">'+button('Manage students','students')+'</div>',
-      '</div></div>',
-      '<div class="he-demo-inline-note"><strong>Recent teaching note</strong><span>'+clean(state.notes[0]?.text||'Add a sample lesson note to get started.')+'</span></div>',
+      '<div class="he-demo-shortcut-grid">',
+        '<button type="button" data-demo-go="calendar"><span aria-hidden="true">▦</span><strong>Your calendar</strong><small>Plan your upcoming lessons</small></button>',
+        '<button type="button" data-demo-go="students"><span aria-hidden="true">♧</span><strong>Students</strong><small>Profiles, goals and lesson notes</small></button>',
+        '<button type="button" data-demo-go="progress"><span aria-hidden="true">▥</span><strong>Progress</strong><small>See your learners’ levels</small></button>',
+        '<button type="button" data-demo-go="atlas"><span aria-hidden="true">✦</span><strong>Atlas AI</strong><small>Explore what is coming next</small></button>',
+      '</div>',
+      '<div class="he-demo-secondary-panel"><div class="he-mini-section-title"><strong>Homework follow-ups</strong><span>'+pending.length+' pending</span></div><div class="he-demo-tasks">',
+        pending.slice(0,3).map(s=>'<button type="button" data-demo-student="'+clean(s.id)+'"><span class="he-demo-task-dot"></span><span><strong>'+clean(s.name)+'</strong><small>'+clean(s.homework)+'</small></span><span>›</span></button>').join(''),
+      '</div><div class="he-mini-actions">'+button('Write a lesson note','notes')+'</div></div>',
       sampleMessage
     ].join('');
   }
@@ -160,18 +172,31 @@
   }
   const views={overview,calendar,students,notes,progress,atlas};
   state=initial();
-  mini.classList.add('he-demo-app');
+  mini.classList.add('he-demo-app','he-demo-real');
   mini.innerHTML=[
-    '<div class="he-mini-topbar"><span class="he-mini-brand"><span class="he-mini-globe" aria-hidden="true">◉</span> helloearth<span class="he-mini-dot">.</span></span><span class="he-mini-example">INTERACTIVE SAMPLE</span><button type="button" class="he-demo-reset" data-demo-reset="true" title="Reset sample records">↻ Reset</button><span class="he-mini-account" aria-hidden="true">T</span></div>',
-    '<div class="he-mini-shell"><nav class="he-mini-sidebar" aria-label="Sample dashboard navigation">',
-    sections.map(s=>'<button type="button" class="he-mini-nav" data-demo-go="'+s.id+'" aria-pressed="false"><span aria-hidden="true">'+s.icon+'</span>'+s.label+'</button>').join(''),
-    '<div class="he-mini-sidebar-foot">Explore with fictional data</div></nav>',
-    '<div class="he-mini-content he-demo-scroll" tabindex="0" aria-label="Demo dashboard content"><div id="he-demo-panel"></div><p class="he-demo-feedback" role="status" aria-live="polite"></p></div></div>',
-    '<div class="he-mini-foot"><span><span class="he-mini-foot-dot"></span> Changes stay in this preview only</span><a href="dashboard.html">Open real dashboard ↗</a></div>'
+    '<div class="he-mini-shell he-demo-real-shell">',
+      '<aside class="he-mini-sidebar he-demo-real-sidebar">',
+        '<a class="he-demo-side-brand" href="dashboard.html"><img src="logo.svg" alt="" width="30" height="30">helloearth<span>.</span></a>',
+        '<nav class="he-demo-side-nav" aria-label="Preview dashboard sections">',
+          sections.map(s=>'<button type="button" class="he-mini-nav" data-demo-go="'+s.id+'" aria-pressed="false"><span aria-hidden="true">'+s.icon+'</span>'+s.label+'</button>').join(''),
+        '</nav>',
+        '<div class="he-demo-side-foot"><a href="index.html">↗ &nbsp; View website</a><p>Your private teaching space.<br>Fictional student data for this demo.</p></div>',
+      '</aside>',
+      '<div class="he-demo-main">',
+        '<header class="he-demo-workspace-header"><div><span class="he-mini-overline">YOUR TEACHING SPACE</span><h2>My workspace<span>.</span></h2></div>',
+          '<div class="he-demo-account"><span class="he-demo-account-label">Demo tutor</span><span class="he-mini-account">T</span><button type="button" class="he-demo-reset" data-demo-reset="true" title="Restore the sample data">↻ Reset</button></div>',
+        '</header>',
+        '<nav class="he-demo-mobile-tabs" aria-label="Sample dashboard mobile tabs">',
+          sections.map(s=>'<button type="button" class="he-demo-mobile-tab" data-demo-go="'+s.id+'" aria-pressed="false"><span aria-hidden="true">'+s.icon+'</span>'+s.label+'</button>').join(''),
+        '</nav>',
+        '<div class="he-mini-content he-demo-scroll" tabindex="0" aria-label="Sample dashboard content"><div id="he-demo-panel"></div><p class="he-demo-feedback" role="status" aria-live="polite"></p></div>',
+        '<div class="he-mini-foot"><span><span class="he-mini-foot-dot"></span> Interactive demo · Fictional data, no real account</span><a href="dashboard.html">Open real dashboard ↗</a></div>',
+      '</div>',
+    '</div>'
   ].join('');
   function render(resetScroll=true){
     for(const btn of mini.querySelectorAll('[data-demo-go]')){
-      if(!btn.classList.contains('he-mini-nav'))continue;
+      if(!btn.classList.contains('he-mini-nav')&&!btn.classList.contains('he-demo-mobile-tab'))continue;
       const active=btn.dataset.demoGo===state.view;
       btn.classList.toggle('is-active',active);
       btn.setAttribute('aria-pressed',String(active));
