@@ -39,7 +39,7 @@
     view:'overview',day:2,selected:'alex',progressStudent:'alex',noteStudent:'alex',
     search:'',studentForm:false,calendarForm:false,students:samples.map(s=>({...s,skills:[...s.skills]})),
     lessons:lessons.map(l=>({...l})),notes:initialNotes.map(n=>({...n})),
-    completed:new Set(),status:''
+    completed:new Set(),status:'',planDraft:'',savedPlans:[]
   });
   const lookup=id=>state.students.find(s=>s.id===id)||state.students[0];
   const avatar=s=>s.name.split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase();
@@ -125,7 +125,7 @@
       '<div class="he-demo-profile-actions">',
        button('+ Lesson note','notes','data-demo-person="'+clean(s.id)+'"'),
        button('Record assessment','progress','data-demo-person="'+clean(s.id)+'"'),
-       button('Prepare lesson','plan','data-demo-person="'+clean(s.id)+'" class="he-demo-button he-demo-primary"'),
+       '<button type="button" class="he-demo-primary" data-demo-go="plan" data-demo-person="'+clean(s.id)+'">Prepare lesson</button>',
       '</div>',
       '<button type="button" class="he-demo-check '+(state.completed.has(s.id)?'is-checked':'')+'" data-demo-homework="'+clean(s.id)+'" aria-pressed="'+state.completed.has(s.id)+'">'+(state.completed.has(s.id)?'✓ Homework complete (demo)':'○ Mark homework complete')+'</button>',
       '</section>',
@@ -155,30 +155,57 @@
     const counts=levels.map(level=>state.students.filter(x=>x.level===level).length);
     const max=Math.max(1,...counts);
     return [
-      title('LEARNER INSIGHTS','Progress tracking','Explore sample skill ratings and add a practice check-in.','Tutor-recorded'),
-      '<div class="he-demo-toolbar"><label class="he-demo-field he-demo-progress-select">Choose a student<select data-demo-progress-student>'+studentOptions(s.id)+'</select></label><button class="he-demo-button" type="button" data-demo-progress-step="true">+ Sample check-in</button></div>',
-      '<div class="he-demo-two-blocks"><div class="he-demo-block">',
-      '<div class="he-mini-section-title"><strong>'+clean(s.name)+' · Skills</strong><span>Scale 1–5</span></div>',
-      labels.map((label,i)=>'<div class="he-demo-skill"><span>'+label+'</span><div><i style="width:'+Math.round(s.skills[i]/5*100)+'%"></i></div><strong>'+s.skills[i].toFixed(1)+'</strong></div>').join(''),
-      '<div class="he-demo-detail-line"><small>Suggested next focus</small><strong>'+clean(s.focus)+'</strong></div>',
-      '</div><div class="he-demo-block">',
-      '<div class="he-mini-section-title"><strong>CEFR levels</strong><span>Demo student group</span></div>',
-      levels.map((label,i)=>'<div class="he-mini-bar"><span>'+label+'</span><i><b style="width:'+Math.round(counts[i]/max*100)+'%"></b></i><strong>'+counts[i]+'</strong></div>').join(''),
-      '<p class="he-demo-muted">Ratings are fictional and entered by the tutor, not automatically assessed by AI.</p>',
-      '</div></div>',
-      sampleMessage
+      title('LEARNER INSIGHTS','Student progress','A quick picture of the CEFR levels across your students.','Demo insights'),
+      '<section class="he-demo-insight-card"><h4>CEFR level distribution</h4>',
+        levels.map((label,i)=>'<div class="he-mini-bar"><span>'+label+'</span><i><b style="width:'+Math.round(counts[i]/max*100)+'%"></b></i><strong>'+counts[i]+'</strong></div>').join(''),
+        '<p class="he-demo-muted">Based on fictional CEFR levels recorded in the sample profiles, not lesson outcomes.</p>',
+      '</section>',
+      '<section class="he-demo-feature-panel"><div class="he-demo-feature-title"><div><h4>Skill development history</h4><p>Compare sample tutor-recorded assessments per student.</p></div>'+button('View students','students')+'</div>',
+        '<div class="he-demo-toolbar"><label class="he-demo-field he-demo-progress-select">Student<select data-demo-progress-student>'+studentOptions(s.id)+'</select></label><button class="he-demo-primary" type="button" data-demo-progress-step="true">+ Sample check-in</button></div>',
+        '<div class="he-demo-skill-panel"><div class="he-mini-section-title"><strong>'+clean(s.name)+' · Recorded skills</strong><span>Scale 1–5</span></div>',
+        labels.map((label,i)=>'<div class="he-demo-skill"><span>'+label+'</span><div><i style="width:'+Math.round(s.skills[i]/5*100)+'%"></i></div><strong>'+s.skills[i].toFixed(1)+'</strong></div>').join(''),
+        '<p class="he-demo-muted">This is a simplified demonstration of the real app’s skills history, not an automated AI score.</p></div>',
+      '</section>',sampleMessage
     ].join('');
   }
   function atlas(){
     return [
-      title('COMING LATER','Atlas AI','A preview of possible future teaching assistance.','In development'),
-      '<div class="he-mini-atlas"><span class="he-mini-atlas-icon">✦</span><strong>Built around each learner</strong><p>Planned assistance would use the relevant student profile and lesson notes, with tutor review before anything is saved.</p><span>Not active in the public workspace</span></div>',
-      '<div class="he-demo-atlas-grid"><div><strong>✦ Lesson suggestions</strong><small>Activities based on the learner’s CEFR level and goals.</small></div><div><strong>▤ Optional transcription</strong><small>Only with suitable consent and privacy controls.</small></div><div><strong>▥ Student insights</strong><small>Possible next steps drawn from lesson history.</small></div></div>',
-      '<div class="he-mini-actions">'+button('Use current lesson templates','notes')+'<a class="he-demo-plain-link" href="#atlas">More about Atlas AI</a></div>',
+      '<div class="he-demo-atlas-hero"><span class="he-mini-atlas-icon">✦</span><span class="he-mini-overline">ATLAS AI</span><h3>Your future teaching companion.</h3>',
+      '<p>Atlas AI is in development. Planned tools include lesson suggestions, learner insights and optional transcription features, designed around your existing student workspace.</p>',
+      '<span class="he-demo-atlas-status">In development · No AI lesson features are active yet</span>',
+      '<div class="he-mini-actions">'+button('Explore students','students')+'<a class="he-demo-plain-link" href="#atlas">Learn about Atlas AI</a></div></div>',
       sampleMessage
     ].join('');
   }
-  const views={overview,calendar,students,notes,progress,atlas};
+  const makePlan=(student,duration,topic)=>[
+    'Lesson plan · '+student.name+' ('+student.level+')',
+    'Duration: '+duration+' minutes',
+    'Topic: '+topic,
+    '',
+    '0–5 min · Warm-up: ask about the learner’s week.',
+    '5–15 min · Review: revisit '+student.focus.toLowerCase()+'.',
+    '15–30 min · Guided activity: practise '+topic.toLowerCase()+' with examples.',
+    '30–45 min · Conversation: use new language in realistic situations.',
+    '45–50 min · Feedback: one strength, one improvement and a next step.',
+    '',
+    'Learner goal: '+student.goal,
+    'Homework reminder: '+student.homework
+  ].join('\n');
+  function plan(){
+    const s=lookup(state.selected);
+    const plans=state.savedPlans.filter(p=>p.student===s.id);
+    return [
+      title('LESSON PREPARATION','Prepare lesson','Create and edit a template-based lesson draft, just like the current app.','Sample template'),
+      '<div class="he-demo-feature-panel"><div class="he-mini-section-title"><strong>'+clean(s.name)+' · '+clean(s.level)+'</strong><span>Editable template · No AI</span></div>',
+      '<div class="he-demo-plan-controls"><label>Lesson topic<input id="he-demo-plan-topic" maxlength="85" value="'+clean(s.focus)+'"></label><label>Duration<select id="he-demo-plan-duration"><option value="30">30 minutes</option><option value="50" selected>50 minutes</option><option value="60">60 minutes</option></select></label></div>',
+      '<div class="he-mini-actions"><button type="button" class="he-demo-button" data-demo-create-plan="true">Create editable draft</button><button type="button" class="he-demo-primary" data-demo-save-plan="true">Save sample plan</button>'+button('Back to student','students','data-demo-person="'+clean(s.id)+'"')+'</div>',
+      '<label class="he-demo-field he-demo-plan-editor">Lesson plan (editable)<textarea id="he-demo-plan-draft" rows="11" maxlength="5000" placeholder="Choose Create editable draft to generate a lesson plan.">'+clean(state.planDraft)+'</textarea></label>',
+      '</div><div class="he-demo-secondary-panel"><div class="he-mini-section-title"><strong>Saved lesson plans</strong><span>'+plans.length+' in demo</span></div>',
+      plans.length?plans.map((p,i)=>'<div class="he-demo-saved-plan"><strong>Plan '+(i+1)+' · '+clean(s.name)+'</strong><small>'+clean(p.text.slice(0,120))+'</small></div>').join(''):'<p class="he-demo-muted">Saved template plans for this learner will appear here.</p>',
+      '</div>',sampleMessage
+    ].join('');
+  }
+  const views={overview,calendar,students,notes,progress,atlas,plan};
   state=initial();
   mini.classList.add('he-demo-app','he-demo-real');
   mini.innerHTML=[
@@ -221,6 +248,7 @@
       state.progressStudent=person;
     }
     state.view=view;state.status='';state.studentForm=false;state.calendarForm=false;
+    if(view==='plan')state.planDraft='';
     render();
   }
   mini.addEventListener('click',event=>{
@@ -243,6 +271,20 @@
       if(!text){state.status='Write a note before saving.';mini.querySelector('.he-demo-feedback').textContent=state.status;return}
       state.notes.unshift({student:state.noteStudent,text:text.slice(0,900),stamp:'Demo · Just added'});
       state.status='Sample lesson note saved in this page only.';render(false);return;
+    }
+    if(t.dataset.demoCreatePlan!==undefined){
+      const student=lookup(state.selected);
+      const topic=mini.querySelector('#he-demo-plan-topic')?.value.trim()||student.focus;
+      const duration=Number(mini.querySelector('#he-demo-plan-duration')?.value)||50;
+      state.planDraft=makePlan(student,duration,topic).slice(0,5000);
+      state.status='Editable sample lesson draft created.';render(false);return;
+    }
+    if(t.dataset.demoSavePlan!==undefined){
+      const value=mini.querySelector('#he-demo-plan-draft')?.value.trim()||'';
+      if(!value){state.status='Create or write a lesson draft before saving.';mini.querySelector('.he-demo-feedback').textContent=state.status;return;}
+      state.planDraft=value.slice(0,5000);
+      state.savedPlans.unshift({student:state.selected,text:state.planDraft});
+      state.status='Sample plan saved in the demo only.';render(false);return;
     }
     if(t.dataset.demoProgressStep!==undefined){
       const s=lookup(state.progressStudent);
