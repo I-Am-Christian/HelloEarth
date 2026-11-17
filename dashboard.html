@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="page-i18n.css?v=20261115full4"><script src="page-i18n.js?v=20261116-suite7" defer></script><link rel="stylesheet" href="space-theme.css?v=20261115-global-space2"><link rel="stylesheet" href="dashboard-navigation.css?v=20261116-scheduling3"><link rel="stylesheet" href="dashboard-scheduler.css?v=20261117-scheduler3"><link rel="stylesheet" href="dashboard-features.css?v=20261116-suite7"><link rel="manifest" href="/site.webmanifest">
 <link rel="apple-touch-icon" href="/helloearth-logo.png">
 <meta name="apple-mobile-web-app-title" content="HelloEarth">
-<link rel="stylesheet" href="dashboard-extras.css?v=20261117-extras1"><link rel="stylesheet" href="notifications.css?v=20261116-push1"><script type="module" src="notifications.js?v=20261116-push1"></script><script src="pwa-register.js?v=20261116-push1" defer></script></head>
+<link rel="stylesheet" href="dashboard-extras.css?v=20261117-extras1"><link rel="stylesheet" href="dashboard-suite.css?v=20261118-suite1"><link rel="stylesheet" href="notifications.css?v=20261116-push1"><script type="module" src="notifications.js?v=20261116-push1"></script><script src="pwa-register.js?v=20261116-push1" defer></script></head>
 <body class="space-theme space-dashboard portal-page">
 <div id="checking" style="padding:20vh 20px;text-align:center;color:#d9cfff">Checking your secure session…</div>
 <div class="workspace" id="workspace" hidden>
@@ -21,6 +21,7 @@
       <button type="button" data-view="calendar"><span aria-hidden="true">▦</span> Calendar</button>
       <button type="button" data-view="students"><span aria-hidden="true">♧</span> Students</button>
       <button type="button" data-view="progress"><span aria-hidden="true">▥</span> Progress</button>
+      <button type="button" data-view="tools"><span aria-hidden="true">⚒</span> Tutor tools</button>
       <button type="button" data-view="atlas"><span aria-hidden="true">✦</span> Atlas AI</button>
     </nav>
     <a class="ws-home-link" href="index.html">↗ &nbsp; View website</a>
@@ -35,6 +36,7 @@
       <button id="calendar-tab" class="ws-view-tab" type="button" role="tab" aria-selected="false" aria-controls="calendar-view" tabindex="-1"><span aria-hidden="true">▦</span> Calendar</button>
       <button id="students-tab" class="ws-view-tab" type="button" role="tab" aria-selected="false" aria-controls="students-view" tabindex="-1"><span aria-hidden="true">♧</span> Students</button>
       <button id="progress-tab" class="ws-view-tab" type="button" role="tab" aria-selected="false" aria-controls="progress-view" tabindex="-1"><span aria-hidden="true">▥</span> Progress</button>
+      <button id="tools-tab" class="ws-view-tab" type="button" role="tab" aria-selected="false" aria-controls="tools-view" tabindex="-1"><span aria-hidden="true">⚒</span> Tutor tools</button>
       <button id="atlas-tab" class="ws-view-tab" type="button" role="tab" aria-selected="false" aria-controls="atlas-view" tabindex="-1"><span aria-hidden="true">✦</span> Atlas AI</button>
     </nav>
     <p class="ws-swipe-hint">Swipe between sections or tap a tab to navigate.</p>
@@ -56,6 +58,7 @@
         <button type="button" data-open-view="calendar"><span aria-hidden="true">▦</span><strong>Your calendar</strong><small>Plan your upcoming lessons</small></button>
         <button type="button" data-open-view="students"><span aria-hidden="true">♧</span><strong>Students</strong><small>Profiles, goals and lesson notes</small></button>
         <button type="button" data-open-view="progress"><span aria-hidden="true">▥</span><strong>Progress</strong><small>See your learners' levels</small></button>
+        <button type="button" data-open-view="tools"><span aria-hidden="true">⚒</span><strong>Tutor tools</strong><small>Bookings, homework and business records</small></button>
         <button type="button" data-open-view="atlas"><span aria-hidden="true">✦</span><strong>Atlas AI</strong><small>Explore what's coming next</small></button>
       </div>
     </section>
@@ -171,6 +174,15 @@
       </section>
 <button type="button" class="ws-mini-btn" data-open-view="students">View student profiles</button>
     </section>
+    <section id="tools-view" class="ws-view ws-tools-view" role="tabpanel" aria-labelledby="tools-tab" hidden>
+      <div class="ws-section-intro"><span class="dash-overline">YOUR TEACHING BUSINESS</span><h2>Everything around your lessons.</h2><p>Manage bookings, follow-ups, reports and reusable resources in one private workspace.</p></div>
+      <nav class="he-suite-tabs" aria-label="Tutor tools"><button type="button" data-suite-tab="schedule" class="active" aria-pressed="true">▦ Scheduling</button><button type="button" data-suite-tab="students" aria-pressed="false">♧ Student care</button><button type="button" data-suite-tab="business" aria-pressed="false">▥ Business &amp; reports</button><button type="button" data-suite-tab="resources" aria-pressed="false">✦ Resources</button></nav>
+      <p class="he-suite-message" id="he-suite-status" role="status" aria-live="polite"></p>
+      <div id="he-suite-schedule" class="he-suite-pane"></div>
+      <div id="he-suite-students" class="he-suite-pane" hidden></div>
+      <div id="he-suite-business" class="he-suite-pane" hidden></div>
+      <div id="he-suite-resources" class="he-suite-pane" hidden></div>
+    </section>
     <section id="atlas-view" class="ws-view" role="tabpanel" aria-labelledby="atlas-tab" hidden>
       <div class="ws-atlas-hero">
         <span class="ws-atlas-orb" aria-hidden="true">✦</span>
@@ -266,4 +278,4 @@
     </form>
   </div>
 </div>
-<script type="module" src="dashboard-extras.js?v=20261117-extras2"></script><script type="module" src="dashboard-navigation.js?v=20261117-scheduler3"></script><script type="module" src="dashboard-features.js?v=20261117-suite10"></script></body></html>
+<script type="module" src="dashboard-extras.js?v=20261117-extras2"></script><script type="module" src="dashboard-navigation.js?v=20261117-scheduler3"></script><script type="module" src="dashboard-features.js?v=20261117-suite10"></script><script type="module" src="dashboard-suite.js?v=20261118-suite1"></script></body></html>
