@@ -3,6 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<script id="he-intro-once">
+/* Decide before the first paint whether this session needs the welcome intro. */
+try {
+ const key="helloearth:homepage-welcome:v1";
+ const reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+ if (!reduce && !sessionStorage.getItem(key)) {
+  document.documentElement.classList.add("he-intro-on");
+  sessionStorage.setItem(key,"1");
+ }
+} catch (_) { /* Session storage unavailable: show the homepage normally. */ }
+</script>
+<link rel="stylesheet" href="home-intro.css?v=20261118-first1">
 <meta name="description" content="HelloEarth is a private workspace for independent tutors: students, lesson notes, progress, lesson plans and Google Calendar. Start free.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="HelloEarth">
@@ -49,12 +61,30 @@ window.addEventListener("load",()=>setTimeout(()=>document.documentElement.class
 </script>
 <script>if(/\/index\.html$/i.test(location.pathname)){history.replaceState(null,"",location.pathname.replace(/index\.html$/i,"")+location.search+location.hash)}</script>
 <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20261118-bright2"><link rel="stylesheet" href="style.css?v=20261117-features3x2">
-<script src="homepage-copy-translations.js?v=20261117-features3x2" defer></script><script src="homepage-demo.js?v=20261117-extras3" defer></script><script src="homepage-demo-extras.js?v=20261117-extras1" defer></script><script src="script.js?v=20261117-home-preview2" defer></script><script type="module" src="homepage-session.js?v=20261115-session-nav4"></script>
+<script src="home-intro.js?v=20261118-first1" defer></script><script src="homepage-copy-translations.js?v=20261117-features3x2" defer></script><script src="homepage-demo.js?v=20261117-extras3" defer></script><script src="homepage-demo-extras.js?v=20261117-extras1" defer></script><script src="script.js?v=20261117-home-preview2" defer></script><script type="module" src="homepage-session.js?v=20261115-session-nav4"></script>
 <link rel="stylesheet" href="space-theme.css?v=20261115-global-space2"><link rel="manifest" href="/site.webmanifest">
 <link rel="apple-touch-icon" href="/helloearth-logo.png">
 <meta name="apple-mobile-web-app-title" content="HelloEarth">
 <script src="pwa-register.js?v=20261116-push1" defer></script><link rel="stylesheet" href="header-scroll.css?v=20261117-hide1"><script src="header-scroll.js?v=20261117-hide1" defer></script><link rel="stylesheet" href="homepage-demo.css?v=20261117-interactive2"><link rel="stylesheet" href="homepage-demo-real.css?v=20261117-real-match1"><link rel="stylesheet" href="homepage-demo-extras.css?v=20261117-extras2"></head>
 <body class="space-theme space-home">
+<div class="he-space-intro" id="he-space-intro" role="status" aria-label="Welcome to Hello Earth">
+ <div class="he-intro-stars" aria-hidden="true"><i class="he-intro-streak"></i><i class="he-intro-streak"></i><i class="he-intro-streak"></i></div>
+ <div class="he-intro-center">
+  <div class="he-intro-globe-wrap" aria-hidden="true">
+   <div class="he-intro-globe-glow"></div><div class="he-intro-orbit"></div>
+   <div class="he-intro-globe">
+    <svg viewBox="0 0 72 72" aria-hidden="true" focusable="false">
+     <path fill="#E9FFFF" d="M5 16 18 7l15 2 3 9-9 9-4 9-11-4-7-10zM3 43l12-4 10 6 5 11-8 13-12-10zM39 6l13 4 12 13-8 9-12-5-5-10zM48 36l14-2 9 9-8 11-13-6z"/>
+    </svg>
+   </div>
+   <span class="he-intro-rocket" aria-hidden="true">🚀</span>
+  </div>
+  <p class="he-intro-wordmark">helloearth<span>.</span></p>
+  <p class="he-intro-caption">Your universe of teaching</p>
+  <div class="he-intro-track" aria-hidden="true"></div>
+ </div>
+ <button class="he-intro-skip" type="button" aria-label="Skip welcome animation">Skip intro →</button>
+</div>
 <header class="site-header"><div class="wrap header-inner"><a class="brand" href="#home" aria-label="HelloEarth home"><img class="brand-logo" src="logo.svg" alt="" width="44" height="44"><span>helloearth<span class="brand-dot">.</span><small>FOR TUTORS</small></span></a><label class="language-picker"><span class="language-picker-icon" aria-hidden="true">文A</span><select id="site-language" aria-label="Website language"><option value="en">English</option><option value="af">Afrikaans</option><option value="es">Español</option><option value="pt">Português</option><option value="fr">Français</option><option value="pl">Polski</option><option value="ru">Русский</option><option value="zh">简体中文</option></select></label><button class="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav"><span>Menu</span><span aria-hidden="true">☰</span></button><nav id="nav" class="nav" aria-label="Main navigation"><a href="#features">Features</a><a href="#preview">Preview</a><a href="#atlas">Atlas AI</a><a href="pricing.html">Pricing</a><a class="nav-signin" href="login.html" data-auth-login>Log in</a><a class="nav-cta" href="register.html" data-auth-start="nav">Get started</a></nav></div></header>
 <div class="solar-background" aria-label="Interactive solar system background"><div class="starfield"></div><div class="starfield starfield-extra"></div><button class="distant-sun" type="button" aria-label="Toggle stronger Sun glow" title="Click to boost the Sun's glow"></button><div class="earth-orbit-path"></div><div class="earth-orbit"><div class="earth-position" role="button" tabindex="0" aria-label="Tap or click Earth to launch a rocket to the Moon"><div class="earth-planet"><div class="earth-continents"></div><div class="earth-shading"></div></div><div class="moon-orbit-path"></div><div class="moon-orbit"><div class="moon-position"><div class="moon-body"><span class="moon-flag" aria-hidden="true"><span class="moon-flagpole"></span><span class="moon-flagcloth"><img src="logo.svg" alt="" width="18" height="18"></span></span></div></div></div></div></div><div class="moon-rocket" aria-hidden="true"><span class="rocket-trail"></span><span class="rocket-ship">🚀</span></div></div><main>
 <section class="hero" id="home"><div class="hero-aurora" aria-hidden="true"></div><span class="shooting-star" aria-hidden="true"></span><div class="wrap hero-layout"><div class="hero-copy"><span class="eyebrow">BUILT FOR INDEPENDENT TUTORS</span><h1>Your teaching essentials.<br><em>One private workspace.</em></h1><p>Keep student profiles, lesson notes, progress, editable lesson plans and your Google Calendar together, without juggling separate tools.</p><div class="hero-actions"><a class="button" href="register.html" data-auth-start="hero">Get started</a><a class="he-hero-secondary" href="#pricing">View pricing</a></div><p class="he-hero-price">Start free with up to 3 students · <strong>R0/month</strong><span>Paid plans are planned, starting from R99/month.</span></p></div><div class="hero-art hero-art-spacer" aria-label="Interactive Moon mission — tap Earth to launch the rocket"></div><div class="mobile-hero-highlights" aria-label="HelloEarth essentials"><div><span aria-hidden="true">♧</span><strong>Student<br>profiles</strong></div><div><span aria-hidden="true">▤</span><strong>Lesson<br>notes</strong></div><div><span aria-hidden="true">▥</span><strong>Progress<br>tracking</strong></div></div></div></section>
