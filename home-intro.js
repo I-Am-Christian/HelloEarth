@@ -9,8 +9,10 @@
   if (closed) return;
   closed = true;
   intro.classList.add("is-leaving");
-  root.classList.remove("he-intro-on");
-  window.setTimeout(() => { intro.remove(); }, 260);
+  window.setTimeout(() => {
+   root.classList.remove("he-intro-on");
+   intro.remove();
+  }, 235);
  };
  const timer = window.setTimeout(close, 1050);
  intro.querySelector(".he-intro-skip")?.addEventListener("click", () => {
