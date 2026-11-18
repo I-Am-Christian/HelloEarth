@@ -142,3 +142,16 @@ html.he-intro-on .he-space-intro{
 @media(prefers-reduced-motion:reduce){
  .space-home .hero-copy .he-replay-intro{transition:none}
 }
+
+/* Keep the replay link above the interactive solar artwork hit area. */
+body.space-home .hero .hero-copy{position:relative;z-index:25}
+body.space-home .hero .hero-copy .he-replay-intro{
+ position:relative;z-index:30;
+ pointer-events:auto!important;
+ -webkit-tap-highlight-color:rgba(185,157,244,.3);
+}
+@media(prefers-reduced-motion:reduce){
+ html.he-intro-on .he-space-intro{
+  animation:he-intro-out .12s linear .55s forwards!important;
+ }
+}
