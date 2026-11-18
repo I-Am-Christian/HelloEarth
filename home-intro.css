@@ -118,3 +118,27 @@ html.he-intro-on .he-space-intro{
  .he-space-intro{display:none!important}
  .he-space-intro *, .he-space-intro::before{animation:none!important}
 }
+
+/* Small, deliberate replay control under the homepage's existing price note. */
+.space-home .hero-copy .he-replay-intro{
+ display:inline-flex;align-items:center;gap:8px;
+ margin:13px 0 0;padding:7px 12px;
+ background:rgba(109,87,161,.14);
+ border:1px solid rgba(166,149,209,.42);
+ border-radius:999px;color:#c3b8e6;
+ font:700 11px/1.4 Arial,Helvetica,sans-serif;
+ cursor:pointer;text-decoration:none;
+ transition:background .16s ease,border-color .16s ease,color .16s ease;
+}
+.space-home .hero-copy .he-replay-intro span{font-size:13px;color:#bd9eff}
+.space-home .hero-copy .he-replay-intro:hover{
+ background:rgba(124,91,185,.26);
+ border-color:rgba(192,171,243,.72);
+ color:#f4edff;
+}
+.space-home .hero-copy .he-replay-intro:focus-visible{
+ outline:2px solid #cfb5ff;outline-offset:3px;
+}
+@media(prefers-reduced-motion:reduce){
+ .space-home .hero-copy .he-replay-intro{transition:none}
+}
