@@ -11,6 +11,10 @@ try {
  if (!reduce && !sessionStorage.getItem(key)) {
   document.documentElement.classList.add("he-intro-on");
   sessionStorage.setItem(key,"1");
+  /* Failsafe: never leave the page locked if the deferred intro script fails. */
+  window.addEventListener("load", () => {
+   window.setTimeout(() => document.documentElement.classList.remove("he-intro-on"), 1750);
+  }, { once:true });
  }
 } catch (_) { /* Session storage unavailable: show the homepage normally. */ }
 </script>
