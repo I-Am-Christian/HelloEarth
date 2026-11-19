@@ -342,3 +342,14 @@ body.space-dashboard{background:var(--ux-bg)}
 @media(prefers-reduced-motion:reduce){
  .ws-side-nav button,.ux-quick-grid button,.ux-mobile-nav button{transition:none!important}
 }
+
+/* Ensure anchored student details and generated reports remain visible below the header. */
+#student-detail,#student-workflow,#progress-skill-panel,
+#teaching-day,.he-suite-card{scroll-margin-top:110px}
+button:focus-visible,.ws-side-nav a:focus-visible,.ux-mobile-nav button:focus-visible{
+ outline:2px solid #cfb2ff;outline-offset:3px;
+}
+@media(max-width:760px){
+ #student-detail,#student-workflow,#progress-skill-panel,
+ #teaching-day,.he-suite-card{scroll-margin-top:24px}
+}
