@@ -39,9 +39,13 @@ function page(name){
 }
 function tools(which="schedule"){
  const suiteApi=window.HelloEarthTutorSuite;
- if(suiteApi?.open){suiteApi.open(which);return true}
- page("tools");
- document.querySelector('[data-suite-tab="'+which+'"]')?.click();
+ if(suiteApi?.open)suiteApi.open(which);
+ else{
+  page("tools");
+  document.querySelector('[data-suite-tab="'+which+'"]')?.click();
+ }
+ document.querySelectorAll("[data-ux-tool]").forEach(btn=>
+  btn.classList.toggle("ux-active-sub",btn.dataset.uxTool===which));
  return true;
 }
 function addStudent(){
@@ -215,10 +219,8 @@ document.addEventListener("keydown",e=>{
 });
 $("ux-header-add-student").addEventListener("click",addStudent);
 document.querySelectorAll("[data-ux-action]").forEach(btn=>btn.addEventListener("click",()=>action(btn.dataset.uxAction)));
-document.querySelectorAll("[data-ux-tool]").forEach(btn=>btn.addEventListener("click",()=>{
- tools(btn.dataset.uxTool);
- document.querySelectorAll("[data-ux-tool]").forEach(el=>el.classList.toggle("ux-active-sub",el.dataset.uxTool===btn.dataset.uxTool));
-}));
+document.querySelectorAll("[data-ux-tool]").forEach(btn=>
+ btn.addEventListener("click",()=>tools(btn.dataset.uxTool)));
 document.querySelectorAll("[data-ux-more-view]").forEach(btn=>btn.addEventListener("click",()=>{
  closeDialog(moreDialog);page(btn.dataset.uxMoreView);
 }));
