@@ -10,28 +10,53 @@
 <link rel="stylesheet" href="page-i18n.css?v=20261115full4"><script src="page-i18n.js?v=20261116-suite7" defer></script><link rel="stylesheet" href="space-theme.css?v=20261115-global-space2"><link rel="stylesheet" href="dashboard-navigation.css?v=20261116-scheduling3"><link rel="stylesheet" href="dashboard-scheduler.css?v=20261117-scheduler3"><link rel="stylesheet" href="dashboard-features.css?v=20261116-suite7"><link rel="manifest" href="/site.webmanifest">
 <link rel="apple-touch-icon" href="/helloearth-logo.png">
 <meta name="apple-mobile-web-app-title" content="HelloEarth">
-<link rel="stylesheet" href="dashboard-extras.css?v=20261117-extras1"><link rel="stylesheet" href="dashboard-suite.css?v=20261118-suite-full2"><link rel="stylesheet" href="notifications.css?v=20261116-push1"><script type="module" src="notifications.js?v=20261116-push1"></script><script src="pwa-register.js?v=20261116-push1" defer></script><link rel="stylesheet" href="leaderboard.css?v=20261118-1">
+<link rel="stylesheet" href="dashboard-extras.css?v=20261117-extras1"><link rel="stylesheet" href="dashboard-suite.css?v=20261118-suite-full2"><link rel="stylesheet" href="notifications.css?v=20261116-push1"><script type="module" src="notifications.js?v=20261116-push1"></script><script src="pwa-register.js?v=20261116-push1" defer></script><link rel="stylesheet" href="leaderboard.css?v=20261118-1"><link rel="stylesheet" href="dashboard-ux.css?v=20261119-ux1">
 </head>
 <body class="space-theme space-dashboard portal-page">
 <div id="checking" style="padding:20vh 20px;text-align:center;color:#d9cfff">Checking your secure session…</div>
 <div class="workspace" id="workspace" hidden>
-  <aside class="ws-sidebar">
-    <a href="index.html" class="portal-brand"><img src="logo.svg" alt="" width="40" height="40">helloearth<span class="brand-dot">.</span></a>
-    <nav class="ws-side-nav" aria-label="Workspace sections">
-      <button type="button" data-view="overview"><span aria-hidden="true">⌂</span> Overview</button>
-      <button type="button" data-view="calendar"><span aria-hidden="true">▦</span> Calendar</button>
-      <button type="button" data-view="students"><span aria-hidden="true">♧</span> Students</button>
-      <button type="button" data-view="progress"><span aria-hidden="true">▥</span> Progress</button>
-      <button type="button" data-view="tools"><span aria-hidden="true">⚒</span> Tutor tools</button>
-      <button type="button" data-view="leaderboard"><span aria-hidden="true">🏆</span> Leaderboard</button>
-      <button type="button" data-view="atlas"><span aria-hidden="true">✦</span> Atlas AI</button>
-    </nav>
-    <a class="ws-home-link" href="index.html">↗ &nbsp; View website</a>
-    <p class="ws-sidebar-foot">Your private teaching space. <br>Student data stays with your signed-in account.</p>
+  <aside class="ws-sidebar" aria-label="Workspace navigation">
+    <a href="index.html" class="portal-brand" aria-label="Hello Earth homepage"><img src="logo.svg" width="40" height="40" alt="">helloearth<span class="brand-dot">.</span></a>
+    <div class="ux-sidebar-nav-wrap">
+      <nav class="ws-side-nav" aria-label="Workspace sections">
+        <span class="ux-nav-heading">WORKSPACE</span>
+        <button type="button" data-view="overview"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5M9 21v-7h6v7"/></svg><span>Overview</span></button>
+        <button type="button" data-view="calendar"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 2v4m10-4v4M3 9h18M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2Zm3 9h3v3H8zm7 0h3v3h-3z"/></svg><span>Calendar</span></button>
+        <button type="button" data-view="students"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Students</span></button>
+        <button type="button" data-view="progress"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V12m5 8V4m5 16v-9m5 9V7M2 20h20"/></svg><span>Progress</span></button>
+        <span class="ux-nav-heading">MANAGE</span>
+        <button type="button" data-view="tools"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16M8 5v4m8 1v4m-4 1v4"/></svg><span>Tutor tools</span></button>
+        <button class="ux-nav-sub" type="button" data-ux-tool="schedule"><span>Bookings &amp; scheduling</span></button>
+        <button class="ux-nav-sub" type="button" data-ux-tool="students"><span>Homework &amp; preparation</span></button>
+        <button class="ux-nav-sub" type="button" data-ux-tool="business"><span>Earnings &amp; reports</span></button>
+        <button class="ux-nav-sub" type="button" data-ux-tool="resources"><span>Teaching templates</span></button>
+        <span class="ux-nav-heading">EXPLORE</span>
+        <button type="button" data-view="leaderboard"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8m-4-4v4M7 3h10v8a5 5 0 0 1-10 0V3ZM7 6H3v3a4 4 0 0 0 4 4m10-7h4v3a4 4 0 0 1-4 4"/></svg><span>Leaderboard</span></button>
+        <button type="button" data-view="atlas"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l2.6 6.9L21.5 12l-6.9 2.6L12 21.5l-2.6-6.9L2.5 12l6.9-3.1L12 2Z"/></svg><span>Atlas AI</span><small class="ux-nav-soon">Preview</small></button>
+      </nav>
+    </div>
+    <div class="ux-sidebar-bottom">
+      <a class="ws-home-link" href="index.html"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-10 10h20M12 2c3 3 4 7 4 10s-1 7-4 10M12 2c-3 3-4 7-4 10s1 7 4 10"/></svg> <span>Visit website</span></a>
+      <p class="ws-sidebar-foot">Your private teaching workspace.<span> Built for your everyday lessons.</span></p>
+    </div>
   </aside>
   <main class="ws-main">
-    <header class="ws-header"><div><span class="dash-overline">YOUR TEACHING SPACE</span><h1>My workspace<span style="color:#bc9cff">.</span></h1></div>
-      <div class="ws-account"><span class="ws-user" id="account-email"></span><span class="ws-avatar" id="account-avatar" aria-hidden="true">H</span><button type="button" class="ws-mini-btn ws-companion-launch" id="ws-companion-open" aria-controls="ws-companion-panel" aria-expanded="false">▶ Start lesson</button><button type="button" id="signout">Log out</button></div>
+    <header class="ws-header">
+      <div class="ux-page-heading">
+        <span class="dash-overline" id="ux-page-eyebrow">WORKSPACE / OVERVIEW</span>
+        <h1 id="ux-page-title">Overview</h1>
+        <p class="ux-page-caption" id="ux-page-caption">Your teaching, organised.</p>
+      </div>
+      <div class="ux-header-actions">
+        <button type="button" id="ux-command-open" class="ux-search-trigger" aria-keyshortcuts="Control+K Meta+K" aria-haspopup="dialog" aria-controls="ux-command-dialog"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.35-4.35M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/></svg><span>Search students, pages…</span><kbd>Ctrl K</kbd></button>
+        <button type="button" id="ux-header-add-student" class="ux-create-button"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>New student</span></button>
+        <div class="ws-account">
+          <button type="button" class="ws-mini-btn ws-companion-launch" id="ws-companion-open" aria-controls="ws-companion-panel" aria-expanded="false"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 4v5l3 2"/></svg><span>Start lesson</span></button>
+          <span class="ws-user" id="account-email"></span>
+          <span class="ws-avatar" id="account-avatar" aria-hidden="true">H</span>
+          <button type="button" id="signout" class="ux-signout" title="Sign out of Hello Earth" aria-label="Sign out"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4m7 14 5-5-5-5m5 5H9"/></svg><span>Log out</span></button>
+        </div>
+      </div>
     </header>
     <nav class="ws-view-switch" role="tablist" aria-label="Dashboard sections">
       <button id="overview-tab" class="ws-view-tab is-current" type="button" role="tab" aria-selected="true" aria-controls="overview-view" tabindex="0"><span aria-hidden="true">⌂</span> Overview</button>
@@ -44,28 +69,49 @@
     </nav>
     <p class="ws-swipe-hint">Swipe between sections or tap a tab to navigate.</p>
     <section id="overview-view" class="ws-view" role="tabpanel" aria-labelledby="overview-tab">
-      <div class="ws-section-intro"><span class="dash-overline">YOUR WORKSPACE</span><h2>Good to see you again.</h2><p>Everything you need to manage your teaching day, all in one place.</p></div>
-    <section class="ws-feature-panel" id="teaching-day" aria-labelledby="teaching-day-title">
-      <div class="ws-feature-title"><div><span class="dash-overline">TODAY AT A GLANCE</span><h3 id="teaching-day-title">My teaching day</h3><p>Upcoming appointments from your Google Calendar, with quick student access.</p></div><button type="button" class="ws-mini-btn" data-open-view="calendar">View calendar</button></div>
-      <div class="ws-day-counts"><div><strong id="day-lessons-count">—</strong><small>Appointments today</small></div><div><strong id="day-week-count">—</strong><small>Remaining this week</small></div><div><strong id="day-next-label">—</strong><small>Next appointment</small></div></div>
-      <div id="teaching-day-events" class="ws-teaching-list" aria-live="polite"><p>Connect your Google Calendar to see this week's appointments.</p></div>
-    </section>
-    <p class="ws-banner">✧ Your student information is private to your account. Only record learner data you have permission to store. Atlas AI lesson features are still in development.</p>
-    <section class="ws-plan-strip" aria-label="Subscription plan"><div><strong id="plan-label">Checking account plan…</strong><span id="plan-capacity">Your plan information will appear here.</span></div><a href="pricing.html">See plans</a></section>
-    <div class="ws-summary">
+      <div class="ux-overview-heading">
+        <div><span class="dash-overline" id="ux-today-date">YOUR DASHBOARD</span><h2>Your teaching day, at a glance.</h2><p>Know what's next, prepare quickly, and find every student in a few clicks.</p></div>
+        <button type="button" class="ux-link-secondary" data-ux-action="schedule"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 2v4m10-4v4M3 9h18M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2Zm3 9h3v3H8zm7 0h3v3h-3z"/></svg> Schedule lesson <svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
+      </div>
+      <div class="ws-summary">
       <div class="ws-metric"><span>Students</span><strong id="stat-students">—</strong><small>In your workspace</small></div>
       <div class="ws-metric"><span>Levels tracked</span><strong id="stat-levels">—</strong><small>CEFR categories</small></div>
       <div class="ws-metric"><span>Profiles to assess</span><strong id="stat-assess">—</strong><small>Unassessed learners</small></div>
     </div>
-      <div class="ws-shortcut-grid">
-        <button type="button" data-open-view="calendar"><span aria-hidden="true">▦</span><strong>Your calendar</strong><small>Plan your upcoming lessons</small></button>
-        <button type="button" data-open-view="students"><span aria-hidden="true">♧</span><strong>Students</strong><small>Profiles, goals and lesson notes</small></button>
-        <button type="button" data-open-view="progress"><span aria-hidden="true">▥</span><strong>Progress</strong><small>See your learners' levels</small></button>
-        <button type="button" data-open-view="tools"><span aria-hidden="true">⚒</span><strong>Tutor tools</strong><small>Bookings, homework and business records</small></button>
-        <button type="button" data-open-view="leaderboard"><span aria-hidden="true">🏆</span><strong>Leaderboard &amp; rewards</strong><small>Rankings, badges and fee milestones</small></button>
-        <button type="button" data-open-view="atlas"><span aria-hidden="true">✦</span><strong>Atlas AI</strong><small>Explore what's coming next</small></button>
-        <button type="button" id="overview-lesson-shortcut"><span aria-hidden="true">◷</span><strong>Start lesson</strong><small>Timer, lesson plan and quick notes</small></button>
+      <div class="ux-overview-layout">
+        <section class="ws-feature-panel" id="teaching-day" aria-labelledby="teaching-day-title">
+      <div class="ws-feature-title"><div><span class="dash-overline">TODAY AT A GLANCE</span><h3 id="teaching-day-title">My teaching day</h3><p>Upcoming appointments from your Google Calendar, with quick student access.</p></div><button type="button" class="ws-mini-btn" data-open-view="calendar">View calendar</button></div>
+      <div class="ws-day-counts"><div><strong id="day-lessons-count">—</strong><small>Appointments today</small></div><div><strong id="day-week-count">—</strong><small>Remaining this week</small></div><div><strong id="day-next-label">—</strong><small>Next appointment</small></div></div>
+      <div id="teaching-day-events" class="ws-teaching-list" aria-live="polite"><p>Connect your Google Calendar to see this week's appointments.</p></div>
+    </section>
+        <aside class="ux-attention-card" aria-labelledby="ux-attention-title">
+          <div class="ux-attention-head"><span class="dash-overline">NEEDS ATTENTION</span><h3 id="ux-attention-title">Stay on top of things</h3><p>Live counts from your saved teaching records.</p></div>
+          <div class="ux-attention-list">
+            <button type="button" class="ux-attention-row" data-ux-action="unassessed"><span class="ux-attention-symbol"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="ux-attention-text"><strong>Students to assess</strong><small>Complete missing CEFR levels</small></span><b id="ux-attention-unassessed">—</b><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+            <button type="button" class="ux-attention-row" data-ux-action="bookings"><span class="ux-attention-symbol"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 2v4m10-4v4M3 9h18M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2Zm3 9h3v3H8zm7 0h3v3h-3z"/></svg></span><span class="ux-attention-text"><strong>Booking requests</strong><small>Review pending appointments</small></span><b id="ux-attention-bookings">—</b><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+            <button type="button" class="ux-attention-row" data-ux-action="homework"><span class="ux-attention-symbol"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h7a3 3 0 0 1 3 3v14a3 3 0 0 0-3-3H4V4Zm16 0h-5a3 3 0 0 0-3 3v14a3 3 0 0 1 3-3h5V4Z"/></svg></span><span class="ux-attention-text"><strong>Overdue homework</strong><small>Follow up on assignments</small></span><b id="ux-attention-homework">—</b><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+          </div>
+          <div class="ux-attention-foot"><span class="ux-status-dot"></span>Only recorded data is shown.</div>
+        </aside>
       </div>
+      <section class="ux-quick-section" aria-labelledby="ux-quick-title">
+        <div class="ux-section-heading"><div><span class="dash-overline">QUICK ACTIONS</span><h3 id="ux-quick-title">Get straight to work</h3></div><button type="button" class="ux-inline-link" data-open-view="tools">All tools <svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button></div>
+        <div class="ws-shortcut-grid ux-quick-grid">
+          <button type="button" class="ux-shortcut-primary" data-ux-action="schedule"><span class="ux-quick-icon"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 2v4m10-4v4M3 9h18M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2Zm3 9h3v3H8zm7 0h3v3h-3z"/></svg></span><strong>Schedule a lesson</strong><small>Choose a time, student or time off</small><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
+          <button type="button" data-ux-action="add-student"><span class="ux-quick-icon"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span><strong>Add a student</strong><small>Create a learner profile</small><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
+          <button type="button" id="overview-lesson-shortcut"><span class="ux-quick-icon"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 4v5l3 2"/></svg></span><strong>Start teaching</strong><small>Open the live lesson companion</small><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
+          <button type="button" data-ux-action="homework"><span class="ux-quick-icon"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h7a3 3 0 0 1 3 3v14a3 3 0 0 0-3-3H4V4Zm16 0h-5a3 3 0 0 0-3 3v14a3 3 0 0 1 3-3h5V4Z"/></svg></span><strong>Homework &amp; prep</strong><small>Assignments and lesson checklists</small><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
+        </div>
+      </section>
+      <div class="ux-overview-bottom">
+        <section class="ws-plan-strip" aria-label="Subscription plan"><div><strong id="plan-label">Checking account plan…</strong><span id="plan-capacity">Your plan information will appear here.</span></div><a href="pricing.html">See plans</a></section>
+        <div class="ux-more-links"><strong>More from Hello Earth</strong>
+          <button type="button" data-open-view="progress"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V12m5 8V4m5 16v-9m5 9V7M2 20h20"/></svg> Student progress</button>
+          <button type="button" data-ux-action="reports"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h10l4 4v14H5V3Zm10 0v5h4M8 12h8m-8 4h8"/></svg> Reports &amp; earnings</button>
+          <button type="button" data-open-view="leaderboard"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8m-4-4v4M7 3h10v8a5 5 0 0 1-10 0V3ZM7 6H3v3a4 4 0 0 0 4 4m10-7h4v3a4 4 0 0 1-4 4"/></svg> Tutor leaderboard</button>
+        </div>
+      </div>
+      <p class="ws-banner ux-privacy-note">Your teaching records are private to your account. Record student information only with permission. AI features marked as previews are still in development.</p>
     </section>
     <section id="calendar-view" class="ws-view" role="tabpanel" aria-labelledby="calendar-tab">
       <div class="ws-calendar-intro"><div><span class="dash-overline">YOUR SCHEDULE</span><h2>Teaching calendar</h2><p>See upcoming lessons and appointments in one place.</p></div><a class="ws-calendar-open" href="https://calendar.google.com/calendar/u/0/r" target="_blank" rel="noopener noreferrer">Open Google Calendar ↗</a></div>
@@ -201,6 +247,31 @@
     </section>
   </main>
 </div>
+<nav id="ux-mobile-nav" class="ux-mobile-nav" aria-label="Mobile primary navigation">
+  <button type="button" data-open-view="overview" data-ux-mobile="overview"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5M9 21v-7h6v7"/></svg><span>Home</span></button>
+  <button type="button" data-open-view="calendar" data-ux-mobile="calendar"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 2v4m10-4v4M3 9h18M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2Zm3 9h3v3H8zm7 0h3v3h-3z"/></svg><span>Calendar</span></button>
+  <button type="button" data-open-view="students" data-ux-mobile="students"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Students</span></button>
+  <button type="button" data-open-view="tools" data-ux-mobile="tools"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16M8 5v4m8 1v4m-4 1v4"/></svg><span>Tools</span></button>
+  <button type="button" id="ux-more-open" aria-haspopup="dialog" aria-controls="ux-more-dialog" aria-label="More workspace pages"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01"/></svg><span>More</span></button>
+</nav>
+<dialog id="ux-more-dialog" class="ux-more-dialog" aria-labelledby="ux-more-title">
+  <div class="ux-dialog-heading"><div><span class="dash-overline">NAVIGATE</span><h2 id="ux-more-title">More pages</h2></div><button type="button" class="ux-close" data-ux-close="more" aria-label="Close menu">✕</button></div>
+  <div class="ux-more-links-dialog">
+    <button type="button" data-ux-more-view="progress"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V12m5 8V4m5 16v-9m5 9V7M2 20h20"/></svg><span><strong>Student progress</strong><small>Assessments and levels</small></span><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+    <button type="button" data-ux-more-tool="schedule"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 2v4m10-4v4M3 9h18M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2Zm3 9h3v3H8zm7 0h3v3h-3z"/></svg><span><strong>Bookings &amp; scheduling</strong><small>Requests and recurring lessons</small></span><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+    <button type="button" data-ux-more-tool="students"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h7a3 3 0 0 1 3 3v14a3 3 0 0 0-3-3H4V4Zm16 0h-5a3 3 0 0 0-3 3v14a3 3 0 0 1 3-3h5V4Z"/></svg><span><strong>Homework &amp; preparation</strong><small>Assignments and lesson checklists</small></span><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+    <button type="button" data-ux-more-tool="business"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h18v14H3V7Zm0 0V5h15m-3 10h6"/></svg><span><strong>Earnings &amp; reports</strong><small>Hours, income and reports</small></span><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+    <button type="button" data-ux-more-tool="resources"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h10l4 4v14H5V3Zm10 0v5h4M8 12h8m-8 4h8"/></svg><span><strong>Teaching templates</strong><small>Reusable lessons and attendance</small></span><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+    <button type="button" data-ux-more-view="leaderboard"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8m-4-4v4M7 3h10v8a5 5 0 0 1-10 0V3ZM7 6H3v3a4 4 0 0 0 4 4m10-7h4v3a4 4 0 0 1-4 4"/></svg><span><strong>Leaderboard</strong><small>Community and achievements</small></span><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+    <button type="button" data-ux-more-view="atlas"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l2.6 6.9L21.5 12l-6.9 2.6L12 21.5l-2.6-6.9L2.5 12l6.9-3.1L12 2Z"/></svg><span><strong>Atlas AI</strong><small>Future features</small></span><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+  </div>
+  <a class="ux-more-website" href="index.html"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-10 10h20M12 2c3 3 4 7 4 10s-1 7-4 10M12 2c-3 3-4 7-4 10s1 7 4 10"/></svg> Visit Hello Earth website</a>
+</dialog>
+<dialog id="ux-command-dialog" class="ux-command-dialog" aria-label="Search workspace pages and students">
+  <div class="ux-command-input-row"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.35-4.35M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/></svg><input id="ux-command-input" type="search" autocomplete="off" spellcheck="false" aria-label="Search pages or students" placeholder="Search students, pages and actions…"><button type="button" class="ux-close" data-ux-close="command" aria-label="Close search">✕</button></div>
+  <div class="ux-command-list" id="ux-command-results" role="listbox" aria-label="Workspace search results"></div>
+  <div class="ux-command-hint"><span>↑ ↓ Navigate &nbsp; Enter Open</span><span>Esc Close</span></div>
+</dialog>
 <aside class="ws-companion-panel" id="ws-companion-panel" role="dialog" aria-modal="false" aria-label="Live lesson companion" hidden>
  <div class="ws-companion-heading"><div><span class="dash-overline">IN-LESSON ASSISTANT</span><h2>Live lesson companion</h2></div><button id="ws-companion-close" type="button" aria-label="Close companion">×</button></div>
  <p class="ws-companion-info">A simple local session timer, saved lesson-plan reference and quick notes. The timer runs only while this browser tab remains open.</p>
@@ -284,4 +355,4 @@
     </form>
   </div>
 </div>
-<script type="module" src="dashboard-extras.js?v=20261117-extras2"></script><script type="module" src="dashboard-navigation.js?v=20261118-suite-full2"></script><script type="module" src="dashboard-features.js?v=20261117-suite10"></script><script type="module" src="dashboard-suite.js?v=20261118-suite-full2"></script><script type="module" src="leaderboard-dashboard.js?v=20261118-1"></script></body></html>
+<script type="module" src="dashboard-extras.js?v=20261117-extras2"></script><script type="module" src="dashboard-navigation.js?v=20261118-suite-full2"></script><script type="module" src="dashboard-features.js?v=20261117-suite10"></script><script type="module" src="dashboard-suite.js?v=20261118-suite-full2"></script><script type="module" src="leaderboard-dashboard.js?v=20261118-1"></script><script type="module" src="dashboard-ux.js?v=20261119-ux1"></script></body></html>
