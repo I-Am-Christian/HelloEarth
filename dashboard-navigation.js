@@ -122,6 +122,7 @@ function setView(view,focus=false){
  syncSideNav();
  if(focus)get(view+"-tab").focus({preventScroll:true});
  history.replaceState(null,"",location.pathname+location.search+"#"+view);
+ document.dispatchEvent(new CustomEvent("helloearth:view-changed",{detail:{view}}));
 }
 for(const name of views)get(name+"-tab").addEventListener("click",()=>setView(name));
 document.querySelectorAll("[data-open-view],[data-view]").forEach(button=>{
@@ -143,21 +144,9 @@ document.querySelector(".ws-view-switch").addEventListener("keydown",event=>{
  const index=views.indexOf(calendar.view);
  setView(views[(index+(event.key==="ArrowRight"?1:-1)+views.length)%views.length],true);
 });
-let touchStart=null;
-const main=document.querySelector(".ws-main");
-main.addEventListener("touchstart",event=>{
- if(event.touches.length!==1||!get("student-modal").hidden||!get("note-modal").hidden||event.target.closest("input,textarea,select,[contenteditable],.ws-calendar-days")){touchStart=null;return}
- touchStart={x:event.touches[0].clientX,y:event.touches[0].clientY};
-},{passive:true});
-main.addEventListener("touchend",event=>{
- if(!touchStart||!event.changedTouches.length)return;
- const dx=event.changedTouches[0].clientX-touchStart.x,dy=event.changedTouches[0].clientY-touchStart.y;
- touchStart=null;
- if(Math.abs(dx)<75||Math.abs(dx)<Math.abs(dy)*1.5)return;
- const index=views.indexOf(calendar.view);
- if(dx>0&&index>0)setView(views[index-1]);
- if(dx<0&&index<views.length-1)setView(views[index+1]);
-},{passive:true});
+// Page-wide swipe navigation is intentionally disabled. It conflicted with
+// horizontal calendar interactions, forms and native mobile scrolling.
+// On phones use the bottom navigation; on desktop use the grouped sidebar.
 function renderWeek(){
  const finish=new Date(calendar.week);finish.setDate(finish.getDate()+6);
  get("calendar-month").textContent=calendar.week.getMonth()===finish.getMonth()
