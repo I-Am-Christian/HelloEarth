@@ -1,47 +1,79 @@
-/* HelloEarth dashboard | quiet violet / warm slate | November 2026
-   Retains the site's purple brand; uses lower-saturation surfaces for extended use. */
-body.space-dashboard {
- color-scheme:dark;
- --bg:#151421;--surface:#252337;--surface2:#302d45;
- --text:#f4f0f8;--muted:#bdb5ce;--line:rgba(192,178,219,.22);
- --violet:#c6b2f3;--purple:#9574d1;--glow:rgba(157,124,218,.16);
- --ux-bg:#171521;--ux-panel:#262437;--ux-panel-soft:#312d45;
- --ux-line:rgba(194,180,219,.19);--ux-hover:rgba(167,135,216,.13);
- --ux-text:#f5f1f8;--ux-muted:#c3bdd2;--ux-purple:#c7b0f1;
- background:#171521;accent-color:#bda3ef;
+/* Hello Earth | Daylight Workspace, Nov 2026.
+   Scoped to authenticated dashboard. One light, consistent surface hierarchy. */
+body.space-dashboard{
+  color-scheme:light;
+  --bg:#f7f7fb;--surface:#fff;--surface2:#f4f1fa;
+  --text:#29243b;--muted:#655e76;--line:#e5dfed;
+  --violet:#7957bd;--purple:#7c5ac3;--glow:rgba(124,90,195,.10);
+  --ux-bg:#f7f7fb;--ux-panel:#fff;--ux-panel-soft:#f6f3fc;
+  --ux-line:#e6e0ef;--ux-hover:#f0eafa;--ux-text:#29243b;
+  --ux-muted:#655e76;--ux-purple:#7957bd;
+  background:#f7f7fb;color:#29243b;accent-color:#7957bd;
 }
-body.space-dashboard .workspace {
- background-color:#191723;
- background-image:radial-gradient(ellipse 60% 50% at 95% 0%,rgba(115,86,162,.09),transparent 75%),
- radial-gradient(ellipse 40% 45% at 5% 100%,rgba(108,91,148,.06),transparent 70%);
- background-attachment:scroll;
+body.space-dashboard .workspace{
+  background:#f7f7fb;background-image:none;
 }
-body.space-dashboard .ws-sidebar {
- background:linear-gradient(170deg,#252237,#201e2e 90%);
- border-right:1px solid rgba(195,178,220,.15);
+body.space-dashboard .ws-main{max-width:1500px;padding:25px clamp(18px,3vw,44px) 70px}
+body.space-dashboard .ws-sidebar{
+  background:#fff;border-right:1px solid #e8e2f1;
+  box-shadow:3px 0 20px rgba(57,41,92,.025);
 }
-body.space-dashboard .ws-header {
- background:linear-gradient(180deg,rgba(25,23,35,.98) 72%,rgba(25,23,35,.91));
- border-bottom-color:rgba(190,176,215,.15);
+body.space-dashboard .ws-sidebar .portal-brand{
+  color:#29243b!important;font-weight:800;
 }
-body.space-dashboard .ws-sidebar .portal-brand,
-body.space-dashboard .ws-header #ux-page-title{color:#f7f2ff!important}
-body.space-dashboard .brand-dot{color:#cbb2fa}
-body.space-dashboard .ux-nav-heading{color:#b6a9cf}
-body.space-dashboard .ws-side-nav button{color:#cfc6dd}
-body.space-dashboard .ws-side-nav button .ux-icon{color:#bbaed2}
-body.space-dashboard .ws-side-nav button:hover{background:rgba(166,135,216,.13);color:#fff}
+body.space-dashboard .brand-dot{color:#8b6fd1}
+body.space-dashboard .ux-nav-heading{color:#857b98}
+body.space-dashboard .ws-side-nav button{color:#514861}
+body.space-dashboard .ws-side-nav button .ux-icon{color:#786d8d}
+body.space-dashboard .ws-side-nav button:hover{
+  color:#604394;background:#f4f0fb;
+}
 body.space-dashboard .ws-side-nav button.active{
- color:#faf6ff;
- background:linear-gradient(100deg,rgba(136,99,192,.32),rgba(98,86,141,.18));
- border-color:rgba(187,154,236,.28);
- box-shadow:inset 3px 0 #ceb4f8;
+  color:#5d3b9e;background:#eee7fa;border-color:#e0d3f3;
+  box-shadow:inset 3px 0 #8a68ca;
 }
 body.space-dashboard .ws-side-nav button.active .ux-icon,
-body.space-dashboard .ws-side-nav button:hover .ux-icon{color:#e0cfff}
+body.space-dashboard .ws-side-nav button:hover .ux-icon{color:#7851bd}
+body.space-dashboard .ws-side-nav button.ux-nav-sub{color:#706583}
 body.space-dashboard .ws-side-nav button.ux-nav-sub.ux-active-sub{
- color:#f3eaff;background:rgba(147,114,195,.18);
+  color:#6947a1;background:#f0eafa;
 }
+body.space-dashboard .ux-sidebar-bottom{border-color:#eee8f5}
+body.space-dashboard .ux-sidebar-bottom .ws-home-link,
+body.space-dashboard .ws-sidebar-foot,
+body.space-dashboard .ux-sidebar-bottom .ws-sidebar-foot{color:#756b87}
+body.space-dashboard .ux-sidebar-bottom .ws-home-link:hover{
+  color:#6745a1;background:#f2ecfc;
+}
+body.space-dashboard .ws-header{
+  background:linear-gradient(180deg,rgba(247,247,251,.98) 78%,rgba(247,247,251,.93));
+  border-bottom:1px solid #e9e3f0;margin-bottom:21px;
+}
+body.space-dashboard .ws-header #ux-page-title{color:#29243b}
+body.space-dashboard .ux-page-caption,
+body.space-dashboard .ux-page-heading .dash-overline{color:#6b607e}
+body.space-dashboard .ws-account{color:#655d76}
+body.space-dashboard .ws-account button,
+body.space-dashboard .ux-search-trigger,
+body.space-dashboard .ux-link-secondary,
+body.space-dashboard .ws-mini-btn,
+body.space-dashboard .ws-home-link{
+  background:#fff;color:#594879;border:1px solid #ded7e8;
+  box-shadow:none;
+}
+body.space-dashboard .ws-account button:hover,
+body.space-dashboard .ux-search-trigger:hover,
+body.space-dashboard .ux-link-secondary:hover,
+body.space-dashboard .ws-mini-btn:hover{background:#f1eafa;color:#5f409a}
+body.space-dashboard .ws-avatar{background:#e9dcfa;color:#604197}
+body.space-dashboard .ws-overview-heading,
+body.space-dashboard .ux-overview-heading{margin-bottom:20px}
+body.space-dashboard .ux-overview-heading h2,
+body.space-dashboard .ws-panel-head h2,
+body.space-dashboard .ws-section-intro h2{color:#29243b}
+body.space-dashboard .ux-overview-heading p,
+body.space-dashboard .ws-panel-head p,
+body.space-dashboard .ws-section-intro p{color:#6d647e}
 body.space-dashboard .ws-card,
 body.space-dashboard .ws-empty,
 body.space-dashboard .ws-note,
@@ -51,94 +83,170 @@ body.space-dashboard .ux-overview-layout .ws-feature-panel,
 body.space-dashboard .ws-chart-card,
 body.space-dashboard .he-suite-card,
 body.space-dashboard .ws-dialog,
-body.space-dashboard .ws-companion-panel{
- background:linear-gradient(135deg,#2c293e,#252438);
- border-color:rgba(192,173,222,.24);
- box-shadow:0 7px 26px rgba(9,7,19,.12);
+body.space-dashboard .ws-companion-panel,
+body.space-dashboard .ux-attention-card{
+  background:#fff;border:1px solid #e7e0ef;
+  box-shadow:0 5px 22px rgba(64,47,99,.045);color:#29243b;
 }
 body.space-dashboard .ws-metric,
 body.space-dashboard .ws-metric:nth-child(3n + 1),
 body.space-dashboard .ws-metric:nth-child(3n + 2),
 body.space-dashboard .ws-metric:nth-child(3n + 3){
- background:linear-gradient(140deg,#302c44,#29263c);
- border-color:rgba(193,177,221,.21);box-shadow:none;
+  background:#fff;border:1px solid #e7e0ef;
+  box-shadow:0 4px 18px rgba(64,47,99,.035);
 }
+body.space-dashboard .ws-metric span,
+body.space-dashboard #overview-view>.ws-summary>.ws-metric span{color:#655b78}
+body.space-dashboard .ws-metric strong,
+body.space-dashboard #overview-view>.ws-summary>.ws-metric strong{color:#2c2440}
+body.space-dashboard .ws-metric small,
+body.space-dashboard #overview-view>.ws-summary>.ws-metric small{color:#746b82}
 body.space-dashboard .student-card,
 body.space-dashboard .student-card:nth-child(3n + 1),
 body.space-dashboard .student-card:nth-child(3n + 2),
 body.space-dashboard .student-card:nth-child(3n + 3){
- background:linear-gradient(135deg,#302d45,#29263b);
- border-color:rgba(192,173,219,.26);
+  background:#fff;border-color:#e5dded;box-shadow:0 4px 16px rgba(61,44,97,.04);
 }
 body.space-dashboard .ws-banner,
 body.space-dashboard .ws-plan-strip{
- background:linear-gradient(110deg,rgba(105,76,151,.37),rgba(74,64,112,.36));
- border-color:rgba(188,160,231,.35);
+  background:linear-gradient(110deg,#f1eafa,#f8f6fd);
+  border-color:#dfd3f0;
 }
 body.space-dashboard .ws-lesson-row,
 body.space-dashboard .ws-timeline-entry,
 body.space-dashboard .ws-saved-plan-row,
 body.space-dashboard .ws-assessment-entry,
 body.space-dashboard .ws-attendance-entry,
-body.space-dashboard .he-suite-row{
- background:rgba(34,31,49,.89);border-color:rgba(190,172,218,.23);
-}
+body.space-dashboard .he-suite-row,
 body.space-dashboard .ws-day-counts>div,
 body.space-dashboard .ws-companion-timer,
-body.space-dashboard .ws-companion-plan{
- background:#252237;border-color:rgba(187,169,220,.23);
+body.space-dashboard .ws-companion-plan,
+body.space-dashboard .he-suite-days,
+body.space-dashboard .he-suite-checklist{
+  background:#f8f6fc;border-color:#e5deed;
 }
-body.space-dashboard :is(input:not([type=checkbox]):not([type=radio]),textarea,select){
- background-color:#201e30;border-color:rgba(186,169,215,.44);
- color:#f5f1fa;color-scheme:dark;
+body.space-dashboard .ux-attention-row{background:#fff;color:#403651;border-color:#eee7f3}
+body.space-dashboard .ux-attention-row:hover{background:#f7f2fd}
+body.space-dashboard .ux-attention-text strong,
+body.space-dashboard .ux-attention-head h3,
+body.space-dashboard .ws-feature-title h3,
+body.space-dashboard .ws-student-workflow h3,
+body.space-dashboard .ws-extra-toolbar h3,
+body.space-dashboard .ws-lesson-row strong,
+body.space-dashboard .ws-timeline-entry>strong,
+body.space-dashboard .he-suite-row strong,
+body.space-dashboard .ws-attendance-summary h3,
+body.space-dashboard .ws-plan-strip strong{color:#302741}
+body.space-dashboard .ux-attention-text small,
+body.space-dashboard .ux-attention-head p,
+body.space-dashboard .ws-feature-title p,
+body.space-dashboard .ws-student-workflow p,
+body.space-dashboard .ws-extra-toolbar p,
+body.space-dashboard .ws-lesson-row small,
+body.space-dashboard .ws-timeline-entry>p,
+body.space-dashboard .ws-attendance-entry small,
+body.space-dashboard .ws-plan-strip span,
+body.space-dashboard .he-suite-note,
+body.space-dashboard .he-suite-row p,
+body.space-dashboard .he-suite-row small{color:#6d627f}
+body.space-dashboard .ws-timeline-entry time,
+body.space-dashboard .ws-assessment-entry time,
+body.space-dashboard .ws-lesson-row time,
+body.space-dashboard .dash-overline{color:#7655af}
+body.space-dashboard .ux-attention-symbol{background:#f0e9fa;color:#7b57b7}
+body.space-dashboard .ux-attention-row b{color:#6f4ca9}
+body.space-dashboard :is(input:not([type=checkbox]):not([type=radio]),textarea,select),
+body.space-dashboard .ws-form-grid input,
+body.space-dashboard .ws-form-grid select,
+body.space-dashboard .ws-skill-form input,
+body.space-dashboard .ws-skill-form select,
+body.space-dashboard .ws-editor-label select,
+body.space-dashboard .ws-editor-label textarea,
+body.space-dashboard .ws-companion-label select,
+body.space-dashboard .ws-companion-label textarea,
+body.space-dashboard .ws-extra-controls select,
+body.space-dashboard .he-suite-booking-student select,
+body.space-dashboard .ws-event-move-row input{
+  background:#fff;color:#2a243a;border:1px solid #d7cfe3;
+  color-scheme:light;
 }
-body.space-dashboard :is(input,textarea,select)::placeholder{color:#aaa2bd}
-body.space-dashboard :is(button,a,input,textarea,select):focus-visible{
- outline:3px solid #d1baff;outline-offset:2px;
-}
+body.space-dashboard :is(input,textarea,select)::placeholder{color:#837a95}
+body.space-dashboard :is(.field label,.ws-form-grid label,.ws-skill-form label,.ws-editor-label,.ws-companion-label,.he-suite-booking-student){color:#494055}
 body.space-dashboard :is(.dash-primary,.primary-action,.ux-create-button){
- background:linear-gradient(110deg,#8060bd,#7052ab);
- border-color:#ad91e2;color:#fff;
- box-shadow:0 6px 19px rgba(35,19,65,.18);
+  background:#7958bb;border:1px solid #7958bb;color:#fff;
+  box-shadow:0 5px 14px rgba(91,63,148,.12);
 }
 body.space-dashboard :is(.dash-primary,.primary-action,.ux-create-button):hover{
- background:linear-gradient(110deg,#9370d2,#7f5cbc);
+  background:#65469e;border-color:#65469e;color:#fff;
 }
-body.space-dashboard :is(.ux-page-caption,.ws-metric small,.ws-feature-title p,.ws-student-workflow p,.ws-extra-toolbar p,.he-suite-note){color:#c7bed8}
-body.space-dashboard :is(.dash-overline,.ws-lesson-row time,.ws-assessment-entry time){color:#d0bdf5}
-body.space-dashboard .ws-timeline-entry:before{background:#b397e7}
-body.space-dashboard .ws-chart-line{stroke:#b89ce9}
-body.space-dashboard .ws-chart-dot{fill:#deccff;stroke:#8060b7}
-body.space-dashboard .ws-skill-score i{background:linear-gradient(90deg,#8769c2,#c2a7ef)}
-body.space-dashboard .ws-chart-axis{fill:#cdc5df}
-/* Overview: direct signposting instead of more nested navigation */
+body.space-dashboard .ws-chart-line{stroke:#8b69cc}
+body.space-dashboard .ws-chart-dot{fill:#bda7ec;stroke:#7856b5}
+body.space-dashboard .ws-skill-score i{background:linear-gradient(90deg,#8060bc,#bba0eb)}
+body.space-dashboard .ws-chart-axis{fill:#645a77}
+body.space-dashboard .ws-chart-grid-line{stroke:#e9e2ef}
+body.space-dashboard .ws-progress-summary,
+body.space-dashboard .ws-chart-data caption,
+body.space-dashboard .ws-chart-data th,
+body.space-dashboard .ws-chart-data td{color:#4b415c}
+body.space-dashboard .ws-side-nav button,
+body.space-dashboard button{transition:background-color .15s,color .15s,border-color .15s}
+body.space-dashboard :is(button,a,input,textarea,select):focus-visible{
+  outline:3px solid #8764c6;outline-offset:2px;
+}
+/* Home hierarchy: data first, task shortcuts second, schedule and attention next. */
+body.space-dashboard .ws-summary{margin:0 0 20px;gap:13px}
 body.space-dashboard .ux-quickstart{
- margin:0 0 22px;padding:19px 20px 20px;
- border:1px solid rgba(192,173,223,.25);
- border-radius:17px;background:linear-gradient(125deg,#302a43,#262337);
+  margin:0 0 24px;padding:20px 22px;background:#fff;
+  border:1px solid #e7e0ef;border-radius:18px;
+  box-shadow:0 5px 20px rgba(64,47,99,.035);
 }
-body.space-dashboard .ux-quickstart h3{margin:0;color:#f7f2ff;font:700 18px/1.3 'Space Grotesk',sans-serif}
-body.space-dashboard .ux-quickstart p{margin:5px 0 14px;color:#c6bbd7;font-size:12px;line-height:1.6}
-body.space-dashboard .ux-quickstart-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+body.space-dashboard .ux-quickstart h3{
+  color:#2d2540;font:700 18px/1.35 'Space Grotesk',sans-serif;margin:0;
+}
+body.space-dashboard .ux-quickstart p{color:#70667f;font-size:12px;margin:5px 0 16px}
+body.space-dashboard .ux-quickstart-grid{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;
+}
 body.space-dashboard .ux-quickstart-grid button{
- display:flex;flex-direction:column;align-items:flex-start;gap:5px;
- min-height:102px;padding:15px;text-align:left;cursor:pointer;
- color:#f7f2fd;border:1px solid rgba(190,165,229,.25);border-radius:12px;
- background:rgba(27,24,42,.65);
- transition:background .16s,border-color .16s,transform .16s;
+  text-align:left;display:flex;flex-direction:column;align-items:flex-start;gap:7px;
+  min-height:100px;padding:15px 16px;border-radius:14px;
+  background:#f7f3fd;color:#392a52;border:1px solid #e9def8;
+  box-shadow:none;cursor:pointer;
 }
 body.space-dashboard .ux-quickstart-grid button:hover{
- background:rgba(112,84,158,.25);border-color:rgba(207,178,255,.58);
- transform:translateY(-1px);
+  background:#ece2fb;border-color:#b79ada;color:#4d307f;
 }
-body.space-dashboard .ux-quickstart-grid strong{font-size:13px;line-height:1.35}
-body.space-dashboard .ux-quickstart-grid span{font-size:11px;color:#c0b6d3;line-height:1.5}
-body.space-dashboard .ws-side-nav .ux-nav-heading{margin-bottom:2px}
-@media(max-width:1080px){body.space-dashboard .ux-quickstart-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+body.space-dashboard .ux-quickstart-grid strong{color:#52347d;font-size:14px}
+body.space-dashboard .ux-quickstart-grid span{color:#716480;font-size:12px;line-height:1.45}
+body.space-dashboard .ws-section-intro{margin-bottom:18px}
+body.space-dashboard .ux-overview-layout{gap:17px}
+body.space-dashboard .ws-feature-panel{border-radius:18px}
+body.space-dashboard .ws-plan-strip a{color:#6f4ea6;border-color:#cbb7e9}
+body.space-dashboard .ws-plan-strip a:hover{background:#eaddfa;color:#51307d}
+body.space-dashboard .ws-timeline-kind{background:#eee5fa;color:#64439a;border-color:#decaf4}
+body.space-dashboard .ws-companion-panel{box-shadow:0 24px 65px rgba(51,34,87,.18)}
+body.space-dashboard .ws-companion-heading h2,
+body.space-dashboard .ws-companion-timer>strong{color:#302640}
+body.space-dashboard .ws-companion-info,
+body.space-dashboard .ws-companion-label,
+body.space-dashboard .ws-companion-plan summary{color:#625473}
+body.space-dashboard .ws-calendar-days .ws-day{color:#3d3350}
+body.space-dashboard .ws-calendar-agenda .ws-event{color:#3d3350}
+body.space-dashboard .he-suite-check span,
+body.space-dashboard .he-suite-days label,
+body.space-dashboard .he-suite-checklist label,
+body.space-dashboard .he-suite-days legend,
+body.space-dashboard .he-suite-checklist legend{color:#50425f}
+body.space-dashboard .he-suite-tabs button{color:#5c4e70}
+body.space-dashboard .he-suite-tabs button.active{color:#63419e;background:#eee6fa}
+@media(max-width:1080px){
+ body.space-dashboard .ux-quickstart-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
 @media(max-width:520px){
- body.space-dashboard .ux-quickstart{padding:15px 13px}
+ body.space-dashboard .ws-main{padding:16px 13px 40px}
+ body.space-dashboard .ux-quickstart{padding:16px}
  body.space-dashboard .ux-quickstart-grid{gap:8px}
- body.space-dashboard .ux-quickstart-grid button{padding:12px;min-height:108px}
+ body.space-dashboard .ux-quickstart-grid button{padding:12px;min-height:105px}
 }
 @media(prefers-reduced-motion:reduce){
  body.space-dashboard *,body.space-dashboard *::before,body.space-dashboard *::after{
