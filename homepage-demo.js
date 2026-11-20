@@ -94,7 +94,7 @@
     const chosen=state.lessons.filter(l=>l.day===state.day).sort((a,b)=>a.time.localeCompare(b.time));
     return [
       title('YOUR SCHEDULE','Teaching calendar','See upcoming lessons and appointments in one place.','Sample calendar'),
-      '<div class="he-demo-calendar-identity"><span class="he-demo-connection-light"></span><div><small>SAMPLE CALENDAR</small><strong>Fictional tutoring schedule</strong></div><span class="he-demo-calendar-identity-status">Demo only · Not connected</span></div>',
+      '<div class="he-demo-calendar-identity"><span class="he-demo-connection-light"></span><div><small>SAMPLE CALENDAR</small><strong>Illustrative class schedule</strong></div><span class="he-demo-calendar-identity-status">Demo only · Not connected</span></div>',
       '<div class="he-demo-scheduling-actions"><button type="button" class="he-demo-primary" data-demo-add-event="true">+ Schedule appointment</button><small>New lessons are added only to this sample workspace.</small></div>',
       state.calendarForm?'<form class="he-demo-form he-demo-inline-form" data-demo-form="event"><label>Student<select name="student" required>'+studentOptions(state.selected)+'</select></label><label>Day<select name="day">'+days.map((d,i)=>'<option value="'+i+'" '+(i===state.day?'selected':'')+'>'+d+'</option>').join('')+'</select></label><label>Time<input name="time" type="time" value="16:00" required></label><label class="he-demo-field-wide">Lesson topic<input name="title" value="Conversation practice" maxlength="65" required></label><div class="he-demo-form-actions"><button type="submit">Add to demo</button><button type="button" data-demo-cancel="true">Cancel</button></div></form>':'',
       '<div class="he-demo-calendar-card"><div class="he-demo-calendar-head"><div><strong>Sample teaching week</strong><p>Choose a day to view its appointments</p></div><button type="button" class="he-demo-button" data-demo-day="2">Today (sample)</button></div>',
@@ -160,7 +160,7 @@
         levels.map((label,i)=>'<div class="he-mini-bar"><span>'+label+'</span><i><b style="width:'+Math.round(counts[i]/max*100)+'%"></b></i><strong>'+counts[i]+'</strong></div>').join(''),
         '<p class="he-demo-muted">Based on fictional CEFR levels recorded in the sample profiles, not lesson outcomes.</p>',
       '</section>',
-      '<section class="he-demo-feature-panel"><div class="he-demo-feature-title"><div><h4>Skill development history</h4><p>Compare sample tutor-recorded assessments per student.</p></div>'+button('View students','students')+'</div>',
+      '<section class="he-demo-feature-panel"><div class="he-demo-feature-title"><div><h4>Skill development history</h4><p>Compare sample educator-recorded assessments per student.</p></div>'+button('View students','students')+'</div>',
         '<div class="he-demo-toolbar"><label class="he-demo-field he-demo-progress-select">Student<select data-demo-progress-student>'+studentOptions(s.id)+'</select></label><button class="he-demo-primary" type="button" data-demo-progress-step="true">+ Sample check-in</button></div>',
         '<div class="he-demo-skill-panel"><div class="he-mini-section-title"><strong>'+clean(s.name)+' · Recorded skills</strong><span>Scale 1–5</span></div>',
         labels.map((label,i)=>'<div class="he-demo-skill"><span>'+label+'</span><div><i style="width:'+Math.round(s.skills[i]/5*100)+'%"></i></div><strong>'+s.skills[i].toFixed(1)+'</strong></div>').join(''),
@@ -219,7 +219,7 @@
       '</aside>',
       '<div class="he-demo-main">',
         '<header class="he-demo-workspace-header"><div><span class="he-mini-overline">YOUR TEACHING SPACE</span><h2>My workspace<span>.</span></h2></div>',
-          '<div class="he-demo-account"><button type="button" class="he-demo-utility-btn" data-demo-tour-start="true">▶ Guided tour</button><button type="button" class="he-demo-utility-btn" data-demo-companion-open="true">◷ Lesson companion</button><span class="he-demo-account-label">Demo tutor</span><span class="he-mini-account">T</span><button type="button" class="he-demo-reset" data-demo-reset="true" title="Restore the sample data">↻ Reset</button></div>',
+          '<div class="he-demo-account"><button type="button" class="he-demo-utility-btn" data-demo-tour-start="true">▶ Guided tour</button><button type="button" class="he-demo-utility-btn" data-demo-companion-open="true">◷ Lesson companion</button><span class="he-demo-account-label">Sample educator</span><span class="he-mini-account">T</span><button type="button" class="he-demo-reset" data-demo-reset="true" title="Restore the sample data">↻ Reset</button></div>',
         '</header>',
         '<nav class="he-demo-mobile-tabs" aria-label="Sample dashboard mobile tabs">',
           sections.map(s=>'<button type="button" class="he-demo-mobile-tab" data-demo-go="'+s.id+'" aria-pressed="false"><span aria-hidden="true">'+s.icon+'</span>'+s.label+'</button>').join(''),
