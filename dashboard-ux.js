@@ -9,8 +9,7 @@ const pages={
  calendar:{title:"Calendar",eyebrow:"WORKSPACE / SCHEDULE",caption:"Your appointments and availability."},
  students:{title:"Students",eyebrow:"WORKSPACE / LEARNERS",caption:"Profiles, goals and lesson notes."},
  progress:{title:"Progress",eyebrow:"WORKSPACE / INSIGHTS",caption:"Student development and CEFR assessments."},
- tools:{title:"Tutor tools",eyebrow:"MANAGE / OPERATIONS",caption:"Bookings, homework, finances and teaching resources."},
- leaderboard:{title:"Leaderboard",eyebrow:"COMMUNITY / REWARDS",caption:"Recognise tutoring activity and milestones."},
+ tools:{title:"Record tools",eyebrow:"DATABASE / OPERATIONS",caption:"Schedules, assignments, reports and reusable records."},
  atlas:{title:"Atlas AI",eyebrow:"EXPLORE / COMING SOON",caption:"Explore planned teaching assistance."}
 };
 const commands=[
@@ -22,7 +21,6 @@ const commands=[
  {title:"Homework & preparation",desc:"Assignments and lesson checklists",tool:"students",symbol:"▤",terms:"student care"},
  {title:"Earnings & reports",desc:"Hours, income and student reports",tool:"business",symbol:"◫",terms:"income money weekly"},
  {title:"Teaching templates",desc:"Reusable lesson material and attendance",tool:"resources",symbol:"✧",terms:"resources attendance cancellation"},
- {title:"Leaderboard",desc:"Tutor community rankings",page:"leaderboard",symbol:"★",terms:"rewards achievements"},
  {title:"Atlas AI",desc:"Planned teaching features",page:"atlas",symbol:"✦",terms:"artificial intelligence"},
  {title:"New student",desc:"Create a learner profile",action:"add-student",symbol:"+",terms:"add student learner create"},
  {title:"Schedule lesson",desc:"Open the Google Calendar scheduler",action:"schedule",symbol:"+",terms:"new lesson book appointment"},
@@ -61,7 +59,7 @@ function action(name){
  case "schedule":schedule();break;
  case "add-student":addStudent();break;
  case "start-lesson":$("ws-companion-open")?.click();break;
- case "bookings":tools("schedule");break;
+ case "notes":page("students");break;
  case "homework":tools("students");break;
  case "reports":tools("business");break;
  case "unassessed":
@@ -118,8 +116,8 @@ function updateAttention(){
   students.filter(s=>s.cefr_level==="UNASSESSED").length:"—";
  const ready=Boolean(suite.userId&&suite.loaded);
  const hasError=prefix=>suite.errors.some(e=>e.startsWith(prefix+":"));
- $("ux-attention-bookings").textContent=ready&&!hasError("bookings")?
-  suite.bookings.filter(b=>b.status==="pending").length:"—";
+ $("ux-attention-notes").textContent=ready&&!hasError("notes")?
+  suite.notes.length:"—";
  $("ux-attention-homework").textContent=ready&&!hasError("homework")?
   suite.homework.filter(h=>h.status==="assigned"&&h.due_on&&h.due_on<localDate()).length:"—";
 }
