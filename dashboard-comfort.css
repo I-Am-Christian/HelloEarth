@@ -1,0 +1,133 @@
+/* HelloEarth — calm workspace palette (2026-11-20).
+   Dashboard only. Keep the marketing site's space identity unchanged.
+   Muted slate, soft teal and lavender accents lower visual noise on long sessions. */
+body.space-dashboard{
+  color-scheme:dark;
+  --bg:#111c27;--surface:#1b2a35;--surface2:#233542;
+  --text:#f0f3ef;--muted:#b3c5c8;--line:rgba(171,203,200,.20);
+  --violet:#c0b5e7;--purple:#8b88ba;--glow:rgba(120,174,168,.18);
+  --ux-bg:#111c27;--ux-panel:#1c2b36;--ux-panel-soft:#243641;
+  --ux-line:rgba(171,203,200,.18);--ux-hover:rgba(128,183,171,.13);
+  --ux-text:#f0f3ef;--ux-muted:#b7c9cb;--ux-purple:#c3b7e8;
+  background:#111c27;
+  accent-color:#8bc5ae;
+}
+body.space-dashboard .workspace{
+  background-color:#111c27;
+  background-image:radial-gradient(ellipse at 90% 3%,rgba(79,139,139,.10),transparent 60%),
+    radial-gradient(ellipse at 8% 88%,rgba(125,112,159,.07),transparent 65%);
+  background-attachment:scroll;
+}
+body.space-dashboard .ws-sidebar{
+  background:linear-gradient(180deg,#1a2935,#15232e 90%);
+  border-right-color:rgba(173,207,198,.16);
+}
+body.space-dashboard .ws-header{
+  background:linear-gradient(180deg,rgba(17,28,39,.98) 72%,rgba(17,28,39,.93));
+  border-bottom-color:rgba(175,201,195,.17);
+}
+body.space-dashboard .ws-side-nav button{color:#c0d0d3}
+body.space-dashboard .ws-side-nav button .ux-icon{color:#a6bbc4}
+body.space-dashboard .ws-side-nav button:hover{
+  background:rgba(128,183,171,.14);color:#f3f7f4;
+}
+body.space-dashboard .ws-side-nav button.active{
+  color:#f7faf7;
+  background:linear-gradient(105deg,rgba(92,151,139,.28),rgba(105,118,153,.16));
+  border-color:rgba(155,201,183,.29);
+  box-shadow:inset 3px 0 #99d1b9;
+}
+body.space-dashboard .ws-side-nav button.active .ux-icon,
+body.space-dashboard .ws-side-nav button:hover .ux-icon{color:#b2e3d0}
+body.space-dashboard .ws-side-nav button.ux-nav-sub.ux-active-sub{
+  background:rgba(112,170,155,.16);color:#e4f4ed;
+}
+body.space-dashboard .ux-nav-heading{color:#a6bbbf}
+body.space-dashboard .ws-sidebar .portal-brand{color:#f5f5f0!important}
+body.space-dashboard .brand-dot{color:#9bd4ba}
+body.space-dashboard .ws-card,
+body.space-dashboard .ws-empty,
+body.space-dashboard .ws-note,
+body.space-dashboard .ws-feature-panel,
+body.space-dashboard .ws-student-workflow,
+body.space-dashboard .ux-overview-layout .ws-feature-panel,
+body.space-dashboard .ws-chart-card,
+body.space-dashboard .he-suite-card,
+body.space-dashboard .ws-dialog,
+body.space-dashboard .ws-companion-panel{
+  background:linear-gradient(135deg,#20313b,#1b2b37);
+  border-color:rgba(163,199,189,.25);
+  box-shadow:0 8px 26px rgba(5,13,21,.11);
+}
+body.space-dashboard .ws-metric,
+body.space-dashboard .ws-metric:nth-child(3n + 1),
+body.space-dashboard .ws-metric:nth-child(3n + 2),
+body.space-dashboard .ws-metric:nth-child(3n + 3){
+  background:linear-gradient(140deg,#233741,#1c2e39);
+  border-color:rgba(158,196,185,.23);box-shadow:none;
+}
+body.space-dashboard .student-card,
+body.space-dashboard .student-card:nth-child(3n + 1),
+body.space-dashboard .student-card:nth-child(3n + 2),
+body.space-dashboard .student-card:nth-child(3n + 3){
+  background:linear-gradient(140deg,#263a44,#1f303d);
+  border-color:rgba(168,199,188,.25);
+}
+body.space-dashboard .ws-banner,
+body.space-dashboard .ws-plan-strip{
+  background:linear-gradient(110deg,rgba(65,109,106,.42),rgba(82,91,124,.29));
+  border-color:rgba(155,198,179,.33);
+}
+body.space-dashboard .ws-lesson-row,
+body.space-dashboard .ws-timeline-entry,
+body.space-dashboard .ws-saved-plan-row,
+body.space-dashboard .ws-assessment-entry,
+body.space-dashboard .ws-attendance-entry,
+body.space-dashboard .he-suite-row{
+  background:rgba(26,44,54,.85);
+  border-color:rgba(163,198,191,.24);
+}
+body.space-dashboard .ws-day-counts>div,
+body.space-dashboard .ws-companion-timer,
+body.space-dashboard .ws-companion-plan{
+  background:#1b2d38;border-color:rgba(163,198,191,.24);
+}
+body.space-dashboard :is(input:not([type=checkbox]):not([type=radio]),textarea,select){
+  background-color:#172832;
+  border-color:rgba(162,194,186,.39);
+  color:#f0f3ef;
+  color-scheme:dark;
+}
+body.space-dashboard :is(input,textarea,select)::placeholder{color:#acbec2}
+body.space-dashboard :is(button,a,input,textarea,select):focus-visible{
+  outline:3px solid #a1d8c0;outline-offset:2px;
+}
+body.space-dashboard :is(.dash-primary,.primary-action,.ux-create-button){
+  background:linear-gradient(115deg,#477e73,#396b70);
+  border-color:#83baac;color:#fff;
+  box-shadow:0 5px 17px rgba(11,32,30,.18);
+}
+body.space-dashboard :is(.dash-primary,.primary-action,.ux-create-button):hover{
+  background:linear-gradient(115deg,#568d80,#447f83);
+}
+body.space-dashboard .ws-header #ux-page-title{color:#f3f5f0}
+body.space-dashboard :is(.ux-page-caption,.ws-metric small,.ws-feature-title p,.ws-student-workflow p,.ws-extra-toolbar p,.he-suite-note){
+  color:#b8cbd0;
+}
+body.space-dashboard :is(.dash-overline,.ws-lesson-row time,.ws-assessment-entry time){color:#b9d9cc}
+body.space-dashboard .ws-timeline-entry:before{background:#88cbb3}
+body.space-dashboard .ws-chart-line{stroke:#93cdb8}
+body.space-dashboard .ws-chart-dot{fill:#b8e2d3;stroke:#426e67}
+body.space-dashboard .ws-skill-score i{background:linear-gradient(90deg,#4e8885,#9bd5bc)}
+body.space-dashboard .ws-chart-axis{fill:#c1d3d6}
+body.space-dashboard .ws-side-nav button,
+body.space-dashboard button{transition:background-color .15s ease,color .15s ease,border-color .15s ease}
+@media(prefers-reduced-motion:reduce){
+ body.space-dashboard *,body.space-dashboard *::before,body.space-dashboard *::after{
+  transition:none!important;animation-duration:.01ms!important;
+ }
+}
+@media print{
+ body.space-dashboard #progress-print,
+ body.space-dashboard #progress-print *{color:#16172a!important;background:transparent!important}
+}
