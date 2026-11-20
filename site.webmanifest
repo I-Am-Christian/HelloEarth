@@ -1,7 +1,7 @@
 {
-  "name": "HelloEarth Tutor Workspace",
+  "name": "HelloEarth Student Database",
   "short_name": "HelloEarth",
-  "description": "A private, space-themed workspace for tutors: students, lesson notes, progress and calendar.",
+  "description": "A private student database for educators, with school-wide management planned for future releases.",
   "id": "/dashboard.html",
   "start_url": "/dashboard.html",
   "scope": "/",
