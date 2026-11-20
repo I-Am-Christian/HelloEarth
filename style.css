@@ -3257,3 +3257,22 @@ body { -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
  #features .essential-card{transition:none!important}
  #features .essential-card:hover{transform:none}
 }
+
+/* School database positioning · quiet, responsive cards aligned to site palette */
+.he-audiences{padding:clamp(58px,7vw,100px) 0;background:
+ radial-gradient(ellipse 62% 64% at 8% 15%,rgba(75,94,113,.18),transparent),
+ linear-gradient(145deg,#1c2130,#191c30 68%,#25253a)}
+.he-audiences-heading{max-width:760px;margin:0 auto 33px;text-align:center}
+.he-audiences-heading h2{font:700 clamp(30px,4vw,47px)/1.15 'Space Grotesk',system-ui,sans-serif;color:#f1effb;letter-spacing:-1px;margin:11px 0 16px}
+.he-audiences-heading p{max-width:62ch;margin:auto;line-height:1.8;font-size:15px;color:#bdc1d0}
+.he-audience-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.he-audience-card{position:relative;display:flex;flex-direction:column;align-items:flex-start;min-height:226px;gap:10px;padding:25px;
+ border:1px solid rgba(182,170,207,.32);background:linear-gradient(135deg,rgba(64,62,86,.58),rgba(35,45,66,.68));border-radius:18px}
+.he-audience-icon{width:43px;height:43px;display:grid;place-items:center;font-size:24px;background:rgba(152,132,191,.19);color:#d2b6f1;border-radius:12px}
+.he-audience-status{position:absolute;right:20px;top:26px;font:700 10px 'DM Sans',sans-serif;letter-spacing:.2px;color:#b6e0c9;border:1px solid rgba(135,186,160,.36);border-radius:99px;padding:6px 10px}
+.he-audience-status.is-planned{color:#c6c1d8;border-color:rgba(168,151,192,.32)}
+.he-audience-card h3{font:700 21px 'Space Grotesk',system-ui,sans-serif;margin:8px 0 0;color:#f8f4ff}
+.he-audience-card p{margin:0;color:#bbc1d3;font-size:13px;line-height:1.7}
+.he-audiences-note{max-width:92ch;text-align:center;margin:24px auto 0;color:#aeb9ca;font-size:12px;line-height:1.8}
+@media(max-width:880px){.he-audience-grid{grid-template-columns:1fr 1fr}.he-audience-card:last-child{grid-column:1/-1;min-height:170px}}
+@media(max-width:580px){.he-audiences{padding:55px 0}.he-audience-grid{grid-template-columns:1fr}.he-audience-card:last-child{grid-column:auto;min-height:210px}.he-audience-card{min-height:204px}.he-audiences-heading p{font-size:13px}}
