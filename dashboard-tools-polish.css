@@ -111,3 +111,28 @@ body.space-dashboard #tools-view :is(button,select,input,textarea):focus-visible
 @media(prefers-reduced-motion:reduce){
  body.space-dashboard #tools-view *{transition:none!important}
 }
+
+/* Full-bleed dashboard header: background and divider reach the workspace edges.
+   Keep the title, search, and account controls inset for readability. */
+@media(min-width:951px){
+ body.space-dashboard .ws-main{
+   --he-main-gutter:clamp(20px,2.5vw,39px);
+   max-width:none;
+   padding-left:var(--he-main-gutter);
+   padding-right:var(--he-main-gutter);
+ }
+ body.space-dashboard .ws-main > .ws-header{
+   margin-left:calc(-1 * var(--he-main-gutter));
+   margin-right:calc(-1 * var(--he-main-gutter));
+   padding-left:var(--he-main-gutter);
+   padding-right:var(--he-main-gutter);
+   width:calc(100% + (2 * var(--he-main-gutter)));
+   box-sizing:border-box;
+ }
+}
+@media(max-width:950px){
+ body.space-dashboard .ws-main > .ws-header{
+   max-width:100%;
+   box-sizing:border-box;
+ }
+}
