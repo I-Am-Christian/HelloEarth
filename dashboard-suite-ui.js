@@ -5,7 +5,7 @@ const btn=(id,label,cls="ws-mini-btn")=>'<button type="button" id="'+id+'" class
 const dayOptions=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"].map((d,i)=>'<option value="'+i+'" '+(i===1?'selected':'')+'>'+d+'</option>').join("");
 export function renderSuite(){
  document.getElementById("he-suite-schedule").innerHTML=[
-  card("Personal booking page","Make a shareable booking-request link. Requests require approval.",
+  card("Public booking page (optional)","Manage existing personal request links; not part of the core student database.",
    '<form id="he-suite-settings" class="he-suite-grid">'+
     '<label>Booking URL slug<input name="public_slug" maxlength="32" placeholder="your-tutor-name" pattern="[a-z0-9][a-z0-9-]{2,31}"></label>'+
     '<label>Business / tutor display name<input name="display_label" maxlength="85" required value="Independent tutor"></label>'+
@@ -20,7 +20,7 @@ export function renderSuite(){
     '<label class="he-suite-check"><input type="checkbox" name="booking_enabled"><span>Enable public booking requests (off by default)</span></label>'+
     '<div class="he-suite-actions"><button type="submit" class="dash-primary">Save settings</button>'+btn("he-suite-copy-booking","Copy link")+'<a id="he-suite-booking-preview" href="booking.html" target="_blank" rel="noopener noreferrer" class="ws-mini-btn">Open booking page</a></div>'+
     '<p class="he-suite-note">The public page accepts requests, not confirmed lessons. Google Calendar events are not read or created by public visitors. Approve requests only after checking your real schedule.</p>'+
-   '</form>',true),
+   '</form>',false),
   card("Booking requests","Review, accept or decline new requests.",'<div id="he-suite-bookings" class="he-suite-list">Loading requests…</div>',true),
   card("Recurring student lessons","Save weekly patterns and send a chosen pattern to Google Calendar.",
    '<form id="he-suite-recurring" class="he-suite-grid">'+studentSelect()+
@@ -69,7 +69,15 @@ export function renderSuite(){
    '<div id="he-suite-portal-result" class="he-suite-result"></div>',false)
  ].join("");
  document.getElementById("he-suite-business").innerHTML=[
-  card("Teaching hours & earnings","Track completed lessons, payment status, cancellations and no-shows.",
+  card("Student progress reports","Export saved student assessments and notes in a printable report or CSV.",
+   '<div class="he-suite-actions"><label>Student<select id="he-suite-report-student" data-suite-students></select></label>'+
+   btn("he-suite-report-print","Print / Save PDF","dash-primary")+btn("he-suite-report-csv","Download data CSV")+'</div>'+
+   '<p class="he-suite-note">Review the report before sharing. Skill scores are tutor observations, not automatic CEFR certifications.</p>',true),
+  card("Weekly activity summary","Review saved student-support and lesson activity.",
+   '<div class="he-suite-actions"><label>Week including<input type="date" id="he-suite-week-date"></label>'+
+   btn("he-suite-review","Refresh review")+btn("he-suite-review-export","Download summary")+'</div><div id="he-suite-week-summary" class="he-suite-metrics"></div>'+
+   '<p class="he-suite-note">Only recorded lessons are counted as completed—not just calendar appointments.</p>',false),
+  card("Optional lesson ledger","Keep optional historic lesson, attendance and payment records.",
    '<form id="he-suite-ledger-form" class="he-suite-grid">'+studentSelect("student_id",false)+
    '<label>Lesson date<input name="lesson_date" type="date" required></label>'+
    '<label>Duration (minutes)<input type="number" min="5" max="480" name="duration_minutes" value="50" required></label>'+
@@ -80,15 +88,7 @@ export function renderSuite(){
    '<label class="he-suite-wide">Note<input name="note" maxlength="600" placeholder="Optional"></label>'+
    '<div class="he-suite-actions"><button type="submit" class="dash-primary">Record lesson / payment</button>'+btn("he-suite-ledger-export","Export ledger CSV")+'</div></form>'+
    '<div id="he-suite-earnings" class="he-suite-metrics"></div><div id="he-suite-ledger-list" class="he-suite-list"></div>'+
-   '<p class="he-suite-note">Amounts remain separated by currency; no exchange conversion is assumed. Payments are records, not processed transactions.</p>',true),
-  card("Weekly tutor review","Review actual teaching records and upcoming tasks.",
-   '<div class="he-suite-actions"><label>Week including<input type="date" id="he-suite-week-date"></label>'+
-   btn("he-suite-review","Refresh review")+btn("he-suite-review-export","Download summary")+'</div><div id="he-suite-week-summary" class="he-suite-metrics"></div>'+
-   '<p class="he-suite-note">Only recorded lessons are counted as completed—not just calendar appointments.</p>',false),
-  card("Student progress reports","Export real tutor observations in a printable PDF-ready report or CSV.",
-   '<div class="he-suite-actions"><label>Student<select id="he-suite-report-student" data-suite-students></select></label>'+
-   btn("he-suite-report-print","Print / Save PDF","dash-primary")+btn("he-suite-report-csv","Download data CSV")+'</div>'+
-   '<p class="he-suite-note">Review the report before sharing. Skill scores are tutor observations, not automatic CEFR certifications.</p>',false)
+   '<p class="he-suite-note">Amounts remain separated by currency; no exchange conversion is assumed. Payments are records, not processed transactions.</p>',false)
  ].join("");
  document.getElementById("he-suite-resources").innerHTML=[
   card("Teaching templates library","Save and reuse lesson formats without relying on Atlas AI.",
