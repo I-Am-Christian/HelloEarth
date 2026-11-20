@@ -1,4 +1,4 @@
-import {renderSuite} from "./dashboard-suite-ui.js?v=20261118-suite1";
+import {renderSuite} from "./dashboard-suite-ui.js?v=20261120-database1";
 import {state,W,refresh,syncStudents,render,message} from "./dashboard-suite-shared.js";
 import {setupSchedule} from "./dashboard-suite-schedule.js";
 import {setupStudents} from "./dashboard-suite-students.js";
