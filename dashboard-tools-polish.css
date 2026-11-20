@@ -1,0 +1,113 @@
+/* Hello Earth — centered Record Tools layout.
+   Scoped to #tools-view so the purple dashboard theme and other pages stay untouched. */
+body.space-dashboard #tools-view{
+  width:100%;
+  max-width:1160px;
+  min-width:0;
+  margin-inline:auto;
+  padding-inline:clamp(4px,1.2vw,18px);
+  padding-bottom:50px;
+  box-sizing:border-box;
+}
+body.space-dashboard #tools-view,
+body.space-dashboard #tools-view *{box-sizing:border-box}
+body.space-dashboard #tools-view .ws-section-intro{
+  width:100%;max-width:none;
+  padding:clamp(18px,2.2vw,28px) clamp(20px,2.7vw,32px);
+  margin:0 0 20px;
+  border:1px solid rgba(164,139,217,.28);
+  border-radius:20px;
+  background:linear-gradient(125deg,rgba(45,37,80,.65),rgba(22,32,61,.56));
+  box-shadow:0 10px 35px rgba(3,6,25,.13);
+}
+body.space-dashboard #tools-view .ws-section-intro h2{
+  font-size:clamp(26px,2.8vw,38px);
+  line-height:1.17;
+  letter-spacing:-.025em;
+  margin:8px 0 9px;
+}
+body.space-dashboard #tools-view .ws-section-intro p{
+  max-width:68ch;line-height:1.65;margin:0;
+}
+body.space-dashboard #tools-view .he-suite-tabs{
+  width:100%;max-width:none;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+  padding:7px;
+  margin:0 0 20px;
+  border-radius:17px;
+  background:rgba(25,28,52,.83);
+  border:1px solid rgba(165,145,211,.35);
+}
+body.space-dashboard #tools-view .he-suite-tabs button{
+  min-width:0;max-width:100%;width:100%;
+  display:flex;align-items:center;justify-content:center;
+  padding:11px 8px;min-height:46px;
+  border-radius:11px;
+  white-space:normal;overflow-wrap:anywhere;
+  text-align:center;line-height:1.35;
+  font-size:12px;
+}
+body.space-dashboard #tools-view .he-suite-tabs button.active,
+body.space-dashboard #tools-view .he-suite-tabs button[aria-pressed="true"]{
+  background:linear-gradient(112deg,#675097,#404a85);
+  border-color:rgba(197,169,248,.52);
+  box-shadow:0 3px 12px rgba(4,6,25,.14);
+}
+body.space-dashboard #tools-view .he-suite-message,
+body.space-dashboard #tools-view .he-suite-pane{
+  min-width:0;width:100%;max-width:100%;
+}
+body.space-dashboard #tools-view .he-suite-card{
+  width:100%;max-width:100%;min-width:0;
+  margin:0 0 16px;
+  border:1px solid rgba(161,144,206,.34);
+  border-radius:18px;overflow:hidden;
+  background:linear-gradient(128deg,rgba(40,39,71,.96),rgba(27,37,65,.97));
+  box-shadow:0 9px 24px rgba(5,8,28,.12),inset 0 1px rgba(255,255,255,.04);
+}
+body.space-dashboard #tools-view .he-suite-card > summary{
+  padding:18px clamp(16px,2vw,24px);
+  gap:14px;
+}
+body.space-dashboard #tools-view .he-suite-card > summary:hover{
+  background:rgba(146,119,208,.10);
+}
+body.space-dashboard #tools-view .he-suite-card[open] > summary{
+  border-bottom:1px solid rgba(163,142,211,.25);
+}
+body.space-dashboard #tools-view .he-suite-card > :not(summary){
+  max-width:100%;
+}
+body.space-dashboard #tools-view .he-suite-actions,
+body.space-dashboard #tools-view .ws-action-row,
+body.space-dashboard #tools-view .ws-controls{
+  flex-wrap:wrap;gap:10px;
+}
+body.space-dashboard #tools-view :is(input,select,textarea){
+  max-width:100%;min-width:0;
+}
+body.space-dashboard #tools-view :is(button,select,input,textarea):focus-visible{
+  outline:2px solid #d2b4ff;outline-offset:2px;
+}
+@media(min-width:1500px){
+ body.space-dashboard #tools-view{max-width:1200px}
+}
+@media(max-width:1000px){
+ body.space-dashboard #tools-view{padding-inline:0}
+ body.space-dashboard #tools-view .he-suite-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:620px){
+ body.space-dashboard #tools-view .ws-section-intro{padding:18px 16px;border-radius:16px}
+ body.space-dashboard #tools-view .he-suite-tabs{gap:6px;padding:6px}
+ body.space-dashboard #tools-view .he-suite-tabs button{font-size:11px;min-height:43px;padding:9px 6px}
+ body.space-dashboard #tools-view .he-suite-card{border-radius:15px}
+ body.space-dashboard #tools-view .he-suite-card > summary{padding:15px 14px}
+}
+@media(max-width:360px){
+ body.space-dashboard #tools-view .he-suite-tabs{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){
+ body.space-dashboard #tools-view *{transition:none!important}
+}
