@@ -1,0 +1,71 @@
+/* HelloEarth timezone calendar optimizer — original dark purple workspace */
+body.space-dashboard .he-optimize-calendar{
+ margin:20px 0 24px;padding:clamp(16px,2vw,24px);
+ border:1px solid rgba(172,149,220,.37);border-radius:19px;
+ background:linear-gradient(133deg,rgba(47,40,78,.96),rgba(27,37,66,.97));
+ box-shadow:0 10px 28px rgba(4,7,24,.13);
+}
+body.space-dashboard .he-opt-head{
+ display:flex;align-items:flex-start;justify-content:space-between;
+ flex-wrap:wrap;gap:15px;margin-bottom:17px;
+}
+body.space-dashboard .he-opt-head h3{
+ margin:6px 0;font:700 clamp(19px,2vw,23px)/1.25 'Space Grotesk',sans-serif;color:#f6efff;
+}
+body.space-dashboard .he-opt-head p{margin:0;color:#b9c3dd;font-size:12px;line-height:1.65;max-width:65ch}
+body.space-dashboard .he-opt-head .he-opt-label{color:#c6aefa;font-size:10px;letter-spacing:1.4px;font-weight:800}
+body.space-dashboard .he-opt-form{
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;align-items:end;
+}
+body.space-dashboard .he-opt-field{min-width:0;display:grid;gap:6px;font-size:11px;font-weight:700;color:#e1d8f3}
+body.space-dashboard .he-opt-field :is(input,select){
+ width:100%;max-width:100%;min-width:0;min-height:41px;
+ background:#1b2440;color:#f1eaff;border:1px solid #8072aa;
+ border-radius:10px;padding:9px 11px;font:inherit;font-size:12px;
+ color-scheme:dark;
+}
+body.space-dashboard .he-opt-field input::placeholder{color:#b0a9c7}
+body.space-dashboard .he-opt-field-wide{grid-column:span 2}
+body.space-dashboard .he-opt-days-wrap{
+ grid-column:1/-1;border:1px solid rgba(161,143,205,.30);
+ background:rgba(20,28,51,.44);padding:11px 13px;border-radius:12px;
+}
+body.space-dashboard .he-opt-days-title{display:block;font-size:11px;color:#ded3f2;font-weight:700;margin-bottom:9px}
+body.space-dashboard .he-opt-days{display:flex;gap:12px;flex-wrap:wrap}
+body.space-dashboard .he-opt-days label{display:inline-flex;gap:5px;align-items:center;color:#ddd5ee;font-size:12px}
+body.space-dashboard .he-opt-days input{accent-color:#ab89e8}
+body.space-dashboard .he-opt-actions{
+ grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:10px;
+}
+body.space-dashboard .he-opt-actions button{min-height:40px;padding:9px 15px}
+body.space-dashboard .he-opt-status{font-size:12px;color:#aee5d9;margin:0}
+body.space-dashboard .he-opt-status.is-error{color:#ffc6d0}
+body.space-dashboard .he-opt-help{color:#aeb9d5;font-size:11px;line-height:1.6;margin:13px 0 0}
+body.space-dashboard .he-opt-results{margin-top:18px}
+body.space-dashboard .he-opt-results-head{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+body.space-dashboard .he-opt-results-head strong{font-size:14px;color:#f3eaff}
+body.space-dashboard .he-opt-results-head small{font-size:11px;color:#bfc4df}
+body.space-dashboard .he-opt-warning{color:#f3d49f;background:rgba(130,92,37,.17);padding:11px;border-radius:10px;font-size:12px}
+body.space-dashboard .he-opt-empty{color:#b9c5df;font-size:12px;line-height:1.6}
+body.space-dashboard .he-opt-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+body.space-dashboard .he-opt-slot{
+ display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;
+ padding:13px;border:1px solid rgba(167,143,220,.32);
+ background:rgba(21,27,51,.64);border-radius:12px;
+}
+body.space-dashboard .he-opt-slot-info{display:grid;gap:5px;min-width:0}
+body.space-dashboard .he-opt-slot-info strong{color:#f3ecff;font-size:12px;line-height:1.4}
+body.space-dashboard .he-opt-slot-info span{color:#c8bbeb;font-size:11px;overflow-wrap:anywhere}
+body.space-dashboard .he-opt-slot-info small{color:#aebad8;font-size:10px}
+body.space-dashboard .he-opt-slot button{flex:none;font-size:11px;white-space:nowrap}
+@media(max-width:1080px){
+ body.space-dashboard .he-opt-form{grid-template-columns:repeat(2,minmax(0,1fr))}
+ body.space-dashboard .he-opt-field-wide{grid-column:span 2}
+ body.space-dashboard .he-opt-list{grid-template-columns:1fr}
+}
+@media(max-width:570px){
+ body.space-dashboard .he-opt-form{grid-template-columns:1fr}
+ body.space-dashboard .he-opt-field-wide{grid-column:span 1}
+ body.space-dashboard .he-opt-slot{align-items:flex-start;flex-direction:column}
+ body.space-dashboard .he-opt-days{gap:9px 13px}
+}
