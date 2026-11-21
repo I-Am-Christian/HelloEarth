@@ -19,19 +19,13 @@
     <a href="index.html" class="portal-brand" aria-label="Hello Earth homepage"><img src="logo.svg" width="40" height="40" alt="">helloearth<span class="brand-dot">.</span></a>
     <div class="ux-sidebar-nav-wrap">
       <nav class="ws-side-nav" aria-label="Workspace sections">
-        <span class="ux-nav-heading">MAIN MENU</span>
+        <span class="ux-nav-heading">WORKSPACE</span>
         <button type="button" data-view="overview"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5M9 21v-7h6v7"/></svg><span>Dashboard</span></button>
-        <button type="button" data-view="calendar"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 2v4m10-4v4M3 9h18M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2Zm3 9h3v3H8zm7 0h3v3h-3z"/></svg><span>Calendar</span></button>
         <button type="button" data-view="students"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Students</span></button>
+        <button type="button" data-view="calendar"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 2v4m10-4v4M3 9h18M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2Zm3 9h3v3H8zm7 0h3v3h-3z"/></svg><span>Calendar</span></button>
         <button type="button" data-view="progress"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V12m5 8V4m5 16v-9m5 9V7M2 20h20"/></svg><span>Progress</span></button>
-        <span class="ux-nav-heading">TOOLS &amp; RECORDS</span>
-        <button type="button" data-view="tools"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16M8 5v4m8 1v4m-4 1v4"/></svg><span>All tools</span></button>
-        <button class="ux-nav-sub" type="button" data-ux-tool="schedule"><span>Scheduling</span></button>
-        <button class="ux-nav-sub" type="button" data-ux-tool="students"><span>Lesson planning</span></button>
-        <button class="ux-nav-sub" type="button" data-ux-tool="business"><span>Reports</span></button>
-        <button class="ux-nav-sub" type="button" data-ux-tool="resources"><span>Templates</span></button>
-        <span class="ux-nav-heading">COMING SOON</span>
-        
+        <button type="button" data-view="tools"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16M8 5v4m8 1v4m-4 1v4"/></svg><span>Tools &amp; records</span></button>
+        <span class="ux-nav-heading">MORE</span>
         <button type="button" data-view="atlas"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l2.6 6.9L21.5 12l-6.9 2.6L12 21.5l-2.6-6.9L2.5 12l6.9-3.1L12 2Z"/></svg><span>Atlas AI</span><small class="ux-nav-soon">Preview</small></button>
       </nav>
     </div>
@@ -48,7 +42,7 @@
         <p class="ux-page-caption" id="ux-page-caption">Your records, organised.</p>
       </div>
       <div class="ux-header-actions">
-        <button type="button" id="ux-command-open" class="ux-search-trigger" aria-keyshortcuts="Control+K Meta+K" aria-haspopup="dialog" aria-controls="ux-command-dialog"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.35-4.35M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/></svg><span>Search students or tools…</span><kbd>Ctrl K</kbd></button>
+        <button type="button" id="ux-command-open" class="ux-search-trigger" aria-keyshortcuts="Control+K Meta+K" aria-haspopup="dialog" aria-controls="ux-command-dialog"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.35-4.35M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/></svg><span>Search anything…</span><kbd>Ctrl K</kbd></button>
         <button type="button" id="ux-header-add-student" class="ux-create-button"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>New student</span></button>
         <div class="ws-account">
           <button type="button" class="ws-mini-btn ws-companion-launch" id="ws-companion-open" aria-controls="ws-companion-panel" aria-expanded="false"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 4v5l3 2"/></svg><span>Lesson notes</span></button>
@@ -58,6 +52,10 @@
         </div>
       </div>
     </header>
+    <div class="ux-return-bar" id="ux-return-bar" hidden>
+      <button type="button" data-open-view="overview" class="ux-return-home">← Dashboard</button>
+      <span id="ux-return-hint">Browse your workspace</span>
+    </div>
     <nav class="ws-view-switch" role="tablist" aria-label="Dashboard sections">
       <button id="overview-tab" class="ws-view-tab is-current" type="button" role="tab" aria-selected="true" aria-controls="overview-view" tabindex="0"><span aria-hidden="true">⌂</span> Overview</button>
       <button id="calendar-tab" class="ws-view-tab" type="button" role="tab" aria-selected="false" aria-controls="calendar-view" tabindex="-1"><span aria-hidden="true">▦</span> Calendar</button>
@@ -79,13 +77,15 @@
       <div class="ws-metric"><span>Profiles to assess</span><strong id="stat-assess">—</strong><small>Unassessed learners</small></div>
     </div>
       <section class="ux-quickstart" aria-labelledby="ux-quickstart-heading">
-        <h3 id="ux-quickstart-heading">Quick actions</h3>
-        <p>Jump straight to the information you need.</p>
+        <div class="ux-quickstart-heading">
+          <div><h3 id="ux-quickstart-heading">What would you like to do?</h3><p>Common tasks, one click away.</p></div>
+          <button type="button" class="ux-quick-search" id="ux-overview-search">Find anything <span aria-hidden="true">⌕</span></button>
+        </div>
         <div class="ux-quickstart-grid">
-          <button type="button" data-open-view="students"><strong>Students →</strong><span>Find, add or edit a learner profile</span></button>
-          <button type="button" data-open-view="calendar"><strong>Calendar →</strong><span>View appointments and scheduling</span></button>
-          <button type="button" data-open-view="progress"><strong>Progress →</strong><span>Review assessments and development</span></button>
-          <button type="button" data-open-view="tools"><strong>Tools &amp; reports →</strong><span>Homework, records and templates</span></button>
+          <button type="button" data-ux-action="add-student"><strong>＋ Add a student</strong><span>Create a new learner profile</span></button>
+          <button type="button" data-ux-action="schedule"><strong>▦ Schedule a lesson</strong><span>Choose a date and time</span></button>
+          <button type="button" data-ux-action="start-lesson"><strong>✎ Lesson notes</strong><span>Open your lesson companion</span></button>
+          <button type="button" data-ux-action="reports"><strong>▥ Reports</strong><span>View records and summaries</span></button>
         </div>
       </section>
       <div class="ux-overview-layout">
@@ -236,8 +236,8 @@
 <button type="button" class="ws-mini-btn" data-open-view="students">View student profiles</button>
     </section>
     <section id="tools-view" class="ws-view ws-tools-view" role="tabpanel" aria-labelledby="tools-tab" hidden>
-      <div class="ws-section-intro"><span class="dash-overline">STUDENT RECORDS</span><h2>Organise student information.</h2><p>Keep scheduling, assignments, reports and reusable record templates together.</p></div>
-      <nav class="he-suite-tabs" aria-label="Record tools"><button type="button" data-suite-tab="schedule" class="active" aria-pressed="true">▦ Scheduling</button><button type="button" data-suite-tab="students" aria-pressed="false">♧ Student care</button><button type="button" data-suite-tab="business" aria-pressed="false">▥ Business &amp; reports</button><button type="button" data-suite-tab="resources" aria-pressed="false">✦ Resources</button></nav>
+      <div class="ws-section-intro"><span class="dash-overline">STUDENT RECORDS</span><h2>Choose a tool.</h2><p>Select a category below to manage scheduling, lesson preparation, reports or templates.</p></div>
+      <nav class="he-suite-tabs" aria-label="Record tools"><button type="button" data-suite-tab="schedule" class="active" aria-pressed="true">▦ Scheduling</button><button type="button" data-suite-tab="students" aria-pressed="false">♧ Lessons &amp; homework</button><button type="button" data-suite-tab="business" aria-pressed="false">▥ Reports</button><button type="button" data-suite-tab="resources" aria-pressed="false">✦ Templates</button></nav>
       <p class="he-suite-message" id="he-suite-status" role="status" aria-live="polite"></p>
       <div id="he-suite-schedule" class="he-suite-pane"></div>
       <div id="he-suite-students" class="he-suite-pane" hidden></div>
