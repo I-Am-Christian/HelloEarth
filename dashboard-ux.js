@@ -5,11 +5,11 @@ import {state as suite, onRender as onSuiteRender} from "./dashboard-suite-share
 
 const $=id=>document.getElementById(id);
 const pages={
- overview:{title:"Overview",eyebrow:"WORKSPACE / OVERVIEW",caption:"Your students, schedule and next actions."},
+ overview:{title:"Dashboard",eyebrow:"WORKSPACE / HOME",caption:"Your students, schedule and next actions."},
  calendar:{title:"Calendar",eyebrow:"WORKSPACE / SCHEDULE",caption:"Your appointments and availability."},
  students:{title:"Students",eyebrow:"WORKSPACE / LEARNERS",caption:"Profiles, goals and lesson notes."},
  progress:{title:"Progress",eyebrow:"WORKSPACE / INSIGHTS",caption:"Student development and CEFR assessments."},
- tools:{title:"Record tools",eyebrow:"DATABASE / OPERATIONS",caption:"Schedules, assignments, reports and reusable records."},
+ tools:{title:"Tools & records",eyebrow:"WORKSPACE / TOOLS",caption:"Scheduling, lessons, reports and templates in one place."},
  atlas:{title:"Atlas AI",eyebrow:"EXPLORE / COMING SOON",caption:"Explore planned teaching assistance."}
 };
 const commands=[
@@ -98,6 +98,12 @@ function setPageTitle(view){
  const moreIsCurrent= !["overview","calendar","students","tools"].includes(view);
  $("ux-more-open").classList.toggle("is-current",moreIsCurrent);
  $("ux-more-open").setAttribute("aria-label",moreIsCurrent?"More pages (currently "+data.title+")":"More workspace pages");
+ const returnBar=$("ux-return-bar");
+ if(returnBar){
+  returnBar.hidden=view==="overview";
+  const hint=$("ux-return-hint");
+  if(hint)hint.textContent=data.caption;
+ }
  mostRecentView=view;
 }
 function announceDate(){
@@ -216,6 +222,7 @@ document.addEventListener("keydown",e=>{
  if(commandDialog.open)closeSearch();else openSearch();
 });
 $("ux-header-add-student").addEventListener("click",addStudent);
+$("ux-overview-search")?.addEventListener("click",openSearch);
 document.querySelectorAll("[data-ux-action]").forEach(btn=>btn.addEventListener("click",()=>action(btn.dataset.uxAction)));
 document.querySelectorAll("[data-ux-tool]").forEach(btn=>
  btn.addEventListener("click",()=>tools(btn.dataset.uxTool)));
