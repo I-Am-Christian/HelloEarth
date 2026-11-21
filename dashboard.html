@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="page-i18n.css?v=20261115full4"><script src="page-i18n.js?v=20261116-suite7" defer></script><link rel="stylesheet" href="space-theme.css?v=20261115-global-space2"><link rel="stylesheet" href="dashboard-navigation.css?v=20261116-scheduling3"><link rel="stylesheet" href="dashboard-scheduler.css?v=20261117-scheduler3"><link rel="stylesheet" href="dashboard-features.css?v=20261116-suite7"><link rel="manifest" href="/site.webmanifest">
 <link rel="apple-touch-icon" href="/helloearth-logo.png">
 <meta name="apple-mobile-web-app-title" content="HelloEarth">
-<link rel="stylesheet" href="dashboard-extras.css?v=20261117-extras1"><link rel="stylesheet" href="dashboard-suite.css?v=20261118-suite-full2"><link rel="stylesheet" href="notifications.css?v=20261116-push1"><script type="module" src="notifications.js?v=20261116-push1"></script><script src="pwa-register.js?v=20261116-push1" defer></script><link rel="stylesheet" href="dashboard-ux.css?v=20261119-ux2"><link rel="stylesheet" href="dashboard-tools-polish.css?v=20261121-nav3">
+<link rel="stylesheet" href="dashboard-extras.css?v=20261117-extras1"><link rel="stylesheet" href="dashboard-suite.css?v=20261118-suite-full2"><link rel="stylesheet" href="notifications.css?v=20261116-push1"><script type="module" src="notifications.js?v=20261116-push1"></script><script src="pwa-register.js?v=20261116-push1" defer></script><link rel="stylesheet" href="dashboard-ux.css?v=20261119-ux2"><link rel="stylesheet" href="dashboard-tools-polish.css?v=20261121-nav3"><link rel="stylesheet" href="dashboard-calendar-optimizer.css?v=20261121-optimizer1">
 </head>
 <body class="space-theme space-dashboard portal-page">
 <div id="checking" style="padding:20vh 20px;text-align:center;color:#d9cfff">Checking your secure session…</div>
@@ -146,6 +146,23 @@
         <span id="calendar-source-count"></span>
       </div>
       <div class="ws-scheduling-actions"><button class="dash-primary" type="button" id="calendar-schedule">+ Lesson or time off</button><button class="ws-mini-btn" type="button" id="calendar-request-write">Authorize scheduling</button><span id="calendar-schedule-hint">Check existing bookings before scheduling. Google Calendar event-edit permission is required to save.</span></div>
+      <section class="he-optimize-calendar" id="he-optimize-calendar" aria-labelledby="he-opt-heading">
+  <div class="he-opt-head"><div><span class="he-opt-label">SMART SCHEDULING</span><h3 id="he-opt-heading">Optimize calendar across time zones</h3><p>Choose a student, manually assign their time zone and preferred hours, then see lesson times that work for both of you.</p></div><button class="ws-mini-btn" type="button" id="he-opt-run">Find best times</button></div>
+  <form class="he-opt-form" id="he-optimize-form">
+    <label class="he-opt-field he-opt-field-wide">Student<select id="he-opt-student" required><option value="">Choose a student</option></select></label>
+    <label class="he-opt-field he-opt-field-wide">Student time zone (IANA name)<input id="he-opt-zone" list="he-opt-zones" autocomplete="off" placeholder="e.g. Europe/Warsaw" required spellcheck="false"></label>
+    <datalist id="he-opt-zones"><option value="Africa/Johannesburg"><option value="Europe/London"><option value="Europe/Warsaw"><option value="Europe/Madrid"><option value="Europe/Berlin"><option value="Europe/Istanbul"><option value="America/Sao_Paulo"><option value="America/Mexico_City"><option value="America/New_York"><option value="America/Los_Angeles"><option value="Asia/Shanghai"><option value="Asia/Tokyo"><option value="Asia/Dubai"><option value="Asia/Kolkata"><option value="Australia/Sydney"></datalist>
+    <label class="he-opt-field">Student prefers from<input id="he-opt-start" type="time" value="09:00" required></label>
+    <label class="he-opt-field">Student prefers until<input id="he-opt-end" type="time" value="20:00" required></label>
+    <label class="he-opt-field">I teach from (my time)<input id="he-opt-teacher-start" type="time" value="08:00" required></label>
+    <label class="he-opt-field">I teach until (my time)<input id="he-opt-teacher-end" type="time" value="20:00" required></label>
+    <label class="he-opt-field">Lesson duration<select id="he-opt-duration"><option value="30">30 minutes</option><option value="50" selected>50 minutes</option><option value="60">60 minutes</option><option value="90">90 minutes</option></select></label>
+    <div class="he-opt-days-wrap"><span class="he-opt-days-title">Student's preferred days (in their time zone)</span><div class="he-opt-days" id="he-opt-days"><label><input type="checkbox" value="1" checked>Mon</label><label><input type="checkbox" value="2" checked>Tue</label><label><input type="checkbox" value="3" checked>Wed</label><label><input type="checkbox" value="4" checked>Thu</label><label><input type="checkbox" value="5" checked>Fri</label><label><input type="checkbox" value="6">Sat</label><label><input type="checkbox" value="0">Sun</label></div></div>
+    <div class="he-opt-actions"><button type="submit" class="dash-primary">Save student's preferences &amp; optimize</button><p class="he-opt-status" id="he-opt-status" role="status" aria-live="polite"></p></div>
+  </form>
+  <p class="he-opt-help">Time zones adjust for daylight saving automatically. Student preferences are saved on this browser for the signed-in tutor, not synchronized between devices. Suggestions do not book or move lessons; only the currently synced Google Calendar window can be checked for conflicts.</p>
+  <div class="he-opt-results" id="he-opt-results" aria-live="polite"><p class="he-opt-empty">Choose a student and save their time zone to begin.</p></div>
+</section>
       <div class="ws-calendar-card">
         <div class="ws-calendar-head"><div><span class="ws-calendar-month" id="calendar-month"></span><p id="calendar-subheading">Your upcoming schedule</p></div><div class="ws-calendar-controls"><button type="button" id="calendar-prev" aria-label="Previous week">‹</button><button type="button" id="calendar-today">Today</button><button type="button" id="calendar-next" aria-label="Next week">›</button></div></div>
         <div id="calendar-days" class="ws-calendar-days" aria-label="Choose a day"></div>
@@ -366,4 +383,4 @@
     </form>
   </div>
 </div>
-<script type="module" src="dashboard-extras.js?v=20261117-extras2"></script><script type="module" src="dashboard-navigation.js?v=20261120-database1"></script><script type="module" src="dashboard-features.js?v=20261117-suite10"></script><script type="module" src="dashboard-suite.js?v=20261120-database1"></script><script type="module" src="dashboard-ux.js?v=20261121-navigation2"></script></body></html>
+<script type="module" src="dashboard-extras.js?v=20261117-extras2"></script><script type="module" src="dashboard-navigation.js?v=20261120-database1"></script><script type="module" src="dashboard-features.js?v=20261117-suite10"></script><script type="module" src="dashboard-suite.js?v=20261120-database1"></script><script type="module" src="dashboard-ux.js?v=20261121-navigation2"></script><script type="module" src="dashboard-calendar-optimizer.js?v=20261121-optimizer1"></script></body></html>
