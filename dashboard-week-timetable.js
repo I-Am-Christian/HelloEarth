@@ -107,7 +107,7 @@ if(heCalendarSection){
  }
  function openSchedule(date,hour=startHour,minute=0){
   const when=new Date(date.getFullYear(),date.getMonth(),date.getDate(),hour,minute);
-  document.dispatchEvent(new CustomEvent("helloearth:calendar-slot-select",{detail:{when:when.toISOString()}}));
+  document.dispatchEvent(new CustomEvent("helloearth:calendar-slot-select",{detail:{when:when.toISOString(),durationMinutes:30}}));
  }
  function editEvent(event,presetDate=null,presetTime=null){
   if(!event.id||!event.calendarId)return;
@@ -317,7 +317,7 @@ if(heCalendarSection){
   });
   const allDayCount=events.filter(e=>isAllDay(e)).length;
   heGet("he-week-status").textContent=connected
-   ?shown+" timed appointment"+(shown===1?"":"s")+(allDayCount?" · "+allDayCount+" all-day event"+(allDayCount===1?"":"s"):"")+" · Click a lesson to edit or an empty slot to schedule"
+   ?shown+" timed appointment"+(shown===1?"":"s")+(allDayCount?" · "+allDayCount+" all-day event"+(allDayCount===1?"":"s"):"")+" · Select a highlighted 30-minute slot to schedule, or click a lesson to edit"
    :"Connect Google Calendar to see your actual appointments in the week grid.";
  }
  // Use native document scrolling: do not move the user to an internal scroll position.
