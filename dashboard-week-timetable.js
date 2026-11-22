@@ -69,6 +69,28 @@ if(section){
   const when=new Date(date.getFullYear(),date.getMonth(),date.getDate(),hour,minute);
   document.dispatchEvent(new CustomEvent("helloearth:calendar-slot-select",{detail:{when:when.toISOString()}}));
  }
+ const connectionBar=document.createElement("div");
+ connectionBar.className="he-week-connection";
+ connectionBar.innerHTML='<div class="he-week-connection-main"><span id="he-week-connection-dot" class="he-week-connection-dot" aria-hidden="true"></span><div><strong id="he-week-connection-name">Google Calendar</strong><small id="he-week-connection-detail">Checking your connection…</small></div></div><div class="he-week-connection-actions"><button type="button" id="he-week-connect">Connect Google Calendar</button><button type="button" id="he-week-refresh" hidden>Refresh calendar</button><button type="button" id="he-week-manage">Calendar settings</button></div>';
+ shell.querySelector(".he-week-main").insertBefore(connectionBar,shell.querySelector(".he-week-status"));
+ const syncConnection=()=>{
+  const label=$("calendar-account-email")?.textContent?.trim()||"";
+  const detail=$("calendar-sync-status")?.textContent?.trim()||"";
+  const isConnected=$("calendar-connection-indicator")?.classList.contains("is-connected")||connected;
+  const name=$("he-week-connection-name"),dot=$("he-week-connection-dot");
+  name.textContent=isConnected?(label||"Google Calendar connected"):(label&&label!=="Not connected"?label:"Google Calendar");
+  $("he-week-connection-detail").textContent=detail|| (isConnected?"Your calendar is connected.":"Connect your calendar to display lessons.");
+  dot.classList.toggle("connected",Boolean(isConnected));
+  $("he-week-connect").hidden=Boolean(isConnected);
+  $("he-week-connect").textContent=label&&label!=="Not connected"?"Reconnect Google Calendar":"Connect Google Calendar";
+  $("he-week-refresh").hidden=!isConnected;
+ };
+ $("he-week-connect").addEventListener("click",()=>document.dispatchEvent(new CustomEvent("helloearth:calendar-connect-request")));
+ $("he-week-refresh").addEventListener("click",()=>document.dispatchEvent(new CustomEvent("helloearth:calendar-refresh-request")));
+ $("he-week-manage").addEventListener("click",()=>{extras.open=true;extras.scrollIntoView({behavior:"smooth",block:"start"})});
+ document.addEventListener("helloearth:calendar-connection-status",syncConnection);
+ const statusNode=$("calendar-sync-status");
+ if(statusNode){new MutationObserver(syncConnection).observe(statusNode,{childList:true,characterData:true,subtree:true})}
  const legacy=section.querySelector(".ws-calendar-card");
  if(legacy) section.insertBefore(shell,legacy);
  const extras=document.createElement("details");extras.className="he-calendar-extras";
@@ -155,10 +177,10 @@ if(section){
    });
    grid.append(day);
   });
-  $("he-week-status").textContent=connected?(count?count+" appointment blocks in this week. Click an appointment to reschedule, or an empty slot to schedule.":"No appointments in this week. Use the arrows to browse other weeks."):"Connect Google Calendar below to see your schedule.";
+  $("he-week-status").textContent=connected?(count?count+" appointment blocks in this week. Click an appointment to reschedule, or an empty slot to schedule.":"No appointments in this week. Use the arrows to browse other weeks."):"Connect Google Calendar above to see your schedule.";
  }
- document.addEventListener("helloearth:calendar-events",e=>{connected=Boolean(e.detail?.connected);current=e.detail?.events||[];if(e.detail?.windowStart)weekStart=monday(new Date(e.detail.windowStart));render()});
- document.addEventListener("helloearth:calendar-disconnected",()=>{connected=false;current=[];render()});
+ document.addEventListener("helloearth:calendar-events",e=>{connected=Boolean(e.detail?.connected);current=e.detail?.events||[];if(e.detail?.windowStart)weekStart=monday(new Date(e.detail.windowStart));render();syncConnection()});
+ document.addEventListener("helloearth:calendar-disconnected",()=>{connected=false;current=[];render();syncConnection()});
  document.addEventListener("helloearth:view-changed",e=>{if(e.detail?.view==="calendar"){syncWeek();render()}});
  document.addEventListener("helloearth:languagechanged",render);
  document.addEventListener("helloearth:time-format-changed",render);
@@ -166,5 +188,5 @@ if(section){
  $("calendar-prev")?.addEventListener("click",()=>{syncWeek();render()});
  $("calendar-next")?.addEventListener("click",()=>{syncWeek();render()});
  $("calendar-today")?.addEventListener("click",()=>{syncWeek();render()});
- render();
+ render();syncConnection();
 }
