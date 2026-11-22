@@ -1,0 +1,305 @@
+/* Full-week calendar is now the actual main Calendar page.
+   Light, readable schedule table inspired by the provided Preply reference,
+   while the application header and other HelloEarth pages retain their theme. */
+body.space-dashboard #calendar-view{
+ width:min(calc(100% - 28px),1720px)!important;
+ max-width:1720px!important;
+ margin:0 auto!important;padding:14px 0 0!important;
+}
+body.space-dashboard #calendar-view .he-week-shell{
+ width:100%;height:calc(100dvh - 154px);min-height:560px;
+ max-height:1050px;box-sizing:border-box;
+ display:grid;grid-template-columns:224px minmax(0,1fr);
+ gap:0;margin:0;border:1px solid #dfe1e9;border-radius:10px;
+ background:#fff;box-shadow:0 14px 38px #03071926;overflow:hidden;
+ font-family:'DM Sans',system-ui,sans-serif;
+}
+body.space-dashboard #calendar-view .he-week-sidebar{
+ display:flex;flex-direction:column;gap:9px;min-width:0;
+ padding:19px 15px;background:#f6f5f9;
+ border:0;border-right:1px solid #dedee7;
+}
+body.space-dashboard #calendar-view .he-week-sidebar>button{
+ flex:none;min-height:42px;width:100%;margin:0;padding:9px 12px;
+ border-radius:8px;font:700 12px/1.3 'DM Sans',system-ui,sans-serif;
+ cursor:pointer;
+}
+body.space-dashboard #calendar-view .he-week-sidebar .he-week-primary{
+ background:#f07bad;color:#191b29;border:1px solid #a93c70;
+}
+body.space-dashboard #calendar-view .he-week-sidebar .he-week-secondary{
+ background:#fff;color:#303a4c;border:1px solid #cbd1dd;
+}
+body.space-dashboard #calendar-view .he-week-sidebar>button:hover{filter:brightness(.96)}
+body.space-dashboard #calendar-view .he-week-legend{
+ border-top:1px solid #dddfe7;padding-top:22px;margin-top:19px;
+}
+body.space-dashboard #calendar-view .he-week-legend h3{
+ font:750 13px 'DM Sans',system-ui,sans-serif;color:#1e2735;
+ margin:0 0 18px;
+}
+body.space-dashboard #calendar-view .he-week-legend p{
+ display:flex;align-items:center;gap:10px;margin:14px 0;
+ color:#28394e;font:500 12px/1.35 'DM Sans',system-ui,sans-serif;
+}
+body.space-dashboard #calendar-view .he-legend-dot{width:5px;height:23px;border-radius:2px;background:#2b83ef}
+body.space-dashboard #calendar-view .he-recurring-dot{background:#d04b89}
+body.space-dashboard #calendar-view .he-timeoff-dot{background:#ae7832}
+body.space-dashboard #calendar-view .he-all-day-dot{background:#81a6a1}
+body.space-dashboard #calendar-view .he-week-sidebar-note{
+ margin-top:20px;font:450 12px/1.65 'DM Sans',system-ui,sans-serif;color:#697487;
+}
+body.space-dashboard #calendar-view .he-week-main{
+ display:flex;flex-direction:column;min-height:0;min-width:0;
+ background:#fff;
+}
+body.space-dashboard #calendar-view .he-week-toolbar{
+ display:flex;flex:none;align-items:center;justify-content:space-between;
+ gap:12px;min-height:74px;padding:12px 22px;box-sizing:border-box;
+ background:#fff;border:0;border-bottom:1px solid #e1e4eb;
+}
+body.space-dashboard #calendar-view .he-week-nav,
+body.space-dashboard #calendar-view .he-week-modes{display:flex;align-items:center;gap:8px}
+body.space-dashboard #calendar-view .he-week-nav strong{
+ margin-left:13px;white-space:nowrap;
+ color:#161f2d;font:750 19px/1.25 'Space Grotesk',system-ui,sans-serif;
+}
+body.space-dashboard #calendar-view .he-week-nav button{
+ display:grid;place-items:center;height:40px;width:40px;padding:0;
+ background:#fff;border:1px solid #ccd2df;border-radius:7px;
+ color:#172130;font:500 28px/1 system-ui;cursor:pointer;
+}
+body.space-dashboard #calendar-view .he-week-modes button{
+ min-width:0;height:39px;padding:0 13px;
+ border:0;border-bottom:3px solid transparent;border-radius:5px 5px 0 0;
+ background:transparent;color:#334157;cursor:pointer;
+ font:700 12px/1.3 'DM Sans',system-ui,sans-serif;
+}
+body.space-dashboard #calendar-view .he-week-modes button#he-week-today{
+ background:#f3f3f7;border:1px solid #cbd0df;border-radius:7px;
+ height:36px;padding:0 14px;margin-right:8px;
+}
+body.space-dashboard #calendar-view .he-week-modes button.he-mode-active{
+ color:#151f2c;border-bottom-color:#f077ae;
+}
+body.space-dashboard #calendar-view .he-week-connection{
+ flex:none;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+ gap:7px 12px;padding:8px 18px;min-height:54px;box-sizing:border-box;
+ background:#fcfbfe;border:0;border-bottom:1px solid #e5e4eb;
+}
+body.space-dashboard #calendar-view .he-week-connection-main{display:flex;gap:9px;align-items:center;min-width:0}
+body.space-dashboard #calendar-view .he-week-connection-main strong{
+ display:block;font:700 12px/1.4 'DM Sans',sans-serif;
+ color:#222f42;overflow-wrap:anywhere;
+}
+body.space-dashboard #calendar-view .he-week-connection-main small{
+ display:block;margin-top:1px;color:#647086;font:500 11px/1.5 'DM Sans',sans-serif;
+}
+body.space-dashboard #calendar-view .he-week-connection-dot{width:8px;height:8px;border-radius:50%;background:#e6a667}
+body.space-dashboard #calendar-view .he-week-connection-dot.connected{background:#2aa07d;box-shadow:0 0 0 4px #2aa07d14}
+body.space-dashboard #calendar-view .he-week-connection-actions{display:flex;flex-wrap:wrap;gap:6px}
+body.space-dashboard #calendar-view .he-week-connection-actions button{
+ min-height:31px;padding:6px 10px;border-radius:6px;
+ border:1px solid #d0d5e0;background:#fff;color:#26364b;
+ font:700 11px/1.25 'DM Sans',system-ui,sans-serif;cursor:pointer;
+}
+body.space-dashboard #calendar-view .he-week-connection-actions #he-week-connect{
+ background:#f6d7e7;border-color:#d899b9;
+}
+body.space-dashboard #calendar-view .he-week-connection-actions button[hidden]{display:none!important}
+body.space-dashboard #calendar-view #calendar-source-row{
+ width:100%;margin:0;flex:none;box-sizing:border-box;min-height:40px;
+ display:flex;align-items:center;gap:10px;padding:6px 18px;
+ background:#fff;color:#39465b;border-bottom:1px solid #e5e7ee;
+ font:500 11px 'DM Sans',sans-serif;
+}
+body.space-dashboard #calendar-view #calendar-source-row[hidden]{display:none!important}
+body.space-dashboard #calendar-view #calendar-source-select{
+ padding:5px 9px;min-height:26px;max-width:260px;
+ color:#26364b;background:#fff;border:1px solid #ccd2df;border-radius:6px;
+}
+body.space-dashboard #calendar-view .he-week-status{
+ flex:none;min-height:25px;box-sizing:border-box;display:flex;align-items:center;
+ padding:5px 18px;margin:0;color:#778295;background:#fff;
+ border-bottom:1px solid #e6e7ee;
+ font:500 11px/1.3 'DM Sans',system-ui,sans-serif;
+}
+body.space-dashboard #calendar-view .he-week-scroll{
+ flex:1;min-height:0;width:100%;max-height:none!important;
+ overflow:auto!important;background:#fff;scrollbar-color:#b7bdcb #fafbfc;
+ scrollbar-width:thin;
+}
+body.space-dashboard #calendar-view .he-week-grid{
+ width:100%;min-width:1050px;box-sizing:border-box;
+ display:grid;grid-template-columns:66px repeat(7,minmax(125px,1fr));
+ grid-template-rows:46px auto auto;
+ background:#fff;
+}
+body.space-dashboard #calendar-view .he-week-corner,
+body.space-dashboard #calendar-view .he-week-day{
+ position:sticky;top:0;z-index:9;box-sizing:border-box;
+ height:46px;min-height:46px;
+ display:flex;align-items:center;justify-content:center;
+ padding:5px 3px;border:0;border-right:1px solid #e2e5ec;
+ border-bottom:1px solid #d7dce5;border-radius:0;
+ background:#fff;color:#26354a;
+}
+body.space-dashboard #calendar-view .he-week-corner{font-size:10px;color:#8490a2;background:#f8f9fc}
+body.space-dashboard #calendar-view .he-week-day{
+ font:600 12px 'DM Sans',sans-serif;cursor:pointer;
+}
+body.space-dashboard #calendar-view .he-week-day:hover{background:#fdf0f7}
+body.space-dashboard #calendar-view .he-week-day.he-week-current{
+ color:#121a29;background:#fff9fc;box-shadow:inset 0 -3px #eb78ae;
+ font-weight:800;
+}
+body.space-dashboard #calendar-view .he-week-allday-label,
+body.space-dashboard #calendar-view .he-week-allday-cell{
+ position:sticky;top:46px;z-index:8;
+ box-sizing:border-box;min-height:32px;
+ padding:5px 3px;border-right:1px solid #e2e5ec;
+ border-bottom:1px solid #dce0e8;background:#fff;
+}
+body.space-dashboard #calendar-view .he-week-allday-label{
+ display:grid;place-items:center;color:#8590a1;
+ background:#f8f9fc;font-size:10px;
+}
+body.space-dashboard #calendar-view .he-week-allday-cell{
+ display:flex;flex-direction:column;gap:3px;overflow:hidden;
+}
+body.space-dashboard #calendar-view .he-week-axis{
+ position:relative;background:#f8f9fc;border-right:1px solid #dce1e9;
+ box-sizing:border-box;
+}
+body.space-dashboard #calendar-view .he-hour-label{
+ position:absolute;right:8px;transform:translateY(-50%);
+ color:#8490a3;font:500 10px 'DM Sans',sans-serif;white-space:nowrap;
+}
+body.space-dashboard #calendar-view .he-week-column{
+ position:relative;box-sizing:border-box;cursor:crosshair;
+ border-right:1px solid #dfe3ea;
+ background:repeating-linear-gradient(to bottom,#fff 0px,#fff 61px,#e5e8ed 61px,#e5e8ed 62px);
+}
+body.space-dashboard #calendar-view .he-week-column:hover{
+ background:repeating-linear-gradient(to bottom,#fffafd 0px,#fffafd 61px,#e4e2ea 61px,#e4e2ea 62px);
+}
+body.space-dashboard #calendar-view .he-week-column.he-week-drop-target{
+ outline:2px solid #c87faa;outline-offset:-3px;
+ background:#fff3f9;
+}
+body.space-dashboard #calendar-view .he-week-event{
+ position:absolute;z-index:2;box-sizing:border-box;display:flex;flex-direction:column;
+ align-items:flex-start;justify-content:flex-start;
+ padding:5px 7px;min-width:0;
+ border:1px solid #3489ee;border-radius:7px;
+ background:#d5e6ff;color:#11263e;
+ text-align:left;overflow:hidden;cursor:pointer;
+ box-shadow:none;transition:filter .1s;
+ font-family:'DM Sans',system-ui,sans-serif;
+}
+body.space-dashboard #calendar-view .he-week-event.he-week-lesson{
+ background:#d5e6ff;border-color:#267df2;color:#10263f;
+}
+body.space-dashboard #calendar-view .he-week-event.he-week-recurring{
+ background:#fde4f0;border-color:#df5c9b;color:#3a1830;
+}
+body.space-dashboard #calendar-view .he-week-event.he-week-timeoff{
+ background:#fff0bd;border-color:#ca983b;color:#513b18;
+}
+body.space-dashboard #calendar-view .he-week-event.he-week-all-day{
+ background:#d8f5ec;border-color:#5aaf9e;color:#17453e;
+}
+body.space-dashboard #calendar-view .he-week-event:hover,
+body.space-dashboard #calendar-view .he-week-event:focus-visible{
+ z-index:5;filter:brightness(.97);outline:2px solid #3c5484;outline-offset:1px;
+}
+body.space-dashboard #calendar-view .he-week-event.is-dragging{opacity:.55}
+body.space-dashboard #calendar-view .he-event-when{
+ display:block;max-width:100%;
+ overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+ color:inherit;font:500 10px/1.25 'DM Sans',sans-serif;
+}
+body.space-dashboard #calendar-view .he-event-title{
+ display:block;max-width:100%;font:750 12px/1.35 'DM Sans',sans-serif;
+ color:inherit;overflow:hidden;text-overflow:ellipsis;
+}
+body.space-dashboard #calendar-view .he-recurring-mark{
+ position:absolute;right:6px;bottom:3px;
+ font-size:14px;font-weight:800;opacity:.65;
+}
+body.space-dashboard #calendar-view .he-week-allday-cell .he-week-event{
+ position:relative!important;left:auto!important;top:auto!important;
+ height:auto!important;width:100%!important;min-height:22px;
+ padding:2px 6px;
+}
+body.space-dashboard #calendar-view .he-week-allday-cell .he-event-when{display:none}
+body.space-dashboard #calendar-view .he-week-now-line{
+ position:absolute;z-index:4;left:0;right:0;
+ border-top:2px solid #e96587;pointer-events:none;
+}
+body.space-dashboard #calendar-view .he-week-now-badge{
+ position:absolute;left:0;top:-10px;padding:1px 3px;
+ background:#e96587;color:#fff;border-radius:3px;
+ font:700 9px 'DM Sans',sans-serif;
+}
+body.space-dashboard #calendar-view .he-week-agenda-list{
+ flex:1;min-height:0;overflow:auto;
+ padding:20px 25px;background:#fff;color:#1e293a;
+}
+body.space-dashboard #calendar-view .he-week-agenda-day{
+ margin-bottom:21px;border-bottom:1px solid #e5e8ed;padding-bottom:15px;
+}
+body.space-dashboard #calendar-view .he-week-agenda-day h3{
+ margin:0 0 12px;color:#24334a;font:750 16px 'Space Grotesk',sans-serif;
+}
+body.space-dashboard #calendar-view .he-week-agenda-day .he-agenda-event{
+ position:relative;left:auto;top:auto;width:100%;
+ min-height:43px;height:auto;margin:5px 0;
+ padding:9px 13px;
+}
+body.space-dashboard #calendar-view .he-week-agenda-empty{color:#778397;font-size:13px}
+body.space-dashboard #calendar-view .he-calendar-engine[hidden]{display:none!important}
+body.space-dashboard #calendar-view .he-calendar-advanced{
+ margin:15px 0 30px;padding:0 16px;
+ border:1px solid #606d8955;border-radius:9px;
+ background:#1e2a41;color:#d7cdec;
+}
+body.space-dashboard #calendar-view .he-calendar-advanced>summary{
+ padding:13px 1px;font:700 13px 'DM Sans',sans-serif;cursor:pointer;
+}
+body.space-dashboard #calendar-view .he-calendar-advanced>.ws-calendar-intro{margin-top:8px}
+body.space-dashboard #calendar-view .he-calendar-advanced>section{margin:12px 0}
+/* The schedule window opens from the table; the embedded month view is not
+   the primary calendar anymore. Native date inputs remain fully usable. */
+#schedule-modal .ws-schedule-picker{display:none!important}
+@media(max-width:980px){
+ body.space-dashboard #calendar-view .he-week-shell{grid-template-columns:185px minmax(0,1fr)}
+ body.space-dashboard #calendar-view .he-week-sidebar{padding:13px 10px}
+ body.space-dashboard #calendar-view .he-week-toolbar{padding:9px 13px}
+ body.space-dashboard #calendar-view .he-week-nav strong{font-size:16px;margin-left:6px}
+}
+@media(max-width:750px){
+ body.space-dashboard #calendar-view .he-week-shell{
+  height:calc(100dvh - 140px);min-height:490px;
+  display:flex;flex-direction:column;
+ }
+ body.space-dashboard #calendar-view .he-week-sidebar{
+  flex:none;display:flex;flex-direction:row;flex-wrap:wrap;
+  gap:7px;padding:10px;border-right:0;border-bottom:1px solid #e0e3ec;
+ }
+ body.space-dashboard #calendar-view .he-week-sidebar>button{flex:1 1 110px;width:auto;min-height:35px}
+ body.space-dashboard #calendar-view .he-week-sidebar .he-week-legend,
+ body.space-dashboard #calendar-view .he-week-sidebar-note{display:none}
+ body.space-dashboard #calendar-view .he-week-main{flex:1}
+ body.space-dashboard #calendar-view .he-week-toolbar{min-height:55px}
+ body.space-dashboard #calendar-view .he-week-connection{padding:7px 10px}
+ body.space-dashboard #calendar-view .he-week-grid{min-width:970px}
+}
+@media(max-width:440px){
+ body.space-dashboard #calendar-view{width:calc(100% - 12px)!important}
+ body.space-dashboard #calendar-view .he-week-nav strong{font-size:12px}
+ body.space-dashboard #calendar-view .he-week-nav button{height:32px;width:32px;font-size:24px}
+ body.space-dashboard #calendar-view .he-week-modes button{height:33px;padding:0 7px;font-size:11px}
+ body.space-dashboard #calendar-view .he-week-modes button#he-week-today{padding:0 8px;margin-right:0}
+ body.space-dashboard #calendar-view .he-week-connection{gap:5px}
+}
