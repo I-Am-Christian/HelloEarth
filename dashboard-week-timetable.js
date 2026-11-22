@@ -73,7 +73,7 @@ if(section){
   }
   const axis=block("div","he-week-axis");axis.style.height=((endHour-startHour)*hourHeight)+"px";
   for(let hour=startHour;hour<=endHour;hour++){
-   const l=block("span","he-hour-label",pad(hour)+":00");l.style.top=((hour-startHour)*hourHeight)+"px";axis.append(l);
+   const axisDate=new Date(2026,0,1,hour,0);const l=block("span","he-hour-label",formatTime(axisDate));l.style.top=((hour-startHour)*hourHeight)+"px";axis.append(l);
   }
   grid.append(axis);
   let count=0;
