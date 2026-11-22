@@ -64,11 +64,10 @@ if(heCalendarSection){
  if(calendarSources)main.querySelector(".he-week-main").insertBefore(calendarSources,heGet("he-week-status"));
 
  const startHour=6, endHour=24, hourHeight=62, rowsHeight=(endHour-startHour)*hourHeight;
- let events=[],connected=false,canWrite=false,mode="week",weekStart=monday(new Date());
- let scrollKey="",dragged=null,scrollOnNextRender=true;
- const timerSet=new Set();
  const toDay=date=>new Date(date.getFullYear(),date.getMonth(),date.getDate());
  function monday(date){const d=toDay(date);d.setDate(d.getDate()-(d.getDay()+6)%7);return d}
+ let events=[],connected=false,canWrite=false,mode="week",weekStart=monday(new Date());
+ let scrollKey="",dragged=null,scrollOnNextRender=true;
  function dateField(field){
   if(field?.dateTime)return new Date(field.dateTime);
   if(field?.date){const a=field.date.split("-").map(Number);return new Date(a[0],a[1]-1,a[2])}
