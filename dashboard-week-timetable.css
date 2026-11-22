@@ -86,3 +86,20 @@ body.space-dashboard #calendar-view{width:min(calc(100% - 32px),1480px);max-widt
 .he-week-connection-actions button[hidden]{display:none!important}
 .he-week-connection-actions button:hover{filter:brightness(1.1)}
 @media(max-width:650px){.he-week-connection{align-items:flex-start;padding:12px}.he-week-connection-actions{width:100%}}
+
+
+/* Date picker stays accessible in the main calendar, not hidden in settings. */
+.he-week-date-picker[hidden]{display:none!important}
+.he-week-date-picker{padding:12px 16px;background:#1c2840;border-bottom:1px solid #65738e58}
+.he-week-date-picker .ws-calendar-card{
+ display:block!important;position:static!important;width:100%!important;max-width:none!important;
+ margin:0!important;padding:10px 12px!important;box-sizing:border-box;
+ border:1px solid #7684a066;border-radius:10px;background:#202e47!important;
+}
+.he-week-date-picker .ws-calendar-head{margin-bottom:9px}
+.he-week-date-picker #calendar-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.he-week-date-picker #calendar-days .ws-day{cursor:pointer;min-width:0;padding:8px 3px;border-radius:8px}
+.he-week-date-picker #calendar-days .ws-day:focus-visible,.he-week-day:focus-visible,.he-week-event:focus-visible{outline:2px solid #e2afd7;outline-offset:2px}
+.he-week-date-picker #calendar-days .ws-day.is-selected{border-color:#e4a3cc!important}
+.he-week-modes #he-week-pick-date[aria-expanded=true]{border-color:#e6a2cc;color:#fff}
+@media(max-width:540px){.he-week-date-picker{padding:9px}.he-week-date-picker .ws-calendar-card{padding:9px!important}.he-week-date-picker #calendar-days{gap:2px}}
