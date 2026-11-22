@@ -58,7 +58,7 @@ if(section){
   e.preventDefault();
   if(!selectedEvent)return;
   const date=$("he-reschedule-date").value;
-  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date))return;
+  if(!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(date))return;
   const chosen=selectedEvent;
   closeReschedule();
   document.dispatchEvent(new CustomEvent("helloearth:calendar-reschedule",{
