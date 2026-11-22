@@ -1,0 +1,172 @@
+/* HelloEarth timetable · atmospheric midnight palette.
+   Functional seven-day grid, not a Preply visual clone. This stylesheet
+   overrides the temporary light calendar theme without changing grid layout. */
+body.space-dashboard #calendar-view{
+ width:min(calc(100% - 28px),1700px)!important;
+ max-width:1700px!important;
+ padding-top:14px!important;
+}
+body.space-dashboard #calendar-view .he-week-shell{
+ border:1px solid #485779;
+ border-radius:16px;
+ background:#172339;
+ box-shadow:0 16px 40px #080d20a3,0 0 0 1px #b994e90e;
+ overflow:hidden;
+}
+body.space-dashboard #calendar-view .he-week-sidebar{
+ background:
+ radial-gradient(ellipse at 4% 15%,#7453a021 0%,transparent 57%),
+ linear-gradient(155deg,#252c49,#20263d 65%,#1d293f);
+ border-right:1px solid #485776;
+}
+body.space-dashboard #calendar-view .he-week-sidebar .he-week-primary{
+ color:#271a38;background:#d5a9e9;border:1px solid #e8c5f7;
+ box-shadow:0 3px 12px #bb91eb2a;
+}
+body.space-dashboard #calendar-view .he-week-sidebar .he-week-secondary{
+ color:#ede7fc;background:#303852;border:1px solid #7885a17a;
+}
+body.space-dashboard #calendar-view .he-week-sidebar>button:hover{filter:brightness(1.09)}
+body.space-dashboard #calendar-view .he-week-legend{
+ border-top:1px solid #61708c50;
+}
+body.space-dashboard #calendar-view .he-week-legend h3{
+ color:#f5f0ff;
+}
+body.space-dashboard #calendar-view .he-week-legend p{color:#c9d2e5}
+body.space-dashboard #calendar-view .he-legend-dot{background:#74aaff}
+body.space-dashboard #calendar-view .he-recurring-dot{background:#e49bca}
+body.space-dashboard #calendar-view .he-timeoff-dot{background:#e7bf76}
+body.space-dashboard #calendar-view .he-all-day-dot{background:#74cfc2}
+body.space-dashboard #calendar-view .he-week-sidebar-note{color:#a5b5d4}
+body.space-dashboard #calendar-view .he-week-main{background:#172339}
+body.space-dashboard #calendar-view .he-week-toolbar{
+ background:linear-gradient(100deg,#293455,#252d48 68%,#242d49);
+ border-bottom:1px solid #5c6987a1;
+}
+body.space-dashboard #calendar-view .he-week-nav strong{
+ color:#f6efff;letter-spacing:-.35px;
+}
+body.space-dashboard #calendar-view .he-week-nav button{
+ color:#e3e5fc;background:#343f60;border:1px solid #7788ab87;
+}
+body.space-dashboard #calendar-view .he-week-nav button:hover{background:#475179}
+body.space-dashboard #calendar-view .he-week-modes button{
+ color:#bfcbe3;
+}
+body.space-dashboard #calendar-view .he-week-modes button:hover{
+ background:#ffffff13;color:#f9f4ff;
+}
+body.space-dashboard #calendar-view .he-week-modes button#he-week-today{
+ color:#f3edff;background:#384362;border:1px solid #7d83a79a;
+}
+body.space-dashboard #calendar-view .he-week-modes button.he-mode-active{
+ color:#fdf5ff;border-bottom-color:#d89ddb;
+}
+body.space-dashboard #calendar-view .he-week-connection{
+ background:#1f2b46;border-bottom:1px solid #52628085;
+}
+body.space-dashboard #calendar-view .he-week-connection-main strong{
+ color:#f7f3ff;
+}
+body.space-dashboard #calendar-view .he-week-connection-main small{color:#b6c3dc}
+body.space-dashboard #calendar-view .he-week-connection-actions button{
+ color:#e5e7f7;background:#303c5c;border:1px solid #7e8baa91;
+}
+body.space-dashboard #calendar-view .he-week-connection-actions #he-week-connect{
+ color:#261b35;background:#d5a6dc;border-color:#e7c4ed;
+}
+body.space-dashboard #calendar-view #calendar-source-row{
+ background:#202c45;color:#c4d0e8;
+ border-bottom:1px solid #52618090;
+}
+body.space-dashboard #calendar-view #calendar-source-select{
+ color:#f1ecff;background:#293750;border:1px solid #7586a4;
+}
+body.space-dashboard #calendar-view .he-week-status{
+ background:#1d2a43;color:#aebdd7;border-bottom:1px solid #52617b8c;
+}
+body.space-dashboard #calendar-view .he-week-scroll{
+ background:#19253d;scrollbar-color:#7180a0 #1c273d;
+}
+body.space-dashboard #calendar-view .he-week-grid{
+ background:#1c2a43;
+}
+body.space-dashboard #calendar-view .he-week-corner,
+body.space-dashboard #calendar-view .he-week-day{
+ color:#dfe5f6;background:#283450;
+ border:0;border-right:1px solid #465673b3;
+ border-bottom:1px solid #63718b9c;
+}
+body.space-dashboard #calendar-view .he-week-corner{
+ color:#98aacb;background:#222d47;
+}
+body.space-dashboard #calendar-view .he-week-day:hover{
+ background:#3d3d65;color:#fff;
+}
+body.space-dashboard #calendar-view .he-week-day.he-week-current{
+ color:#fff0ff;background:#493c63;box-shadow:inset 0 -3px #dc92ca;
+}
+body.space-dashboard #calendar-view .he-week-allday-label,
+body.space-dashboard #calendar-view .he-week-allday-cell{
+ background:#22314b;border-right:1px solid #465673b3;border-bottom:1px solid #63718b80;
+}
+body.space-dashboard #calendar-view .he-week-allday-label{color:#93a8c8;background:#1c2941}
+body.space-dashboard #calendar-view .he-week-axis{
+ background:#202c45;border-right:1px solid #5365819c;
+}
+body.space-dashboard #calendar-view .he-hour-label{color:#a7b5d2}
+body.space-dashboard #calendar-view .he-week-column{
+ border-right:1px solid #4253709e;
+ background:repeating-linear-gradient(to bottom,#1c2941 0,#1c2941 61px,#4a5b758f 61px,#4a5b758f 62px);
+}
+body.space-dashboard #calendar-view .he-week-column:nth-child(2n){
+ background:repeating-linear-gradient(to bottom,#1e2b44 0,#1e2b44 61px,#4a5b758f 61px,#4a5b758f 62px);
+}
+body.space-dashboard #calendar-view .he-week-column:hover{
+ background:repeating-linear-gradient(to bottom,#273453 0,#273453 61px,#7183a04f 61px,#7183a04f 62px);
+}
+body.space-dashboard #calendar-view .he-week-column.he-week-drop-target{
+ outline:2px solid #e1a8df;outline-offset:-3px;background:#374059;
+}
+body.space-dashboard #calendar-view .he-week-event{
+ box-shadow:0 2px 7px #0a10254a;
+ transition:filter .12s,box-shadow .12s;
+}
+body.space-dashboard #calendar-view .he-week-event.he-week-lesson{
+ background:#354c74;border-color:#82aeec;color:#f0f5ff;
+}
+body.space-dashboard #calendar-view .he-week-event.he-week-recurring{
+ background:#523754;border-color:#e29fc9;color:#fff0fb;
+}
+body.space-dashboard #calendar-view .he-week-event.he-week-timeoff{
+ background:#59482f;border-color:#e6c582;color:#fff6e1;
+}
+body.space-dashboard #calendar-view .he-week-event.he-week-all-day{
+ background:#295054;border-color:#83cec7;color:#e9fff9;
+}
+body.space-dashboard #calendar-view .he-week-event:hover,
+body.space-dashboard #calendar-view .he-week-event:focus-visible{
+ filter:brightness(1.18);
+ outline:2px solid #d5d3ff;outline-offset:1px;
+ box-shadow:0 5px 15px #050b1c9e;
+}
+body.space-dashboard #calendar-view .he-week-event .he-event-title,
+body.space-dashboard #calendar-view .he-week-event .he-event-when{color:inherit}
+body.space-dashboard #calendar-view .he-week-now-line{border-top-color:#fa94bd}
+body.space-dashboard #calendar-view .he-week-now-badge{background:#d472ad;color:white}
+body.space-dashboard #calendar-view .he-week-agenda-list{
+ background:#1d2a43;color:#e7eaff;
+}
+body.space-dashboard #calendar-view .he-week-agenda-day{
+ border-bottom:1px solid #56668389;
+}
+body.space-dashboard #calendar-view .he-week-agenda-day h3{color:#f3eeff}
+body.space-dashboard #calendar-view .he-week-agenda-empty{color:#b3c1dc}
+body.space-dashboard #calendar-view .he-calendar-advanced{
+ border-color:#6572916f;background:#1b2740;color:#d9d1ee;
+}
+body.space-dashboard #calendar-view .he-calendar-advanced>summary{color:#e2d6fa}
+@media(max-width:750px){
+ body.space-dashboard #calendar-view .he-week-sidebar{border-bottom:1px solid #61718d;background:#242f4b}
+}
