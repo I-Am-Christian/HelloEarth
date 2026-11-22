@@ -1,0 +1,24 @@
+/* Full-width weekly calendar, compact Preply-inspired scheduler. */
+body.space-dashboard #calendar-view{width:min(calc(100% - 24px),1680px)!important;max-width:1680px!important;padding-top:14px!important}
+.he-week-shell{grid-template-columns:210px minmax(0,1fr);border-radius:9px}
+.he-week-scroll{max-height:min(78vh,920px)}
+.he-week-grid{grid-template-columns:60px repeat(7,minmax(120px,1fr));min-width:960px}
+.he-week-date-picker[hidden]{display:none!important}
+.ws-modal#schedule-modal .ws-dialog.ws-scheduler-dialog{width:min(94vw,530px)!important;max-width:530px!important;max-height:calc(100dvh - 32px);overflow:auto;padding:23px!important;border-radius:14px}
+#schedule-modal .ws-dialog-head h2{font-size:27px}
+#schedule-modal .ws-schedule-kind{display:none!important}
+#schedule-modal .he-schedule-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;border-bottom:1px solid #858da65b;margin:9px 0 17px}
+#schedule-modal .he-schedule-tabs button{padding:12px 8px;border:0;border-bottom:3px solid transparent;border-radius:0;background:transparent;color:#bfc6da;font:750 13px 'DM Sans',sans-serif;cursor:pointer}
+#schedule-modal .he-schedule-tabs button.is-active{border-bottom-color:#e794c3;color:#fff}
+#schedule-modal .ws-schedule-picker{margin:4px 0 11px}
+#schedule-modal .ws-scheduler-dialog .ws-form{grid-template-columns:repeat(2,minmax(0,1fr))}
+#schedule-modal .ws-scheduler-dialog .ws-form[hidden]{display:none!important}
+#schedule-modal .he-inline-reschedule[hidden]{display:none!important}
+#schedule-modal .he-inline-reschedule h3{color:#fff;font-size:17px;margin:6px 0 10px}
+#schedule-modal .he-reschedule-hint{color:#afbdd3;font-size:12px;line-height:1.55}
+#schedule-modal .he-inline-reschedule label{display:block;color:#e9e5f3;font-size:13px;font-weight:700;margin:15px 0}
+#schedule-modal .he-inline-reschedule input{display:block;width:100%;box-sizing:border-box;margin-top:7px;padding:12px;border-radius:9px;background:#172137;color:#fff;border:1px solid #8594ae8a;color-scheme:dark}
+#schedule-modal .he-inline-reschedule .dash-primary{width:100%;min-height:43px}
+#schedule-modal #he-inline-status{font-size:12px;color:#ffb7bf;margin-top:12px}
+@media(max-width:760px){.he-week-shell{display:block}.ws-modal#schedule-modal .ws-dialog.ws-scheduler-dialog{padding:17px!important}#schedule-modal .ws-scheduler-dialog .ws-form{grid-template-columns:1fr 1fr}}
+@media(max-width:430px){#schedule-modal .ws-scheduler-dialog .ws-form{grid-template-columns:1fr}}
