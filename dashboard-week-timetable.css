@@ -67,3 +67,22 @@ body.space-dashboard #calendar-view{width:min(calc(100% - 32px),1480px);max-widt
 .he-reschedule-actions button[type=submit]{border-color:#d8a3d7;background:#bb84be;color:#201a2b}
 .he-reschedule-actions button:hover{filter:brightness(1.1)}
 @media(max-width:520px){.he-reschedule-dialog{padding:18px}.he-reschedule-top h2{font-size:21px}}
+
+
+/* Keep calendar connection visible before the timeline; never hide it in extras. */
+.he-week-connection{
+ display:flex;align-items:center;justify-content:space-between;gap:12px;
+ flex-wrap:wrap;padding:13px 17px;background:#202b43;border-bottom:1px solid #65738e58
+}
+.he-week-connection-main{display:flex;align-items:center;gap:11px;min-width:0}
+.he-week-connection-main>div{min-width:0}
+.he-week-connection-main strong{display:block;font-size:12px;color:#f4efff;overflow-wrap:anywhere}
+.he-week-connection-main small{display:block;margin-top:3px;font-size:11px;color:#b0c2de;line-height:1.5;overflow-wrap:anywhere}
+.he-week-connection-dot{width:9px;height:9px;border-radius:50%;background:#dca581;flex:none}
+.he-week-connection-dot.connected{background:#73cda9;box-shadow:0 0 0 4px #73cda91c}
+.he-week-connection-actions{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+.he-week-connection-actions button{cursor:pointer;border:1px solid #8792ac77;border-radius:8px;background:#303b56;color:#f5ebff;font:700 11px/1.25 'DM Sans',system-ui,sans-serif;padding:9px 12px;min-height:34px}
+.he-week-connection-actions button#he-week-connect{background:#bc8cba;color:#221a2f;border-color:#d4a1d4}
+.he-week-connection-actions button[hidden]{display:none!important}
+.he-week-connection-actions button:hover{filter:brightness(1.1)}
+@media(max-width:650px){.he-week-connection{align-items:flex-start;padding:12px}.he-week-connection-actions{width:100%}}
