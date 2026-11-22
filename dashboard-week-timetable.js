@@ -63,7 +63,7 @@ if(heCalendarSection){
  const calendarSources=heCalendarSection.querySelector("#calendar-source-row");
  if(calendarSources)main.querySelector(".he-week-main").insertBefore(calendarSources,heGet("he-week-status"));
 
- const startHour=6, endHour=24, hourHeight=96, rowsHeight=(endHour-startHour)*hourHeight;
+ const startHour=0, endHour=24, hourHeight=96, rowsHeight=(endHour-startHour)*hourHeight;
  const toDay=date=>new Date(date.getFullYear(),date.getMonth(),date.getDate());
  function monday(date){const d=toDay(date);d.setDate(d.getDate()-(d.getDay()+6)%7);return d}
  let events=[],connected=false,canWrite=false,mode="week",weekStart=monday(new Date());
@@ -223,7 +223,9 @@ if(heCalendarSection){
   axis.style.height=rowsHeight+"px";
   for(let h=startHour;h<endHour;h++){
    const hour=textNode("span","he-hour-label",clock(new Date(2026,0,1,h,0)));
-   hour.style.top=((h-startHour)*hourHeight)+"px";axis.append(hour);
+   hour.style.top=((h-startHour)*hourHeight)+"px";
+   if(h===startHour)hour.classList.add("he-hour-label-first");
+   axis.append(hour);
   }
   grid.append(axis);
   let shown=0;
