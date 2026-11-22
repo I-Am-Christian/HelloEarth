@@ -2,6 +2,7 @@
    Existing dashboard views, IDs, and user data are preserved. */
 body.space-dashboard{background:#101727}
 body.space-dashboard .workspace{display:block!important;min-width:0;background:#101727}
+body.space-dashboard .workspace[hidden]{display:none!important}
 body.space-dashboard .ws-sidebar{display:none!important}
 body.space-dashboard .ws-main{display:block!important;width:100%;max-width:none!important;margin:0!important;padding:0 0 80px!important;min-width:0;overflow:visible}
 body.space-dashboard .ws-header{position:relative!important;top:auto!important;margin:0!important;padding:0 clamp(18px,3vw,38px)!important;height:78px;min-height:78px;box-sizing:border-box;display:flex;align-items:center;flex-wrap:nowrap;gap:24px;background:#151d30!important;border-bottom:1px solid #63718a3b;box-shadow:none;z-index:40}
