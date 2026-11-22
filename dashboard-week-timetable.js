@@ -221,7 +221,7 @@ if(heCalendarSection){
   });
   const axis=textNode("div","he-week-axis");
   axis.style.height=rowsHeight+"px";
-  for(let h=startHour;h<=endHour;h++){
+  for(let h=startHour;h<endHour;h++){
    const hour=textNode("span","he-hour-label",clock(new Date(2026,0,1,h,0)));
    hour.style.top=((h-startHour)*hourHeight)+"px";axis.append(hour);
   }
