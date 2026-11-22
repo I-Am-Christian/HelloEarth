@@ -464,3 +464,65 @@ body.space-dashboard #calendar-view .he-calendar-advanced{
 body.space-dashboard #calendar-view .he-week-axis .he-hour-label-first{
   transform:translateY(7px)!important;
 }
+
+
+/* Clickable half-hour cubes — 06:00–06:30, 06:30–07:00, and so on.
+   Appointments sit above these targets and remain independently clickable. */
+body.space-dashboard #calendar-view .he-week-slot{
+  position:absolute;
+  z-index:1;
+  left:0;
+  width:100%;
+  margin:0;
+  padding:4px;
+  box-sizing:border-box;
+  border:0;
+  border-bottom:1px solid #53668163;
+  border-radius:0;
+  background:transparent;
+  appearance:none;
+  cursor:pointer;
+  text-align:center;
+  color:#f1e6ff;
+  font-family:'DM Sans',system-ui,sans-serif;
+  transition:background-color .12s ease,box-shadow .12s ease;
+}
+body.space-dashboard #calendar-view .he-week-slot.he-week-slot-hour-end{
+  border-bottom-color:#6c7f9c95;
+}
+body.space-dashboard #calendar-view .he-week-slot:hover,
+body.space-dashboard #calendar-view .he-week-slot:focus-visible{
+  background:rgba(174,135,224,.20);
+  box-shadow:inset 0 0 0 1px #d6b3f2a8;
+  outline:none;
+}
+body.space-dashboard #calendar-view .he-week-slot.is-selected{
+  background:rgba(196,142,225,.28);
+  box-shadow:inset 0 0 0 2px #e8b5fa;
+}
+body.space-dashboard #calendar-view .he-week-slot-label{
+  display:inline-block;
+  max-width:100%;
+  padding:3px 6px;
+  border-radius:5px;
+  background:#422f60;
+  color:#faf1ff;
+  font:750 11px/1.25 'DM Sans',system-ui,sans-serif;
+  white-space:nowrap;
+  opacity:0;
+  pointer-events:none;
+  transform:translateY(2px);
+  transition:opacity .1s ease,transform .1s ease;
+}
+body.space-dashboard #calendar-view .he-week-slot:hover .he-week-slot-label,
+body.space-dashboard #calendar-view .he-week-slot:focus-visible .he-week-slot-label,
+body.space-dashboard #calendar-view .he-week-slot.is-selected .he-week-slot-label{
+  opacity:1;
+  transform:translateY(0);
+}
+@media(prefers-reduced-motion:reduce){
+  body.space-dashboard #calendar-view .he-week-slot,
+  body.space-dashboard #calendar-view .he-week-slot-label{
+    transition:none;
+  }
+}
