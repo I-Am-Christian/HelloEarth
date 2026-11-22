@@ -480,6 +480,9 @@ async function init() {
     console.error("Workspace initialization failed", err?.name || "unknown error");
   }
 }
+document.getElementById("he-open-teaching")?.addEventListener("click",()=>{window.location.href="teaching.html"});
+document.getElementById("he-student-teaching")?.addEventListener("click",()=>{if(state.selected)window.location.href="teaching.html?student="+encodeURIComponent(state.selected.id)});
+
 window.HelloEarthWorkspace = {
  get userId(){return state.user?.id||null},
  get students(){return state.students.slice()},
