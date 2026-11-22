@@ -10,7 +10,9 @@ const pages={
  students:{title:"Students",eyebrow:"WORKSPACE / LEARNERS",caption:"Profiles, goals and lesson notes."},
  progress:{title:"Progress",eyebrow:"WORKSPACE / INSIGHTS",caption:"Student development and CEFR assessments."},
  tools:{title:"Tools & records",eyebrow:"WORKSPACE / TOOLS",caption:"Scheduling, lessons, reports and templates in one place."},
- atlas:{title:"Atlas AI",eyebrow:"EXPLORE / COMING SOON",caption:"Explore planned teaching assistance."}
+ homework:{title:"Homework",eyebrow:"WORKSPACE / ASSIGNMENTS",caption:"Assignment deadlines and completed work."},
+ lessons:{title:"Lesson Creation",eyebrow:"WORKSPACE / LESSONS",caption:"Create, edit, and save original teaching materials."},
+ settings:{title:"Settings",eyebrow:"WORKSPACE / PREFERENCES",caption:"Time format and AI connection."}
 };
 const commands=[
  {title:"Overview",desc:"Your teaching dashboard",page:"overview",symbol:"⌂",terms:"home today"},
@@ -18,10 +20,11 @@ const commands=[
  {title:"Students",desc:"Student profiles and lesson notes",page:"students",symbol:"♧",terms:"learner names"},
  {title:"Progress",desc:"Assessments and CEFR development",page:"progress",symbol:"▥",terms:"levels charts report"},
  {title:"Bookings & scheduling",desc:"Booking requests and recurring lessons",tool:"schedule",symbol:"▦",terms:"recurring availability"},
- {title:"Homework & preparation",desc:"Assignments and lesson checklists",tool:"students",symbol:"▤",terms:"student care"},
+ {title:"Homework",desc:"Assignments and due dates",page:"homework",symbol:"▤",terms:"student care homework"},
+ {title:"Lesson Creation",desc:"Create lessons manually or with your own OpenAI API",page:"lessons",symbol:"✎",terms:"lesson plans AI API ChatGPT"},
  {title:"Earnings & reports",desc:"Hours, income and student reports",tool:"business",symbol:"◫",terms:"income money weekly"},
  {title:"Teaching templates",desc:"Reusable lesson material and attendance",tool:"resources",symbol:"✧",terms:"resources attendance cancellation"},
- {title:"Atlas AI",desc:"Planned teaching features",page:"atlas",symbol:"✦",terms:"artificial intelligence"},
+ {title:"Settings",desc:"Time display and API preferences",page:"settings",symbol:"⚙",terms:"settings clock"},
  {title:"New student",desc:"Create a learner profile",action:"add-student",symbol:"+",terms:"add student learner create"},
  {title:"Schedule lesson",desc:"Open the Google Calendar scheduler",action:"schedule",symbol:"+",terms:"new lesson book appointment"},
  {title:"Start lesson",desc:"Open the live lesson companion",action:"start-lesson",symbol:"▶",terms:"timer companion notes"}
@@ -60,7 +63,7 @@ function action(name){
  case "add-student":addStudent();break;
  case "start-lesson":$("ws-companion-open")?.click();break;
  case "notes":page("students");break;
- case "homework":tools("students");break;
+ case "homework":page("homework");break;
  case "reports":tools("business");break;
  case "unassessed":
   page("students");
