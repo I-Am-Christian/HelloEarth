@@ -206,3 +206,89 @@ body.space-dashboard #overview-view .ux-quickstart-grid > button > span{
 @media(max-width:350px){
  body.space-dashboard #overview-view .ux-quickstart-grid{grid-template-columns:1fr!important}
 }
+
+
+/* Compact, viewport-safe desktop shell. Keep all controls visible at normal zoom. */
+html:has(body.space-dashboard),body.space-dashboard{max-width:100%;overflow-x:clip}
+body.space-dashboard .workspace,body.space-dashboard .ws-main{min-width:0;max-width:100%;box-sizing:border-box}
+body.space-dashboard .ws-header{
+ width:100%;max-width:100%;min-width:0;
+ padding-inline:max(18px,calc((100vw - 1240px)/2))!important;
+ box-sizing:border-box;gap:14px;height:66px;min-height:66px;
+}
+body.space-dashboard .ws-header .he-top-brand{min-width:0;flex:0 0 auto;font-size:22px}
+body.space-dashboard .ws-header .ux-header-actions{
+ flex:0 1 auto;min-width:0;max-width:calc(100% - 180px);
+ margin-left:auto;gap:8px;justify-content:flex-end;
+}
+body.space-dashboard .ws-header .ux-header-actions > *{min-width:0}
+body.space-dashboard .ws-header .ux-search-trigger{flex:0 1 200px;min-width:37px;max-width:200px}
+body.space-dashboard .ws-header .ws-account{display:flex;flex:0 0 auto;min-width:0;max-width:100%;gap:6px;align-items:center}
+body.space-dashboard .ws-header .ws-account #signout{flex:0 0 auto;min-width:35px;max-width:42px;overflow:hidden;padding:9px!important}
+body.space-dashboard .ws-header .ws-account #signout span{display:none!important}
+body.space-dashboard .ws-view-switch{
+ padding-inline:max(18px,calc((100vw - 1240px)/2))!important;
+ box-sizing:border-box;
+}
+body.space-dashboard .ws-view-switch .ws-view-tab{height:52px;padding-inline:15px!important}
+body.space-dashboard .ws-view-switch{height:53px}
+body.space-dashboard #overview-view{width:min(calc(100% - 36px),900px);padding-top:26px}
+body.space-dashboard #overview-view .he-home-intro{margin-bottom:16px}
+body.space-dashboard #overview-view .he-home-intro h2{font-size:29px;margin-bottom:4px}
+body.space-dashboard #overview-view .he-home-intro p{font-size:13px}
+body.space-dashboard #overview-view .he-next-hero{
+ min-height:178px;padding:19px 24px;margin-bottom:26px;
+ grid-template-columns:minmax(0,1fr) 150px;
+}
+body.space-dashboard #overview-view .he-next-hero h3{font-size:24px;margin:0 0 3px}
+body.space-dashboard #overview-view .he-next-hero .he-feature-time{font-size:16px;margin-bottom:3px}
+body.space-dashboard #overview-view .he-next-hero .he-feature-sub{font-size:12px;margin-bottom:13px}
+body.space-dashboard #overview-view .he-feature-actions button{min-height:36px;padding:7px 13px;font-size:12px}
+body.space-dashboard #overview-view .he-feature-art{height:135px}
+body.space-dashboard #overview-view .he-feature-art .he-planet{width:96px;height:96px}
+body.space-dashboard #overview-view .he-feature-art .he-ring{width:135px;height:40px;border-width:8px}
+body.space-dashboard #overview-view .he-upcoming{margin-bottom:18px}
+body.space-dashboard #overview-view .he-upcoming-head{margin-bottom:12px}
+body.space-dashboard #overview-view .he-upcoming-head h3{font-size:23px}
+body.space-dashboard #overview-view .he-upcoming-empty{padding:13px 16px;min-height:0}
+body.space-dashboard #overview-view .he-upcoming-item{min-height:64px;padding:9px 13px}
+body.space-dashboard #overview-view .ws-summary{margin-top:19px;margin-bottom:16px}
+body.space-dashboard #overview-view .ws-summary > .ws-metric{padding:13px 16px;min-height:0}
+body.space-dashboard #overview-view .ux-quickstart{margin:16px 0 22px!important;padding:17px 19px!important}
+body.space-dashboard #overview-view .ux-quickstart-grid > button{min-height:82px!important;padding:12px 13px!important}
+body.space-dashboard #overview-view .ux-quickstart-heading{margin-bottom:12px!important}
+body.space-dashboard #overview-view .ux-overview-layout{margin-top:14px}
+@media(min-width:1550px){
+ body.space-dashboard #overview-view{width:min(calc(100% - 48px),940px)}
+}
+@media(max-width:1090px){
+ body.space-dashboard .ws-header .ux-search-trigger{flex-basis:42px;min-width:38px;max-width:42px}
+ body.space-dashboard .ws-header .ux-search-trigger span,
+ body.space-dashboard .ws-header .ux-search-trigger kbd{display:none!important}
+ body.space-dashboard .ws-header .ux-create-button{padding-inline:10px!important}
+}
+@media(max-width:800px){
+ body.space-dashboard .ws-header{padding-inline:14px!important;height:59px;min-height:59px;gap:8px}
+ body.space-dashboard .ws-header .he-top-brand{font-size:19px}
+ body.space-dashboard .ws-header .ux-header-actions{max-width:calc(100% - 146px);gap:5px}
+ body.space-dashboard .ws-view-switch{padding-inline:8px!important}
+ body.space-dashboard #overview-view{width:calc(100% - 28px);padding-top:22px}
+ body.space-dashboard #overview-view .he-next-hero{min-height:170px;grid-template-columns:minmax(0,1fr) 95px;padding:17px 16px;margin-bottom:24px}
+ body.space-dashboard #overview-view .he-feature-art{height:100px}
+ body.space-dashboard #overview-view .he-feature-art .he-planet{width:70px;height:70px}
+ body.space-dashboard #overview-view .he-feature-art .he-ring{width:102px;height:31px;border-width:6px}
+}
+@media(max-width:480px){
+ body.space-dashboard .ws-header .he-top-brand{font-size:17px}
+ body.space-dashboard .ws-header .he-top-brand img{width:27px;height:27px}
+ body.space-dashboard .ws-header .ux-header-actions{max-width:calc(100% - 132px)}
+ body.space-dashboard .ws-header .ux-search-trigger{max-width:34px;min-width:34px}
+ body.space-dashboard .ws-header .ux-create-button{display:none!important}
+ body.space-dashboard .ws-header .ws-account .ws-avatar{width:29px;height:29px}
+ body.space-dashboard .ws-header .ws-account #signout{max-width:30px;min-width:30px;padding:5px!important}
+ body.space-dashboard #overview-view .he-home-intro h2{font-size:25px}
+ body.space-dashboard #overview-view .he-next-hero{display:block;min-height:0}
+ body.space-dashboard #overview-view .he-feature-art{display:none}
+ body.space-dashboard #overview-view .ws-summary{gap:7px}
+ body.space-dashboard #overview-view .ws-summary > .ws-metric{padding:10px 8px}
+}
