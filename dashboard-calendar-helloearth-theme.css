@@ -458,3 +458,9 @@ body.space-dashboard #calendar-view .he-week-scroll::after{
 body.space-dashboard #calendar-view .he-calendar-advanced{
   margin-top:23px!important;
 }
+
+/* Midnight is the first visible time marker. Keep it inside the first row
+   instead of letting the normal centered tick overlap the all-day section. */
+body.space-dashboard #calendar-view .he-week-axis .he-hour-label-first{
+  transform:translateY(7px)!important;
+}
