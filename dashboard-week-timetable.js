@@ -67,7 +67,7 @@ if(heCalendarSection){
  const toDay=date=>new Date(date.getFullYear(),date.getMonth(),date.getDate());
  function monday(date){const d=toDay(date);d.setDate(d.getDate()-(d.getDay()+6)%7);return d}
  let events=[],connected=false,canWrite=false,mode="week",weekStart=monday(new Date());
- let scrollKey="",dragged=null,scrollOnNextRender=true;
+ let dragged=null;
  function dateField(field){
   if(field?.dateTime)return new Date(field.dateTime);
   if(field?.date){const a=field.date.split("-").map(Number);return new Date(a[0],a[1]-1,a[2])}
@@ -283,21 +283,7 @@ if(heCalendarSection){
    ?shown+" timed appointment"+(shown===1?"":"s")+(allDayCount?" · "+allDayCount+" all-day event"+(allDayCount===1?"":"s"):"")+" · Click a lesson to edit or an empty slot to schedule"
    :"Connect Google Calendar to see your actual appointments in the week grid.";
  }
- function scrollToSchedule(force=false){
-  if(mode!=="week")return;
-  const area=heGet("he-week-scroll");
-  const key=dayKey(weekStart);
-  if(!force&&scrollKey===key)return;
-  scrollKey=key;
-  const now=new Date(),weekEnd=new Date(weekStart);weekEnd.setDate(weekEnd.getDate()+7);
-  const within=now>=weekStart&&now<weekEnd;
-  const candidates=events.filter(e=>e.start?.dateTime&&dateField(e.end)>now&&dateField(e.start)<weekEnd)
-   .sort((a,b)=>dateField(a.start)-dateField(b.start));
-  const earliest=events.filter(e=>e.start?.dateTime).map(e=>dateField(e.start).getHours());
-  const hour=within ? (candidates.length?Math.min(now.getHours(),dateField(candidates[0].start).getHours()):now.getHours())
-   : (earliest.length?Math.min(...earliest):10);
-  area.scrollTop=Math.max(0,(Math.min(endHour-3,Math.max(startHour,hour-1))-startHour)*hourHeight);
- }
+ // Use native document scrolling: do not move the user to an internal scroll position.
  function render(){
   renderGrid();renderAgenda();
   heGet("he-week-scroll").hidden=mode!=="week";
@@ -306,16 +292,15 @@ if(heCalendarSection){
   heGet("he-week-agenda").setAttribute("aria-pressed",String(mode==="agenda"));
   heGet("he-week-mode").classList.toggle("he-mode-active",mode==="week");
   heGet("he-week-agenda").classList.toggle("he-mode-active",mode==="agenda");
-  statusConnection();scrollToSchedule(scrollOnNextRender);
-  scrollOnNextRender=false;
+  statusConnection();
  }
  function moveWeek(direction){
   heGet(direction<0?"calendar-prev":"calendar-next")?.click();
-  syncWeek();scrollOnNextRender=true;render();
+  syncWeek();render();
  }
  heGet("he-week-prev").addEventListener("click",()=>moveWeek(-1));
  heGet("he-week-next").addEventListener("click",()=>moveWeek(1));
- heGet("he-week-today").addEventListener("click",()=>{heGet("calendar-today")?.click();syncWeek();scrollOnNextRender=true;render()});
+ heGet("he-week-today").addEventListener("click",()=>{heGet("calendar-today")?.click();syncWeek();render()});
  heGet("he-week-mode").addEventListener("click",()=>{mode="week";render()});
  heGet("he-week-agenda").addEventListener("click",()=>{mode="agenda";render()});
  heGet("he-week-schedule").addEventListener("click",()=>heGet("calendar-schedule")?.click());
@@ -333,7 +318,7 @@ if(heCalendarSection){
   canWrite=Boolean(e.detail?.canWrite);
   events=Array.isArray(e.detail?.events)?e.detail.events:[];
   if(e.detail?.windowStart)weekStart=monday(new Date(e.detail.windowStart));
-  scrollOnNextRender=true;render();
+  render();
  });
  document.addEventListener("helloearth:calendar-disconnected",()=>{
   connected=false;canWrite=false;events=[];render();
