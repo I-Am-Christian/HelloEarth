@@ -45,3 +45,25 @@ body.space-dashboard #calendar-view{width:min(calc(100% - 32px),1480px);max-widt
 .he-calendar-extras[open]>.he-optimize-calendar{margin-block:15px}
 @media(max-width:850px){.he-week-shell{display:block}.he-week-sidebar{display:flex;flex-direction:row;flex-wrap:wrap;gap:8px;border-right:0;border-bottom:1px solid #65738e4d;padding:12px}.he-week-sidebar>button{flex:1 1 125px}.he-week-legend,.he-week-sidebar-note{display:none}.he-week-toolbar{padding:11px 13px}.he-week-nav strong{font-size:13px}}
 @media(max-width:480px){body.space-dashboard #calendar-view{width:calc(100% - 18px);padding-top:10px}.he-week-toolbar{gap:8px}.he-week-nav,.he-week-modes{gap:4px}.he-week-nav strong{font-size:12px;margin-left:3px}.he-week-nav button,.he-week-modes button{height:32px;min-width:31px;padding:5px 7px}.he-week-grid{grid-template-columns:46px repeat(7,125px);min-width:921px}}
+
+
+/* Direct calendar interaction and reschedule date picker */
+.he-week-day{cursor:pointer}
+.he-week-column{cursor:crosshair}
+.he-week-column:hover{background-color:rgba(185,152,223,.05)}
+.he-week-event{cursor:pointer}
+.he-reschedule-overlay[hidden]{display:none!important}
+.he-reschedule-overlay{position:fixed;inset:0;z-index:200;display:grid;place-items:center;background:rgba(5,9,21,.78);padding:18px;box-sizing:border-box}
+.he-reschedule-dialog{box-sizing:border-box;width:min(100%,440px);max-height:calc(100dvh - 36px);overflow:auto;border-radius:17px;background:#222c45;border:1px solid #8490ac80;box-shadow:0 25px 85px rgba(0,0,0,.45);padding:23px;color:#f9f5ff}
+.he-reschedule-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.he-reschedule-top h2{font:750 23px/1.2 'Space Grotesk',system-ui,sans-serif;margin:0 0 12px}
+.he-reschedule-top button{display:grid;place-items:center;border:1px solid #8792ad66;border-radius:8px;color:#f4eaff;background:#303c56;width:32px;height:32px;cursor:pointer;font-size:22px}
+#he-reschedule-name{font:650 14px/1.4 'DM Sans',system-ui,sans-serif;color:#d5c5e9;margin:0 0 22px}
+#he-reschedule-form label{display:block;font-size:12px;font-weight:750;color:#eee6fa;margin-bottom:8px}
+#he-reschedule-date{display:block;width:100%;box-sizing:border-box;min-height:45px;border:1px solid #9ca4bf8c;border-radius:9px;background:#172139;color:#fff;padding:9px 12px;font:600 15px 'DM Sans',system-ui,sans-serif;color-scheme:dark;cursor:pointer}
+.he-reschedule-help{font:400 12px/1.6 'DM Sans',system-ui,sans-serif;color:#b9c5dc;margin:12px 0 22px}
+.he-reschedule-actions{display:flex;justify-content:flex-end;gap:9px}
+.he-reschedule-actions button{min-height:39px;padding:9px 15px;border-radius:9px;border:1px solid #7e8baa88;background:#303b56;color:#f3ecff;font:700 12px 'DM Sans',system-ui,sans-serif;cursor:pointer}
+.he-reschedule-actions button[type=submit]{border-color:#d8a3d7;background:#bb84be;color:#201a2b}
+.he-reschedule-actions button:hover{filter:brightness(1.1)}
+@media(max-width:520px){.he-reschedule-dialog{padding:18px}.he-reschedule-top h2{font-size:21px}}
