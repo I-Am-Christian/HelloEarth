@@ -433,3 +433,28 @@ body.space-dashboard .ws-view-switch .ws-view-tab{
     top:104px!important;
   }
 }
+
+
+/* Finish the final calendar hour cleanly: the 00:00 tick belongs to the next
+   day, so the grid ends with a subtle closing edge and breathing room. */
+body.space-dashboard #calendar-view .he-week-axis,
+body.space-dashboard #calendar-view .he-week-column{
+  border-bottom:1px solid #647693bf!important;
+}
+body.space-dashboard #calendar-view .he-week-scroll::after{
+  content:"End of day";
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  height:30px;
+  box-sizing:border-box;
+  padding:0 clamp(14px,2vw,30px);
+  border-top:1px solid #465876;
+  background:linear-gradient(180deg,#24324c,#1b273f);
+  color:#a8b8d5;
+  font:600 10px/1.2 'DM Sans',system-ui,sans-serif;
+  letter-spacing:.03em;
+}
+body.space-dashboard #calendar-view .he-calendar-advanced{
+  margin-top:23px!important;
+}
