@@ -18,8 +18,9 @@ if(section){
   <div class="he-week-toolbar">
    <div class="he-week-nav"><button type="button" id="he-week-prev" aria-label="Previous week">‹</button><button type="button" id="he-week-next" aria-label="Next week">›</button>
     <strong id="he-week-range">This week</strong></div>
-   <div class="he-week-modes"><button type="button" id="he-week-today">Today</button><button type="button" class="he-mode-active" id="he-week-mode">Week</button><button type="button" id="he-week-agenda">Agenda</button></div>
+   <div class="he-week-modes"><button type="button" id="he-week-pick-date" aria-expanded="false" aria-controls="he-week-date-picker">Choose date</button><button type="button" id="he-week-today">Today</button><button type="button" class="he-mode-active" id="he-week-mode">Week</button><button type="button" id="he-week-agenda">Agenda</button></div>
   </div>
+  <div class="he-week-date-picker" id="he-week-date-picker" hidden></div>
   <div id="he-week-status" class="he-week-status" role="status" aria-live="polite">Connect Google Calendar to display your weekly timetable.</div>
   <div class="he-week-scroll" id="he-week-scroll" tabindex="0" aria-label="Weekly appointment timetable">
    <div class="he-week-grid" id="he-week-grid"></div>
@@ -94,10 +95,30 @@ if(section){
  const sourceSelector=section.querySelector("#calendar-source-row");
  if(sourceSelector)shell.querySelector(".he-week-main").insertBefore(sourceSelector,shell.querySelector(".he-week-status"));
  const legacy=section.querySelector(".ws-calendar-card");
- if(legacy) section.insertBefore(shell,legacy);
+ if(legacy){
+  // Keep the real clickable day picker visible on demand, not inside settings.
+  shell.querySelector("#he-week-date-picker").append(legacy);
+  legacy.hidden=false;
+ }
+ section.insertBefore(shell,section.firstElementChild);
+ const picker=$("he-week-date-picker");
+ const pickerButton=$("he-week-pick-date");
+ const showPicker=open=>{
+  picker.hidden=!open;
+  pickerButton.setAttribute("aria-expanded",String(open));
+  pickerButton.classList.toggle("he-mode-active",open);
+ };
+ pickerButton.addEventListener("click",()=>showPicker(picker.hidden));
+ // Date selection uses the existing calendar controller, retaining its
+ // click handlers, weekly navigation and Google refresh logic.
+ $("calendar-days")?.addEventListener("click",e=>{
+  if(!e.target.closest(".ws-day[data-day]"))return;
+  syncWeek();render();showPicker(false);
+ });
+
  const extras=document.createElement("details");extras.className="he-calendar-extras";
  extras.innerHTML='<summary>Calendar settings, notifications, scheduling tools &amp; day agenda</summary>';
- const preserved=[".ws-calendar-intro",".ws-calendar-connection",".he-notice-card",".ws-scheduling-actions","#he-optimize-calendar",".ws-calendar-card",".ws-agenda-card"];
+ const preserved=[".ws-calendar-intro",".ws-calendar-connection",".he-notice-card",".ws-scheduling-actions","#he-optimize-calendar",".ws-agenda-card"];
  preserved.forEach(selector=>{const node=section.querySelector(selector);if(node)extras.append(node)});
  section.append(extras);
  let current=[],connected=false,weekStart=monday(new Date()),selectedDate=new Date(),mode="week";
@@ -137,7 +158,7 @@ if(section){
    const date=new Date(weekStart);date.setDate(date.getDate()+i);days.push(date);
    const head=block("button","he-week-day",date.toLocaleDateString(undefined,{weekday:"short",day:"numeric"}));head.type="button";
    if(dayKey(date)===dayKey(new Date()))head.classList.add("he-week-current");
-   head.addEventListener("click",()=>scheduleSlot(date,Math.max(startHour,new Date().getHours())));head.title="Schedule on this date";grid.append(head);
+   head.addEventListener("click",()=>{selectDay(date);showPicker(true)});head.title="Select day and view its appointments";grid.append(head);
   }
   const axis=block("div","he-week-axis");axis.style.height=((endHour-startHour)*hourHeight)+"px";
   for(let hour=startHour;hour<=endHour;hour++){
