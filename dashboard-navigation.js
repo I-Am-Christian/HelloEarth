@@ -610,6 +610,16 @@ function openScheduler(){
   scheduleStatus("Select Authorize scheduling in the Calendar page to allow event creation.",true);
 }
 get("calendar-schedule").addEventListener("click",openScheduler);
+// The weekly timetable can preselect a date and time without bypassing validation.
+document.addEventListener("helloearth:calendar-slot-select",e=>{
+ const detail=e.detail||{};
+ const date=new Date(detail.when);
+ if(!Number.isFinite(date.getTime()))return;
+ calendar.date=toDate(date);
+ openScheduler();
+ scheduleUI.reset(date);
+});
+
 get("schedule-close").addEventListener("click",()=>{
  get("schedule-modal").hidden=true;
  ++schedulePreviewRequest;++scheduleMonthRequest;clearTimeout(scheduleCheckTimer);
@@ -771,6 +781,14 @@ async function moveGoogleEvent(event,newDate){
   get("calendar-day-title").textContent+=" · Appointment moved";
  }catch(error){alert("Could not move Google Calendar appointment: "+(error.message||"Unknown error"))}
 }
+// Reuse the existing permission checks, conflict checks, and explicit confirmation
+// when a user selects a new date from the weekly timetable reschedule dialog.
+document.addEventListener("helloearth:calendar-reschedule",e=>{
+ const d=e.detail||{};
+ const selected=calendar.events.find(item=>item.id===d.id&&item.calendarId===d.calendarId);
+ if(!selected||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(d.newDate||""))return;
+ moveGoogleEvent(selected,d.newDate);
+});
 get("calendar-agenda").addEventListener("dragstart",e=>{
  const item=e.target.closest(".ws-event[data-event-index]");
  draggedCalendarEvent=item?calendar.events[Number(item.dataset.eventIndex)]:null;
