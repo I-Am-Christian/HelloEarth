@@ -1,0 +1,47 @@
+/* Calendar modeled on the familiar Preply weekly timetable layout. */
+body.space-dashboard #calendar-view{width:min(calc(100% - 32px),1480px);max-width:1480px;padding-top:18px}
+.he-week-shell{display:grid;grid-template-columns:206px minmax(0,1fr);min-width:0;background:#151e31;border:1px solid #5f6c854d;border-radius:12px;overflow:hidden;margin:0 0 14px}
+.he-week-sidebar{border-right:1px solid #61708a42;padding:17px 14px;background:#192238;display:flex;flex-direction:column;gap:8px}
+.he-week-sidebar>button{min-height:39px;border-radius:8px;padding:9px 10px;font:700 12px 'DM Sans',system-ui,sans-serif;cursor:pointer}
+.he-week-primary{background:#d592be;color:#231b30;border:1px solid #e9add3}
+.he-week-secondary{background:#252f47;color:#eee8fa;border:1px solid #65728e75}
+.he-week-sidebar>button:hover{filter:brightness(1.12)}
+.he-week-legend{border-top:1px solid #7d88a33f;margin-top:15px;padding-top:16px}
+.he-week-legend h3{color:#f2eafa;font-size:13px;margin:0 0 12px}
+.he-week-legend p{display:flex;align-items:center;gap:9px;font-size:12px;color:#bdc9df;margin:11px 0}
+.he-legend-dot{width:9px;height:9px;border-radius:3px;background:#a3c9f8;flex:none}
+.he-other-dot{background:#efb0cb}.he-all-day-dot{background:#f5d88f}
+.he-week-sidebar-note{font-size:11px;line-height:1.6;color:#91a1c1;margin-top:15px}
+.he-week-main{min-width:0}
+.he-week-toolbar{min-height:69px;padding:12px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid #64738e50}
+.he-week-nav,.he-week-modes{display:flex;align-items:center;gap:9px}
+.he-week-nav strong{font:700 16px 'Space Grotesk',system-ui,sans-serif;color:#f5f0ff;margin-left:8px;white-space:nowrap}
+.he-week-nav button,.he-week-modes button{height:35px;min-width:37px;border:1px solid #7883a26b;border-radius:7px;background:#26314a;color:#ecedf7;font-weight:700;cursor:pointer;padding:6px 10px}
+.he-week-nav button{font-size:22px;line-height:1}
+.he-week-modes button{font-size:12px}
+.he-week-modes .he-mode-active{border-bottom:3px solid #e68ebd;color:white}
+.he-week-status{padding:8px 16px;font-size:11px;color:#a7b5d0;border-bottom:1px solid #65738c38}
+.he-week-scroll{width:100%;overflow:auto;max-height:min(70vh,730px);scrollbar-color:#7686a5 #172138}
+.he-week-grid{display:grid;grid-template-columns:60px repeat(7,minmax(132px,1fr));min-width:1010px;position:relative}
+.he-week-corner,.he-week-day{position:sticky;top:0;z-index:6;height:48px;border:0;border-right:1px solid #76829d43;border-bottom:1px solid #8995aa45;background:#1f2a40;color:#d6dcef}
+.he-week-corner{display:grid;place-items:center;font-size:9px;color:#95a4c3}
+.he-week-day{cursor:pointer;font:700 12px 'DM Sans',system-ui,sans-serif}
+.he-week-day:hover,.he-week-day.he-week-current{color:#fff;background:#34334f}
+.he-week-axis{position:relative;border-right:1px solid #7d8ba14b;background:#192238}
+.he-hour-label{position:absolute;right:9px;transform:translateY(-50%);font-size:10px;color:#98a8c7}
+.he-week-column{position:relative;border-right:1px solid #7a879e3b;background:repeating-linear-gradient(to bottom,#172136 0,#172136 63px,#64728a50 63px,#64728a50 64px)}
+.he-week-event{display:flex;flex-direction:column;align-items:flex-start;text-align:left;position:absolute;overflow:hidden;z-index:2;border-radius:7px;border:1px solid #729ef5;background:#293f64;color:#edf3ff;padding:4px 6px;cursor:pointer;font:600 12px/1.3 'DM Sans',system-ui,sans-serif;min-width:0}
+.he-week-event:nth-of-type(3n){background:#4c304d;border-color:#d482bb}
+.he-week-event:nth-of-type(5n){background:#254b51;border-color:#79c1b4}
+.he-week-event:hover{z-index:4;filter:brightness(1.2);outline:1px solid #eef2ff}
+.he-week-event small{display:block;font-size:10px;font-weight:500;white-space:nowrap}
+.he-week-event strong{display:block;max-width:100%;font-size:11px;overflow:hidden;text-overflow:ellipsis}
+.he-week-event.he-week-all-day{background:#5b4d2e;border-color:#f1cc73;color:#fff7d9}
+.he-calendar-extras{border:1px solid #62718a65;background:#1a2439;border-radius:12px;padding:0 15px 15px;margin-bottom:24px}
+.he-calendar-extras>summary{padding:15px 8px;color:#dfd1fc;font-size:13px;font-weight:700;cursor:pointer}
+.he-calendar-extras:not([open])>*:not(summary){display:none!important}
+.he-calendar-extras[open]>.ws-calendar-card{display:none!important}
+.he-calendar-extras[open]>.ws-calendar-intro{margin-top:14px}
+.he-calendar-extras[open]>.he-optimize-calendar{margin-block:15px}
+@media(max-width:850px){.he-week-shell{display:block}.he-week-sidebar{display:flex;flex-direction:row;flex-wrap:wrap;gap:8px;border-right:0;border-bottom:1px solid #65738e4d;padding:12px}.he-week-sidebar>button{flex:1 1 125px}.he-week-legend,.he-week-sidebar-note{display:none}.he-week-toolbar{padding:11px 13px}.he-week-nav strong{font-size:13px}}
+@media(max-width:480px){body.space-dashboard #calendar-view{width:calc(100% - 18px);padding-top:10px}.he-week-toolbar{gap:8px}.he-week-nav,.he-week-modes{gap:4px}.he-week-nav strong{font-size:12px;margin-left:3px}.he-week-nav button,.he-week-modes button{height:32px;min-width:31px;padding:5px 7px}.he-week-grid{grid-template-columns:46px repeat(7,125px);min-width:921px}}
