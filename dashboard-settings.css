@@ -1,0 +1,15 @@
+body.space-dashboard #settings-view{width:min(calc(100% - 36px),900px);padding-top:30px}
+.he-settings-header{margin:0 0 22px}
+.he-settings-header h2{font:750 29px 'Space Grotesk',system-ui,sans-serif;margin:0 0 5px;color:#faf6ff}
+.he-settings-header p{margin:0;color:#b8c5de;font-size:13px}
+.he-settings-card{background:#1d2940;border:1px solid #71809b58;border-radius:14px;padding:24px;max-width:640px}
+.he-settings-card h3{font-size:19px;color:#faf6ff;margin:0 0 8px}
+.he-settings-card p{font-size:12px;color:#b9c6db;line-height:1.6;margin:0 0 17px}
+.he-settings-field{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.he-settings-field label{font-weight:700;font-size:13px;color:#eee9ff}
+.he-settings-field select{min-width:190px;padding:10px 13px;border-radius:9px;background:#283550;border:1px solid #818ba87c;color:#fff;font-weight:650}
+.he-settings-example{margin:12px 0 0!important;color:#cab6ee!important}
+.he-countdown{display:inline-flex;align-items:center;gap:6px;max-width:100%;margin-bottom:10px;padding:7px 11px;border-radius:7px;background:#ffffff1b;color:#f8efff;font:750 12px/1.35 'DM Sans',system-ui,sans-serif}
+.he-countdown[hidden]{display:none!important}
+.he-upcoming-countdown{font-size:11px;color:#dfbfef;margin-top:4px;display:block}
+@media(max-width:600px){.he-settings-card{padding:18px}.he-settings-field{align-items:flex-start;flex-direction:column;gap:10px}.he-settings-field select{width:100%}}
