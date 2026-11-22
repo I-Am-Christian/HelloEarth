@@ -366,7 +366,7 @@ async function refreshEvents(){
   rememberConnection(calendar.userId,calendar.email);
   updateCalendarControls();setCalendarSources();renderWeek();
   document.dispatchEvent(new CustomEvent("helloearth:calendar-events",{detail:{
-   connected:true,windowStart:from.toISOString(),windowEnd:until.toISOString(),events:calendar.events.map(e=>({
+   connected:true,canWrite:Boolean(calendar.writeAuthorized),windowStart:from.toISOString(),windowEnd:until.toISOString(),events:calendar.events.map(e=>({
     id:e.id,calendarId:e.calendarId,summary:e.summary,start:e.start,end:e.end,
     calendarName:e.calendarName,recurringEventId:e.recurringEventId||null,
     eventType:e.eventType||"",transparency:e.transparency||"",
