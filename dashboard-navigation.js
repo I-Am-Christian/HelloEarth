@@ -730,7 +730,7 @@ function localParts(time,timezone){
 const timezoneValid=zone=>{
  try{new Intl.DateTimeFormat("en",{timeZone:zone});return true}catch{return false}
 };
-function wallTimeMove(event,newDate){
+function wallTimeMove(event,newDate,newTime){
  const start=eventDate(event.start),end=eventDate(event.end);
  if(!Number.isFinite(start.getTime())||!Number.isFinite(end.getTime())||end<=start)throw Error("Invalid event times");
  const duration=end-start;
@@ -741,6 +741,12 @@ function wallTimeMove(event,newDate){
   const targetEnd=new Date(newDate+"T12:00:00Z");targetEnd.setUTCDate(targetEnd.getUTCDate()+days);
   return {start:{date:newDate},end:{date:targetEnd.toISOString().slice(0,10)}};
  }
+ if(newTime){
+  if(!/^[0-9]{2}:[0-9]{2}$/.test(newTime))throw Error("Choose a valid start time.");
+  const localStart=new Date(newDate+"T"+newTime+":00");
+  if(!Number.isFinite(localStart.getTime()))throw Error("Invalid date or time.");
+  return {start:{dateTime:localStart.toISOString()},end:{dateTime:new Date(localStart.getTime()+duration).toISOString()}};
+ }
  const zone=timezoneValid(event.start.timeZone)?event.start.timeZone:
   Intl.DateTimeFormat().resolvedOptions().timeZone;
  const parts=localParts(start,zone);
@@ -749,7 +755,7 @@ function wallTimeMove(event,newDate){
  return {start:{dateTime:localStart,timeZone:zone},
   end:{dateTime:wallEnd,timeZone:zone}};
 }
-async function moveGoogleEvent(event,newDate){
+async function moveGoogleEvent(event,newDate,newTime){
  if(!event?.id||!event.calendarId)return;
  if(!calendar.connected||!calendar.writeAuthorized||!calendar.token){
   alert("Authorize Google Calendar scheduling before moving appointments.");return;
@@ -757,19 +763,22 @@ async function moveGoogleEvent(event,newDate){
  if(!calendar.sources.some(src=>src.id===event.calendarId&&src.writable)){
   alert("This calendar is read-only. You cannot move appointments in it.");return;
  }
- const oldDay=localField(eventDate(event.start)).slice(0,10);
- if(newDate===oldDay)return;
- if(!confirm("Move "+(event.summary||"this event")+" to "+newDate+" while keeping its local time? This changes Google Calendar."))return;
+ const oldStart=eventDate(event.start);
+ const oldDay=localField(oldStart).slice(0,10);
+ const oldTime=String(oldStart.getHours()).padStart(2,"0")+":"+String(oldStart.getMinutes()).padStart(2,"0");
+ if(newDate===oldDay&&(!newTime||newTime===oldTime))return;
+ if(!confirm("Reschedule "+(event.summary||"this event")+" to "+newDate+(newTime?" at "+newTime:"")+"? This changes Google Calendar."))return;
  try{
-  const times=wallTimeMove(event,newDate);
+  const times=wallTimeMove(event,newDate,newTime);
   const from=new Date(newDate+"T00:00:00");
   from.setDate(from.getDate()-1);
   const until=new Date(newDate+"T00:00:00");until.setDate(until.getDate()+3);
   let checked=null;
   try{checked=await readScheduleRange(from,until)}catch{}
+  const proposedStart=eventDate(times.start),proposedEnd=eventDate(times.end);
   const other=checked?.events?.filter(e=>
    !(e.id===event.id&&e.calendarId===event.calendarId)&&
-   eventDate(e.start)<until&&eventDate(e.end)>from)||[];
+   eventDate(e.start)<proposedEnd&&eventDate(e.end)>proposedStart)||[];
   if(!checked?.complete){
    if(!confirm("Some Google calendars could not be checked. Move the event anyway?"))return;
   }else if(other.length){
@@ -788,7 +797,7 @@ document.addEventListener("helloearth:calendar-reschedule",e=>{
  const d=e.detail||{};
  const selected=calendar.events.find(item=>item.id===d.id&&item.calendarId===d.calendarId);
  if(!selected||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(d.newDate||""))return;
- moveGoogleEvent(selected,d.newDate);
+ moveGoogleEvent(selected,d.newDate,d.newTime);
 });
 get("calendar-agenda").addEventListener("dragstart",e=>{
  const item=e.target.closest(".ws-event[data-event-index]");
