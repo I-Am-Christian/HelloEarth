@@ -25,6 +25,50 @@ if(section){
    <div class="he-week-grid" id="he-week-grid"></div>
   </div>
  </div></div>`;
+ const reschedule=document.createElement("div");
+ reschedule.className="he-reschedule-overlay";
+ reschedule.hidden=true;
+ reschedule.innerHTML='<div class="he-reschedule-dialog" role="dialog" aria-modal="true" aria-labelledby="he-reschedule-heading"><div class="he-reschedule-top"><h2 id="he-reschedule-heading">Reschedule appointment</h2><button type="button" id="he-reschedule-close" aria-label="Close">×</button></div><p id="he-reschedule-name"></p><form id="he-reschedule-form"><label for="he-reschedule-date">Choose a new date</label><input id="he-reschedule-date" type="date" required><p class="he-reschedule-help">The appointment keeps its original time and duration. You will confirm before Google Calendar is changed.</p><div class="he-reschedule-actions"><button type="button" id="he-reschedule-cancel">Cancel</button><button type="submit">Review change</button></div></form></div>';
+ section.append(reschedule);
+ let selectedEvent=null,previousFocus=null;
+ const closeReschedule=()=>{
+  reschedule.hidden=true;
+  selectedEvent=null;
+  previousFocus?.focus?.();
+ };
+ const openReschedule=event=>{
+  selectedEvent=event;previousFocus=document.activeElement;
+  $("he-reschedule-name").textContent=event.summary||"Untitled appointment";
+  $("he-reschedule-date").value=dayKey(dateOf(event.start));
+  reschedule.hidden=false;$("he-reschedule-date").focus();
+ };
+ $("he-reschedule-close").addEventListener("click",closeReschedule);
+ $("he-reschedule-cancel").addEventListener("click",closeReschedule);
+ reschedule.addEventListener("click",e=>{if(e.target===reschedule)closeReschedule()});
+ reschedule.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){e.preventDefault();closeReschedule()}
+  if(e.key==="Tab"){
+   const focusable=Array.from(reschedule.querySelectorAll("button,input")).filter(el=>!el.disabled);
+   const first=focusable[0],last=focusable[focusable.length-1];
+   if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}
+   else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
+  }
+ });
+ $("he-reschedule-form").addEventListener("submit",e=>{
+  e.preventDefault();
+  if(!selectedEvent)return;
+  const date=$("he-reschedule-date").value;
+  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date))return;
+  const chosen=selectedEvent;
+  closeReschedule();
+  document.dispatchEvent(new CustomEvent("helloearth:calendar-reschedule",{
+   detail:{id:chosen.id,calendarId:chosen.calendarId,newDate:date}
+  }));
+ });
+ function scheduleSlot(date,hour=startHour,minute=0){
+  const when=new Date(date.getFullYear(),date.getMonth(),date.getDate(),hour,minute);
+  document.dispatchEvent(new CustomEvent("helloearth:calendar-slot-select",{detail:{when:when.toISOString()}}));
+ }
  const legacy=section.querySelector(".ws-calendar-card");
  if(legacy) section.insertBefore(shell,legacy);
  const extras=document.createElement("details");extras.className="he-calendar-extras";
@@ -69,7 +113,7 @@ if(section){
    const date=new Date(weekStart);date.setDate(date.getDate()+i);days.push(date);
    const head=block("button","he-week-day",date.toLocaleDateString(undefined,{weekday:"short",day:"numeric"}));head.type="button";
    if(dayKey(date)===dayKey(new Date()))head.classList.add("he-week-current");
-   head.addEventListener("click",()=>selectDay(date));grid.append(head);
+   head.addEventListener("click",()=>scheduleSlot(date,Math.max(startHour,new Date().getHours())));head.title="Schedule on this date";grid.append(head);
   }
   const axis=block("div","he-week-axis");axis.style.height=((endHour-startHour)*hourHeight)+"px";
   for(let hour=startHour;hour<=endHour;hour++){
@@ -79,6 +123,8 @@ if(section){
   let count=0;
   days.forEach(date=>{
    const day=block("div","he-week-column");day.style.height=((endHour-startHour)*hourHeight)+"px";
+   day.title="Click an empty time slot to schedule an appointment";
+   day.addEventListener("click",e=>{if(e.target.closest(".he-week-event"))return;const bounds=day.getBoundingClientRect();const relative=Math.max(0,Math.min((endHour-startHour)*hourHeight-1,e.clientY-bounds.top));const mins=Math.round(relative/hourHeight*60/15)*15;const total=startHour*60+mins;scheduleSlot(date,Math.floor(total/60),total%60)});
    const next=new Date(date);next.setDate(next.getDate()+1);
    const dayEvents=current.filter(e=>dateOf(e.start)<next&&dateOf(e.end)>date);
    dayEvents.sort((a,b)=>dateOf(a.start)-dateOf(b.start));
@@ -96,8 +142,8 @@ if(section){
     const when=block("small","",allDay?"All day":formatTime(start)+" – "+formatTime(finish));
     btn.append(when,heading);
     btn.title=(event.summary||"Busy")+" · "+(allDay?"All day":formatTime(start)+" – "+formatTime(finish));
-    btn.setAttribute("aria-label",btn.title+". Show this date in agenda");
-    btn.addEventListener("click",()=>{selectDay(date);mode="agenda";setModes();extras.open=true;$("calendar-agenda")?.scrollIntoView({behavior:"smooth",block:"nearest"})});
+    btn.setAttribute("aria-label",btn.title+". Reschedule appointment");
+    btn.addEventListener("click",e=>{e.stopPropagation();if(event.id&&event.calendarId)openReschedule(event);else{selectDay(date);mode="agenda";setModes();extras.open=true;$("calendar-agenda")?.scrollIntoView({behavior:"smooth",block:"nearest"})}});
     // For simultaneous events share the available column space, rather than obscuring each other.
     const concurrent=dayEvents.filter(other=>other!==event&&dateOf(other.start)<finish&&dateOf(other.end)>start);
     const earlier=concurrent.filter(other=>dateOf(other.start)<=start);
@@ -109,7 +155,7 @@ if(section){
    });
    grid.append(day);
   });
-  $("he-week-status").textContent=connected?(count?count+" appointment blocks in this week. Click one to view details.":"No appointments in this week. Use the arrows to browse other weeks."):"Connect Google Calendar below to see your schedule.";
+  $("he-week-status").textContent=connected?(count?count+" appointment blocks in this week. Click an appointment to reschedule, or an empty slot to schedule.":"No appointments in this week. Use the arrows to browse other weeks."):"Connect Google Calendar below to see your schedule.";
  }
  document.addEventListener("helloearth:calendar-events",e=>{connected=Boolean(e.detail?.connected);current=e.detail?.events||[];if(e.detail?.windowStart)weekStart=monday(new Date(e.detail.windowStart));render()});
  document.addEventListener("helloearth:calendar-disconnected",()=>{connected=false;current=[];render()});
