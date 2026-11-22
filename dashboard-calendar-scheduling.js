@@ -12,7 +12,7 @@ if(modal){
  form.before(wrapper);
  const editor=document.createElement("section");
  editor.id="he-inline-reschedule";editor.className="he-inline-reschedule";editor.hidden=true;
- editor.innerHTML='<h3 id="he-inline-name">Select a calendar appointment</h3><p class="he-reschedule-hint">Click any appointment on the weekly calendar to edit it here. The new date and start time will be checked before saving to Google Calendar.</p><form id="he-inline-reschedule-form"><label for="he-inline-date">New date<input type="date" id="he-inline-date" required></label><label for="he-inline-time">New start time<input type="time" id="he-inline-time" step="300" required></label><p id="he-inline-duration" class="he-reschedule-hint">Original lesson duration is retained.</p><div class="he-work-actions"><button type="submit" class="dash-primary" id="he-inline-submit">Review reschedule</button></div><p id="he-inline-status" role="status" aria-live="polite"></p></form>';
+ editor.innerHTML='<h3 id="he-inline-name">Select a calendar appointment</h3><p class="he-reschedule-hint">Click any appointment on the weekly calendar to edit it here. The new date and start time will be checked before saving to Google Calendar.</p><form id="he-inline-reschedule-form"><label for="he-inline-date">New date<input type="date" id="he-inline-date" required></label><label for="he-inline-time">New start time<input type="time" id="he-inline-time" step="1800" required></label><p id="he-inline-duration" class="he-reschedule-hint">Original lesson duration is retained.</p><div class="he-work-actions"><button type="submit" class="dash-primary" id="he-inline-submit">Review reschedule</button></div><p id="he-inline-status" role="status" aria-live="polite"></p></form>';
  form.after(editor);
  let selected=null,mode="lesson";
  const fmtDate=date=>[date.getFullYear(),String(date.getMonth()+1).padStart(2,"0"),String(date.getDate()).padStart(2,"0")].join("-");
@@ -43,6 +43,8 @@ if(modal){
   byId("he-inline-name").textContent=selected.summary||"Untitled appointment";
   byId("he-inline-date").value=/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(detail.targetDate||"")?detail.targetDate:fmtDate(start);
   byId("he-inline-time").value=/^[0-9]{2}:[0-9]{2}$/.test(detail.targetTime||"")?detail.targetTime:String(start.getHours()).padStart(2,"0")+":"+String(start.getMinutes()).padStart(2,"0");
+  // Preserve existing off-grid event times while new selections use 00/:30.
+  byId("he-inline-time").step=start.getMinutes()%30===0||detail.targetTime?"1800":"300";
   byId("he-inline-time").disabled=Boolean(selected.start?.date);
   const duration=Math.round((end-start)/60000);
   byId("he-inline-duration").textContent=selected.start?.date?"All-day event — date can be changed.":Number.isFinite(duration)?"Duration: "+duration+" minutes (unchanged).":"Original duration is preserved.";
@@ -54,6 +56,14 @@ if(modal){
   if(!selected){byId("he-inline-status").textContent="Choose an appointment in the weekly calendar first.";return}
   const newDate=byId("he-inline-date").value,time=byId("he-inline-time").disabled?null:byId("he-inline-time").value;
   if(!/^\d{4}-\d{2}-\d{2}$/.test(newDate)||(!byId("he-inline-time").disabled&&!/^\d{2}:\d{2}$/.test(time||"")))return;
+  // Older Google events may start at :15 or :25; allow preserving that
+  // unchanged time, but require a half-hour boundary for any NEW start time.
+  const original=parseDate(selected.start);
+  const originalTime=String(original.getHours()).padStart(2,"0")+":"+String(original.getMinutes()).padStart(2,"0");
+  if(time&&time!==originalTime&&Number(time.slice(3))%30!==0){
+   byId("he-inline-status").textContent="Choose a 30-minute time slot, e.g. 06:00 or 06:30.";
+   return;
+  }
   modal.hidden=true;
   document.dispatchEvent(new CustomEvent("helloearth:calendar-reschedule",{detail:{id:selected.id,calendarId:selected.calendarId,newDate,newTime:time}}));
  });
