@@ -3,7 +3,7 @@ import { db } from "./supabase-client.js";
 
 const get = id => document.getElementById(id);
 const translate = key => window.HelloEarthI18n?.t(key) ?? key;
-const views = ["overview","calendar","students","progress","tools","atlas","settings"];
+const views = ["overview","calendar","students","progress","homework","lessons","tools","settings"];
 const monday = date => {
  const day = new Date(date.getFullYear(),date.getMonth(),date.getDate());
  day.setDate(day.getDate() - ((day.getDay()+6)%7));return day;
@@ -1114,7 +1114,7 @@ function renderProgress(levels,total){
 }
 document.addEventListener("helloearth:studentsloaded",event=>renderProgress(event.detail.levels,event.detail.total));
 if(window.HelloEarthDashboardSummary)renderProgress(window.HelloEarthDashboardSummary.levels,window.HelloEarthDashboardSummary.total);
-const startView=location.hash.slice(1);
+const startView=location.hash.slice(1)==="atlas"?"lessons":location.hash.slice(1);
 const justAuthorized=new URLSearchParams(location.search).get("calendar")==="connected";
 setView(views.includes(startView)?startView:justAuthorized?"calendar":"overview");
 renderWeek();restore().catch(()=>{calendar.restored=true;updateCalendarControls()});
