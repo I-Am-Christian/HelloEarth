@@ -53,7 +53,7 @@ if(section){
  $("he-week-next").addEventListener("click",()=>move(1));
  $("he-week-today").addEventListener("click",()=>{$("calendar-today")?.click();syncWeek();render()});
  $("he-week-schedule").addEventListener("click",()=>$("calendar-schedule")?.click());
- $("he-week-timeoff").addEventListener("click",()=>{$("calendar-schedule")?.click();const option=$("schedule-kind");if(option){option.value="timeoff";option.dispatchEvent(new Event("change",{bubbles:true}))}});
+ $("he-week-timeoff").addEventListener("click",()=>{$("calendar-schedule")?.click();$("schedule-kind-timeoff")?.click()});
  $("he-week-optimize").addEventListener("click",()=>{extras.open=true;$("he-optimize-calendar")?.scrollIntoView({behavior:"smooth",block:"start"})});
  $("he-week-agenda").addEventListener("click",()=>{mode="agenda";setModes();extras.open=true;$("calendar-agenda")?.scrollIntoView({behavior:"smooth",block:"start"})});
  $("he-week-mode").addEventListener("click",()=>{mode="week";setModes();shell.scrollIntoView({behavior:"smooth",block:"start"})});
