@@ -67,7 +67,7 @@ if(heCalendarSection){
  const toDay=date=>new Date(date.getFullYear(),date.getMonth(),date.getDate());
  function monday(date){const d=toDay(date);d.setDate(d.getDate()-(d.getDay()+6)%7);return d}
  let events=[],connected=false,canWrite=false,mode="week",weekStart=monday(new Date());
- let dragged=null;
+ let dragged=null,selectedSlot=null;
  function dateField(field){
   if(field?.dateTime)return new Date(field.dateTime);
   if(field?.date){const a=field.date.split("-").map(Number);return new Date(a[0],a[1]-1,a[2])}
@@ -236,15 +236,44 @@ if(heCalendarSection){
    day.style.setProperty("--he-hour-height",hourHeight+"px");
    day.setAttribute("aria-label","Appointments "+date.toLocaleDateString(undefined,{dateStyle:"full"}));
    day.title="Click an empty slot to schedule, or drag an appointment here to reschedule";
-   const minutesForY=y=>Math.max(0,Math.min(rowsHeight-1,y))*60/hourHeight+startHour*60;
+   // Each cell represents exactly 30 minutes, including 06:00–06:30.
+   const halfHourHeight=hourHeight/2;
    const slotAt=(clientY)=>{
     const r=day.getBoundingClientRect();
-    const total=Math.max(startHour*60,Math.min(endHour*60-15,Math.round(minutesForY(clientY-r.top)/15)*15));
-    return {hour:Math.floor(total/60),minute:total%60};
+    const slotIndex=Math.max(0,Math.min((endHour-startHour)*2-1,
+      Math.floor((clientY-r.top)/halfHourHeight)));
+    const total=startHour*60+slotIndex*30;
+    return {hour:Math.floor(total/60),minute:total%60,total};
    };
+   const chooseSlot=(total,button)=>{
+    selectedSlot=dayKey(date)+"|"+total;
+    heGet("he-week-grid").querySelectorAll(".he-week-slot.is-selected").forEach(other=>{
+     if(other!==button){other.classList.remove("is-selected");other.setAttribute("aria-pressed","false")}
+    });
+    if(button){button.classList.add("is-selected");button.setAttribute("aria-pressed","true")}
+    openSchedule(date,Math.floor(total/60),total%60);
+   };
+   for(let total=startHour*60;total<endHour*60;total+=30){
+    const begin=new Date(date.getFullYear(),date.getMonth(),date.getDate(),Math.floor(total/60),total%60);
+    const finish=new Date(begin.getTime()+30*60*1000);
+    const cube=textNode("button","he-week-slot");
+    cube.type="button";
+    cube.style.top=((total-startHour*60)*hourHeight/60)+"px";
+    cube.style.height=halfHourHeight+"px";
+    if(total%60===30)cube.classList.add("he-week-slot-hour-end");
+    const label=clock(begin)+" – "+clock(finish);
+    cube.title="Schedule "+label;
+    cube.setAttribute("aria-label","Schedule "+date.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"})+" from "+label);
+    const chosen=selectedSlot===dayKey(date)+"|"+total;
+    cube.setAttribute("aria-pressed",String(chosen));
+    if(chosen)cube.classList.add("is-selected");
+    cube.append(textNode("span","he-week-slot-label",label));
+    cube.addEventListener("click",event=>{event.stopPropagation();chooseSlot(total,cube)});
+    day.append(cube);
+   }
    day.addEventListener("click",e=>{
-    if(e.target.closest(".he-week-event"))return;
-    const slot=slotAt(e.clientY);openSchedule(date,slot.hour,slot.minute);
+    if(e.target.closest(".he-week-event,.he-week-slot"))return;
+    const slot=slotAt(e.clientY);chooseSlot(slot.total,null);
    });
    day.addEventListener("dragover",e=>{
     if(!dragged)return;
@@ -256,6 +285,12 @@ if(heCalendarSection){
     if(!dragged)return;
     e.preventDefault();day.classList.remove("he-week-drop-target");
     const slot=slotAt(e.clientY),event=dragged;dragged=null;
+    selectedSlot=dayKey(date)+"|"+slot.total;
+    day.querySelectorAll(".he-week-slot").forEach(cube=>{
+     const active=cube.style.top===(slot.total-startHour*60)*hourHeight/60+"px";
+     cube.classList.toggle("is-selected",active);
+     cube.setAttribute("aria-pressed",String(active));
+    });
     editEvent(event,dayKey(date),String(slot.hour).padStart(2,"0")+":"+String(slot.minute).padStart(2,"0"));
    });
    const entries=[];
