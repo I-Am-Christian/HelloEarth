@@ -621,6 +621,12 @@ document.addEventListener("helloearth:calendar-slot-select",e=>{
  calendar.date=toDate(date);
  openScheduler();
  scheduleUI.reset(date);
+ // Clicking a half-hour slot creates a draft with the same 30-minute length.
+ // The user can still choose a different lesson duration.
+ if(detail.durationMinutes===30){
+  get("schedule-duration").value="30";
+  get("schedule-duration").dispatchEvent(new Event("change",{bubbles:true}));
+ }
 });
 
 get("schedule-close").addEventListener("click",()=>{
