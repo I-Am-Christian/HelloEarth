@@ -41,8 +41,8 @@ if(modal){
   const start=parseDate(selected.start),end=parseDate(selected.end);
   if(!Number.isFinite(start.getTime()))return;
   byId("he-inline-name").textContent=selected.summary||"Untitled appointment";
-  byId("he-inline-date").value=fmtDate(start);
-  byId("he-inline-time").value=String(start.getHours()).padStart(2,"0")+":"+String(start.getMinutes()).padStart(2,"0");
+  byId("he-inline-date").value=/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(detail.targetDate||"")?detail.targetDate:fmtDate(start);
+  byId("he-inline-time").value=/^[0-9]{2}:[0-9]{2}$/.test(detail.targetTime||"")?detail.targetTime:String(start.getHours()).padStart(2,"0")+":"+String(start.getMinutes()).padStart(2,"0");
   byId("he-inline-time").disabled=Boolean(selected.start?.date);
   const duration=Math.round((end-start)/60000);
   byId("he-inline-duration").textContent=selected.start?.date?"All-day event — date can be changed.":Number.isFinite(duration)?"Duration: "+duration+" minutes (unchanged).":"Original duration is preserved.";
