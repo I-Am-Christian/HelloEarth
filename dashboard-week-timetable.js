@@ -38,7 +38,7 @@ if(section){
  function dateOf(raw){if(raw?.dateTime)return new Date(raw.dateTime);if(raw?.date)return new Date(raw.date+"T00:00:00");return new Date(NaN)}
  function pad(n){return String(n).padStart(2,"0")}
  function dayKey(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
- function formatTime(d){return d.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"})}
+ function formatTime(d){return window.HelloEarthTime?.formatTime(d)||d.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit",hour12:false})}
  function selectDay(date){
   selectedDate=date;
   const button=Array.from(document.querySelectorAll("#calendar-days .ws-day")).find(b=>b.dataset.day===dayKey(date));
@@ -115,6 +115,7 @@ if(section){
  document.addEventListener("helloearth:calendar-disconnected",()=>{connected=false;current=[];render()});
  document.addEventListener("helloearth:view-changed",e=>{if(e.detail?.view==="calendar"){syncWeek();render()}});
  document.addEventListener("helloearth:languagechanged",render);
+ document.addEventListener("helloearth:time-format-changed",render);
  // Navigation changes update the old agenda before the new week fetch completes.
  $("calendar-prev")?.addEventListener("click",()=>{syncWeek();render()});
  $("calendar-next")?.addEventListener("click",()=>{syncWeek();render()});
