@@ -82,6 +82,7 @@ function setConnection(email,status,active=false){
  emailNode.textContent=email||translate("Not connected");
  statusNode.textContent=status;
  get("calendar-connection-indicator").classList.toggle("is-connected",active);
+ document.dispatchEvent(new CustomEvent("helloearth:calendar-connection-status",{detail:{email,status,connected:active}}));
 }
 function setCalendarSources(){
  const select=get("calendar-source-select");
@@ -1004,6 +1005,8 @@ get("calendar-next").addEventListener("click",()=>{calendar.week.setDate(calenda
 get("calendar-today").addEventListener("click",()=>{calendar.date=toDate(new Date());calendar.week=monday(calendar.date);renderWeek();if(calendar.token)refreshEvents()});
 get("calendar-refresh").addEventListener("click",refreshEvents);
 get("calendar-connect")?.addEventListener("click",()=>connectGoogle(false));
+document.addEventListener("helloearth:calendar-connect-request",()=>connectGoogle(false));
+document.addEventListener("helloearth:calendar-refresh-request",()=>refreshEvents());
 db.auth.onAuthStateChange((event,session)=>{
  // A normal HelloEarth Google login token might not include Calendar permission.
  // Only capture a fresh provider token when OUR Calendar OAuth flow is in progress.
