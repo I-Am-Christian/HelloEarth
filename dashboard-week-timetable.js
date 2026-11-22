@@ -91,11 +91,13 @@ if(section){
  document.addEventListener("helloearth:calendar-connection-status",syncConnection);
  const statusNode=$("calendar-sync-status");
  if(statusNode){new MutationObserver(syncConnection).observe(statusNode,{childList:true,characterData:true,subtree:true})}
+ const sourceSelector=section.querySelector("#calendar-source-row");
+ if(sourceSelector)shell.querySelector(".he-week-main").insertBefore(sourceSelector,shell.querySelector(".he-week-status"));
  const legacy=section.querySelector(".ws-calendar-card");
  if(legacy) section.insertBefore(shell,legacy);
  const extras=document.createElement("details");extras.className="he-calendar-extras";
  extras.innerHTML='<summary>Calendar settings, notifications, scheduling tools &amp; day agenda</summary>';
- const preserved=[".ws-calendar-intro",".ws-calendar-connection",".he-notice-card","#calendar-source-row",".ws-scheduling-actions","#he-optimize-calendar",".ws-calendar-card",".ws-agenda-card"];
+ const preserved=[".ws-calendar-intro",".ws-calendar-connection",".he-notice-card",".ws-scheduling-actions","#he-optimize-calendar",".ws-calendar-card",".ws-agenda-card"];
  preserved.forEach(selector=>{const node=section.querySelector(selector);if(node)extras.append(node)});
  section.append(extras);
  let current=[],connected=false,weekStart=monday(new Date()),selectedDate=new Date(),mode="week";
