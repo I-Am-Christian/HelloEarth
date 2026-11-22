@@ -63,7 +63,7 @@ if(heCalendarSection){
  const calendarSources=heCalendarSection.querySelector("#calendar-source-row");
  if(calendarSources)main.querySelector(".he-week-main").insertBefore(calendarSources,heGet("he-week-status"));
 
- const startHour=6, endHour=24, hourHeight=62, rowsHeight=(endHour-startHour)*hourHeight;
+ const startHour=6, endHour=24, hourHeight=96, rowsHeight=(endHour-startHour)*hourHeight;
  const toDay=date=>new Date(date.getFullYear(),date.getMonth(),date.getDate());
  function monday(date){const d=toDay(date);d.setDate(d.getDate()-(d.getDay()+6)%7);return d}
  let events=[],connected=false,canWrite=false,mode="week",weekStart=monday(new Date());
@@ -188,7 +188,9 @@ if(heCalendarSection){
    group.forEach(e=>{
     const b=makeEventButton(e.event,e.start,e.end);
     b.style.top=(Math.max(0,e.begin)*hourHeight/60+2)+"px";
-    b.style.height=Math.max(22,(e.finish-e.begin)*hourHeight/60-4)+"px";
+    const eventHeight=Math.max(14,(e.finish-e.begin)*hourHeight/60-4);
+    b.style.height=eventHeight+"px";
+    if(eventHeight<37)b.classList.add("he-week-compact");
     b.style.left="calc("+(e.slot*100/count)+"% + 3px)";
     b.style.width="calc("+(100/count)+"% - 6px)";
     day.append(b);
