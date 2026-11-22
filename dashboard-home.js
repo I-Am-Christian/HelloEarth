@@ -24,7 +24,11 @@ if(overview){
  const render=()=>{
   const now=Date.now();
   const valid=appointments.filter(e=>e&&e.start&&Number.isFinite(parsed(e.start).getTime())&&parsed(e.end||e.start).getTime()>now)
-    .sort((a,b)=>parsed(a.start)-parsed(b.start));
+    .sort((a,b)=>{
+     const isCurrent=e=>Boolean(e.start?.dateTime&&e.end?.dateTime&&parsed(e.start).getTime()<=now&&parsed(e.end).getTime()>now);
+     if(isCurrent(a)!==isCurrent(b))return isCurrent(a)?-1:1;
+     return parsed(a.start)-parsed(b.start);
+    });
   const list=document.getElementById("he-upcoming-list");if(!list)return;
   list.replaceChildren();
   // Prefer a class in progress over a class that has not started.
