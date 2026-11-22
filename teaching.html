@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer"><title>Teaching Companion | HelloEarth</title>
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="teaching.css?v=20261122-1">
+<script type="module" src="teaching.js?v=20261122-1"></script>
+</head><body>
+<header class="teach-header">
+ <a href="dashboard.html" class="teach-logo"><img src="logo.svg" alt="" width="40" height="40"><span>helloearth<span class="dot">.</span></span></a>
+ <a href="dashboard.html" class="teach-back">← Back to dashboard</a>
+</header>
+<main class="teach-main" id="teach-app" hidden>
+ <div class="teach-hero"><div><span class="eyebrow">TEACHING COMPANION</span><h1>Make every lesson count.</h1><p>Capture corrections during class, save useful feedback and create private exercises that record students' answers.</p></div></div>
+ <div class="teach-toolbar"><label>Student<select id="t-student"><option value="">Choose a student</option></select></label><label>Lesson date<input id="t-date" type="date"></label></div>
+ <div class="teach-tabs" role="group" aria-label="Teaching tools"><button id="t-tab-notes" class="active" type="button">Lesson feedback</button><button id="t-tab-exercise" type="button">Exercise links</button></div>
+ <p id="t-status" role="status" aria-live="polite" class="teach-status">Loading your students…</p>
+ <div id="t-notes-view" class="teach-columns">
+  <section class="teach-card">
+   <div class="teach-card-heading"><h2>Live lesson feedback</h2><p>One learning objective, memorable corrections and a simple follow-up.</p></div>
+   <label>Learning objective<input id="t-objective" maxlength="500" placeholder="Talk about yesterday using the past simple"></label>
+   <label>Lesson summary<textarea id="t-summary" rows="3" maxlength="2500" placeholder="What did you practise in this lesson?"></textarea></label>
+   <label>Strengths<textarea id="t-strengths" rows="2" maxlength="1500" placeholder="What did your student do well?"></textarea></label>
+   <label>Next steps<textarea id="t-next" rows="2" maxlength="1500" placeholder="What should you practise next?"></textarea></label>
+   <label>Optional homework<textarea id="t-homework" rows="2" maxlength="1500" placeholder="A short review task"></textarea></label>
+   <div class="teach-subhead"><h3>Corrections & vocabulary</h3><small id="t-item-count">0 items</small></div>
+   <div class="teach-inline">
+    <label>Type<select id="t-kind"><option value="correction">Sentence correction</option><option value="vocabulary">New vocabulary</option></select></label>
+    <label><span id="t-before-label">Student said</span><input id="t-before" maxlength="280" placeholder="Yesterday I go to work"></label>
+    <label><span id="t-after-label">Correct sentence</span><input id="t-after" maxlength="280" placeholder="Yesterday I went to work"></label>
+   </div>
+   <label>Explanation or example<input id="t-explain" maxlength="400" placeholder="Use went, the past form of go"></label>
+   <button id="t-add-item" type="button" class="teach-soft">+ Add correction / word</button>
+   <div id="t-items" class="teach-records"></div>
+   <div class="teach-actions"><button id="t-draft" type="button">Save draft</button><button id="t-final" type="button" class="teach-primary">Finish & save report</button><button id="t-print" type="button">Print / Save PDF</button><button id="t-new" type="button">New lesson</button></div>
+   <p class="teach-note">Reports and drafts are private to your account. Students do not automatically see them.</p>
+  </section>
+  <aside class="teach-card"><h2>Past reports</h2><p class="teach-note">Select a previous lesson to reopen and edit its feedback.</p><div id="t-history" class="teach-records"></div></aside>
+ </div>
+ <div id="t-exercise-view" class="teach-columns" hidden>
+  <section class="teach-card">
+   <h2>Generate a student exercise link</h2><p class="teach-note">Each private link belongs to one student, expires after 30 days and accepts one submission. Multiple-choice answers are marked automatically, while written answers are saved for teacher review.</p>
+   <label>Exercise title<input id="t-ex-title" maxlength="140" placeholder="Unit 2 · Past tense practice"></label>
+   <label>Student instructions<textarea id="t-ex-instructions" maxlength="1200" rows="2" placeholder="Answer all the questions and submit once."></textarea></label>
+   <div class="teach-subhead"><h3>Questions</h3><small id="t-question-count">0 / 12</small></div>
+   <label>Question text<input id="t-prompt" maxlength="500" placeholder="Which sentence is correct?"></label>
+   <div class="teach-inline"><label>Answer type<select id="t-type"><option value="choice">Multiple choice</option><option value="text">Written answer</option></select></label><label id="t-correct-wrap">Correct option<select id="t-correct"><option value="0">Option 1</option><option value="1">Option 2</option><option value="2">Option 3</option><option value="3">Option 4</option></select></label></div>
+   <label id="t-options-wrap">Options (one per line, 2–4 total)<textarea id="t-options" rows="4" placeholder="I went to work yesterday.&#10;I go to work yesterday."></textarea></label>
+   <button type="button" id="t-add-question" class="teach-soft">+ Add question</button>
+   <div id="t-questions" class="teach-records"></div>
+   <div class="teach-actions"><button type="button" id="t-publish" class="teach-primary">Generate private link</button></div>
+   <div id="t-link-box" class="teach-link-box" hidden><label>Copy the private link now<input readonly id="t-link"></label><div class="teach-actions"><button id="t-copy" type="button">Copy link</button><button id="t-preview" type="button">Preview</button></div><small>Only share this link with the intended learner. Anyone with it can submit the answers once.</small></div>
+  </section>
+  <aside class="teach-card"><h2>Exercises & recorded answers</h2><p class="teach-note">Review answers, regenerate an unused link or close an exercise.</p><div id="t-exercises" class="teach-records"></div><div id="t-review" class="teach-review" hidden></div></aside>
+ </div>
+</main>
+<div id="teach-loading" class="teach-loading">Checking your secure session…</div>
+</body></html>
