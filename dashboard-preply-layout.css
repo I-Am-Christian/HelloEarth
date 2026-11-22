@@ -1,0 +1,83 @@
+/* Preply-style two-tier navigation and centered tutor homepage.
+   Existing dashboard views, IDs, and user data are preserved. */
+body.space-dashboard{background:#101727}
+body.space-dashboard .workspace{display:block!important;min-width:0;background:#101727}
+body.space-dashboard .ws-sidebar{display:none!important}
+body.space-dashboard .ws-main{display:block!important;width:100%;max-width:none!important;margin:0!important;padding:0 0 80px!important;min-width:0;overflow:visible}
+body.space-dashboard .ws-header{position:relative!important;top:auto!important;margin:0!important;padding:0 clamp(18px,3vw,38px)!important;height:78px;min-height:78px;box-sizing:border-box;display:flex;align-items:center;flex-wrap:nowrap;gap:24px;background:#151d30!important;border-bottom:1px solid #63718a3b;box-shadow:none;z-index:40}
+body.space-dashboard .ws-header .he-top-brand{display:inline-flex;gap:10px;align-items:center;flex:none;white-space:nowrap;color:#f8f4ff;text-decoration:none;font:800 24px 'Space Grotesk',system-ui,sans-serif;letter-spacing:-1.1px}
+body.space-dashboard .he-top-brand img{width:36px;height:36px}
+body.space-dashboard .he-top-brand .brand-dot{color:#c6a4f4}
+body.space-dashboard .ws-header .ux-page-heading{display:none!important}
+body.space-dashboard .ws-header .ux-header-actions{margin-left:auto;display:flex;gap:12px;flex-wrap:nowrap;min-width:0}
+body.space-dashboard .ws-header .ux-search-trigger{min-width:160px;max-width:240px}
+body.space-dashboard .ws-header .ws-account{display:flex;gap:10px;align-items:center}
+body.space-dashboard .ws-header .ws-account .ws-avatar{display:grid!important}
+body.space-dashboard .ws-header #ws-companion-open{display:none!important}
+body.space-dashboard .ws-header .ux-signout{border:0;background:transparent;color:#b8c4df}
+body.space-dashboard .ws-view-switch{display:flex!important;position:relative!important;z-index:30;align-items:stretch;justify-content:flex-start;gap:3px;width:100%!important;max-width:none!important;margin:0!important;padding:0 clamp(18px,3vw,38px)!important;height:57px;box-sizing:border-box;overflow-x:auto;overflow-y:hidden;border:0!important;border-radius:0!important;background:#151d30!important;border-bottom:1px solid #63718a3b!important;scrollbar-width:thin}
+body.space-dashboard .ws-view-switch .ws-view-tab{display:inline-flex;align-items:center;justify-content:center;flex:none;white-space:nowrap;gap:7px;min-width:0;min-height:0;height:56px;padding:0 18px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:#b6c1d6;font:650 13px 'DM Sans',system-ui,sans-serif}
+body.space-dashboard .ws-view-switch .ws-view-tab.is-current{border-bottom:3px solid #e18bba!important;color:#fff!important}
+body.space-dashboard .ws-view-switch .ws-view-tab:hover{color:#fff!important;background:#ffffff09!important}
+body.space-dashboard .ws-swipe-hint{display:none!important}
+body.space-dashboard .ux-mobile-nav,body.space-dashboard .ws-mobile-nav{display:none!important}
+body.space-dashboard .ux-return-bar{max-width:1050px;margin:15px auto 0!important;padding:0 12px}
+body.space-dashboard .ws-view{width:min(100% - 40px,1050px);max-width:1050px;margin:0 auto;min-width:0;padding-top:35px}
+body.space-dashboard #overview-view{width:min(100% - 40px,940px);padding-top:61px}
+body.space-dashboard #overview-view .he-home-intro{margin:0 0 26px}
+body.space-dashboard #overview-view .he-home-chip{display:none}
+body.space-dashboard #overview-view .he-home-intro h2{font-size:clamp(26px,2.7vw,33px);font-weight:750;letter-spacing:-1px;margin-bottom:6px}
+body.space-dashboard #overview-view .he-home-intro p{font-size:14px;color:#b8c0d6}
+body.space-dashboard #overview-view .he-next-hero{min-height:254px;grid-template-columns:minmax(0,1fr) 190px;padding:25px 27px;margin-bottom:59px;border:0;border-radius:9px;background:#42334e;box-shadow:none}
+body.space-dashboard #overview-view .he-next-hero .he-feature-label{display:none}
+body.space-dashboard #overview-view .he-next-hero h3{font-size:clamp(25px,2.6vw,29px);margin-bottom:5px}
+body.space-dashboard #overview-view .he-next-hero .he-feature-time{font-size:19px;margin-bottom:4px}
+body.space-dashboard #overview-view .he-next-hero .he-feature-sub{margin-bottom:20px}
+body.space-dashboard #overview-view .he-feature-actions button{border:1px solid #e5d6f2!important;border-radius:8px!important;min-height:43px;padding:10px 16px;font-size:13px;background:#e6d6f0!important;color:#2c233d!important}
+body.space-dashboard #overview-view .he-feature-actions button+button{background:transparent!important;color:#f7efff!important}
+body.space-dashboard #overview-view .he-feature-art{height:180px}
+body.space-dashboard #overview-view .he-feature-art .he-planet{width:135px;height:135px}
+body.space-dashboard #overview-view .he-feature-art .he-ring{width:180px;height:54px}
+body.space-dashboard #overview-view .he-upcoming{margin:0 0 27px}
+body.space-dashboard #overview-view .he-upcoming-head{margin-bottom:22px}
+body.space-dashboard #overview-view .he-upcoming-head h3{font-size:28px;letter-spacing:-.7px}
+body.space-dashboard #overview-view .he-upcoming-list{gap:8px}
+body.space-dashboard #overview-view .he-upcoming-item{min-height:79px;border-radius:7px;background:#1c263b;border:1px solid #70809a66;padding:12px 16px}
+body.space-dashboard #overview-view .he-event-avatar{width:46px;height:46px;border-radius:7px}
+body.space-dashboard #overview-view .he-event-copy strong{font-size:14px}
+body.space-dashboard #overview-view .he-event-action{background:transparent;border-color:#919bb365}
+body.space-dashboard #overview-view .ws-summary{margin-top:50px}
+body.space-dashboard #overview-view .ux-quickstart{margin-top:25px}
+@media(min-width:1100px){
+ body.space-dashboard .ws-header .ux-search-trigger{min-width:220px}
+}
+@media(max-width:800px){
+ body.space-dashboard .ws-header{height:66px;min-height:66px;padding:0 15px!important;gap:12px}
+ body.space-dashboard .ws-header .he-top-brand{font-size:20px}
+ body.space-dashboard .he-top-brand img{width:30px;height:30px}
+ body.space-dashboard .ws-header .ux-search-trigger{min-width:38px;max-width:38px;padding:8px!important}
+ body.space-dashboard .ws-header .ux-search-trigger span,body.space-dashboard .ws-header .ux-search-trigger kbd{display:none!important}
+ body.space-dashboard .ws-header .ux-create-button{padding:8px!important;min-width:38px}
+ body.space-dashboard .ws-view-switch{height:52px;padding:0 12px!important}
+ body.space-dashboard .ws-view-switch .ws-view-tab{height:51px;padding:0 13px!important;font-size:12px}
+ body.space-dashboard .ws-view{width:calc(100% - 28px);padding-top:25px}
+ body.space-dashboard #overview-view{width:calc(100% - 28px);padding-top:32px}
+ body.space-dashboard #overview-view .he-next-hero{min-height:215px;margin-bottom:38px;padding:22px 18px;grid-template-columns:minmax(0,1fr) 110px}
+ body.space-dashboard #overview-view .he-feature-art .he-planet{width:79px;height:79px}
+ body.space-dashboard #overview-view .he-feature-art .he-ring{width:115px;height:34px;border-width:7px}
+ body.space-dashboard #overview-view .he-upcoming-head h3{font-size:24px}
+ body.space-dashboard #overview-view .he-upcoming-head{margin-bottom:13px}
+}
+@media(max-width:480px){
+ body.space-dashboard .ws-header{gap:7px}
+ body.space-dashboard .ws-header .he-top-brand{font-size:18px}
+ body.space-dashboard .ws-header .ws-account{gap:3px}
+ body.space-dashboard .ws-header .ws-account .ws-avatar{width:30px;height:30px}
+ body.space-dashboard .ws-header .ux-create-button{display:none!important}
+ body.space-dashboard .ws-header .ux-signout{min-width:32px!important}
+ body.space-dashboard #overview-view .he-next-hero{display:block;min-height:220px}
+ body.space-dashboard #overview-view .he-feature-art{display:none}
+ body.space-dashboard #overview-view .he-next-hero h3{font-size:24px}
+ body.space-dashboard #overview-view .he-event-action{font-size:11px}
+ body.space-dashboard #overview-view .he-event-avatar{width:37px;height:37px}
+}
