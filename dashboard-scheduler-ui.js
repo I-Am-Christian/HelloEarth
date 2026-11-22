@@ -42,7 +42,10 @@
     label:fmt(date,{weekday:"short",day:"numeric",month:"short",year:"numeric"})+
       (localDate(date)!==localDate(endDate)?" – "+fmt(endDate,{weekday:"short",day:"numeric",month:"short",year:"numeric"}):"")+" · All day"};
   }
-  const start=fromTime(date,get("schedule-time-start").value);
+  const startText=get("schedule-time-start").value;
+  if(!/^([01][0-9]|2[0-3]):(00|30)$/.test(startText||""))
+   return {valid:false,error:"Choose a 30-minute start slot, such as 06:00 or 06:30."};
+  const start=fromTime(date,startText);
   if(!start)return {valid:false,error:"Choose a valid starting time."};
   let end;
   if(mode==="lesson"){
@@ -50,7 +53,10 @@
    if(!Number.isFinite(minutes)||minutes<15||minutes>480)return {valid:false,error:"Choose a lesson length of 15 minutes to 8 hours."};
    end=new Date(start.getTime()+minutes*60000);
   }else{
-   end=fromTime(date,get("schedule-time-end").value);
+   const endText=get("schedule-time-end").value;
+   if(!/^([01][0-9]|2[0-3]):(00|30)$/.test(endText||""))
+    return {valid:false,error:"Choose a 30-minute end slot, such as 07:00 or 07:30."};
+   end=fromTime(date,endText);
   }
   if(!end||end<=start)return {valid:false,error:"Your end time must be later than your start time."};
   if(end-start>(mode==="lesson"?8:12)*3600000)return {valid:false,error:"Choose a shorter time period."};
