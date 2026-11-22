@@ -64,7 +64,7 @@ if(heCalendarSection){
  if(calendarSources)main.querySelector(".he-week-main").insertBefore(calendarSources,heGet("he-week-status"));
 
  const startHour=6, endHour=24, hourHeight=62, rowsHeight=(endHour-startHour)*hourHeight;
- let events=[],connected=false,mode="week",weekStart=monday(new Date());
+ let events=[],connected=false,canWrite=false,mode="week",weekStart=monday(new Date());
  let scrollKey="",dragged=null,scrollOnNextRender=true;
  const timerSet=new Set();
  const toDay=date=>new Date(date.getFullYear(),date.getMonth(),date.getDate());
@@ -104,7 +104,7 @@ if(heCalendarSection){
   heGet("he-week-connect").hidden=active;
   heGet("he-week-connect").textContent=label&&label!=="Not connected"?"Reconnect":"Connect calendar";
   heGet("he-week-refresh").hidden=!active;
-  heGet("he-week-authorize").hidden=!active;
+  heGet("he-week-authorize").hidden=!active||canWrite;
  }
  function openSchedule(date,hour=startHour,minute=0){
   const when=new Date(date.getFullYear(),date.getMonth(),date.getDate(),hour,minute);
@@ -329,12 +329,13 @@ if(heCalendarSection){
  if(legacyStatus && typeof MutationObserver!=="undefined")new MutationObserver(statusConnection).observe(legacyStatus,{subtree:true,childList:true,characterData:true});
  document.addEventListener("helloearth:calendar-events",e=>{
   connected=Boolean(e.detail?.connected);
+  canWrite=Boolean(e.detail?.canWrite);
   events=Array.isArray(e.detail?.events)?e.detail.events:[];
   if(e.detail?.windowStart)weekStart=monday(new Date(e.detail.windowStart));
   scrollOnNextRender=true;render();
  });
  document.addEventListener("helloearth:calendar-disconnected",()=>{
-  connected=false;events=[];render();
+  connected=false;canWrite=false;events=[];render();
  });
  document.addEventListener("helloearth:view-changed",e=>{
   if(e.detail?.view==="calendar"){syncWeek();render()}
