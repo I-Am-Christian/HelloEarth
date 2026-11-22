@@ -238,7 +238,7 @@ function renderAgenda(){
   const item=document.createElement("article");item.className="ws-event";
   if(event.id&&event.calendarId){item.dataset.eventIndex=String(calendar.events.indexOf(event));item.draggable=true;}
   const at=document.createElement("span");at.className="ws-event-time";
-  at.textContent=event.start?.dateTime?localized(new Date(event.start.dateTime),{hour:"2-digit",minute:"2-digit"}):translate("All day");
+  at.textContent=event.start?.dateTime?(window.HelloEarthTime?.formatTime(new Date(event.start.dateTime))||localized(new Date(event.start.dateTime),{hour:"2-digit",minute:"2-digit",hour12:false})):translate("All day");
   const body=document.createElement("div");const title=document.createElement("strong");
   title.textContent=event.summary||translate("Busy");if(event.summary)title.classList.add("i18n-user-content");
   body.append(title);
@@ -1015,6 +1015,7 @@ db.auth.onAuthStateChange((event,session)=>{
  }
 });
 document.addEventListener("helloearth:languagechanged",()=>renderWeek());
+document.addEventListener("helloearth:time-format-changed",()=>renderAgenda());
 async function restore(){
  const expected=storageRead(sessionStorage,"helloearth-calendar-expected-user");
  const writeExpected=storageRead(sessionStorage,"helloearth-calendar-write-intent");
