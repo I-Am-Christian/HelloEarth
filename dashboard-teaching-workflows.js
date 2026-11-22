@@ -96,7 +96,7 @@ el("he-lesson-save").addEventListener("click",async()=>{
  if(!studentId||!topic||!markdown){say("he-lesson-feedback","Choose a student, enter a topic, and add lesson content.",true);return}
  const button=el("he-lesson-save");button.disabled=true;
  try{
-  await ensureUser();const {error}=await db.from("atlas_lesson_plans").insert({tutor_id:activeTutor,student_id:studentId,topic:topic.slice(0,200),cefr_level:level,duration_minutes:duration,markdown:markdown.slice(0,100000)});
+  await ensureUser();const {error}=await db.from("atlas_lesson_plans").insert({id:crypto.randomUUID(),tutor_id:activeTutor,student_id:studentId,topic:topic.slice(0,200),cefr_level:level,duration_minutes:duration,markdown:markdown.slice(0,100000)});
   if(error)throw error;say("he-lesson-feedback","Lesson saved to this student's records.");await loadLessons();
  }catch(e){say("he-lesson-feedback",e.message,true)}finally{button.disabled=false}
 });
