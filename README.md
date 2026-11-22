@@ -44,3 +44,16 @@ The site uses static HTML/CSS/JS. Key files:
 - `supabase-client.js`: common Supabase client with persisted authentication.
 
 Subscription billing and hosted Atlas AI remain planned, not released.
+
+## Teaching Companion & private exercise links
+
+The `teaching.html` page opens from **Lesson Creation** or the selected student profile in the authenticated dashboard.
+- Save a per-student learning objective, lesson summary, strengths, next steps, homework, corrections, and vocabulary in `he_lesson_feedback` (draft/final).
+- Open past lesson reports, edit them, or print/save a private PDF using the browser print dialog.
+- Create an exercise with 1–12 multiple-choice or written questions and generate a **student-specific private link** under `exercise.html#<token>`.
+- The separate `he-exercises` Edge Function accepts one set of answers per link; multiple choice is automatically scored, and written answers are stored for the teacher to review.
+- Links expire after 30 days and can be revoked by closing the exercise. Unsubmitted links can be regenerated, invalidating the original.
+- Exercise tokens are stored only as SHA-256 hashes in Supabase; answers and correct options are never exposed to unauthenticated database clients.
+- Teachers should inform learners that their answers will be recorded and treat links as private. This is one submission per student-specific link, not a general public survey.
+
+Supabase schema: `database/lesson-feedback-exercises.sql`. The database migration was applied to Hello Earth DB. Do not put student data in GitHub.
