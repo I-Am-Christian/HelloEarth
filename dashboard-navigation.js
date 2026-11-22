@@ -370,6 +370,21 @@ async function refreshEvents(){
     extendedProperties:e.extendedProperties
    }))
   }}));
+  // The Overview is independent of the week currently being browsed.
+  // Query the next two weeks with the same selected calendars and OAuth access.
+  const upcomingFrom=new Date();
+  const upcomingUntil=new Date(upcomingFrom.getTime()+14*24*60*60*1000);
+  const upcomingReads=await Promise.allSettled(toRead.map(source=>
+   eventsForSource(source,upcomingFrom,upcomingUntil,token)));
+  if(req!==calendar.request||calendar.disconnected)return;
+  const upcoming=upcomingReads.filter(item=>item.status==="fulfilled")
+   .flatMap(item=>item.value).sort((a,b)=>eventDate(a.start)-eventDate(b.start));
+  document.dispatchEvent(new CustomEvent("helloearth:upcoming-events",{detail:{
+   connected:true,events:upcoming.map(e=>({
+    id:e.id,calendarId:e.calendarId,summary:e.summary,start:e.start,end:e.end,
+    calendarName:e.calendarName,extendedProperties:e.extendedProperties
+   }))
+  }}));
  }catch(error){
   if(req!==calendar.request||calendar.disconnected)return;
   const status=Number(error?.status||0);
