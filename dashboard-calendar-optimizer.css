@@ -69,3 +69,22 @@ body.space-dashboard .he-opt-slot button{flex:none;font-size:11px;white-space:no
  body.space-dashboard .he-opt-slot{align-items:flex-start;flex-direction:column}
  body.space-dashboard .he-opt-days{gap:9px 13px}
 }
+
+/* Preview-only mode selector and combined timetable guidance */
+body.space-dashboard .he-opt-view-help{
+ grid-column:span 2;align-self:end;margin:0 0 5px;
+ color:#bdc6e1;font-size:12px;line-height:1.55;
+}
+body.space-dashboard .he-opt-field-dimmed{opacity:.85}
+body.space-dashboard .he-opt-summary{
+ margin:0 0 13px;padding:11px 13px;
+ border-radius:10px;background:rgba(115,91,175,.17);
+ color:#e0d4fa;font-size:12px;line-height:1.5;
+}
+body.space-dashboard .he-opt-slot-name{color:#f4e9ff!important;font-size:14px!important}
+@media(max-width:1080px){
+ body.space-dashboard .he-opt-view-help{grid-column:span 2}
+}
+@media(max-width:570px){
+ body.space-dashboard .he-opt-view-help{grid-column:span 1}
+}
