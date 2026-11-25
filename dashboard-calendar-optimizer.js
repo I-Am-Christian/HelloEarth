@@ -15,6 +15,7 @@ const resultsEl=$("he-opt-results");
 const teacherStart=$("he-opt-teacher-start");
 const teacherEnd=$("he-opt-teacher-end");
 const durationEl=$("he-opt-duration");
+const viewEl=$("he-opt-view");
 const weekdays=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const zoneList=["Africa/Johannesburg","Europe/London","Europe/Warsaw","Europe/Madrid","Europe/Istanbul","Europe/Berlin","Europe/Paris","Europe/Rome","America/Sao_Paulo","America/Mexico_City","America/New_York","America/Chicago","America/Los_Angeles","America/Toronto","Asia/Shanghai","Asia/Tokyo","Asia/Dubai","Asia/Kolkata","Australia/Sydney","Pacific/Auckland"];
 const fmtCache=new Map();
@@ -80,73 +81,144 @@ function eventInterval(e){
 function create(tag,cls,content){
  const n=document.createElement(tag);if(cls)n.className=cls;if(content!=null)n.textContent=content;return n;
 }
+function currentTeacherZone(){
+ const candidate=suite.settings?.timezone;
+ const fallback=Intl.DateTimeFormat().resolvedOptions().timeZone;
+ return validZone(candidate)?candidate:(validZone(fallback)?fallback:"Africa/Johannesburg");
+}
+function calendarContext(){
+ const cal=suite.calendar;
+ const start=cal.start?new Date(cal.start).getTime():NaN;
+ const end=cal.end?new Date(cal.end).getTime():NaN;
+ const verified=Boolean(cal.connected&&Number.isFinite(start)&&Number.isFinite(end)&&end>start);
+ const now=Date.now();
+ return {verified,now,from:verified?Math.max(now,start):now,
+  to:verified?end:now+7*86400000,
+  events:verified?cal.events.map(eventInterval).filter(Boolean):[]};
+}
+function validPreference(pref){
+ return Boolean(pref&&validZone(pref.zone)&&
+  Array.isArray(pref.days)&&pref.days.length&&
+  timeToMinutes(pref.start)>=0&&timeToMinutes(pref.end)>timeToMinutes(pref.start));
+}
+function candidatesFor(pref,context,teacherZone,duration,tStart,tEnd){
+ const start=timeToMinutes(pref.start),end=timeToMinutes(pref.end);
+ const list=[],initial=Math.ceil(context.from/1800000)*1800000;
+ for(let ms=initial;ms+duration*60000<=context.to;ms+=1800000){
+  const st=parts(new Date(ms),pref.zone),tt=parts(new Date(ms),teacherZone);
+  const endAt=new Date(ms+duration*60000-60000);
+  const stEnd=parts(endAt,pref.zone),ttEnd=parts(endAt,teacherZone);
+  if(!pref.days.includes(st.day)||st.date!==stEnd.date||
+    tt.date!==ttEnd.date)continue;
+  if(!inside(st.minute,start,end,duration)||!inside(tt.minute,tStart,tEnd,duration))continue;
+  if(context.events.some(e=>ms<e.end+600000&&ms+duration*60000>e.start-600000))continue;
+  const studentMid=st.minute+duration/2,teacherMid=tt.minute+duration/2;
+  const score=Math.abs(studentMid-14*60)*.65+Math.abs(teacherMid-13*60)*.35+
+   (ms-context.now)/86400000*8;
+  list.push({ms,score,studentTime:st,teacherTime:tt});
+ }
+ return list.sort((a,b)=>a.score-b.score||a.ms-b.ms);
+}
+function slotCard(student,pref,item,index,teacherZone,all=false){
+ const card=create("div","he-opt-slot");
+ const left=create("div","he-opt-slot-info");
+ if(all)left.append(create("strong","he-opt-slot-name",student.display_name));
+ left.append(create("strong","",item.teacherTime.weekday+" "+item.teacherTime.date+
+  " · "+item.teacherTime.time+" (your time)"));
+ left.append(create("span","",item.studentTime.weekday+" "+item.studentTime.date+
+  " · "+item.studentTime.time+" ("+pref.zone+")"));
+ left.append(create("small","",all?"Preview suggestion · not reserved":
+  index===0?"Best match for this student":"Alternative suggestion"));
+ const copy=create("button","ws-mini-btn","Copy");
+ copy.type="button";
+ copy.addEventListener("click",()=>{
+  const summary=student.display_name+" — "+new Date(item.ms).toLocaleString("en-GB",{
+   timeZone:teacherZone,weekday:"short",day:"numeric",month:"short",year:"numeric",
+   hour:"2-digit",minute:"2-digit",hourCycle:"h23"})+" ("+teacherZone+") / "+
+   new Date(item.ms).toLocaleString("en-GB",{
+   timeZone:pref.zone,weekday:"short",day:"numeric",month:"short",year:"numeric",
+   hour:"2-digit",minute:"2-digit",hourCycle:"h23"})+" ("+pref.zone+")";
+  if(!navigator.clipboard?.writeText){message("Copying is unavailable in this browser.",true);return}
+  navigator.clipboard.writeText(summary).then(()=>message("Preview time copied. No lessons changed."))
+   .catch(()=>message("Unable to copy. You can select the displayed times.",true));
+ });
+ card.append(left,copy);return card;
+}
 function render(){
  resultsEl.replaceChildren();
- const id=studentEl.value,student=getStudents().find(s=>s.id===id);
- if(!student){resultsEl.append(create("p","he-opt-empty","Select a student to see recommended lesson times."));return}
- const pref=load()[id];
- if(!pref||!validZone(pref.zone)){
-  resultsEl.append(create("p","he-opt-empty","Save this student's time zone and preferred hours first."));return;
+ const all=viewEl.value==="all",students=getStudents();
+ const selected=students.find(s=>s.id===studentEl.value);
+ const saved=load(),teacherZone=currentTeacherZone(),context=calendarContext();
+ const duration=Number(durationEl.value),tStart=timeToMinutes(teacherStart.value),
+  tEnd=timeToMinutes(teacherEnd.value);
+ if(!Number.isFinite(tStart)||!Number.isFinite(tEnd)||tStart>=tEnd){
+  resultsEl.append(create("p","he-opt-empty","Enter valid teaching hours to generate a preview."));return;
  }
- const studentStart=timeToMinutes(pref.start),studentEnd=timeToMinutes(pref.end);
- const tStart=timeToMinutes(teacherStart.value),tEnd=timeToMinutes(teacherEnd.value);
- const duration=Number(durationEl.value);
- if(!Number.isFinite(studentStart)||!Number.isFinite(studentEnd)||studentEnd<=studentStart||
-  !Number.isFinite(tStart)||!Number.isFinite(tEnd)||tEnd<=tStart){
-  resultsEl.append(create("p","he-opt-empty","Check the working-hour ranges before optimizing."));return;
+ if(!all&&!selected){
+  resultsEl.append(create("p","he-opt-empty","Choose a student or switch to All students."));return;
  }
- const teacherZone=validZone(suite.settings?.timezone)?suite.settings.timezone:Intl.DateTimeFormat().resolvedOptions().timeZone;
- const calendar=suite.calendar;
- const verified=Boolean(calendar.connected&&calendar.start&&calendar.end);
- const now=Date.now();
- const from=verified?Math.max(now,new Date(calendar.start).getTime()):now;
- const to=verified?new Date(calendar.end).getTime():now+7*86400000;
- const events=verified?calendar.events.map(eventInterval).filter(Boolean):[];
- const busyBuffer=10*60000;
- let candidates=[];
- const initial=Math.ceil(from/(30*60000))*30*60000;
- for(let ms=initial;ms+duration*60000<=to&&candidates.length<2000;ms+=30*60000){
-  const date=new Date(ms),studentTime=parts(date,pref.zone),teacherTime=parts(date,teacherZone);
-  const endDate=new Date(ms+duration*60000-60000);
-  const studentEndPart=parts(endDate,pref.zone),teacherEndPart=parts(endDate,teacherZone);
-  if(!pref.days.includes(studentTime.day)||studentTime.date!==studentEndPart.date||
-   teacherTime.date!==teacherEndPart.date)continue;
-  if(!inside(studentTime.minute,studentStart,studentEnd,duration)||
-   !inside(teacherTime.minute,tStart,tEnd,duration))continue;
-  if(events.some(e=>ms<e.end+busyBuffer&&ms+duration*60000>e.start-busyBuffer))continue;
-  // Prefer comfortable mid-day hours for both people, with small reward for sooner dates.
-  const studentMid=studentTime.minute+duration/2,teacherMid=teacherTime.minute+duration/2;
-  const score=Math.abs(studentMid-14*60)*.65+Math.abs(teacherMid-13*60)*.35+(ms-now)/86400000*8;
-  candidates.push({ms,score,studentTime,teacherTime});
- }
- candidates.sort((a,b)=>a.score-b.score||a.ms-b.ms);
- latest=candidates.slice(0,8);
+ const eligible=all?students.filter(s=>validPreference(saved[s.id])):
+  validPreference(saved[selected.id])?[selected]:[];
+ const missing=all?students.length-eligible.length:0;
  const heading=create("div","he-opt-results-head");
- heading.append(create("strong","",verified?"Best open times in your synced week":"Possible overlaps — calendar not verified"));
- heading.append(create("small","",teacherZone+" · "+duration+" minute lessons · 10 minute conflict buffer"));
+ heading.append(create("strong","",all?"Whole-week student recommendations (preview)":
+  "Recommended times for "+selected.display_name+" (preview)"));
+ heading.append(create("small","",teacherZone+" · "+duration+" min · 10 min buffer"));
  resultsEl.append(heading);
- if(!verified)resultsEl.append(create("p","he-opt-warning","Connect and refresh Google Calendar to check existing events. These suggestions might clash with appointments."));
- if(verified&&to<=now)resultsEl.append(create("p","he-opt-warning","The synced calendar window has passed. Move to a future week and refresh your calendar."));
- if(!latest.length){
-  resultsEl.append(create("p","he-opt-empty","No matching times in this window. Try widening working hours, changing preferred days, or moving the calendar week."));return;
+ if(!context.verified)resultsEl.append(create("p","he-opt-warning",
+  "Google Calendar is not synced for this window. Results are tentative and may conflict with appointments."));
+ if(context.verified&&context.to<=context.now)resultsEl.append(create("p","he-opt-warning",
+  "The synced week has passed. Select a future week and refresh Google Calendar."));
+ if(all&&missing)resultsEl.append(create("p","he-opt-warning",
+  missing+" student(s) are excluded because their time zone or preferred hours have not been saved."));
+ if(!eligible.length){
+  resultsEl.append(create("p","he-opt-empty",all?
+   "No student preferences saved yet. Select students individually, ask their preferred times, and save their answers.":
+   "Save this student's preferred days, hours and time zone first."));
+  return;
  }
  const list=create("div","he-opt-list");
- latest.forEach((item,i)=>{
-  const card=create("div","he-opt-slot");
-  const title=create("strong","",item.teacherTime.weekday+" "+item.teacherTime.date+" · "+item.teacherTime.time+" (your time)");
-  const second=create("span","",item.studentTime.weekday+" "+item.studentTime.date+" · "+item.studentTime.time+" ("+pref.zone+")");
-  const details=create("small","",i===0?"Top match based on both schedules":"Recommended time zone overlap");
-  const copy=create("button","ws-mini-btn","Copy times");
-  copy.type="button";
-  copy.addEventListener("click",()=>{
-   const line=student.display_name+" — "+title.textContent+" / "+second.textContent;
-   navigator.clipboard?.writeText(line).then(()=>message("Suggested times copied.")).catch(()=>message("Select and copy the displayed times."));
-  });
-  const left=create("div","he-opt-slot-info");left.append(title,second,details);
-  card.append(left,copy);list.append(card);
- });
+ if(all){
+  // Assign at most one non-overlapping suggestion per student, without writing to any calendar.
+  const requests=eligible.map(student=>({
+   student,pref:saved[student.id],
+   candidates:candidatesFor(saved[student.id],context,teacherZone,duration,tStart,tEnd)
+  }));
+  // Hardest-to-place students first reduces clashes for the shared preview.
+  requests.sort((a,b)=>a.candidates.length-b.candidates.length||
+   a.student.display_name.localeCompare(b.student.display_name));
+  const reserved=[];
+  let assigned=0;
+  for(const request of requests){
+   const item=request.candidates.find(candidate=>reserved.every(other=>
+    candidate.ms>=other.end+600000||candidate.ms+duration*60000+600000<=other.start));
+   if(!item){
+    const missingCard=create("div","he-opt-slot");
+    const info=create("div","he-opt-slot-info");
+    info.append(create("strong","",request.student.display_name),
+     create("span","","No non-overlapping match in this preview window"));
+    missingCard.append(info);list.append(missingCard);
+    continue;
+   }
+   reserved.push({start:item.ms,end:item.ms+duration*60000});
+   list.append(slotCard(request.student,request.pref,item,0,teacherZone,true));
+   assigned++;
+  }
+  resultsEl.append(create("p","he-opt-summary",
+   assigned+" of "+eligible.length+" eligible students have a suggested slot. "+
+   "Suggestions do not overlap one another, but are not bookings."));
+ }else{
+  const pref=saved[selected.id];
+  const candidates=candidatesFor(pref,context,teacherZone,duration,tStart,tEnd).slice(0,8);
+  if(!candidates.length){
+   resultsEl.append(create("p","he-opt-empty","No matching times found. Adjust preferred days or working hours, or check a different calendar week."));
+   return;
+  }
+  candidates.forEach((item,i)=>list.append(slotCard(selected,pref,item,i,teacherZone)));
+ }
  resultsEl.append(list);
 }
+
 form.addEventListener("submit",e=>{
  e.preventDefault();const id=studentEl.value,pref=getPreference();
  if(!id){message("Choose a student first.",true);return}
@@ -156,10 +228,15 @@ form.addEventListener("submit",e=>{
  }
  const entries=load();entries[id]=pref;
  if(!persist(entries)){message("Browser storage is unavailable; preferences were not saved.",true);return}
- message("Saved on this browser for your tutor account. Time zone changes are reflected in the recommendations.");
+ message("Preferences saved in this browser. Preview only — no lessons or calendars changed.");
  render();
 });
 studentEl.addEventListener("change",()=>{fill();message("");render()});
+viewEl.addEventListener("change",()=>{
+ const all=viewEl.value==="all";
+ studentEl.closest("label").classList.toggle("he-opt-field-dimmed",all);
+ render();
+});
 [teacherStart,teacherEnd,durationEl].forEach(el=>el.addEventListener("change",render));
 $("he-opt-run").addEventListener("click",render);
 document.addEventListener("helloearth:calendar-events",()=>queueMicrotask(render));
