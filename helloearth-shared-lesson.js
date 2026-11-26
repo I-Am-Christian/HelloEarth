@@ -81,10 +81,10 @@ function paintText(mark){
   const node=document.createElementNS(ns,"rect");node.setAttribute("x",(rect.left-base.left)/base.width*1000);node.setAttribute("y",(rect.top-base.top)/base.height*1000);node.setAttribute("width",rect.width/base.width*1000);node.setAttribute("height",rect.height/base.height*1000);node.setAttribute("fill",mark.color);node.setAttribute("opacity",".28");svg.append(node);
  }
 }
-const colors=new Set(["#8456d5","#dc6a85","#46a49a","#dba84b","#28385f"]);
+const colors={has:value=>typeof value==="string"&&/^#[0-9a-f]{6}$/i.test(value)};
 function validStroke(s){return s&&["pen","highlight"].includes(s.tool)&&colors.has(s.color)&&Array.isArray(s.points)&&s.points.length>=2&&s.points.length<=320&&s.points.every(p=>Array.isArray(p)&&p.length===2&&p.every(n=>typeof n==="number"&&n>=0&&n<=1))}
 function validMark(m){return m&&colors.has(m.color)&&Number.isInteger(m.start)&&Number.isInteger(m.end)&&m.start>=0&&m.end>m.start&&m.end<=el("share-content").textContent.length}
-function sendInk(){if(!inkReady||dead)return;inkChannel.send({type:"broadcast",event:"ink",payload:{author,strokes:presenter?[]:localStrokes.slice(-60),text:textInk.slice(-100)}}).catch(()=>msg("Annotation connection interrupted.",true))}
+function sendInk(){if(!inkReady||dead)return;inkChannel.send({type:"broadcast",event:"ink",payload:{author,strokes:localStrokes.slice(-60),text:textInk.slice(-100)}}).catch(()=>msg("Annotation connection interrupted.",true))}
 async function connectInk(){
  const bytes=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(token));
  const room=Array.from(new Uint8Array(bytes),n=>n.toString(16).padStart(2,"0")).join("");
@@ -121,7 +121,7 @@ function paintStrokes(){
  for(const mark of textInk)paintText(mark);
  for(const stroke of localStrokes)svg.append(drawStroke(stroke,true));
  if(active)svg.append(drawStroke(active,true));
- const canUndo=textInk.length>0||(presenter?sharedStrokes.length>0:localStrokes.length>0);
+ const canUndo=textInk.length>0||localStrokes.length>0||(presenter&&sharedStrokes.length>0);
  el("share-undo").disabled=!canUndo;
  el("share-clear").disabled=!canUndo;
 }
@@ -160,7 +160,7 @@ function finish(event){
  if(!active)return;
  const p=pointFrom(event),stroke=active;active=null;
  if(stroke.points.length<2)stroke.points.push([Math.min(1,stroke.points[0][0]+0.001),Math.min(1,stroke.points[0][1]+0.001)]);
- if(presenter){
+ if(presenter&&["#8456d5","#dc6a85","#46a49a","#dba84b","#28385f"].includes(stroke.color)){
   sharedStrokes.push(stroke);
   if(sharedStrokes.length>155)sharedStrokes.shift();
   queue({annotations:sharedStrokes});
@@ -195,8 +195,8 @@ async function flush(){
 }
 el("share-undo").addEventListener("click",()=>{
  if(tool==="text"&&textInk.length)textInk.pop();
+ else if(localStrokes.length)localStrokes.pop();
  else if(presenter&&sharedStrokes.length){sharedStrokes.pop();queue({annotations:sharedStrokes})}
- else if(!presenter&&localStrokes.length)localStrokes.pop();
  else textInk.pop();sendInk();
  paintStrokes();
 });
@@ -204,7 +204,7 @@ el("share-clear").addEventListener("click",()=>{
  if(!confirm("Clear your own annotations for everyone?"))return;
  textInk=[];sendInk();
  if(presenter){sharedStrokes=[];queue({annotations:[]})}
- else localStrokes=[];
+ localStrokes=[];
  sendInk();paintStrokes();
 });
 for(const btn of document.querySelectorAll("[data-tool]"))btn.addEventListener("click",()=>setTool(btn.dataset.tool));
