@@ -256,6 +256,7 @@ function renderLessons(){
    actionButton("Open homework",()=>openLink(linked.id))
   );
   actions.append(actionButton(linked?"New worksheet":"Create homework link",()=>prepareHomeworkFromLesson(p)));
+  actions.append(actionButton("PDF view",()=>window.open(new URL("lesson.html#saved="+p.id,location.href).href,"_blank","noopener")));
   actions.append(actionButton("Download lesson",()=>downloadText("helloearth-lesson.md",p.markdown||"")));
   row.append(main,actions);root.append(row);
  }
