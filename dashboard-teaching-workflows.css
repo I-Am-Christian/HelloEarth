@@ -79,3 +79,5 @@ body.space-dashboard #lessons-view{max-width:1350px;width:min(calc(100% - 28px),
 .he-generation-row .he-inline-actions{flex:0 1 auto}
 body.space-dashboard #he-generation-list{max-height:420px}
 @media(max-width:850px){body.space-dashboard #lessons-view{width:calc(100% - 20px)}}
+
+.he-workbook-link{display:inline-block;color:#e5b9fa;font-size:11px;font-weight:760;text-decoration:underline;text-underline-offset:3px;margin:8px 0 2px}.he-workbook-link:hover{color:#fff}
