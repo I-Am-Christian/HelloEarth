@@ -37,7 +37,7 @@ function listRow(parent,title,meta,body,actionText,onClick){
 async function loadHomework(){
  try{
   const tutor=await ensureUser();
-  const {data,error}=await db.from("he_homework").select("id,student_id,title,due_on,status,created_at").eq("tutor_id",tutor).order("created_at",{ascending:false}).limit(150);
+  const {data,error}=await db.from("he_homework").select("id,student_id,title,content_markdown,due_on,status,created_at").eq("tutor_id",tutor).order("created_at",{ascending:false}).limit(150);
   if(error)throw error;homeworkRows=data||[];renderHomework();
  }catch(e){say("he-homework-feedback","Could not load homework: "+e.message,true)}
 }
@@ -46,7 +46,7 @@ function renderHomework(){
  const filter=el("he-homework-filter").value;
  const rows=homeworkRows.filter(h=>!filter||h.student_id===filter);
  if(!rows.length){const p=document.createElement("p");p.className="he-record-empty";p.textContent="No assignments here yet. Add an assignment above.";root.append(p);return}
- rows.forEach(h=>listRow(root,h.title,selectedName(h.student_id)+" · "+(h.due_on?"Due "+h.due_on:"No due date")+" · "+h.status,"",h.status==="completed"?"Mark assigned":"Mark completed",async()=>{
+ rows.forEach(h=>listRow(root,h.title,selectedName(h.student_id)+" · "+(h.due_on?"Due "+h.due_on:"No due date")+" · "+h.status,(h.content_markdown||"").slice(0,350),h.status==="completed"?"Mark assigned":"Mark completed",async()=>{
   try{
    const next=h.status==="completed"?"assigned":"completed";
    const {error}=await db.from("he_homework").update({status:next,completed_at:next==="completed"?new Date().toISOString():null}).eq("id",h.id).eq("tutor_id",activeTutor);
@@ -57,13 +57,13 @@ function renderHomework(){
 el("he-homework-filter").addEventListener("change",renderHomework);
 el("he-homework-form").addEventListener("submit",async e=>{
  e.preventDefault();
- const studentId=el("he-homework-student").value,title=clean(el("he-homework-title").value),due=el("he-homework-due").value;
+ const studentId=el("he-homework-student").value,title=clean(el("he-homework-title").value),content=clean(el("he-homework-content").value),due=el("he-homework-due").value;
  if(!studentId||!title){say("he-homework-feedback","Choose a student and enter an assignment.",true);return}
  const button=el("he-homework-save");button.disabled=true;
  try{
   await ensureUser();
-  const {error}=await db.from("he_homework").insert({tutor_id:activeTutor,student_id:studentId,title:title.slice(0,800),due_on:due||null,status:"assigned"});
-  if(error)throw error;el("he-homework-title").value="";say("he-homework-feedback","Homework saved.");await loadHomework();
+  const {error}=await db.from("he_homework").insert({tutor_id:activeTutor,student_id:studentId,title:title.slice(0,800),content_markdown:content.slice(0,30000),due_on:due||null,status:"assigned"});
+  if(error)throw error;el("he-homework-title").value="";el("he-homework-content").value="";say("he-homework-feedback","Homework saved.");await loadHomework();
  }catch(e){say("he-homework-feedback",e.message,true)}finally{button.disabled=false}
 });
 async function loadLessons(){
@@ -148,9 +148,10 @@ async function generateWithHaiku(mode){
   if(mode==="homework"){
    el("he-homework-student").value=studentId;
    el("he-homework-title").value=("Practice: "+topic).slice(0,800);
+   el("he-homework-content").value=String(data.text).slice(0,30000);
   }
   say("he-ai-feedback",
-   mode==="homework"?"Homework generated in the editor; review it and copy the exercises into your assignment before saving.":"Lesson generated. Review and edit it before saving."+
+   mode==="homework"?"Homework generated and copied to the Homework assignment form. Review and assign it from the Homework tab.":"Lesson generated. Review and edit it before saving."+
    (Number.isFinite(data.remainingToday)?" Remaining generations today: "+data.remainingToday+".":""));
  }catch(e){say("he-ai-feedback",e.message,true)}
  finally{buttons.forEach(b=>{b.disabled=false})}
@@ -161,10 +162,19 @@ el("he-homework-from-lesson").addEventListener("click",()=>{
  const text=clean(el("he-lesson-editor").value);if(!text){say("he-lesson-feedback","Create or open a lesson first.",true);return}
  el("he-homework-student").value=el("he-lesson-student").value;
  el("he-homework-title").value=("Practice: "+clean(el("he-lesson-topic").value)).slice(0,800);
+ el("he-homework-content").value=text.slice(0,30000);
  el("homework-tab")?.click();
  say("he-homework-feedback","Homework draft prepared. Add the assignment details before saving.");
 });
 el("he-openai-key").addEventListener("input",()=>say("he-ai-feedback","Personal Anthropic key is used for this request only. It is not saved."));
+el("he-homework-create-ai").addEventListener("click",()=>{
+ const chosen=el("he-homework-student").value;
+ el("lessons-tab")?.click();
+ if(chosen)el("he-lesson-student").value=chosen;
+ el("he-ai-integration").open=true;
+ el("he-homework-ai-generate").focus();
+ say("he-ai-feedback","Enter a topic and click Generate homework with Haiku.");
+});
 document.addEventListener("helloearth:studentsloaded",()=>{studentOptions();loadHomework();loadLessons()});
 document.addEventListener("helloearth:view-changed",e=>{if(e.detail?.view==="homework")loadHomework();if(e.detail?.view==="lessons")loadLessons()});
 const ready=()=>{if(W()?.userId){studentOptions();loadHomework();loadLessons()}};
