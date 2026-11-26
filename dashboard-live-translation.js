@@ -11,7 +11,7 @@ const input=el("he-translate-input"),feed=el("he-caption-feed");
 const locale={en:"en-US",pl:"pl-PL",pt:"pt-BR",es:"es-ES",zh:"zh-CN",tr:"tr-TR",
  vi:"vi-VN",af:"af-ZA",fr:"fr-FR",de:"de-DE",ru:"ru-RU",ar:"ar-SA"};
 let listening=false,activeEngine="",audioStream=null,displayStream=null,micStream=null,mixedCtx=null;
-let recognition=null,mediaRecorder=null,recordTimer=null,clockTimer=null,sessionStarted=0,sessionRun=0;
+let recognition=null,mediaRecorder=null,flushRecorder=null,recordTimer=null,clockTimer=null,sessionStarted=0,sessionRun=0;
 let uploadCount=0,lastError="",pip=null,closing=false,cloud={cloudAvailable:false,eligible:false,cloudConfigured:false};
 let segments=[],seq=0,interim="",translationQueue=[],translateBusy=false,lastTranslate=0,dirty=false;
 let room=null,roomChannel=null,roomKey=null,roomUntil=0,roomReady=false,roomUrl="";
@@ -175,7 +175,8 @@ function stopTracks(){
  audioStream=null;displayStream=null;micStream=null;
  if(mixedCtx){mixedCtx.close().catch(()=>{});mixedCtx=null}
 }
-function stopListening(){
+function stopListening(flush=false){
+ if(flush&&mediaRecorder?.state==="recording")flushRecorder=mediaRecorder;
  listening=false;sessionRun++;
  if(recordTimer){clearTimeout(recordTimer);recordTimer=null}
  if(clockTimer){clearInterval(clockTimer);clockTimer=null}
@@ -317,19 +318,21 @@ function cloudChunk(){
   if(recordTimer){clearTimeout(recordTimer);recordTimer=null}
   const seconds=Math.max(0,Math.round((Date.now()-begin)/1000));
   const blob=new Blob(chunks,{type:mime});
+  const wasFinal=flushRecorder===recorder;
+  if(wasFinal)flushRecorder=null;
   if(listening&&activeEngine==="cloud"){
    try{cloudChunk()}catch(error){stopListening();say(error.message,true)}
   }
   // Stop means stop: do not transmit an unfinished segment after the user stops.
-  if(listening&&activeEngine==="cloud"&&blob.size>=400&&seconds>=3){
+  if((listening&&activeEngine==="cloud"||wasFinal)&&blob.size>=400&&seconds>=3){
    if(uploadCount>=2){say("Speech service is slower than the class. Captions are delayed; skipping a full audio segment.",true)}
-   else uploadBlob(blob,seconds,sessionRun).catch(error=>say(error.message,true));
+   else uploadBlob(blob,seconds,sessionRun,wasFinal).catch(error=>say(error.message,true));
   }
  };
  recorder.start();
  recordTimer=setTimeout(()=>{if(recorder.state==="recording")recorder.stop()},7300);
 }
-async function uploadBlob(blob,seconds,whichSession){
+async function uploadBlob(blob,seconds,whichSession,isFinal=false){
  uploadCount++;
  try{
   const form=new FormData();
@@ -345,7 +348,7 @@ async function uploadBlob(blob,seconds,whichSession){
    }
    throw Error(msg);
   }
-  if(data?.text&&listening&&sessionRun===whichSession)
+  if(data?.text&&((listening&&sessionRun===whichSession)||isFinal))
    addCaption(data.text,el("he-caption-source").value==="mic"?"Microphone":
     el("he-caption-source").value==="both"?"Class + microphone":"Class audio");
   say("Cloud captions active. "+(typeof data?.remainingSeconds==="number"&&data.remainingSeconds<1800?
@@ -429,7 +432,7 @@ function endSharing(){
 }
 el("he-caption-install").addEventListener("click",onDeviceInstall);
 el("he-translate-mic").addEventListener("click",startListening);
-el("he-caption-stop").addEventListener("click",()=>{stopListening();say("Transcription stopped. Your captions remain in this tab until cleared.")});
+el("he-caption-stop").addEventListener("click",()=>{stopListening(true);say("Stopped microphone capture. Finishing the final recorded audio segment, if any…")});
 el("he-caption-share").addEventListener("click",()=>startSharing().catch(e=>say(e.message,true)));
 el("he-caption-stop-share").addEventListener("click",()=>{endSharing();say("Student viewing link stopped receiving captions.")});
 el("he-caption-copy-url").addEventListener("click",()=>copy(roomUrl));
