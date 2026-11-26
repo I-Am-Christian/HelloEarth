@@ -3,6 +3,8 @@ const el=id=>document.getElementById(id);
 const W=()=>window.HelloEarthWorkspace;
 let activeTutor=null, activeLessonId=null, students=[], lessonRows=[], homeworkRows=[], reviewWorksheet=null;
 const savedPublicLinks=new Map();
+let lessonFolder="all",lessonFilter="saved",lessonSearch="",lessonLoadVersion=0;
+const lessonFolderOpen=new Set();
 async function shareSavedLesson(plan,copy=true){
  try{
   await ensureUser();
@@ -266,8 +268,7 @@ el("he-homework-form").addEventListener("submit",async e=>{
 async function loadLessons(){
  try{
   const tutor=await ensureUser();
-  const {data,error}=await db.from("atlas_lesson_plans").select("id,student_id,topic,cefr_level,duration_minutes,markdown,created_at").eq("tutor_id",tutor).order("created_at",{ascending:false}).limit(40);
-  if(error)throw error;lessonRows=data||[];
+  const version=++lessonLoadVersion,all=[];for(let offset=0;;offset+=100){const {data,error}=await db.from("atlas_lesson_plans").select("id,student_id,topic,cefr_level,duration_minutes,markdown,created_at,completed_at,unsaved_at").eq("tutor_id",tutor).order("created_at",{ascending:false}).order("id",{ascending:false}).range(offset,offset+99);if(error)throw error;if(version!==lessonLoadVersion)return;all.push(...(data||[]));if(!data||data.length<100)break}lessonRows=all;
    try{await refreshSavedPublicLinks()}catch{}
    renderLessons();
  }catch(e){say("he-lesson-feedback","Could not load saved lessons: "+e.message,true)}
@@ -287,17 +288,43 @@ function prepareHomeworkFromLesson(plan){
   ?"Review the extracted homework and create a 14-day link. Nothing is sent automatically."
   :"No standalone Homework section found in this lesson. Add your questions and create a shareable link.");
 }
+async function changeLessonState(p,operation,button){
+ if(operation==="delete"&&!confirm("Permanently delete this lesson? Its saved-lesson sharing links will stop working. Existing homework and reports remain."))return;
+ button.disabled=true;
+ try{const tutor=await ensureUser();let result;
+ if(operation==="delete")result=await db.from("atlas_lesson_plans").delete().eq("id",p.id).eq("tutor_id",tutor).select("id").single();
+ else{const patch=operation==="complete"?{completed_at:p.completed_at?null:new Date().toISOString()}:{unsaved_at:operation==="restore"?null:new Date().toISOString()};result=await db.from("atlas_lesson_plans").update(patch).eq("id",p.id).eq("tutor_id",tutor).select("id,completed_at,unsaved_at").single()}
+ if(result.error)throw result.error;
+ if(operation==="delete"){lessonRows=lessonRows.filter(x=>x.id!==p.id);savedPublicLinks.delete(p.id);if(activeLessonId===p.id)activeLessonId=null}
+ else Object.assign(p,result.data);
+ renderLessons();say("he-lesson-feedback",operation==="delete"?"Lesson permanently deleted.":operation==="restore"?"Lesson restored to Saved.":operation==="unsave"?"Lesson unsaved. Restore it from the Unsaved tab.":p.completed_at?"Lesson marked complete.":"Lesson reopened.");
+ document.dispatchEvent(new CustomEvent("helloearth:workspace-data"));
+ }catch(e){say("he-lesson-feedback",e.message,true);button.disabled=false}
+}
 function renderLessons(){
- const root=el("he-lesson-history");root.replaceChildren();
- if(!lessonRows.length){
-  const p=document.createElement("p");p.className="he-record-empty";p.textContent="No saved lessons yet.";root.append(p);return;
- }
- for(const p of lessonRows){
+ const root=el("he-lesson-history");if(!root)return;root.replaceChildren();
+ const controls=document.createElement("div");controls.className="he-folder-controls";
+ const studentPicker=document.createElement("select");studentPicker.setAttribute("aria-label","Filter saved lessons by student");studentPicker.add(new Option("All students","all"));
+ const ids=[...new Set(lessonRows.map(p=>p.student_id))].sort((a,b)=>selectedName(a).localeCompare(selectedName(b)));
+ for(const id of ids)studentPicker.add(new Option("📁 "+selectedName(id),id));
+ if(lessonFolder!=="all"&&!ids.includes(lessonFolder))lessonFolder="all";
+ studentPicker.value=lessonFolder;studentPicker.onchange=()=>{lessonFolder=studentPicker.value;renderLessons()};
+ const filters=document.createElement("div");filters.className="he-folder-filters";for(const [key,label] of [["saved","Saved"],["pending","To teach"],["complete","Completed"],["unsaved","Unsaved"]]){
+ const b=actionButton(label,()=>{lessonFilter=key;renderLessons()});b.setAttribute("aria-pressed",String(key===lessonFilter));filters.append(b)}
+ const search=document.createElement("input");search.type="search";search.placeholder="Find a lesson…";search.setAttribute("aria-label","Find lesson");search.value=lessonSearch;search.oninput=()=>{lessonSearch=search.value;const pos=search.selectionStart;renderLessons();const next=root.querySelector("input[type=search]");next?.focus();try{next?.setSelectionRange(pos,pos)}catch{}};
+ controls.append(studentPicker,filters,search);root.append(controls);
+ const folders=new Map();
+ for(const p of lessonRows){if(lessonFolder!=="all"&&p.student_id!==lessonFolder)continue;if(lessonFilter==="unsaved"?!p.unsaved_at:p.unsaved_at)continue;if(lessonFilter==="complete"&&!p.completed_at||lessonFilter==="pending"&&p.completed_at)continue;if(lessonSearch&&!([p.topic,selectedName(p.student_id),p.cefr_level].join(" ").toLowerCase().includes(lessonSearch.toLowerCase())))continue;if(!folders.has(p.student_id))folders.set(p.student_id,[]);folders.get(p.student_id).push(p)}
+ if(!folders.size){const p=document.createElement("p");p.className="he-record-empty";p.textContent="No lessons match this folder or filter.";root.append(p);return}
+ for(const [id,plans] of [...folders].sort((a,b)=>selectedName(a[0]).localeCompare(selectedName(b[0])))){
+ const folder=document.createElement("details");folder.className="he-student-folder";folder.open=lessonFolder===id||lessonFolderOpen.has(id)||Boolean(lessonSearch)||folders.size===1;
+ const head=document.createElement("summary"),label=document.createElement("strong"),count=document.createElement("small");label.textContent="📁 "+selectedName(id);count.textContent=plans.length+" lesson"+(plans.length===1?"":"s");head.append(label,count);folder.append(head);folder.addEventListener("toggle",()=>{if(folder.open)lessonFolderOpen.add(id);else lessonFolderOpen.delete(id)});root.append(folder);
+ for(const p of plans){
   const row=document.createElement("article");row.className="he-record-row he-lesson-row";
   const main=document.createElement("div");
   const title=document.createElement("strong");title.textContent=p.topic;
   const meta=document.createElement("small");
-  meta.textContent=selectedName(p.student_id)+" · "+p.cefr_level+" · "+p.duration_minutes+" min";
+  meta.textContent=p.cefr_level+" · "+p.duration_minutes+" min · "+new Date(p.created_at).toLocaleDateString()+(p.completed_at?" · Completed":"")+(p.unsaved_at?" · Unsaved":"");
   main.append(title,meta);
   const actions=document.createElement("div");actions.className="he-work-actions he-inline-actions";
   actions.append(actionButton("Open lesson",()=>{
@@ -333,9 +360,13 @@ function renderLessons(){
    }));
   actions.append(actionButton("PDF view",()=>window.open(new URL("lesson.html#saved="+p.id,location.href).href,"_blank","noopener")));
   actions.append(actionButton("Download lesson",()=>downloadText("helloearth-lesson.md",p.markdown||"")));
-  row.append(main,actions);root.append(row);
+  const manage=document.createElement("div");manage.className="he-folder-manage";
+  for(const [op,label] of [["complete",p.completed_at?"Reopen":"✓ Complete"],[p.unsaved_at?"restore":"unsave",p.unsaved_at?"Restore":"Unsave"],["delete","Delete"]]){const b=actionButton(label,()=>changeLessonState(p,op,b));if(op==="delete")b.className+=" he-delete-lesson";manage.append(b)}
+  row.append(main,actions,manage);folder.append(row);
+ }
  }
 }
+document.addEventListener("helloearth:open-lesson-folder",e=>{lessonFolder=e.detail?.studentId||"all";lessonFilter="saved";lessonSearch="";if(lessonFolder!=="all")lessonFolderOpen.add(lessonFolder);el("lessons-tab")?.click();loadLessons().then(()=>el("he-lesson-history")?.scrollIntoView({block:"start"}))});
 function baseLesson(){
  const topic=clean(el("he-lesson-topic").value),level=el("he-lesson-level").value,duration=Number(el("he-lesson-duration").value)||50;
  return {topic,level,duration};
