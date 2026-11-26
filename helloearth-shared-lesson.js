@@ -12,6 +12,32 @@ let dead=false,busyPoll=false,seen=false,syncEnabled=false,canFollow=true,isProg
 let writing=false,pending=null,writeTimer=null,lastWrite=0;
 let inkChannel=null,inkReady=false,guestInk=new Map(),textInk=[],remoteText=new Map();const author=crypto.randomUUID();
 const paper=el("share-paper"),svg=el("share-annotations"),follow=el("share-follow"),presentSync=el("share-presenter-sync");
+let zoom=100,teacherZoom=100,zoomSync=false,teacherZoomSync=false,zoomRevision=0,remoteZoomRevision=-1;
+const zoomFollow=el("share-zoom-follow"),zoomControl=el("share-zoom-sync");
+function applyZoom(value){
+ const next=Math.max(75,Math.min(200,Math.round(Number(value)/5)*5));
+ if(!Number.isFinite(next))return;
+ const rect=paper.getBoundingClientRect(),anchor=Math.max(0,Math.min(1,(window.innerHeight/2-rect.top)/Math.max(1,rect.height)));
+ const old=zoom;zoom=next;paper.style.zoom=String(zoom/100);
+ el("share-zoom-value").textContent=zoom+"%";
+ el("share-zoom-out").disabled=zoom<=75;el("share-zoom-in").disabled=zoom>=200;
+ if(old!==zoom){const after=paper.getBoundingClientRect();window.scrollBy(0,after.top+anchor*after.height-window.innerHeight/2);requestAnimationFrame(paintStrokes)}
+}
+function sendZoom(){
+ if(!presenter||!inkReady||dead)return;
+ inkChannel.send({type:"broadcast",event:"zoom",payload:{author,value:zoom,enabled:zoomSync,revision:++zoomRevision}}).catch(()=>msg("Zoom sync connection interrupted.",true));
+}
+function manualZoom(value){
+ if(!loaded||dead)return;
+ if(!presenter)zoomFollow.checked=false;
+ applyZoom(value);if(presenter&&zoomSync)sendZoom();
+}
+el("share-zoom-in").addEventListener("click",()=>manualZoom(zoom+10));
+el("share-zoom-out").addEventListener("click",()=>manualZoom(zoom-10));
+el("share-zoom-reset").addEventListener("click",()=>manualZoom(100));
+zoomControl.addEventListener("change",()=>{if(!presenter)return;zoomSync=zoomControl.checked;sendZoom()});
+zoomFollow.addEventListener("change",()=>{if(zoomFollow.checked){if(teacherZoomSync)applyZoom(teacherZoom);if(inkReady)inkChannel.send({type:"broadcast",event:"zoom-request",payload:{}})}});
+
 function msg(content,error=false){
  const node=el("share-connection");node.textContent=content;
  node.style.color=error?"#ffb8c6":"#c7deee";
@@ -99,8 +125,13 @@ async function connectInk(){
   if(Array.isArray(p.strokes))guestInk.set(p.author,p.strokes.slice(0,60).filter(validStroke));
   if(Array.isArray(p.text))remoteText.set(p.author,p.text.slice(0,100).filter(validMark));
   paintStrokes();
- }).on("broadcast",{event:"request"},()=>sendInk()).subscribe(status=>{
-  inkReady=status==="SUBSCRIBED";if(inkReady){sendInk();inkChannel.send({type:"broadcast",event:"request",payload:{}})}
+ }).on("broadcast",{event:"zoom"},({payload:p})=>{
+  if(presenter||dead||!p||typeof p.value!=="number"||!Number.isFinite(p.value)||p.value<75||p.value>200||typeof p.enabled!=="boolean")return;
+  teacherZoom=p.value;teacherZoomSync=p.enabled;
+  if(teacherZoomSync&&zoomFollow.checked)applyZoom(teacherZoom);
+ }).on("broadcast",{event:"zoom-request"},()=>sendZoom())
+ .on("broadcast",{event:"request"},()=>{sendInk();sendZoom()}).subscribe(status=>{
+  inkReady=status==="SUBSCRIBED";if(inkReady){sendInk();sendZoom();inkChannel.send({type:"broadcast",event:"request",payload:{}})}
  });
 }
 let savedSelection=null,selectionTimer=null;
@@ -300,6 +331,7 @@ async function checkPresenter(){
   el("share-role").textContent="Teacher · presenter";
   el("share-follow-label").hidden=true;
   el("share-presenter-label").hidden=false;
+  el("share-zoom-sync-label").hidden=false;el("share-zoom-follow-label").hidden=true;
   el("share-end").hidden=false;
   syncEnabled=result.state.syncEnabled===true;
   presentSync.checked=syncEnabled;
