@@ -257,28 +257,28 @@ for(const [locale,items] of Object.entries({"af":{"Overview":"Oorsig","Calendar"
 for(const [locale,items] of Object.entries(window.HelloEarthHomepageCopy||{})){
  if(sharedTranslations[locale])Object.assign(sharedTranslations[locale],items);
 }
-const picker=document.getElementById('site-language');if(!picker)return;
+const picker=document.getElementById('site-language');if(!picker)return;window.HelloEarthTranslate?.localizeOptions(picker);
 const nodes=[];const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let node;
 const normalize=value=>value.replace(/\s+/g,' ').trim();
 while((node=walker.nextNode())){
  if(node.parentElement?.closest('script,style,select,textarea'))continue;
  const raw=node.nodeValue,original=raw.trim(),normalized=normalize(original);
  const index=source.indexOf(normalized);
- if(index!==-1||Object.prototype.hasOwnProperty.call(ruExtras,normalized)||Object.values(sharedTranslations).some(dict=>Object.prototype.hasOwnProperty.call(dict,normalized)))nodes.push({node,raw,original,normalized,index});
+ if(normalized&&!node.parentElement?.closest('[translate=no],.he-translate-dialog,.he-translate-launch'))nodes.push({node,raw,original,normalized,index});
 }
-function setLanguage(lang){
+function setLanguage(lang,refresh=false){
  const strings=translations[lang];
  nodes.forEach(({node,raw,original,normalized,index})=>{
-  const replacement=lang==='en'?original:(sharedTranslations[lang]?.[normalized]??(lang==='ru'?ruExtras[normalized]:undefined)??(index>=0?strings?.[index]:undefined)??original);
+  const replacement=lang==='en'?original:(sharedTranslations[lang]?.[normalized]??(lang==='ru'?ruExtras[normalized]:undefined)??(index>=0?strings?.[index]:undefined)??window.HelloEarthTranslate?.lookup(normalized,lang)??original);
   node.nodeValue=raw.replace(original,replacement);
  });
  document.documentElement.lang=lang;picker.value=lang;
  document.title=sharedTranslations[lang]?.['Home | HelloEarth']||'Home | HelloEarth';
- document.dispatchEvent(new CustomEvent('helloearth:languagechanged',{detail:{language:lang}}));
+ if(!refresh)document.dispatchEvent(new CustomEvent('helloearth:languagechanged',{detail:{language:lang}}));
  try{localStorage.setItem('helloearth-language',lang)}catch(e){}
 }
-let saved;try{saved=localStorage.getItem('helloearth-language')}catch(e){}const browser=(navigator.languages?.[0]||navigator.language||'en').toLowerCase().split('-')[0];setLanguage(saved==='en'||translations[saved]?saved:(translations[browser]?browser:'en'));
-picker.addEventListener('change',()=>setLanguage(picker.value));
+let saved;try{saved=localStorage.getItem('helloearth-language')}catch(e){}const browser=(navigator.languages?.[0]||navigator.language||'en').toLowerCase().split('-')[0];setLanguage(saved==='en'||translations[saved]||window.HelloEarthTranslate?.supported.has(saved)?saved:(translations[browser]||window.HelloEarthTranslate?.supported.has(browser)?browser:'en'));
+picker.addEventListener('change',()=>setLanguage(picker.value));document.addEventListener('helloearth:translationready',()=>setLanguage(picker.value,true));
 })();
 
 /* Keep the solar animation inside the hero artwork on every screen size. */
