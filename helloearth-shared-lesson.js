@@ -1,7 +1,7 @@
 import {db} from "./supabase-client.js";
 import {SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY} from "./supabase-config.js";
 import {renderWorkbook} from "./helloearth-workbook-renderer.js";
-import {mountClassroomDialogue} from "./classroom-dialogue.js?v=20261126-live1";
+import {mountClassroomDialogue} from "./classroom-dialogue.js?v=20261126-live2";
 let dialogue=null,assignedStudent=null,contentRevision=0,editingWorkbook=false;
 // One-way tutor presentation. Public guests can view with a signed link,
 // follow scrolling, and make LOCAL drawings; only the owner can save/sync.
@@ -479,7 +479,7 @@ async function connectInk(){
  inkChannel.on("presence",{event:"sync"},()=>{presenceSynced=true;updatePresence()})
  .on("broadcast",{event:"ink-batch"},({payload})=>receiveInkBatch(payload))
  .on("broadcast",{event:"ink"},({payload:p})=>{
-  if(dead||!p||typeof p.author!=="string"||p.author===author||p.author.length>64||inkSeenRevisions.has(p.author)||(!guestInk.has(p.author)&&guestInk.size>=40))return;
+  if(dead||contentRevision!==0||!p||typeof p.author!=="string"||p.author===author||p.author.length>64||inkSeenRevisions.has(p.author)||(!guestInk.has(p.author)&&guestInk.size>=40))return;
   if(Array.isArray(p.strokes))guestInk.set(p.author,p.strokes.slice(0,60).filter(validStroke));
   if(Array.isArray(p.text))remoteText.set(p.author,p.text.slice(0,100).filter(validMark));
   paintStrokes();
@@ -654,7 +654,7 @@ window.addEventListener("scroll",()=>{
 },{passive:true});
 setInterval(()=>{if(presenter&&loaded&&!dead&&syncEnabled)sendReadingAnchor()},3000);
 function updateState(state){
- if(!state||dead)return;
+ if(!state||dead||Number(state.contentRevision||0)<contentRevision)return;
  if(!lesson)lesson={state};else lesson.state=state;
  const wasSync=syncEnabled;
  if((!presenter&&!freshAnchor())||(presenter&&!pending&&!writing))syncEnabled=state.syncEnabled===true;
@@ -700,9 +700,11 @@ el("share-edit-workbook").onclick=()=>{if(!presenter||dead||!loaded)return;editR
 el("share-edit-cancel").onclick=()=>editor.close();
 el("share-edit-save").onclick=async()=>{
  if(!presenter||dead||editingWorkbook)return;
+ if(writing){editorStatus.textContent="Please finish the current annotation update before publishing.";return}
  const markdown=editorText.value.trim();if(markdown===lesson.markdown){editor.close();return}
  if(markdown.length<20){editorStatus.textContent="Enter at least 20 characters.";return}
  if(!confirm("Publish edits to the shared workbook? Existing drawings and highlights will be cleared because their positions may no longer match. The original saved lesson is unchanged."))return;
+ if(pending&&Object.hasOwn(pending,"annotations")){delete pending.annotations;if(!Object.keys(pending).length)pending=null}
  editingWorkbook=true;el("share-edit-save").disabled=true;
  try{const response=await api("edit-workbook",{markdown,revision:editRevision},true);applyWorkbookRevision(response);updateState(response.state);editor.close();if(inkReady)await chatBroadcast("workbook-edited",{revision:contentRevision});}
  catch(e){editorStatus.textContent=e.message||"Could not publish changes."}finally{editingWorkbook=false;el("share-edit-save").disabled=false}
