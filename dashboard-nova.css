@@ -1,0 +1,39 @@
+/* Nova: compact, friendly navigation and study-assistant chat */
+#he-nova-root{position:relative;z-index:110000}
+#he-nova-launch{position:fixed;z-index:110001;left:21px;bottom:18px;display:flex;align-items:center;gap:9px;
+ border:1px solid #e2c5f79e;background:linear-gradient(135deg,#6a4a93,#3d416c);color:#fcf5ff;
+ border-radius:999px;padding:12px 17px;box-shadow:0 11px 36px #080918aa;cursor:pointer;font:750 12px 'DM Sans',system-ui,sans-serif}
+#he-nova-launch:hover{filter:brightness(1.13)}
+.he-nova-symbol{font-size:19px;color:#f4d0ff;line-height:1}
+#he-nova-panel{position:fixed;z-index:110005;bottom:80px;left:19px;width:min(402px,calc(100vw - 30px));height:min(600px,calc(100dvh - 100px));
+ border:1px solid #a48cc2;border-radius:17px;background:#1a2740;color:#eff1ff;box-shadow:0 23px 73px #080c1dec;
+ display:flex;flex-direction:column;overflow:hidden;font:13px/1.55 'DM Sans',system-ui,sans-serif}
+#he-nova-panel[hidden]{display:none!important}
+.he-nova-head{padding:15px 16px;display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:1px solid #6d7e985b;
+ background:linear-gradient(120deg,#34355b,#263851)}
+.he-nova-heading{display:flex;align-items:center;gap:10px}
+.he-nova-emblem{display:grid;place-items:center;flex:0 0 40px;height:40px;border-radius:12px;background:#ac7dce44;
+ color:#f6d2ff;font-size:27px}
+.he-nova-heading strong{display:block;font-size:16px;line-height:1.15;color:#fcefff}
+.he-nova-heading small{display:block;font-size:11px;color:#b8c7e3;margin-top:3px}
+#he-nova-close{background:transparent;border:0;color:#d9d7ef;font-size:23px;cursor:pointer}
+.he-nova-messages{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:15px 13px;
+ scrollbar-color:#7885b0 #1b2941}
+.he-nova-message{padding:10px 12px;max-width:92%;white-space:pre-wrap;overflow-wrap:anywhere;border-radius:12px;font-size:12px}
+.he-nova-bot{align-self:flex-start;background:#2c3b58;border:1px solid #6c79996f;color:#e6efff;border-top-left-radius:4px}
+.he-nova-user{align-self:flex-end;background:#684d82;border:1px solid #b48ed3;color:#fff1fc;border-top-right-radius:4px}
+.he-nova-examples{display:flex;flex-wrap:wrap;gap:5px;padding:7px 12px;border-top:1px solid #73819a36}
+.he-nova-examples button{font:650 10px 'DM Sans',system-ui,sans-serif;border:1px solid #8c8eb2;
+ border-radius:100px;background:#313b58;color:#f0eafe;padding:6px 10px;cursor:pointer}
+.he-nova-form{display:flex;align-items:flex-end;gap:7px;padding:8px 12px 11px}
+#he-nova-input{flex:1;min-width:0;min-height:54px;max-height:115px;resize:vertical;
+ border:1px solid #7f8eaa;border-radius:10px;padding:10px;background:#121e33;color:#fcfaff;
+ font:12px/1.45 'DM Sans',system-ui,sans-serif}
+#he-nova-input:focus{outline:2px solid #c4a1dd}
+#he-nova-send{background:#d6b0ec;color:#25172e;border:1px solid #eccff5;border-radius:9px;
+ padding:11px 13px;cursor:pointer;font-weight:800;font-size:12px}
+#he-nova-send:disabled{opacity:.5;cursor:wait}
+#he-nova-status{margin:0 13px;font-size:10px;color:#b4dfcc;min-height:13px}
+#he-nova-status.he-nova-error{color:#ffb4c7}
+.he-nova-disclaimer{font-size:9px;color:#acb9d3;margin:4px 12px 10px;line-height:1.45}
+@media(max-width:760px){#he-nova-launch{left:10px;bottom:72px;padding:9px 12px}#he-nova-panel{left:7px;bottom:120px;width:min(420px,calc(100vw - 14px));height:min(580px,calc(100dvh - 140px))}}
