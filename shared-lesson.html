@@ -4,44 +4,47 @@
 <meta name="theme-color" content="#1d2b46"><title>Shared Lesson | HelloEarth</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="stylesheet" href="helloearth-lesson.css?v=20261126-first1">
-<link rel="stylesheet" href="helloearth-shared-lesson.css?v=20261126-zoom2">
-<script type="module" src="helloearth-shared-lesson.js?v=20261126-zoom2"></script></head>
+<link rel="stylesheet" href="helloearth-shared-lesson.css?v=20261126-dock3">
+<script type="module" src="helloearth-shared-lesson.js?v=20261126-dock3"></script></head>
 <body>
+<div class="share-top-dock">
 <header class="lesson-toolbar share-toolbar">
  <a href="index.html" class="toolbar-brand">✦ HelloEarth <span>Live Lesson</span></a>
  <div class="share-toolbar-actions">
   <span id="share-role">Student view</span>
   <span id="share-countdown">Checking link…</span>
-  <button type="button" id="share-copy" disabled>Copy link</button>
-  <button type="button" id="share-download" disabled>Download .md</button>
-  <button type="button" id="share-print" disabled>Print / Save PDF</button>
+  <button type="button" id="share-copy" disabled title="Copy lesson link">Copy link</button>
+  <details class="share-menu share-file-menu"><summary aria-label="More lesson actions">More <span aria-hidden="true">⌄</span></summary><div class="share-menu-panel"><button type="button" id="share-download" disabled>Download .md</button><button type="button" id="share-print" disabled>Print / Save PDF</button><button type="button" id="share-end" hidden>End sharing</button></div></details>
  </div>
 </header>
 <div class="share-control-shell">
  <nav class="share-tools" aria-label="Shared lesson tools">
-  <label class="share-follow" id="share-follow-label"><input type="checkbox" id="share-follow" checked> Follow teacher</label>
-  <label class="share-follow" id="share-presenter-label" hidden><input type="checkbox" id="share-presenter-sync"> <strong>Sync students' scrolling</strong></label>
+  <div class="share-main-row">
   <div class="share-zoom-tools" role="group" aria-label="Lesson zoom">
 <button type="button" id="share-zoom-out" aria-label="Zoom out">−</button><button type="button" id="share-zoom-reset" aria-label="Reset zoom"><span id="share-zoom-value">100%</span></button><button type="button" id="share-zoom-in" aria-label="Zoom in">+</button>
-<label class="share-follow" id="share-zoom-follow-label"><input type="checkbox" id="share-zoom-follow" checked> Follow zoom</label>
-<label class="share-follow" id="share-zoom-sync-label" hidden><input type="checkbox" id="share-zoom-sync"> Sync zoom</label></div>
+</div>
 <div class="share-separator" aria-hidden="true"></div>
   <div class="share-tool-modes" role="group" aria-label="Annotation tools">
-   <button type="button" data-tool="view" class="selected" aria-pressed="true">↕ Scroll</button>
-   <button type="button" data-tool="pen" aria-pressed="false">✎ Draw</button>
-   <button type="button" data-tool="highlight" aria-pressed="false">▰ Freehand highlight</button>
-   <button type="button" data-tool="text" aria-pressed="false">▰ Highlight text</button>
+   <button type="button" data-tool="view" class="selected" aria-pressed="true"><span aria-hidden="true">↕</span><span class="share-tool-label">Scroll</span></button>
+   <button type="button" data-tool="pen" aria-pressed="false"><span aria-hidden="true">✎</span><span class="share-tool-label">Draw</span></button>
+   <button type="button" data-tool="highlight" aria-pressed="false"><span aria-hidden="true">▰</span><span class="share-tool-label">Marker</span></button>
+   <button type="button" data-tool="text" aria-pressed="false"><span aria-hidden="true">T</span><span class="share-tool-label">Text</span></button>
   </div>
-  <label class="share-color">Ink <input type="color" id="share-ink" value="#8456d5" aria-label="Choose any annotation colour" title="Open colour picker"></label>
+  <label class="share-color" title="Ink colour">Ink <input type="color" id="share-ink" value="#8456d5" aria-label="Choose any annotation colour" title="Open colour picker"></label>
+  <details class="share-menu share-ink-menu"><summary aria-label="Annotation style settings">Style <span aria-hidden="true">⌄</span></summary><div class="share-menu-panel share-style-panel"><strong>Ink colour</strong>
   <div class="share-swatches" role="group" aria-label="Quick ink colours">
   <button type="button" data-ink-color="#8456d5" style="--swatch:#8456d5" aria-label="Ink #8456d5" title="#8456d5"></button><button type="button" data-ink-color="#dc6a85" style="--swatch:#dc6a85" aria-label="Ink #dc6a85" title="#dc6a85"></button><button type="button" data-ink-color="#46a49a" style="--swatch:#46a49a" aria-label="Ink #46a49a" title="#46a49a"></button><button type="button" data-ink-color="#dba84b" style="--swatch:#dba84b" aria-label="Ink #dba84b" title="#dba84b"></button><button type="button" data-ink-color="#28385f" style="--swatch:#28385f" aria-label="Ink #28385f" title="#28385f"></button><button type="button" data-ink-color="#ffeb3b" style="--swatch:#ffeb3b" aria-label="Ink #ffeb3b" title="#ffeb3b"></button><button type="button" data-ink-color="#ef4444" style="--swatch:#ef4444" aria-label="Ink #ef4444" title="#ef4444"></button>
   </div>
-  <button type="button" id="share-undo" disabled>Undo</button>
-  <button type="button" id="share-clear" disabled>Clear</button>
-  <button type="button" id="share-end" hidden>End sharing</button>
+  <label class="share-range">Highlight intensity <output id="share-opacity-value" for="share-opacity">30%</output><input id="share-opacity" type="range" min="10" max="75" step="5" value="30"></label>
+  <label class="share-range">Stroke thickness <output id="share-width-value" for="share-width">100%</output><input id="share-width" type="range" min="50" max="200" step="10" value="100"></label>
+  <div id="share-ink-preview" class="share-ink-preview">Sample highlighted text</div><button type="button" id="share-style-reset">Reset style</button></div></details>
+  <button type="button" id="share-undo" disabled title="Undo your last annotation" aria-label="Undo annotation">↶</button>
+  <button type="button" id="share-clear" disabled title="Clear your annotations" aria-label="Clear annotations">Clear</button>
+  </div><div class="share-sync-row"><label class="share-follow" id="share-follow-label"><input type="checkbox" id="share-follow" checked> Follow scroll</label><label class="share-follow" id="share-presenter-label" hidden><input type="checkbox" id="share-presenter-sync"> Sync scroll</label><label class="share-follow" id="share-zoom-follow-label"><input type="checkbox" id="share-zoom-follow" checked> Follow zoom</label><label class="share-follow" id="share-zoom-sync-label" hidden><input type="checkbox" id="share-zoom-sync"> Sync zoom</label></div>
  </nav>
  <div class="share-meta"><span id="share-connection" role="status" aria-live="polite">Opening lesson…</span>
  <span id="share-draw-hint">Teacher and student annotations are shared live while connected.</span></div>
+</div>
 </div>
 <div id="share-error" class="share-error" role="alert" hidden></div>
 <main class="lesson-screen share-page">
