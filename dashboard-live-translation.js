@@ -7,6 +7,26 @@ launch.title="Live transcription with optional translation";
 (document.getElementById("he-live-launchers")||document.body).append(launch);
 const el=id=>panel.querySelector("#"+id);
 const source=el("he-translate-source"),target=el("he-translate-target");
+const sessionControls=document.createElement("div");sessionControls.className="he-caption-grid";
+sessionControls.innerHTML='<label>Assigned student<select id="he-caption-student"></select></label><label><input type="checkbox" id="he-caption-dual"> Separate teacher microphone and student tab audio</label><label>Teacher language<select id="he-caption-teacher-language"></select></label><label><input type="checkbox" id="he-caption-auto-report" checked> Generate private report when I finish</label>';
+el("he-caption-source").closest(".he-caption-grid").after(sessionControls);
+const assigned=el("he-caption-student"),teacherLanguage=el("he-caption-teacher-language");
+teacherLanguage.innerHTML=source.innerHTML;teacherLanguage.value="en";
+let assignedId="",dualSession=false,dualRecorders=new Set(),dualPending=new Set(),dualTimers=new Set(),finishing=false;
+function fillAssigned(id){
+ if(listening||finishing)return;
+ const previous=id||assigned.value||document.getElementById("he-lesson-student")?.value||"";
+ assigned.replaceChildren(new Option("Choose student",""));
+ for(const s of window.HelloEarthWorkspace?.students||[])assigned.add(new Option(s.display_name,s.id));
+ assigned.value=previous;
+}
+document.addEventListener("helloearth:studentsloaded",()=>fillAssigned());
+document.addEventListener("helloearth:lesson-selected",e=>fillAssigned(e.detail?.studentId));
+launch.addEventListener("click",()=>fillAssigned());
+assigned.addEventListener("change",()=>previewMicLanguage(assigned.value));
+el("he-caption-dual").addEventListener("change",()=>{if(el("he-caption-dual").checked){el("he-caption-source").value="both";target.value="en";el("he-translate-auto").checked=true;el("he-translate-speak").checked=true}});
+fillAssigned();
+
 const input=el("he-translate-input"),feed=el("he-caption-feed");
 const locale={en:"en-US",pl:"pl-PL",pt:"pt-BR",es:"es-ES",zh:"zh-CN",tr:"tr-TR",
  vi:"vi-VN",af:"af-ZA",fr:"fr-FR",de:"de-DE",ru:"ru-RU",ar:"ar-SA"};
@@ -104,7 +124,7 @@ async function broadcast(data){
   await roomChannel.send({type:"broadcast",event:"caption",payload:{data:packet,signature:toB64(signature)}});
  }catch{say("Student sharing connection is interrupted. Local captions continue.",true)}
 }
-function addCaption(raw,who){
+function addCaption(raw,who,spokenLanguage=source.value){
  const text=String(raw||"").trim().slice(0,1300);
  if(!text)return;
  const used=recordsText().length;
@@ -112,11 +132,11 @@ function addCaption(raw,who){
   say("Transcript reached the 160,000-character session safety limit. Download it before starting a new session.",true);
   stopListening();return;
  }
- const item={seq:++seq,created:Date.now(),source:who||"Speech",text,translation:""};
+ const item={seq:++seq,created:Date.now(),source:who||"Speech",language:spokenLanguage,text,translation:""};
  segments.push(item);dirty=true;makeRow(item);
  broadcast({type:"caption",seq:item.seq,source:item.source,text:item.text});
- if(el("he-translate-auto").checked&&source.value!==target.value){
-  item.translationSource=source.value;item.translationTarget=target.value;translationQueue.push(item);processTranslations();
+ if(el("he-translate-auto").checked&&spokenLanguage!==target.value&&(!dualSession||who==="Student")){
+  item.translationSource=spokenLanguage;item.translationTarget=target.value;translationQueue.push(item);processTranslations();
  }
 }
 let nativeTranslator=null,nativePair="";
@@ -201,6 +221,9 @@ function stopTracks(){
  if(mixedCtx){mixedCtx.close().catch(()=>{});mixedCtx=null}
 }
 function stopListening(flush=false){
+ for(const timer of dualTimers)clearTimeout(timer);dualTimers.clear();
+ for(const recorder of dualRecorders){recorder.heFlush=flush;try{if(recorder.state==="recording")recorder.stop()}catch{}}
+ dualRecorders.clear();
  silenceTranslation();
  if(flush&&mediaRecorder?.state==="recording")flushRecorder=mediaRecorder;
  listening=false;sessionRun++;
@@ -209,7 +232,7 @@ function stopListening(flush=false){
  if(recognition){const old=recognition;recognition=null;try{old.abort()}catch{}}
  if(mediaRecorder){const m=mediaRecorder;mediaRecorder=null;try{if(m.state==="recording")m.stop()}catch{}}
  stopTracks();el("he-translate-interim").textContent="";
- updateState();updateTime();
+ updateState();updateTime();if(!finishing)assigned.disabled=false;
 }
 function updateTime(){
  const ms=listening?Date.now()-sessionStarted:0;
@@ -388,19 +411,66 @@ async function startCloud(){
  activeEngine="cloud";cloudChunk();updateState();
  say("Cloud captions started. Audio will be processed in roughly 10-second segments.");
 }
+function dualChunk(stream,role,language,run){
+ if(!listening||sessionRun!==run)return;
+ const mime=chosenMime();if(!mime)throw Error("Audio recorder unavailable.");
+ const recorder=new MediaRecorder(stream,{mimeType:mime,audioBitsPerSecond:48000});
+ dualRecorders.add(recorder);const chunks=[],started=Date.now();
+ let resolveDone;const done=new Promise(resolve=>{resolveDone=resolve});dualPending.add(done);
+ let timer;
+ recorder.ondataavailable=e=>{if(e.data?.size)chunks.push(e.data)};
+ recorder.onerror=()=>{clearTimeout(timer);dualTimers.delete(timer);dualRecorders.delete(recorder);dualPending.delete(done);resolveDone();say("A "+role+" audio channel failed. Check the transcript.",true)};
+ recorder.onstop=async()=>{
+  clearTimeout(timer);dualTimers.delete(timer);dualRecorders.delete(recorder);
+  try{
+   if(listening&&sessionRun===run)dualChunk(stream,role,language,run);
+   if((listening&&sessionRun===run)||recorder.heFlush){
+    const blob=new Blob(chunks,{type:mime}),seconds=Math.round((Date.now()-started)/1000);
+    if(blob.size>=400&&seconds>=3){
+     const form=new FormData();form.append("action","transcribe");form.append("confirmedConsent","true");form.append("language",language);form.append("seconds",String(Math.min(45,seconds)));form.append("audio",blob,"lesson."+(mime.includes("mp4")?"mp4":mime.includes("ogg")?"ogg":"webm"));
+     const {data,error}=await db.functions.invoke("he-live-transcribe",{body:form});
+     if(error)throw error;
+     if(data?.text&&((listening&&sessionRun===run)||finishing))addCaption(data.text,role,language);
+    }
+   }
+  }catch(e){say(role+" transcription failed: "+e.message,true)}
+  finally{dualPending.delete(done);resolveDone()}
+ };
+ recorder.start();timer=setTimeout(()=>{if(recorder.state==="recording")recorder.stop()},7300);dualTimers.add(timer);
+}
+async function finishAssigned(){
+ if(finishing)return;
+ finishing=true;const id=assignedId;stopListening(true);
+ try{
+  await Promise.allSettled([...dualPending]);
+  if(!id||!el("he-caption-auto-report").checked){say("Stopped. Download the transcript or use it for a report.");return}
+  const evidence=segments.map(s=>"["+new Date(s.created).toISOString()+"] "+s.source+" ["+(s.language||"unknown")+"] ORIGINAL: "+s.text).join("\n");
+  if(!evidence.trim())throw Error("No speech captured.");
+  const reports=window.HelloEarthLessonReports;
+  if(!reports?.finishAssigned)throw Error("Report module unavailable. Download your transcript.");
+  await reports.finishAssigned(id,evidence);
+  say("Lesson report saved to the assigned student.");
+ }catch(e){say("Report not saved: "+e.message+". Your transcript is still available.",true)}
+ finally{finishing=false;assigned.disabled=false}
+}
 async function startListening(){
- if(listening)return;
+ if(listening||finishing)return;
  if(!el("he-caption-consent").checked){
   say("Confirm consent from class participants before transcribing audio.",true);return;
  }
  if(!navigator.mediaDevices){say("Microphone capture requires a secure browser and HTTPS.",true);return}
- listening=true;sessionStarted=Date.now();const currentRun=++sessionRun;
+ if(segments.length&&assignedId!==assigned.value){say("Download and clear the previous lesson before switching students.",true);return}
+ assignedId=assigned.value;dualSession=el("he-caption-dual").checked;
+ if(dualSession&&(!assignedId||!cloud.cloudAvailable)){say("Separate speaker capture needs an assigned student and enabled cloud speech.",true);return}
+ if(dualSession)el("he-caption-source").value="both";
+ assigned.disabled=true;listening=true;sessionStarted=Date.now();const currentRun=++sessionRun;
  const choice=el("he-caption-engine").value;
  el("he-translate-interim").textContent="";
  updateState();
  try{
   await obtainAudio();
   if(!listening||sessionRun!==currentRun){stopTracks();return}
+  if(dualSession){activeEngine="cloud";dualChunk(micStream,"Teacher",teacherLanguage.value,currentRun);dualChunk(new MediaStream(displayStream.getAudioTracks()),"Student",source.value,currentRun);clockTimer=setInterval(updateTime,1000);updateState();say("Separate teacher and student channels active. Use headphones.");return}
   const offline=await localAvailability();
   if(!listening||sessionRun!==currentRun){stopTracks();return}
   if(choice==="device"){
@@ -459,7 +529,7 @@ function endSharing(){
 }
 el("he-caption-install").addEventListener("click",onDeviceInstall);
 el("he-translate-mic").addEventListener("click",startListening);
-el("he-caption-stop").addEventListener("click",()=>{stopListening(true);say("Stopped microphone capture. Finishing the final recorded audio segment, if any…")});
+el("he-caption-stop").addEventListener("click",()=>{if(dualSession)finishAssigned();else{stopListening(true);assigned.disabled=false;say("Stopped microphone capture. Finishing the final recorded audio segment, if any…")}});
 el("he-caption-share").addEventListener("click",()=>startSharing().catch(e=>say(e.message,true)));
 el("he-caption-stop-share").addEventListener("click",()=>{endSharing();say("Student viewing link stopped receiving captions.")});
 el("he-caption-copy-url").addEventListener("click",()=>copy(roomUrl));
@@ -469,7 +539,7 @@ el("he-caption-download").addEventListener("click",()=>{
 el("he-caption-clear").addEventListener("click",()=>{
  if(listening){say("Stop live captions before clearing the transcript.",true);return}
  if(segments.length&&!confirm("Clear the transcript from this browser tab?"))return;
- segments=[];seq=0;dirty=false;translationQueue.length=0;feed.replaceChildren();
+ segments=[];assignedId="";seq=0;dirty=false;translationQueue.length=0;feed.replaceChildren();
  const p=document.createElement("p");p.id="he-caption-empty";p.className="he-caption-activity";
  p.textContent="Captions cleared. Start a new session whenever you're ready.";feed.append(p);
  say("Transcript cleared from this tab.");
