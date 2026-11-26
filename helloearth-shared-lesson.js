@@ -13,17 +13,24 @@ let writing=false,pending=null,writeTimer=null,lastWrite=0;
 let roleKnown=false,remoteAnchor=null,anchorReceivedAt=0,anchorAuthor="",anchorRevision=0,remoteAnchorRevision=-1,scrollGuard=null,layoutFollowTimer=null;
 let inkChannel=null,inkReady=false,guestInk=new Map(),textInk=[],remoteText=new Map();const author=crypto.randomUUID();
 let presenceReady=false,presenceTracked=false,presenceSynced=false;
-const paper=el("share-paper"),svg=el("share-annotations"),follow=el("share-follow"),presentSync=el("share-presenter-sync");
+const paper=el("share-paper"),paperFrame=el("share-paper-frame"),svg=el("share-annotations"),follow=el("share-follow"),presentSync=el("share-presenter-sync");
+let paperScale=1,layoutWidth=0,layoutFrameRAF=0;
 let zoom=100,teacherZoom=100,zoomSync=false,teacherZoomSync=false,zoomRevision=0,remoteZoomRevision=-1;
 const zoomFollow=el("share-zoom-follow"),zoomControl=el("share-zoom-sync");
 function applyZoom(value){
  const next=Math.max(75,Math.min(200,Math.round(Number(value)/5)*5));
- if(!Number.isFinite(next))return;
- const rect=paper.getBoundingClientRect(),anchor=Math.max(0,Math.min(1,(window.innerHeight/2-rect.top)/Math.max(1,rect.height)));
- const old=zoom;layoutPaper();zoom=next;paper.style.zoom=String(zoom/100);
+ if(!Number.isFinite(next)||next===zoom)return;
+ const page=paper.closest(".share-page"),rect=paper.getBoundingClientRect(),line=readingLine();
+ const anchor=clamp01((line-rect.top)/Math.max(1,rect.height));
+ const pageRect=page.getBoundingClientRect(),x=pageRect.left+page.clientWidth/2;
+ const horizontal=clamp01((x-rect.left)/Math.max(1,rect.width));
+ zoom=next;layoutPaper();
  el("share-zoom-value").textContent=zoom+"%";
  el("share-zoom-out").disabled=zoom<=75;el("share-zoom-in").disabled=zoom>=200;
- if(old!==zoom){const after=paper.getBoundingClientRect();window.scrollBy(0,after.top+anchor*after.height-window.innerHeight/2);requestAnimationFrame(paintStrokes);scheduleFollowLayout()}
+ const after=paper.getBoundingClientRect();
+ if(line>=rect.top&&line<=rect.bottom)window.scrollBy({top:after.top+anchor*after.height-line,behavior:"instant"});
+ page.scrollLeft+=after.left+horizontal*after.width-x;
+ requestAnimationFrame(()=>{paintStrokes();scheduleFollowLayout()});
 }
 function sendZoom(){
  if(!presenter||!inkReady||dead)return;
@@ -147,8 +154,19 @@ function scheduleFollowLayout(){
 }
 function layoutPaper(){
  const page=paper.closest(".share-page"),style=getComputedStyle(page);
- const width=Math.max(180,Math.min(910,page.clientWidth-parseFloat(style.paddingLeft||0)-parseFloat(style.paddingRight||0)));
- paper.style.width=width+"px";paper.style.maxWidth="none";
+ const available=Math.max(1,page.clientWidth-parseFloat(style.paddingLeft||0)-parseFloat(style.paddingRight||0));
+ const logical=Math.max(280,Math.min(910,document.documentElement.clientWidth-32));
+ if(logical!==layoutWidth){layoutWidth=logical;paper.style.width=logical+"px"}
+ paper.style.maxWidth="none";paper.style.zoom="1";
+ paperScale=Math.min(1,available/layoutWidth)*zoom/100;
+ paper.style.transform="scale("+paperScale+")";
+ const width=Math.ceil(layoutWidth*paperScale)+"px",height=Math.ceil(paper.offsetHeight*paperScale)+"px";
+ if(paperFrame.style.width!==width)paperFrame.style.width=width;
+ if(paperFrame.style.height!==height)paperFrame.style.height=height;
+}
+function schedulePaperLayout(){
+ if(layoutFrameRAF)return;
+ layoutFrameRAF=requestAnimationFrame(()=>{layoutFrameRAF=0;layoutPaper();paintStrokes();scheduleFollowLayout()});
 }
 function pointAnchor(x,y){
  const blocks=contentBlocks();
@@ -313,7 +331,7 @@ function setChatOpen(open,visit=false){
   paintStrokes();
   if(open&&visit){
    const rect=chatPanel.getBoundingClientRect(),dock=document.querySelector(".share-top-dock").getBoundingClientRect();
-   if(rect.top<dock.bottom||rect.top>=window.innerHeight){
+   if(window.innerWidth<=760&&(rect.top<dock.bottom||rect.top>=window.innerHeight)){
     if(!presenter&&canFollow&&syncEnabled){canFollow=false;follow.checked=false;msg("Follow teacher paused while you visit chat. Enable Follow scroll to resume.")}
     chatPanel.scrollIntoView({block:"start",behavior:"instant"});
    }
@@ -510,7 +528,7 @@ document.addEventListener("pointerup",e=>{
  clearTimeout(selectionTimer);selectionTimer=setTimeout(()=>{if(captureSelection())highlightSelection()},0);
 });
 document.addEventListener("keydown",e=>{if(tool==="text"&&e.key==="Enter"&&!["INPUT","SELECT","BUTTON","TEXTAREA"].includes(document.activeElement?.tagName)){highlightSelection()}});
-window.addEventListener("resize",()=>{layoutPaper();paintStrokes();scheduleFollowLayout()});if(window.ResizeObserver){new ResizeObserver(()=>{paintStrokes();positionRemoteCursor()}).observe(paper);new ResizeObserver(()=>{layoutPaper();scheduleFollowLayout()}).observe(paper.closest(".share-page"))}
+window.addEventListener("resize",schedulePaperLayout);paper.closest(".share-page").addEventListener("scroll",positionRemoteCursor,{passive:true});if(window.ResizeObserver){const observer=new ResizeObserver(schedulePaperLayout);observer.observe(paper);observer.observe(paper.closest(".share-page"))}
 function paintStrokes(){
  const geometry={base:svg.getBoundingClientRect(),blocks:contentBlocks().map(b=>b.getBoundingClientRect())};
  svg.replaceChildren();
@@ -691,6 +709,7 @@ el("share-copy").addEventListener("click",async()=>{
  catch{msg("Couldn't copy the link automatically. Copy it from the address bar.",true)}
 });
 el("share-print").addEventListener("click",()=>window.print());
+window.addEventListener("afterprint",schedulePaperLayout);
 el("share-download").addEventListener("click",()=>{
  if(!lesson?.markdown)return;
  const url=URL.createObjectURL(new Blob([lesson.markdown],{type:"text/markdown;charset=utf-8"}));
