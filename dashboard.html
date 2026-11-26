@@ -6,7 +6,7 @@
 <title>Dashboard | Hello Earth</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg?v=20261119-home-brand1">
 <link rel="stylesheet" href="portal.css?v=20261115pricing1">
-<script type="module" src="dashboard.js?v=20261126-profiles1"></script>
+<script type="module" src="dashboard.js?v=20261126-quickphoto1"></script>
 <link rel="stylesheet" href="page-i18n.css?v=20261115full4"><script src="page-i18n.js?v=20261116-suite7" defer></script><link rel="stylesheet" href="space-theme.css?v=20261115-global-space2"><link rel="stylesheet" href="dashboard-navigation.css?v=20261116-scheduling3"><link rel="stylesheet" href="dashboard-scheduler.css?v=20261117-scheduler3"><link rel="stylesheet" href="dashboard-features.css?v=20261116-suite7"><link rel="manifest" href="/site.webmanifest">
 <link rel="apple-touch-icon" href="/helloearth-logo.png">
 <meta name="apple-mobile-web-app-title" content="HelloEarth">
@@ -189,7 +189,7 @@
     <section class="ws-detail" id="student-detail" hidden aria-labelledby="selected-name">
       <div class="ws-card"><div class="ws-detail-top"><div><span class="dash-overline">STUDENT PROFILE</span><div class="he-profile-heading"><span id="selected-avatar" class="he-profile-avatar" aria-hidden="true"></span><h2 id="selected-name" class="ws-detail-title"></h2></div><p id="selected-nickname" class="he-nickname" hidden></p></div><button class="ws-mini-btn" id="close-detail" type="button">Close</button></div>
         <div class="ws-fields" id="student-fields"></div>
-        <div class="ws-action-row"><button type="button" class="ws-mini-btn" id="edit-student">Edit profile</button><button type="button" class="ws-mini-btn" id="add-note">+ Lesson note</button><button type="button" class="ws-mini-btn" id="assess-student">Record skill assessment</button><button type="button" class="dash-primary" id="plan-student-lesson">Prepare lesson</button><button type="button" class="ws-mini-btn" id="he-student-teaching">Teaching companion</button></div>
+        <div class="ws-action-row"><button type="button" class="ws-mini-btn" id="edit-student">Edit profile</button><button type="button" class="ws-mini-btn" id="selected-photo-upload">Add photo</button><input type="file" id="selected-photo-file" accept="image/jpeg,image/png,image/webp" hidden><button type="button" class="ws-mini-btn" id="selected-photo-remove" disabled>Remove photo</button><span id="selected-photo-status" role="status" aria-live="polite"></span><button type="button" class="ws-mini-btn" id="add-note">+ Lesson note</button><button type="button" class="ws-mini-btn" id="assess-student">Record skill assessment</button><button type="button" class="dash-primary" id="plan-student-lesson">Prepare lesson</button><button type="button" class="ws-mini-btn" id="he-student-teaching">Teaching companion</button></div>
         <section class="ws-student-workflow" id="student-workflow" hidden>
           <h3 id="workflow-heading">Prepare lesson</h3>
           <div class="ws-form-grid"><label>Lesson topic <input id="plan-topic" maxlength="200" placeholder="Conversation, job interview, travel…"></label><label>Duration <select id="plan-duration"><option value="30">30 minutes</option><option value="50" selected>50 minutes</option><option value="60">60 minutes</option><option value="90">90 minutes</option></select></label><label>Planning level <select id="plan-level"><option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option><option>C2</option></select></label></div>
