@@ -1,0 +1,48 @@
+
+/* More approachable student profile editor: guided sections, information hierarchy */
+#student-modal .ws-dialog{width:min(900px,calc(100% - 22px));max-width:900px;max-height:90dvh;overflow:auto}
+#student-modal #student-form{display:block!important}
+.he-profile-intro{padding:12px 14px;border:1px solid #8a80ac88;background:linear-gradient(110deg,#332d50,#29354e);border-radius:12px;margin-bottom:13px}
+.he-profile-intro strong{display:block;color:#fff3ff;font-size:14px}
+.he-profile-intro p{margin:4px 0 0;color:#bfcbe2;font-size:11px;line-height:1.6}
+.he-student-editor-tabs{display:flex;gap:5px;flex-wrap:wrap;padding:5px;background:#1c2741;border:1px solid #74809d56;border-radius:11px;margin-bottom:13px}
+.he-student-editor-tabs button{border:0;background:transparent;color:#c4cee1;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:720;white-space:nowrap}
+.he-student-editor-tabs button[aria-pressed=true]{background:#67517d;color:#fff;box-shadow:inset 0 0 0 1px #c49dd7}
+.he-student-form-step{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:15px;row-gap:10px;align-items:start;min-width:0}
+.he-student-form-step[hidden]{display:none!important}
+.he-step-heading{grid-column:1/-1;min-width:0;margin:5px 0 8px}
+.he-step-heading h3{color:#f1e5ff;font-size:18px;margin:0 0 4px}
+.he-step-heading p{color:#aabbd7;margin:0;font-size:12px}
+.he-student-form-step>.field{min-width:0}
+.he-student-form-step>.field.full{grid-column:1/-1}
+.he-student-step-controls{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:18px 0 12px;padding:11px 0;border-top:1px solid #7281a03f}
+.he-student-step-controls span{color:#bac8df;font-size:11px}
+.he-student-step-controls button{border:1px solid #7c85a8;color:#ebe7f8;background:#303d5c;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:12px}
+.he-student-step-controls button:disabled{opacity:.4;cursor:default}
+#student-modal #save-student{display:block;min-width:180px;min-height:40px;margin-left:auto}
+.he-student-info-tabs{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:16px 0 18px;border-bottom:1px solid #7b87a055;padding-bottom:11px}
+.he-student-info-tabs button{background:#2c3654;color:#c8d4e7;padding:9px 13px;border:1px solid #7987a46c;border-radius:9px;cursor:pointer;font-size:12px;font-weight:700}
+.he-student-info-tabs button[aria-pressed=true]{background:#69537f;border-color:#cfade7;color:#fff3ff}
+.he-student-profile-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0}
+.he-student-profile-summary>div{border:1px solid #818da657;background:linear-gradient(120deg,#24324d,#1f2e49);border-radius:12px;padding:12px 14px;min-width:0}
+.he-student-profile-summary small{display:block;color:#b3c2d9;font-size:10px;letter-spacing:.02em;margin-bottom:6px}
+.he-student-profile-summary strong{display:block;color:#f8f2ff;font-size:13px;overflow-wrap:anywhere}
+#student-fields{display:block!important}
+#student-fields .he-profile-section{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#student-fields .he-profile-section[hidden]{display:none!important}
+#student-fields .he-profile-section .ws-field{min-width:0;background:#25334e;border:1px solid #7c8aa54d;border-radius:10px;padding:13px 15px;display:flex;flex-direction:column;gap:7px}
+#student-fields .he-profile-section .ws-field strong{color:#b6c7e3;font-size:11px}
+#student-fields .he-profile-section .ws-field span{color:#f2f0ff;font-size:13px;white-space:pre-wrap;line-height:1.6}
+.he-profile-empty{font-size:12px;color:#aabbd5;padding:12px}
+.he-student-recent-feedback{margin:15px 0 22px;padding:15px;background:#212f48;border:1px solid #71809f69;border-radius:12px}
+.he-student-recent-feedback[hidden]{display:none!important}
+.he-student-observations-header h3{margin:0;color:#faefff;font-size:16px}
+.he-student-observations-header p{font-size:11px;color:#adbad1;margin:6px 0 10px}
+.he-student-observations-buttons{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.he-student-observations-buttons button{border:1px solid #9a89be;background:#403b60;color:#faf2ff;border-radius:8px;padding:8px 12px;font-size:11px;cursor:pointer}
+#he-student-recent-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.he-student-observation{border:1px solid #697e9b50;background:#293a55;border-radius:9px;padding:11px}
+.he-student-observation small{display:block;color:#d3abdf;font-size:10px;text-transform:capitalize}
+.he-student-observation p{font-size:12px;color:#e6eaf6;line-height:1.5;margin:6px 0;white-space:pre-wrap}
+@media(max-width:730px){.he-student-profile-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#he-student-recent-list{grid-template-columns:1fr}}
+@media(max-width:580px){.he-student-form-step{grid-template-columns:1fr}.he-student-form-step>.field.full{grid-column:1}.he-student-editor-tabs button{flex:1 1 40%;font-size:11px}#student-fields .he-profile-section{grid-template-columns:1fr}}
