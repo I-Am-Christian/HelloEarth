@@ -306,6 +306,17 @@ window.addEventListener("beforeunload",e=>{
  }
 });
 window.HelloEarthLessonReports={
+ useTranscript(value){
+  if(listening){feedback("Stop the report microphone before importing another transcript.",true);return}
+  const imported=String(value||"").trim().slice(0,35000);
+  if(!imported)return;
+  const field=el("he-report-transcript");
+  if(field.value.trim()&&field.value.trim()!==imported){
+   if(!confirm("Replace the current report transcript with your live captions?"))return;
+  }
+  field.value=imported;typedUsed=true;voiceUsed=false;
+  updateCount();feedback("Live class captions imported. Choose the student and confirm permission before generating the report.");
+ },
  openForStudent(id){
   selectedLessonStudent=id;
   el("reports-tab")?.click();
