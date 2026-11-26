@@ -13,7 +13,7 @@ const lifespan=()=>{
  const left=Date.parse(lesson.expires_at)-Date.now();
  if(left<=0){el("lesson-life").textContent="Expired";el("lesson-content").replaceChildren();message("This temporary lesson has expired. Please create another copy.",true);return}
  const days=Math.floor(left/86400000),hours=Math.floor((left%86400000)/3600000),minutes=Math.floor((left%3600000)/60000);
- el("lesson-life").textContent="Temporary link · deleted in "+(days?days+"d ":"")+hours+"h "+minutes+"m";
+ el("lesson-life").textContent="Link expires in "+(days?days+"d ":"")+hours+"h "+minutes+"m · auto-deletes shortly after";
 };
 async function open(){
  if(!valid.test(id)){message("The lesson link is invalid.",true);return}
