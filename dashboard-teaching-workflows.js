@@ -100,29 +100,63 @@ el("he-lesson-save").addEventListener("click",async()=>{
   if(error)throw error;say("he-lesson-feedback","Lesson saved to this student's records.");await loadLessons();
  }catch(e){say("he-lesson-feedback",e.message,true)}finally{button.disabled=false}
 });
-el("he-lesson-generate").addEventListener("click",async()=>{
- const {topic,level,duration}=baseLesson(),apiKey=el("he-openai-key").value,studentId=el("he-lesson-student").value;
- if(!topic||!apiKey){say("he-ai-feedback","Enter a topic and your OpenAI API key.",true);return}
- if(!studentId){say("he-ai-feedback","Choose a student to make a lesson.",true);return}
- const button=el("he-lesson-generate");button.disabled=true;say("he-ai-feedback","Generating your editable lesson…");
+// Managed Claude is the default. Tutor-owned keys are sent only when opted in;
+// neither mode stores API credentials in the browser or student records.
+const aiProvider=el("he-ai-provider");
+const personalKeyRow=el("he-ai-personal-key-row");
+aiProvider.addEventListener("change",()=>{
+ personalKeyRow.hidden=aiProvider.value!=="anthropic-byok";
+ say("he-ai-feedback",aiProvider.value==="managed"
+  ?"HelloEarth will cover this generation within your included allowance."
+  :"Your Anthropic API key is used for this request only, and isn't stored.");
+});
+async function generateWithHaiku(mode){
+ const {topic,level,duration}=baseLesson();
+ const studentId=el("he-lesson-student").value;
+ const byok=aiProvider.value==="anthropic-byok";
+ const ownKey=el("he-openai-key").value.trim();
+ if(!topic){say("he-ai-feedback","Enter a topic for this lesson or homework.",true);return}
+ if(!studentId){say("he-ai-feedback","Choose a student first.",true);return}
+ if(byok&&!ownKey.startsWith("sk-ant-")){
+  say("he-ai-feedback","Enter your Anthropic API key or select HelloEarth AI.",true);return
+ }
+ const buttons=[el("he-lesson-generate"),el("he-homework-ai-generate")];
+ buttons.forEach(b=>{b.disabled=true});
+ say("he-ai-feedback","Claude Haiku 5.5 is generating an editable "+mode+" draft…");
  try{
   await ensureUser();
   const {data:{session},error:authError}=await db.auth.getSession();
   if(authError||!session?.access_token)throw new Error("Session expired. Sign in again.");
-  const chosen=students.find(s=>s.id===studentId);
+  const chosen=students.find(student=>student.id===studentId);
   let studentContext="";
   if(el("he-share-context").checked&&chosen){
-   studentContext=`CEFR: ${chosen.cefr_level}. Goals: ${(chosen.learning_goals||[]).join("; ")}. Focus: ${(chosen.focus_areas||[]).join("; ")}. Interests: ${(chosen.interests||[]).join("; ")}.`.slice(0,1400);
+   studentContext=`CEFR: ${chosen.cefr_level}. Goals: ${(chosen.learning_goals||[]).join("; ")}. Focus: ${(chosen.focus_areas||[]).join("; ")}. Interests: ${(chosen.interests||[]).join("; ")}.`.slice(0,900);
   }
-  const {data,error}=await db.functions.invoke("helloearth-generate",{
-   body:{apiKey,model:el("he-ai-model").value,mode:"lesson",topic,cefr:level,duration,instructions:el("he-lesson-instructions").value,studentContext}
-  });
-  if(error){let message=error.message||"AI generation failed";if(typeof error.context?.json==="function"){try{const info=await error.context.json();if(info?.error)message=info.error}catch{}}throw new Error(message)}
-  if(!data?.text)throw new Error(data?.error||"AI returned no lesson content");
+  const body={provider:byok?"anthropic-byok":"managed",mode,topic,cefr:level,duration,
+   instructions:el("he-lesson-instructions").value,studentContext};
+  if(byok)body.apiKey=ownKey;
+  const {data,error}=await db.functions.invoke("helloearth-generate",{body});
+  if(error){
+   let message=error.message||"Claude generation failed.";
+   if(typeof error.context?.json==="function"){
+    try{const detail=await error.context.json();if(detail?.error)message=detail.error}catch{}
+   }
+   throw new Error(message);
+  }
+  if(!data?.text)throw new Error(data?.error||"Claude returned no content.");
   el("he-lesson-editor").value=String(data.text).slice(0,100000);
-  say("he-ai-feedback","Lesson generated. Review and edit before saving.");
- }catch(e){say("he-ai-feedback",e.message,true)}finally{button.disabled=false}
-});
+  if(mode==="homework"){
+   el("he-homework-student").value=studentId;
+   el("he-homework-title").value=("Practice: "+topic).slice(0,800);
+  }
+  say("he-ai-feedback",
+   mode==="homework"?"Homework generated in the editor; review it and copy the exercises into your assignment before saving.":"Lesson generated. Review and edit it before saving."+
+   (Number.isFinite(data.remainingToday)?" Remaining generations today: "+data.remainingToday+".":""));
+ }catch(e){say("he-ai-feedback",e.message,true)}
+ finally{buttons.forEach(b=>{b.disabled=false})}
+}
+el("he-lesson-generate").addEventListener("click",()=>generateWithHaiku("lesson"));
+el("he-homework-ai-generate").addEventListener("click",()=>generateWithHaiku("homework"));
 el("he-homework-from-lesson").addEventListener("click",()=>{
  const text=clean(el("he-lesson-editor").value);if(!text){say("he-lesson-feedback","Create or open a lesson first.",true);return}
  el("he-homework-student").value=el("he-lesson-student").value;
@@ -130,7 +164,7 @@ el("he-homework-from-lesson").addEventListener("click",()=>{
  el("homework-tab")?.click();
  say("he-homework-feedback","Homework draft prepared. Add the assignment details before saving.");
 });
-el("he-openai-key").addEventListener("input",()=>say("he-ai-feedback","The API key is only held in this page until you leave or refresh."));
+el("he-openai-key").addEventListener("input",()=>say("he-ai-feedback","Personal Anthropic key is used for this request only. It is not saved."));
 document.addEventListener("helloearth:studentsloaded",()=>{studentOptions();loadHomework();loadLessons()});
 document.addEventListener("helloearth:view-changed",e=>{if(e.detail?.view==="homework")loadHomework();if(e.detail?.view==="lessons")loadLessons()});
 const ready=()=>{if(W()?.userId){studentOptions();loadHomework();loadLessons()}};
