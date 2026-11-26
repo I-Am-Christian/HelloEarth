@@ -4,8 +4,8 @@
 <meta name="theme-color" content="#1d2b46"><title>Shared Lesson | HelloEarth</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="stylesheet" href="helloearth-lesson.css?v=20261126-first1">
-<link rel="stylesheet" href="helloearth-shared-lesson.css?v=20261126-share1">
-<script type="module" src="helloearth-shared-lesson.js?v=20261126-ink2"></script></head>
+<link rel="stylesheet" href="helloearth-shared-lesson.css?v=20261126-wheel1">
+<script type="module" src="helloearth-shared-lesson.js?v=20261126-wheel1"></script></head>
 <body>
 <header class="lesson-toolbar share-toolbar">
  <a href="index.html" class="toolbar-brand">✦ HelloEarth <span>Live Lesson</span></a>
@@ -28,11 +28,10 @@
    <button type="button" data-tool="highlight" aria-pressed="false">▰ Freehand highlight</button>
    <button type="button" data-tool="text" aria-pressed="false">▰ Highlight text</button>
   </div>
-  <label class="share-color">Ink <select id="share-ink">
-    <option value="#8456d5">Purple</option><option value="#dc6a85">Pink</option>
-    <option value="#46a49a">Teal</option><option value="#dba84b">Gold</option>
-    <option value="#28385f">Navy</option>
-  </select></label>
+  <label class="share-color">Ink <input type="color" id="share-ink" value="#8456d5" aria-label="Choose any annotation colour" title="Open colour picker"></label>
+  <div class="share-swatches" role="group" aria-label="Quick ink colours">
+  <button type="button" data-ink-color="#8456d5" style="--swatch:#8456d5" aria-label="Ink #8456d5" title="#8456d5"></button><button type="button" data-ink-color="#dc6a85" style="--swatch:#dc6a85" aria-label="Ink #dc6a85" title="#dc6a85"></button><button type="button" data-ink-color="#46a49a" style="--swatch:#46a49a" aria-label="Ink #46a49a" title="#46a49a"></button><button type="button" data-ink-color="#dba84b" style="--swatch:#dba84b" aria-label="Ink #dba84b" title="#dba84b"></button><button type="button" data-ink-color="#28385f" style="--swatch:#28385f" aria-label="Ink #28385f" title="#28385f"></button><button type="button" data-ink-color="#ffeb3b" style="--swatch:#ffeb3b" aria-label="Ink #ffeb3b" title="#ffeb3b"></button><button type="button" data-ink-color="#ef4444" style="--swatch:#ef4444" aria-label="Ink #ef4444" title="#ef4444"></button>
+  </div>
   <button type="button" id="share-undo" disabled>Undo</button>
   <button type="button" id="share-clear" disabled>Clear</button>
   <button type="button" id="share-end" hidden>End sharing</button>
