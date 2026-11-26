@@ -1,6 +1,8 @@
 import {db} from "./supabase-client.js";
 import {SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY} from "./supabase-config.js";
 import {renderWorkbook} from "./helloearth-workbook-renderer.js";
+import {mountClassroomDialogue} from "./classroom-dialogue.js?v=20261126-live1";
+let dialogue=null,assignedStudent=null,contentRevision=0,editingWorkbook=false;
 // One-way tutor presentation. Public guests can view with a signed link,
 // follow scrolling, and make LOCAL drawings; only the owner can save/sync.
 const el=id=>document.getElementById(id);
@@ -53,7 +55,7 @@ function msg(content,error=false){
 }
 function failure(text){
  presenceReady=false;presenceTracked=false;presenceSynced=false;showPresence("offline","Disconnected","Lesson connection ended");
- dead=true;loaded=false;if(inkChannel){db.removeChannel(inkChannel);inkReady=false}chatConnected();
+ dialogue?.stop();dead=true;loaded=false;if(inkChannel){db.removeChannel(inkChannel);inkReady=false}chatConnected();
  el("share-error").hidden=false;el("share-error").textContent=text;
  el("share-content").replaceChildren();
  el("share-title").textContent="Lesson unavailable";msg(text,true);
@@ -155,7 +157,7 @@ function scheduleFollowLayout(){
 function layoutPaper(){
  const page=paper.closest(".share-page"),style=getComputedStyle(page);
  const available=Math.max(1,page.clientWidth-parseFloat(style.paddingLeft||0)-parseFloat(style.paddingRight||0));
- const logical=Math.max(280,Math.min(910,document.documentElement.clientWidth-32));
+ const logical=760;
  if(logical!==layoutWidth){layoutWidth=logical;paper.style.width=logical+"px"}
  paper.style.maxWidth="none";paper.style.zoom="1";
  paperScale=Math.min(1,available/layoutWidth)*zoom/100;
@@ -204,7 +206,7 @@ function paintText(mark){
  const range=textRange(mark.start,mark.end);if(!range)return;
  const base=svg.getBoundingClientRect();if(!base.width||!base.height)return;
  for(const rect of range.getClientRects()){
-  const node=document.createElementNS(ns,"rect");node.setAttribute("x",(rect.left-base.left)/base.width*1000);node.setAttribute("y",(rect.top-base.top)/base.height*1000);node.setAttribute("width",rect.width/base.width*1000);node.setAttribute("height",rect.height/base.height*1000);node.setAttribute("fill",mark.color);node.setAttribute("opacity",String(inkOpacity(mark.opacity,.28)));svg.append(node);
+  const node=document.createElementNS(ns,"rect");node.setAttribute("x",(rect.left-base.left)/base.width*1000);node.setAttribute("y",((mark.kind==="underline"?rect.bottom-rect.height*.12:rect.top)-base.top)/base.height*1000);node.setAttribute("width",rect.width/base.width*1000);node.setAttribute("height",(mark.kind==="underline"?Math.max(1.5,rect.height*.075):rect.height)/base.height*1000);node.setAttribute("fill",mark.color);node.setAttribute("opacity",mark.kind==="underline"?"0.95":String(inkOpacity(mark.opacity,.28)));svg.append(node);
  }
 }
 const colors={has:value=>typeof value==="string"&&/^#[0-9a-f]{6}$/i.test(value)};
@@ -228,18 +230,18 @@ function updateSwatches(){for(const swatch of document.querySelectorAll("[data-i
 inkPicker.addEventListener("input",updateSwatches);updateSwatches();
 
 function validStroke(s){return s&&["pen","highlight"].includes(s.tool)&&colors.has(s.color)&&Array.isArray(s.points)&&s.points.length>=2&&s.points.length<=320&&s.points.every(p=>Array.isArray(p)&&p.length===2&&p.every(n=>typeof n==="number"&&n>=0&&n<=1))&&(!s.anchors||(Array.isArray(s.anchors)&&s.anchors.length===s.points.length&&s.anchors.every(a=>anchorValid(a))))}
-function validMark(m){return m&&colors.has(m.color)&&Number.isInteger(m.start)&&Number.isInteger(m.end)&&m.start>=0&&m.end>m.start&&m.end<=el("share-content").textContent.length}
+function validMark(m){return m&&(!m.kind||["underline","highlight"].includes(m.kind))&&colors.has(m.color)&&Number.isInteger(m.start)&&Number.isInteger(m.end)&&m.start>=0&&m.end>m.start&&m.end<=el("share-content").textContent.length}
 let inkRevision=0;
 const inkBatches=new Map(),inkSeenRevisions=new Map();
 function sendInk(){
  if(!inkReady||dead)return;
  const revision=++inkRevision,total=Math.max(1,Math.ceil(localStrokes.length/6));
  for(let index=0;index<total;index++){
-  inkChannel.send({type:"broadcast",event:"ink-batch",payload:{author,revision,index,total,strokes:localStrokes.slice(index*6,index*6+6),text:index===0?textInk.slice():[]}}).then(result=>{if(result!=="ok")msg("Some annotations could not synchronize. Reconnecting may help.",true)}).catch(()=>msg("Annotation connection interrupted.",true));
+  inkChannel.send({type:"broadcast",event:"ink-batch",payload:{author,revision,contentRevision,index,total,strokes:localStrokes.slice(index*6,index*6+6),text:index===0?textInk.slice():[]}}).then(result=>{if(result!=="ok")msg("Some annotations could not synchronize. Reconnecting may help.",true)}).catch(()=>msg("Annotation connection interrupted.",true));
  }
 }
 function receiveInkBatch(p){
- if(dead||!p||typeof p.author!=="string"||p.author===author||p.author.length>64||!Number.isSafeInteger(p.revision)||!Number.isInteger(p.index)||!Number.isInteger(p.total)||p.total<1||p.total>10||p.index<0||p.index>=p.total||!Array.isArray(p.strokes)||p.strokes.length>6||!Array.isArray(p.text)||p.text.length>100)return;
+ if(dead||!p||Number(p.contentRevision||0)!==contentRevision||typeof p.author!=="string"||p.author===author||p.author.length>64||!Number.isSafeInteger(p.revision)||!Number.isInteger(p.index)||!Number.isInteger(p.total)||p.total<1||p.total>10||p.index<0||p.index>=p.total||!Array.isArray(p.strokes)||p.strokes.length>6||!Array.isArray(p.text)||p.text.length>100)return;
  if(!inkBatches.has(p.author)&&!guestInk.has(p.author)&&inkBatches.size+guestInk.size>=40)return;
  if(p.revision<=(inkSeenRevisions.get(p.author)??-1))return;
  let batch=inkBatches.get(p.author);
@@ -251,28 +253,31 @@ function receiveInkBatch(p){
  const strokes=[];for(let i=0;i<batch.total;i++)strokes.push(...batch.parts.get(i));
  guestInk.set(p.author,strokes);remoteText.set(p.author,batch.text);inkSeenRevisions.set(p.author,p.revision);inkBatches.delete(p.author);paintStrokes();
 }
-let remoteCursor=null,cursorLast=0,cursorTimer=null;
+const remoteCursors=new Map();let cursorLast=0;
 const cursorNode=el("share-remote-cursor"),cursorToggle=el("share-cursor-sync");
-function hideRemoteCursor(){remoteCursor=null;cursorNode.hidden=true;clearTimeout(cursorTimer)}
+function removeCursor(id){const entry=remoteCursors.get(id);if(entry){clearTimeout(entry.timer);entry.node.remove();remoteCursors.delete(id)}}
+function hideRemoteCursor(){for(const id of remoteCursors.keys())removeCursor(id);cursorNode.hidden=true}
 function positionRemoteCursor(){
- if(!remoteCursor||presenter||dead){cursorNode.hidden=true;return}
- const base=svg.getBoundingClientRect(),q=resolvePoint(remoteCursor.point,remoteCursor.anchor),x=base.left+q[0]*base.width,y=base.top+q[1]*base.height;
- const page=paper.closest(".share-page").getBoundingClientRect(),dock=document.querySelector(".share-top-dock").getBoundingClientRect();
- const bottom=window.innerHeight;
- if(x<Math.max(0,page.left)||x>Math.min(window.innerWidth,page.right)||y<dock.bottom||y>bottom){cursorNode.hidden=true;return}
- cursorNode.hidden=false;cursorNode.style.left=x+"px";cursorNode.style.top=y+"px";
+ const base=svg.getBoundingClientRect(),page=paper.closest(".share-page").getBoundingClientRect(),dock=document.querySelector(".share-top-dock").getBoundingClientRect();
+ for(const entry of remoteCursors.values()){
+  const q=resolvePoint(entry.packet.point,entry.packet.anchor),x=base.left+q[0]*base.width,y=base.top+q[1]*base.height;
+  const visible=!dead&&x>=Math.max(0,page.left)&&x<=Math.min(window.innerWidth,page.right)&&y>=dock.bottom&&y<=window.innerHeight;
+  entry.node.hidden=!visible;if(visible){entry.node.style.left=x+"px";entry.node.style.top=y+"px"}
+ }
 }
 function receiveCursor(p){
- if(presenter||dead||!p)return;
- if(p.visible===false){hideRemoteCursor();return}
+ if(dead||!p||typeof p.author!=="string"||p.author===author||p.author.length>64||Number(p.contentRevision||0)!==contentRevision)return;
+ if(!p.visible){removeCursor(p.author);return}
  if(!Array.isArray(p.point)||p.point.length!==2||!p.point.every(n=>Number.isFinite(n)&&n>=0&&n<=1)||!anchorValid(p.anchor))return;
- remoteCursor=p;positionRemoteCursor();clearTimeout(cursorTimer);cursorTimer=setTimeout(hideRemoteCursor,3500);
+ let entry=remoteCursors.get(p.author);
+ if(!entry){if(remoteCursors.size>=20)return;const n=cursorNode.cloneNode(true);n.removeAttribute("id");n.dataset.role=p.role==="teacher"?"teacher":"student";n.querySelector("span").textContent=p.role==="teacher"?"Teacher":"Student";document.body.append(n);entry={node:n,timer:null};remoteCursors.set(p.author,entry)}
+ entry.packet=p;clearTimeout(entry.timer);entry.timer=setTimeout(()=>removeCursor(p.author),5000);positionRemoteCursor();
 }
 function broadcastCursor(event){
- if(!presenter||!inkReady||dead||!cursorToggle.checked||Date.now()-cursorLast<65)return;
- cursorLast=Date.now();inkChannel.send({type:"broadcast",event:"teacher-cursor",payload:{visible:true,point:pointFrom(event),anchor:pointAnchor(event.clientX,event.clientY)}}).catch(()=>{});
+ if(!inkReady||dead||!cursorToggle.checked||Date.now()-cursorLast<70)return;
+ cursorLast=Date.now();inkChannel.send({type:"broadcast",event:"classroom-cursor",payload:{author,contentRevision,role:presenter?"teacher":"student",visible:true,point:pointFrom(event),anchor:pointAnchor(event.clientX,event.clientY)}}).catch(()=>{});
 }
-function clearCursorBroadcast(){if(presenter&&inkReady)inkChannel.send({type:"broadcast",event:"teacher-cursor",payload:{visible:false}}).catch(()=>{})}
+function clearCursorBroadcast(){if(inkReady)inkChannel.send({type:"broadcast",event:"classroom-cursor",payload:{author,contentRevision,visible:false}}).catch(()=>{})}
 paper.addEventListener("pointermove",broadcastCursor,{passive:true});paper.addEventListener("pointerdown",broadcastCursor,{passive:true});paper.addEventListener("pointerleave",clearCursorBroadcast);
 cursorToggle.addEventListener("change",()=>{if(!cursorToggle.checked)clearCursorBroadcast()});
 function showPresence(state,label,detail){
@@ -485,7 +490,9 @@ async function connectInk(){
  }).on("broadcast",{event:"zoom-request"},()=>sendZoom())
  .on("broadcast",{event:"reading-position"},({payload})=>receiveReadingAnchor(payload))
  .on("broadcast",{event:"reading-request"},()=>sendReadingAnchor())
- .on("broadcast",{event:"teacher-cursor"},({payload})=>receiveCursor(payload))
+ .on("broadcast",{event:"classroom-cursor"},({payload})=>receiveCursor(payload))
+ .on("broadcast",{event:"dialogue"},({payload})=>dialogue?.receive(payload))
+ .on("broadcast",{event:"workbook-edited"},()=>poll())
  .on("broadcast",{event:"chat-message"},({payload})=>chatAdd(payload))
  .on("broadcast",{event:"chat-translate-request"},({payload})=>chatRequest(payload))
  .on("broadcast",{event:"chat-translation"},({payload})=>chatReceiveTranslation(payload))
@@ -506,13 +513,13 @@ function captureSelection(){
  return end>start?{start,end}:null;
 }
 function highlightSelection(){
- if(dead||!loaded||tool!=="text")return;
+ if(dead||!loaded||!["text","underline"].includes(tool))return;
  const mark=captureSelection()||savedSelection;
  if(!mark)return;
  savedSelection=null;
- const next={...mark,color:el("share-ink").value,opacity:Number(opacityPicker.value)/100};
+ const next={...mark,kind:tool==="underline"?"underline":"highlight",color:el("share-ink").value,opacity:Number(opacityPicker.value)/100};
  if(!validMark(next))return;
- if(!textInk.some(m=>m.start===next.start&&m.end===next.end&&m.color===next.color)){
+ if(!textInk.some(m=>m.start===next.start&&m.end===next.end&&m.color===next.color&&m.kind===next.kind)){
   if(textInk.length>=100){msg("Text highlight limit reached. Undo or clear your own marks first.",true);return}
   textInk.push(next);
  }
@@ -522,12 +529,12 @@ const highlightButton=document.createElement("button");highlightButton.type="but
 highlightButton.addEventListener("pointerdown",e=>{savedSelection=captureSelection()||savedSelection;e.preventDefault()});
 highlightButton.addEventListener("click",highlightSelection);
 document.querySelector(".share-tool-modes").after(highlightButton);
-document.addEventListener("selectionchange",()=>{if(tool==="text"){const mark=captureSelection();if(mark)savedSelection=mark}});
+document.addEventListener("selectionchange",()=>{if(["text","underline"].includes(tool)){const mark=captureSelection();if(mark)savedSelection=mark}});
 document.addEventListener("pointerup",e=>{
- if(tool!=="text"||e.pointerType==="touch"||!el("share-content").contains(e.target))return;
+ if(!["text","underline"].includes(tool)||e.pointerType==="touch"||!el("share-content").contains(e.target))return;
  clearTimeout(selectionTimer);selectionTimer=setTimeout(()=>{if(captureSelection())highlightSelection()},0);
 });
-document.addEventListener("keydown",e=>{if(tool==="text"&&e.key==="Enter"&&!["INPUT","SELECT","BUTTON","TEXTAREA"].includes(document.activeElement?.tagName)){highlightSelection()}});
+document.addEventListener("keydown",e=>{if(["text","underline"].includes(tool)&&e.key==="Enter"&&!["INPUT","SELECT","BUTTON","TEXTAREA"].includes(document.activeElement?.tagName)){highlightSelection()}});
 window.addEventListener("resize",schedulePaperLayout);paper.closest(".share-page").addEventListener("scroll",positionRemoteCursor,{passive:true});if(window.ResizeObserver){const observer=new ResizeObserver(schedulePaperLayout);observer.observe(paper);observer.observe(paper.closest(".share-page"))}
 function paintStrokes(){
  const geometry={base:svg.getBoundingClientRect(),blocks:contentBlocks().map(b=>b.getBoundingClientRect())};
@@ -545,14 +552,14 @@ function paintStrokes(){
 }
 function setTool(next){
  tool=next;active=null;savedSelection=null;clearTimeout(selectionTimer);
- paper.classList.toggle("is-text-highlighting",tool==="text");
+ paper.classList.toggle("is-text-highlighting",["text","underline"].includes(tool));
  for(const btn of document.querySelectorAll("[data-tool]")){
   const on=btn.dataset.tool===tool;btn.classList.toggle("selected",on);
   btn.setAttribute("aria-pressed",String(on));
  }
  svg.classList.toggle("is-annotating",tool==="pen"||tool==="highlight");
- highlightButton.hidden=tool!=="text";if(tool==="view")resumeReading();
- el("share-draw-hint").textContent=tool==="text"?"Drag across words to highlight automatically. On touchscreens, select text and tap Apply text highlight.": "Teacher and student annotations are shared live while connected.";
+ highlightButton.hidden=!["text","underline"].includes(tool);highlightButton.textContent=tool==="underline"?"Apply underline":"Apply text highlight";if(tool==="view")resumeReading();
+ el("share-draw-hint").textContent=["text","underline"].includes(tool)?"Drag across words to highlight automatically. On touchscreens, select text and tap Apply text highlight.": "Teacher and student annotations are shared live while connected.";
  paintStrokes();
 }
 function pointFrom(event){
@@ -669,7 +676,8 @@ async function poll(){
  if(requestInFlight||dead||!loaded)return;
  requestInFlight=true;
  try{
-  const response=await api("state");
+  const response=await api("state",{contentRevision});
+  if(typeof response.markdown==="string"&&Number(response.state?.contentRevision||0)!==contentRevision)applyWorkbookRevision(response);
   updateState(response.state);
   if(seen){msg(presenter?
    (syncEnabled?"Presenter connected · scrolling is shared":"Presenter connected · scrolling sync is off"):
@@ -681,6 +689,24 @@ async function poll(){
   else msg("Connection interrupted — retrying…",true);
  }finally{requestInFlight=false}
 }
+function applyWorkbookRevision(response){
+ const revision=Number(response.state?.contentRevision||0);if(revision<contentRevision)return;
+ contentRevision=revision;lesson.markdown=response.markdown;active=null;localStrokes=[];textInk=[];sharedStrokes=[];guestInk.clear();remoteText.clear();inkBatches.clear();inkSeenRevisions.clear();remoteAnchor=null;hideRemoteCursor();
+ renderWorkbook(el("share-content"),lesson.markdown);layoutPaper();paintStrokes();scheduleFollowLayout();msg("Live workbook updated.");
+}
+const editor=el("share-edit-dialog"),editorText=el("share-edit-text"),editorStatus=el("share-edit-status");
+let editRevision=0;
+el("share-edit-workbook").onclick=()=>{if(!presenter||dead||!loaded)return;editRevision=contentRevision;editorText.value=lesson.markdown;editorStatus.textContent="";editor.showModal()};
+el("share-edit-cancel").onclick=()=>editor.close();
+el("share-edit-save").onclick=async()=>{
+ if(!presenter||dead||editingWorkbook)return;
+ const markdown=editorText.value.trim();if(markdown===lesson.markdown){editor.close();return}
+ if(markdown.length<20){editorStatus.textContent="Enter at least 20 characters.";return}
+ if(!confirm("Publish edits to the shared workbook? Existing drawings and highlights will be cleared because their positions may no longer match. The original saved lesson is unchanged."))return;
+ editingWorkbook=true;el("share-edit-save").disabled=true;
+ try{const response=await api("edit-workbook",{markdown,revision:editRevision},true);applyWorkbookRevision(response);updateState(response.state);editor.close();if(inkReady)await chatBroadcast("workbook-edited",{revision:contentRevision});}
+ catch(e){editorStatus.textContent=e.message||"Could not publish changes."}finally{editingWorkbook=false;el("share-edit-save").disabled=false}
+};
 async function checkPresenter(){
  try{
   const {data:{session}}=await db.auth.getSession();
@@ -688,7 +714,7 @@ async function checkPresenter(){
   await db.auth.getUser();
   const result=await api("role",{},true);
   if(!result.presenter)return;
-  presenter=true;
+  presenter=true;assignedStudent=result.student||null;el("share-edit-workbook").hidden=false;
   el("share-role").textContent="Teacher · presenter";
   el("share-follow-label").hidden=true;
   el("share-presenter-label").hidden=false;el("share-cursor-label").hidden=false;
@@ -720,7 +746,7 @@ async function open(){
  if(!valid.test(token)){failure("Invalid shared lesson link. Ask your tutor to create a new public share link.");return}
  try{
   const response=await api("open");
-  lesson=response;
+  lesson=response;contentRevision=Number(response.state?.contentRevision||0);
   renderWorkbook(el("share-content"),response.markdown);
   el("share-title").textContent=response.topic;
   el("share-level").textContent="CEFR "+response.cefrLevel;
@@ -732,7 +758,7 @@ async function open(){
   loaded=true;sharedStrokes=Array.isArray(response.state.annotations)?response.state.annotations:[];
   updateState(response.state);paintStrokes();remaining();
   msg("Lesson loaded. Checking if you're the presenter…");
-  await checkPresenter();roleKnown=true;layoutPaper();chatDefaults();resumeReading();
+  await checkPresenter();roleKnown=true;layoutPaper();chatDefaults();dialogue=mountClassroomDialogue({teacher:presenter,student:assignedStudent,topic:lesson.topic,send:p=>chatBroadcast("dialogue",p)});resumeReading();
   connectInk().catch(()=>{msg("Live annotation connection unavailable.",true);showPresence("offline","Status unavailable","Could not connect to the live lesson channel")});
   if(!presenter)msg("Ready to read · no login required. Use Follow teacher to sync scrolling.");
   setInterval(()=>{remaining();poll()},1700);
