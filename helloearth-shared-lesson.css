@@ -161,3 +161,12 @@
  #share-chat-form{padding:5px 7px}#share-chat-input{rows:1;min-height:36px;height:39px;resize:none;padding:6px;font-size:16px}.share-chat-footer{padding:2px 8px}
 }
 @media print{.share-classroom-layout{display:block;padding:0}.share-classroom-layout .share-chat{display:none!important}}
+
+/* Fixed logical workbook width per viewport; zoom scales instead of reflowing it. */
+.share-classroom-layout .share-page{overflow-x:auto;scrollbar-width:thin;overflow-anchor:none}
+.share-classroom-layout .share-paper{flex-shrink:0;transform-origin:top left}
+.share-remote-cursor[hidden]{display:none!important}
+.share-remote-cursor{position:fixed;z-index:25;pointer-events:none;display:flex;align-items:flex-start;gap:2px;filter:drop-shadow(0 2px 3px #22133355)}
+.share-remote-cursor svg{width:24px;height:24px;flex:none}
+.share-remote-cursor span{margin-top:12px;background:#6344a2;color:white;border:1px solid #e5d5ff;border-radius:5px;padding:3px 6px;font:700 10px system-ui;white-space:nowrap}
+@media print{.share-remote-cursor{display:none!important}}
