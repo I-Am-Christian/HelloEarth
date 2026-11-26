@@ -300,8 +300,8 @@ const personalKeyRow=el("he-ai-personal-key-row");
 aiProvider.addEventListener("change",()=>{
  personalKeyRow.hidden=aiProvider.value!=="anthropic-byok";
  say("he-ai-feedback",aiProvider.value==="managed"
-  ?"HelloEarth will cover this generation within your included allowance."
-  :"Your Anthropic API key is used for this request only, and isn't stored.");
+  ?"Nova will use your included lesson credits."
+  :"Your own API key is used for this request only and isn't saved.");
 });
 async function generateWithHaiku(mode){
  const {topic,level,duration}=baseLesson();
@@ -311,11 +311,11 @@ async function generateWithHaiku(mode){
  if(!topic){say("he-ai-feedback","Enter a topic for this lesson or homework.",true);return}
  if(!studentId){say("he-ai-feedback","Choose a student first.",true);return}
  if(byok&&!ownKey.startsWith("sk-ant-")){
-  say("he-ai-feedback","Enter your Anthropic API key or select HelloEarth AI.",true);return
+  say("he-ai-feedback","Enter your API key or select Nova included credits.",true);return
  }
  const buttons=[el("he-lesson-generate"),el("he-homework-ai-generate")];
  buttons.forEach(b=>{b.disabled=true});
- say("he-ai-feedback","Claude Haiku 5.5 is generating an editable "+mode+" draft…");
+ say("he-ai-feedback","Nova is preparing your print-ready "+mode+" workbook…");
  try{
   await ensureUser();
   const {data:{session},error:authError}=await db.auth.getSession();
@@ -352,18 +352,30 @@ async function generateWithHaiku(mode){
    }
    throw new Error(message);
   }
-  if(!data?.text)throw new Error(data?.error||"Claude returned no content.");
-  el("he-lesson-editor").value=String(data.text).slice(0,100000);
+  if(!data?.text)throw new Error(data?.error||"No workbook content was returned.");
+  const workbook=String(data.text).replace(/^\s*>\s*\*\*Note for the tutor:\*\*[^\n]*(?:\n>[^\n]*)*\n?/gim,"").trim().slice(0,100000);
+  el("he-lesson-editor").value=workbook;
+  let logged=false;
+  try{
+   if(!window.HelloEarthGenerationLog?.record)throw Error("Generation history is unavailable.");
+   await window.HelloEarthGenerationLog.record({studentId,topic,level,duration,markdown:workbook,kind:mode});
+   logged=true;
+  }catch(logError){
+   say("he-lesson-feedback","Workbook ready, but the temporary link could not be saved: "+logError.message,true);
+  }
   if(mode==="homework"){
    el("he-homework-student").value=studentId;
    el("he-homework-title").value=("Practice: "+topic).slice(0,800);
-   const parts=splitAnswerKey(String(data.text));
+   const parts=splitAnswerKey(workbook);
    el("he-homework-content").value=parts.worksheet.slice(0,30000);
    el("he-homework-key").value=parts.key.slice(0,12000);
    el("he-homework-lesson-id").value=activeLessonId||"";
   }
   say("he-ai-feedback",
-   mode==="homework"?"Homework worksheet prepared in the Homework tab. Review it, then create and copy its 14-day link. Nothing has been sent.":"Lesson generated. Review and edit it before saving."+
+   (mode==="homework"
+    ?"Homework worksheet prepared. Review the tasks, then create a student link in Homework."
+    :"Your workbook is ready. Open its printable page or edit it before saving.")+
+   (logged?" A temporary link is in Generation history.":"")+
    (Number.isFinite(data.remainingToday)?" Remaining generations today: "+data.remainingToday+".":""));
  }catch(e){say("he-ai-feedback",e.message,true)}
  finally{buttons.forEach(b=>{b.disabled=false})}
@@ -382,7 +394,7 @@ el("he-homework-from-lesson").addEventListener("click",()=>{
  el("homework-tab")?.click();
  say("he-homework-feedback","Homework draft prepared. Add the assignment details before saving.");
 });
-el("he-openai-key").addEventListener("input",()=>say("he-ai-feedback","Personal Anthropic key is used for this request only. It is not saved."));
+el("he-openai-key").addEventListener("input",()=>say("he-ai-feedback","Your API key is used for this request only. It is not saved."));
 el("he-homework-create-ai").addEventListener("click",()=>{
  const chosen=el("he-homework-student").value;
  el("lessons-tab")?.click();
@@ -390,7 +402,7 @@ el("he-homework-create-ai").addEventListener("click",()=>{
  activeLessonId=null;
  el("he-ai-integration").open=true;
  el("he-homework-ai-generate").focus();
- say("he-ai-feedback","Enter a topic and click Generate homework with Haiku.");
+ say("he-ai-feedback","Enter a topic and click Generate homework with Nova.");
 });
 document.addEventListener("helloearth:studentsloaded",()=>{studentOptions();loadHomework();loadLessons()});
 document.addEventListener("helloearth:view-changed",e=>{if(e.detail?.view==="homework")loadHomework();if(e.detail?.view==="lessons")loadLessons()});
