@@ -82,6 +82,11 @@ function paintText(mark){
  }
 }
 const colors={has:value=>typeof value==="string"&&/^#[0-9a-f]{6}$/i.test(value)};
+const inkPicker=el("share-ink");
+for(const swatch of document.querySelectorAll("[data-ink-color]"))swatch.addEventListener("click",()=>{inkPicker.value=swatch.dataset.inkColor;inkPicker.dispatchEvent(new Event("input"))});
+function updateSwatches(){for(const swatch of document.querySelectorAll("[data-ink-color]"))swatch.setAttribute("aria-pressed",String(swatch.dataset.inkColor===inkPicker.value))}
+inkPicker.addEventListener("input",updateSwatches);updateSwatches();
+
 function validStroke(s){return s&&["pen","highlight"].includes(s.tool)&&colors.has(s.color)&&Array.isArray(s.points)&&s.points.length>=2&&s.points.length<=320&&s.points.every(p=>Array.isArray(p)&&p.length===2&&p.every(n=>typeof n==="number"&&n>=0&&n<=1))}
 function validMark(m){return m&&colors.has(m.color)&&Number.isInteger(m.start)&&Number.isInteger(m.end)&&m.start>=0&&m.end>m.start&&m.end<=el("share-content").textContent.length}
 function sendInk(){if(!inkReady||dead)return;inkChannel.send({type:"broadcast",event:"ink",payload:{author,strokes:localStrokes.slice(-60),text:textInk.slice(-100)}}).catch(()=>msg("Annotation connection interrupted.",true))}
