@@ -285,7 +285,7 @@
       </div>
     </section>
     <section id="lessons-view" class="ws-view" role="tabpanel" aria-labelledby="lessons-tab" hidden>
-      <div class="he-work-heading"><h2>Lesson Creation</h2><p>Build lessons manually or bring your own OpenAI API key for optional AI-assisted drafts.</p><div class="he-work-actions"><button type="button" id="he-open-teaching" class="he-primary">Open Teaching Companion · Feedback &amp; Exercise Links</button></div></div>
+      <div class="he-work-heading"><h2>Lesson Creation</h2><p>Build lessons and homework with HelloEarth's managed Claude Haiku 5.5, or connect your own Anthropic API key.</p><div class="he-work-actions"><button type="button" id="he-open-teaching" class="he-primary">Open Teaching Companion · Feedback &amp; Exercise Links</button></div></div>
       <div class="he-work-grid">
         <section class="he-work-card" aria-labelledby="he-lesson-new-title">
           <h3 id="he-lesson-new-title">Lesson details</h3>
@@ -298,15 +298,15 @@
           <label>Instructions / preferences<textarea id="he-lesson-instructions" rows="3" maxlength="2400" placeholder="Conversation-led, Polish translations, avoid homework, use workplace examples…"></textarea></label>
           <div class="he-work-actions"><button type="button" id="he-lesson-template">Create manual template</button></div>
           <details id="he-ai-integration">
-            <summary><span aria-hidden="true">✦</span> Connect your own AI (OpenAI API)</summary>
-            <p class="he-work-help">Use an OpenAI Platform API key for each request. A ChatGPT subscription does not automatically include API credits. Your key is sent over HTTPS only to an authenticated HelloEarth function and then to OpenAI. It is not stored in HelloEarth or saved in this browser.</p>
-            <label>AI provider<select id="he-ai-provider"><option value="openai">OpenAI (ChatGPT models)</option></select></label>
-            <label>OpenAI API key<input id="he-openai-key" type="password" autocomplete="off" spellcheck="false" placeholder="sk-…" aria-describedby="he-api-notice"></label>
-            <label>Model<select id="he-ai-model"><option value="gpt-4.1-mini" selected>GPT-4.1 mini</option><option value="gpt-4o-mini">GPT-4o mini</option><option value="gpt-5-mini">GPT-5 mini</option></select></label>
-            <label class="he-consent"><input type="checkbox" id="he-share-context"><span>Include this student's CEFR level, learning goals, focus areas and interests in the AI request. I have permission to share these details.</span></label>
-            <p class="he-work-help" id="he-api-notice">Your API provider may charge for generation. Leave the checkbox unchecked to send only the lesson topic, level, duration and your instructions.</p>
-            <div class="he-work-actions"><button type="button" id="he-lesson-generate" class="he-primary">Generate AI lesson</button></div>
-            <p id="he-ai-feedback" class="he-work-message" role="status" aria-live="polite"></p>
+            <summary><span aria-hidden="true">✦</span> AI-assisted lessons &amp; homework · Claude Haiku 5.5</summary>
+             <p class="he-work-help">HelloEarth AI is included with a limited monthly allowance during early access. Daily and monthly server-side limits protect against unexpected charges.</p>
+             <label>AI billing<select id="he-ai-provider"><option value="managed" selected>HelloEarth AI — included (default)</option><option value="anthropic-byok">My own Anthropic API key</option></select></label>
+             <label id="he-ai-personal-key-row" hidden>My Anthropic API key (used only for this request)<input id="he-openai-key" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-…" aria-describedby="he-api-notice"></label>
+             <p class="he-work-help">Model: <strong>Claude Haiku 5.5</strong>. Each generated draft must be reviewed by the tutor before it is used with a student.</p>
+             <label class="he-consent"><input type="checkbox" id="he-share-context"><span>Include this student's CEFR level, learning goals, focus areas and interests. I have permission to share these details with Anthropic.</span></label>
+             <p class="he-work-help" id="he-api-notice">Only the lesson topic, CEFR level, duration and instructions are sent by default. AI responses may be incomplete or inaccurate.</p>
+             <div class="he-work-actions"><button type="button" id="he-lesson-generate" class="he-primary">Generate lesson with Haiku</button><button type="button" id="he-homework-ai-generate">Generate homework with Haiku</button></div>
+             <p id="he-ai-feedback" class="he-work-message" role="status" aria-live="polite"></p>
           </details>
         </section>
         <div class="he-work-column">
@@ -330,7 +330,7 @@
     <select id="he-time-format"><option value="24h">24-hour (14:30)</option><option value="12h">12-hour (2:30 PM)</option></select></div>
    <p class="he-settings-example" id="he-time-example">Example: 14:30</p>
   </div>
-  <div class="he-settings-card" style="margin-top:16px"><h3>Your own AI API</h3><p>OpenAI API generation is available under Lesson Creation. Your API key is entered for each request and is never saved to your account.</p><button type="button" data-open-view="lessons" class="ws-mini-btn">Open Lesson Creation</button></div>
+  <div class="he-settings-card" style="margin-top:16px"><h3>Claude AI</h3><p>HelloEarth manages Haiku 5.5 by default with fair usage limits. Under Lesson Creation you may switch to your own Anthropic API key for individual requests; keys are not saved in your account.</p><button type="button" data-open-view="lessons" class="ws-mini-btn">Open Lesson Creation</button></div>
  </section>
   </main>
 <nav id="ux-mobile-nav" class="ux-mobile-nav" aria-label="Mobile primary navigation">
@@ -444,4 +444,4 @@
     </form>
   </div>
 </div>
-<script type="module" src="dashboard-extras.js?v=20261117-extras2"></script><script type="module" src="dashboard-navigation.js?v=20261123-halfhour2"></script><script type="module" src="dashboard-features.js?v=20261117-suite10"></script><script type="module" src="dashboard-suite.js?v=20261120-database1"></script><script type="module" src="dashboard-ux.js?v=20261122-learning1"></script><script type="module" src="dashboard-calendar-optimizer.js?v=20261125-preview2"></script><script type="module" src="dashboard-week-timetable.js?v=20261123-halfhour1"></script><script type="module" src="dashboard-calendar-scheduling.js?v=20261123-halfhour2"></script><script type="module" src="dashboard-teaching-workflows.js?v=20261122-learning2"></script></body></html>
+<script type="module" src="dashboard-extras.js?v=20261117-extras2"></script><script type="module" src="dashboard-navigation.js?v=20261123-halfhour2"></script><script type="module" src="dashboard-features.js?v=20261117-suite10"></script><script type="module" src="dashboard-suite.js?v=20261120-database1"></script><script type="module" src="dashboard-ux.js?v=20261122-learning1"></script><script type="module" src="dashboard-calendar-optimizer.js?v=20261125-preview2"></script><script type="module" src="dashboard-week-timetable.js?v=20261123-halfhour1"></script><script type="module" src="dashboard-calendar-scheduling.js?v=20261123-halfhour2"></script><script type="module" src="dashboard-teaching-workflows.js?v=20261126-haiku1"></script></body></html>
