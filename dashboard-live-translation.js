@@ -15,17 +15,17 @@ teacherLanguage.innerHTML=source.innerHTML;teacherLanguage.value="en";
 let assignedId="",dualSession=false,dualRecorders=new Set(),dualPending=new Set(),dualTimers=new Set(),finishing=false;
 function fillAssigned(id){
  if(listening||finishing)return;
- const previous=id||assigned.value||document.getElementById("he-lesson-student")?.value||"";
+ const previous=id||window.HelloEarthWorkspace?.selectedStudent?.id||assigned.value||document.getElementById("he-lesson-student")?.value||"";
  assigned.replaceChildren(new Option("Choose student",""));
  for(const s of window.HelloEarthWorkspace?.students||[])assigned.add(new Option(s.display_name,s.id));
- assigned.value=previous;
+ assigned.value=previous;if(assigned.value)previewMicLanguage(assigned.value);
 }
 document.addEventListener("helloearth:studentsloaded",()=>fillAssigned());
 document.addEventListener("helloearth:lesson-selected",e=>fillAssigned(e.detail?.studentId));
+document.addEventListener("helloearth:student-opened",e=>fillAssigned(e.detail?.student?.id));
 launch.addEventListener("click",()=>fillAssigned());
 assigned.addEventListener("change",()=>previewMicLanguage(assigned.value));
-el("he-caption-dual").addEventListener("change",()=>{if(el("he-caption-dual").checked){el("he-caption-source").value="both";target.value="en";el("he-translate-auto").checked=true;el("he-translate-speak").checked=true}});
-fillAssigned();
+el("he-caption-dual").addEventListener("change",()=>{if(el("he-caption-dual").checked){el("he-caption-source").value="both";target.value="en";previewMicLanguage(assigned.value);el("he-translate-auto").checked=true;el("he-translate-speak").checked=false}});
 
 const input=el("he-translate-input"),feed=el("he-caption-feed");
 const locale={en:"en-US",pl:"pl-PL",pt:"pt-BR",es:"es-ES",zh:"zh-CN",tr:"tr-TR",
@@ -36,6 +36,7 @@ let uploadCount=0,lastError="",pip=null,closing=false,cloud={cloudAvailable:fals
 let segments=[],seq=0,interim="",translationQueue=[],translateBusy=false,lastTranslate=0,dirty=false;
 let room=null,roomChannel=null,roomKey=null,roomUntil=0,roomReady=false,roomUrl="";
 const cap=160000,maxRows=300;
+fillAssigned();
 const say=(text,error=false)=>{
  const node=el("he-translate-status");node.textContent=text;node.classList.toggle("he-error",error);
 };
@@ -56,8 +57,8 @@ function previewMicLanguage(studentId){
  const names={polish:"pl",portuguese:"pt",spanish:"es",chinese:"zh",turkish:"tr",
   vietnamese:"vi",afrikaans:"af",french:"fr",german:"de",russian:"ru",arabic:"ar",english:"en"};
  const code=Object.keys(names).find(x=>name.includes(x));
- if(code)target.value=names[code];
- else if(locale[name])target.value=name;
+ const selected=code?names[code]:locale[name]?name:null;
+ if(selected){if(el("he-caption-dual").checked){source.value=selected;target.value="en"}else target.value=selected}
 }
 document.addEventListener("helloearth:lesson-selected",e=>previewMicLanguage(e.detail?.studentId));
 document.getElementById("he-lesson-student")?.addEventListener("change",e=>previewMicLanguage(e.target.value));
