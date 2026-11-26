@@ -327,7 +327,7 @@ function cloudChunk(){
   }
  };
  recorder.start();
- recordTimer=setTimeout(()=>{if(recorder.state==="recording")recorder.stop()},10500);
+ recordTimer=setTimeout(()=>{if(recorder.state==="recording")recorder.stop()},7300);
 }
 async function uploadBlob(blob,seconds,whichSession){
  uploadCount++;
@@ -415,7 +415,9 @@ async function startSharing(){
    el("he-caption-share-box").hidden=false;
    el("he-caption-share-url").value=roomUrl;
    say("Student caption link is ready. Share it privately.");
-  }else if(["CHANNEL_ERROR","TIMED_OUT"].includes(status))say("Student caption sharing could not connect. Local captions still work.",true);
+  }else if(["CHANNEL_ERROR","TIMED_OUT","CLOSED"].includes(status)){
+   say("Student sharing could not connect. Captions on your screen still work.",true);
+  }
  });
 }
 function endSharing(){
