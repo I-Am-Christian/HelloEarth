@@ -9,7 +9,7 @@ function remaining(iso){
  const ms=Date.parse(iso)-Date.now();
  if(!Number.isFinite(ms)||ms<=0)return "Expired";
  const d=Math.floor(ms/86400000),h=Math.floor(ms%86400000/3600000),m=Math.floor(ms%3600000/60000);
- return (d?d+"d ":"")+h+"h "+m+"m until automatic deletion";
+ return (d?d+"d ":"")+h+"h "+m+"m until expiry · deleted within 15 min after";
 }
 function textError(message,isError=false){
  const node=el("he-generation-feedback");
@@ -58,7 +58,10 @@ function paint(){
    new Date(row.created_at).toLocaleDateString();
   const timer=document.createElement("span");timer.className="he-expiration-count";
   timer.dataset.expiry=row.expires_at;timer.textContent=remaining(row.expires_at);
-  info.append(title,meta,timer);
+  const link=document.createElement("a");
+  link.href=URLfor(row.id);link.target="_blank";link.rel="noopener noreferrer";
+  link.className="he-workbook-link";link.textContent="Open printable lesson ↗";
+  info.append(title,meta,link,timer);
   const actions=document.createElement("div");actions.className="he-work-actions he-inline-actions";
   actions.append(
    button("Open PDF-style page",()=>window.open(URLfor(row.id),"_blank","noopener")),
