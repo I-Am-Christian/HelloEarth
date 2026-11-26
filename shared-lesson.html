@@ -4,8 +4,8 @@
 <meta name="theme-color" content="#1d2b46"><title>Shared Lesson | HelloEarth</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="stylesheet" href="helloearth-lesson.css?v=20261126-first1">
-<link rel="stylesheet" href="helloearth-shared-lesson.css?v=20261126-pinnedchat2">
-<script type="module" src="helloearth-shared-lesson.js?v=20261126-pinnedchat2"></script></head>
+<link rel="stylesheet" href="helloearth-shared-lesson.css?v=20261126-anchor4">
+<script type="module" src="helloearth-shared-lesson.js?v=20261126-anchor4"></script></head>
 <body>
 <div class="share-top-dock">
 <header class="lesson-toolbar share-toolbar">
@@ -42,7 +42,7 @@
   <div id="share-ink-preview" class="share-ink-preview">Sample highlighted text</div><button type="button" id="share-style-reset">Reset style</button></div></details>
   <button type="button" id="share-undo" disabled title="Undo your last annotation" aria-label="Undo annotation">↶</button>
   <button type="button" id="share-clear" disabled title="Clear your annotations" aria-label="Clear annotations">Clear</button>
-  </div><div class="share-sync-row"><label class="share-follow" id="share-follow-label"><input type="checkbox" id="share-follow" checked> Follow scroll</label><label class="share-follow" id="share-presenter-label" hidden><input type="checkbox" id="share-presenter-sync"> Sync scroll</label><label class="share-follow" id="share-zoom-follow-label"><input type="checkbox" id="share-zoom-follow" checked> Follow zoom</label><label class="share-follow" id="share-zoom-sync-label" hidden><input type="checkbox" id="share-zoom-sync"> Sync zoom</label></div>
+  </div><div class="share-sync-row"><label class="share-follow" id="share-follow-label"><input type="checkbox" id="share-follow" checked> Follow scroll</label><label class="share-follow" id="share-presenter-label" hidden><input type="checkbox" id="share-presenter-sync"> Sync scroll</label><label class="share-follow" id="share-zoom-follow-label"><input type="checkbox" id="share-zoom-follow" checked> Follow zoom</label><label class="share-follow" id="share-zoom-sync-label" hidden><input type="checkbox" id="share-zoom-sync"> Sync zoom</label><label class="share-follow" id="share-cursor-label" hidden><input type="checkbox" id="share-cursor-sync" checked> Show pointer</label></div>
  </nav>
  <div class="share-meta"><span id="share-connection" role="status" aria-live="polite">Opening lesson…</span>
  <span id="share-draw-hint">Teacher and student annotations are shared live while connected.</span></div>
@@ -68,4 +68,5 @@
  <form id="share-chat-form"><textarea id="share-chat-input" rows="2" maxlength="580" placeholder="Type a message…" aria-label="Chat message" required></textarea><button type="submit" id="share-chat-send" disabled>Send</button></form>
  <footer class="share-chat-footer"><span>Session only · not saved to student records</span><button type="button" id="share-chat-export">Download chat</button></footer>
 </aside></div>
+<div id="share-remote-cursor" class="share-remote-cursor" aria-hidden="true" hidden><svg viewBox="0 0 24 24"><path d="M2 1L2 19L7 14L11 22L15 20L11 12L20 12Z" fill="#a78bfa" stroke="#30204d" stroke-width="1.4"/></svg><span>Teacher</span></div>
 </body></html>
