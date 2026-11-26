@@ -10,6 +10,7 @@ const ns="http://www.w3.org/2000/svg";
 let loaded=false,presenter=false,lesson=null,latestUpdated="",sharedStrokes=[],localStrokes=[],tool="view",active=null;
 let dead=false,busyPoll=false,seen=false,syncEnabled=false,canFollow=true,isProgrammatic=false;
 let writing=false,pending=null,writeTimer=null,lastWrite=0;
+let roleKnown=false,remoteAnchor=null,anchorReceivedAt=0,anchorAuthor="",anchorRevision=0,remoteAnchorRevision=-1,scrollGuard=null,layoutFollowTimer=null;
 let inkChannel=null,inkReady=false,guestInk=new Map(),textInk=[],remoteText=new Map();const author=crypto.randomUUID();
 let presenceReady=false,presenceTracked=false,presenceSynced=false;
 const paper=el("share-paper"),svg=el("share-annotations"),follow=el("share-follow"),presentSync=el("share-presenter-sync");
@@ -19,10 +20,10 @@ function applyZoom(value){
  const next=Math.max(75,Math.min(200,Math.round(Number(value)/5)*5));
  if(!Number.isFinite(next))return;
  const rect=paper.getBoundingClientRect(),anchor=Math.max(0,Math.min(1,(window.innerHeight/2-rect.top)/Math.max(1,rect.height)));
- const old=zoom;zoom=next;paper.style.zoom=String(zoom/100);
+ const old=zoom;layoutPaper();zoom=next;paper.style.zoom=String(zoom/100);
  el("share-zoom-value").textContent=zoom+"%";
  el("share-zoom-out").disabled=zoom<=75;el("share-zoom-in").disabled=zoom>=200;
- if(old!==zoom){const after=paper.getBoundingClientRect();window.scrollBy(0,after.top+anchor*after.height-window.innerHeight/2);requestAnimationFrame(paintStrokes)}
+ if(old!==zoom){const after=paper.getBoundingClientRect();window.scrollBy(0,after.top+anchor*after.height-window.innerHeight/2);requestAnimationFrame(paintStrokes);scheduleFollowLayout()}
 }
 function sendZoom(){
  if(!presenter||!inkReady||dead)return;
@@ -77,21 +78,101 @@ function getRatio(){
  const max=Math.max(1,document.documentElement.scrollHeight-window.innerHeight);
  return Math.max(0,Math.min(1,window.scrollY/max));
 }
-function scrollToRatio(ratio){
- if(!canFollow||presenter||!syncEnabled||tool!=="view")return;
- const max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
- const target=ratio*max;
- if(Math.abs(window.scrollY-target)<8)return;
- isProgrammatic=true;
- window.scrollTo({top:target,behavior:"smooth"});
- setTimeout(()=>{isProgrammatic=false},700);
+const clamp01=n=>Math.max(0,Math.min(1,n));
+const round4=n=>Math.round(n*10000)/10000;
+function contentBlocks(){return Array.from(el("share-content").children)}
+function readingLine(){
+ const dock=document.querySelector(".share-top-dock")?.getBoundingClientRect();
+ const chat=el("share-chat")?.getBoundingClientRect();
+ const top=Math.max(0,dock?.bottom||0),bottom=window.innerWidth<=850&&chat?Math.min(window.innerHeight,chat.top):window.innerHeight;
+ return top+Math.max(6,Math.min(40,(bottom-top)*.15));
 }
-function pathFor(points){
- return points.map((p,i)=>(i?"L":"M")+(p[0]*1000).toFixed(2)+","+(p[1]*1000).toFixed(2)).join(" ");
+function getReadingAnchor(){
+ const blocks=contentBlocks(),y=readingLine();
+ let index=blocks.findIndex(b=>{const r=b.getBoundingClientRect();return r.height>0&&r.bottom>y});
+ if(index<0)index=blocks.findLastIndex(b=>b.getBoundingClientRect().height>0);
+ if(index<0)return {ratio:getRatio(),block:-1,fraction:0,offset:null};
+ const block=blocks[index],rect=block.getBoundingClientRect();
+ let offset=null;
+ if(y>=rect.top&&y<=rect.bottom){
+  const left=Math.max(0,rect.left),right=Math.min(window.innerWidth,rect.right);
+  for(const portion of [.1,.3,.55,.8]){
+   if(right<=left)break;
+   const x=left+(right-left)*portion;
+   const p=document.caretPositionFromPoint?.(x,y),range=!p?document.caretRangeFromPoint?.(x,y):null;
+   const node=p?.offsetNode||range?.startContainer,off=p?.offset??range?.startOffset;
+   if(node&&block.contains(node)&&Number.isInteger(off)){try{offset=textOffset(node,off);break}catch{}}
+  }
+ }
+ return {block:index,fraction:clamp01((y-rect.top)/Math.max(1,rect.height)),offset,ratio:getRatio()};
+}
+function scrollAbsolute(target){
+ if(!roleKnown||!canFollow||presenter||!syncEnabled||tool!=="view"||dead)return;
+ const max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight),clamped=Math.max(0,Math.min(max,target));
+ if(Math.abs(window.scrollY-clamped)<4)return;
+ isProgrammatic=true;clearTimeout(scrollGuard);window.scrollTo({top:clamped,behavior:"instant"});
+ scrollGuard=setTimeout(()=>{isProgrammatic=false},180);
+}
+function scrollToRatio(ratio){scrollAbsolute(clamp01(Number(ratio)||0)*Math.max(0,document.documentElement.scrollHeight-window.innerHeight))}
+function followReadingAnchor(anchor){
+ if(!anchor||anchor.block<0){scrollToRatio(anchor?.ratio||0);return}
+ const r=contentBlocks()[anchor.block]?.getBoundingClientRect();
+ if(!r||r.height<=0){scrollToRatio(anchor.ratio);return}
+ let top=r.top+anchor.fraction*r.height;
+ if(Number.isInteger(anchor.offset)){
+  const total=el("share-content").textContent.length,start=Math.max(0,Math.min(total-1,anchor.offset));
+  try{const line=textRange(start,start+1)?.getClientRects()[0];if(line&&line.height>0&&line.top>=r.top-3&&line.top<=r.bottom+3)top=line.top}catch{}
+ }
+ scrollAbsolute(window.scrollY+top-readingLine());
+}
+function sendReadingAnchor(){
+ if(!presenter||!inkReady||dead||!loaded)return;
+ inkChannel.send({type:"broadcast",event:"reading-position",payload:{author,revision:++anchorRevision,enabled:syncEnabled,...getReadingAnchor()}}).catch(()=>{});
+}
+function receiveReadingAnchor(p){
+ if(presenter||dead||!p||typeof p.author!=="string"||p.author.length>64||typeof p.enabled!=="boolean"||!Number.isSafeInteger(p.revision)||!Number.isInteger(p.block)||p.block<-1||p.block>=contentBlocks().length||!Number.isFinite(p.fraction)||p.fraction<0||p.fraction>1||!Number.isFinite(p.ratio)||p.ratio<0||p.ratio>1||(p.offset!==null&&(!Number.isInteger(p.offset)||p.offset<0||p.offset>el("share-content").textContent.length)))return;
+ if(anchorAuthor===p.author&&p.revision<=remoteAnchorRevision)return;
+ anchorAuthor=p.author;remoteAnchorRevision=p.revision;anchorReceivedAt=Date.now();remoteAnchor=p;syncEnabled=p.enabled;
+ if(syncEnabled)followReadingAnchor(p);
+}
+function freshAnchor(){return inkReady&&remoteAnchor&&Date.now()-anchorReceivedAt<10000}
+function requestReadingAnchor(){if(inkReady&&!presenter)inkChannel.send({type:"broadcast",event:"reading-request",payload:{}}).catch(()=>{})}
+function resumeReading(){
+ if(!roleKnown||!loaded||dead||presenter||!canFollow||tool!=="view")return;
+ if(freshAnchor()){if(remoteAnchor.enabled)followReadingAnchor(remoteAnchor)}
+ else if(syncEnabled&&lesson?.state)scrollToRatio(lesson.state.scrollRatio);
+ requestReadingAnchor();
+}
+function scheduleFollowLayout(){
+ clearTimeout(layoutFollowTimer);layoutFollowTimer=setTimeout(()=>{if(presenter){if(syncEnabled)sendReadingAnchor()}else resumeReading()},180);
+}
+function layoutPaper(){
+ const page=paper.closest(".share-page"),style=getComputedStyle(page);
+ const width=Math.max(180,Math.min(910,page.clientWidth-parseFloat(style.paddingLeft||0)-parseFloat(style.paddingRight||0)));
+ paper.style.width=width+"px";paper.style.maxWidth="none";
+}
+function pointAnchor(x,y){
+ const blocks=contentBlocks();
+ let index=blocks.findIndex(b=>{const r=b.getBoundingClientRect();return r.height>0&&y>=r.top&&y<=r.bottom&&x>=r.left-6&&x<=r.right+6});
+ if(index<0)return null;
+ const r=blocks[index].getBoundingClientRect();
+ return [index,round4(clamp01((x-r.left)/Math.max(1,r.width))),round4(clamp01((y-r.top)/Math.max(1,r.height)))];
+}
+function anchorValid(a){return a===null||(Array.isArray(a)&&a.length===3&&Number.isInteger(a[0])&&a[0]>=0&&a[0]<contentBlocks().length&&a.slice(1).every(n=>Number.isFinite(n)&&n>=0&&n<=1))}
+function resolvePoint(point,anchor){
+ const base=svg.getBoundingClientRect();
+ if(anchor&&anchorValid(anchor)){
+  const r=contentBlocks()[anchor[0]].getBoundingClientRect();
+  if(r.height>0&&r.width>0)return [(r.left+anchor[1]*r.width-base.left)/Math.max(1,base.width),(r.top+anchor[2]*r.height-base.top)/Math.max(1,base.height)];
+ }
+ return point;
+}
+function pathFor(points,anchors){
+ return points.map((p,i)=>{const q=resolvePoint(p,anchors?.[i]);return (i?"L":"M")+(q[0]*1000).toFixed(2)+","+(q[1]*1000).toFixed(2)}).join(" ");
 }
 function drawStroke(stroke,local=false){
  const path=document.createElementNS(ns,"path");
- path.setAttribute("d",pathFor(stroke.points));
+ path.setAttribute("d",pathFor(stroke.points,stroke.anchors));
  path.setAttribute("stroke",stroke.color);
  path.setAttribute("stroke-width",String((stroke.tool==="highlight"?25:3.5)*inkThickness(stroke.width)));
  path.setAttribute("stroke-opacity",stroke.tool==="highlight"?String(inkOpacity(stroke.opacity,.31)):"0.96");
@@ -129,9 +210,33 @@ for(const swatch of document.querySelectorAll("[data-ink-color]"))swatch.addEven
 function updateSwatches(){for(const swatch of document.querySelectorAll("[data-ink-color]"))swatch.setAttribute("aria-pressed",String(swatch.dataset.inkColor===inkPicker.value))}
 inkPicker.addEventListener("input",updateSwatches);updateSwatches();
 
-function validStroke(s){return s&&["pen","highlight"].includes(s.tool)&&colors.has(s.color)&&Array.isArray(s.points)&&s.points.length>=2&&s.points.length<=320&&s.points.every(p=>Array.isArray(p)&&p.length===2&&p.every(n=>typeof n==="number"&&n>=0&&n<=1))}
+function validStroke(s){return s&&["pen","highlight"].includes(s.tool)&&colors.has(s.color)&&Array.isArray(s.points)&&s.points.length>=2&&s.points.length<=320&&s.points.every(p=>Array.isArray(p)&&p.length===2&&p.every(n=>typeof n==="number"&&n>=0&&n<=1))&&(!s.anchors||(Array.isArray(s.anchors)&&s.anchors.length===s.points.length&&s.anchors.every(anchorValid)))}
 function validMark(m){return m&&colors.has(m.color)&&Number.isInteger(m.start)&&Number.isInteger(m.end)&&m.start>=0&&m.end>m.start&&m.end<=el("share-content").textContent.length}
 function sendInk(){if(!inkReady||dead)return;inkChannel.send({type:"broadcast",event:"ink",payload:{author,strokes:localStrokes.slice(-60),text:textInk.slice(-100)}}).catch(()=>msg("Annotation connection interrupted.",true))}
+let remoteCursor=null,cursorLast=0,cursorTimer=null;
+const cursorNode=el("share-remote-cursor"),cursorToggle=el("share-cursor-sync");
+function hideRemoteCursor(){remoteCursor=null;cursorNode.hidden=true;clearTimeout(cursorTimer)}
+function positionRemoteCursor(){
+ if(!remoteCursor||presenter||dead){cursorNode.hidden=true;return}
+ const base=svg.getBoundingClientRect(),q=resolvePoint(remoteCursor.point,remoteCursor.anchor),x=base.left+q[0]*base.width,y=base.top+q[1]*base.height;
+ const page=paper.closest(".share-page").getBoundingClientRect(),dock=document.querySelector(".share-top-dock").getBoundingClientRect();
+ const bottom=window.innerWidth<=850?el("share-chat").getBoundingClientRect().top:window.innerHeight;
+ if(x<Math.max(0,page.left)||x>Math.min(window.innerWidth,page.right)||y<dock.bottom||y>bottom){cursorNode.hidden=true;return}
+ cursorNode.hidden=false;cursorNode.style.left=x+"px";cursorNode.style.top=y+"px";
+}
+function receiveCursor(p){
+ if(presenter||dead||!p)return;
+ if(p.visible===false){hideRemoteCursor();return}
+ if(!Array.isArray(p.point)||p.point.length!==2||!p.point.every(n=>Number.isFinite(n)&&n>=0&&n<=1)||!anchorValid(p.anchor))return;
+ remoteCursor=p;positionRemoteCursor();clearTimeout(cursorTimer);cursorTimer=setTimeout(hideRemoteCursor,3500);
+}
+function broadcastCursor(event){
+ if(!presenter||!inkReady||dead||!cursorToggle.checked||Date.now()-cursorLast<65)return;
+ cursorLast=Date.now();inkChannel.send({type:"broadcast",event:"teacher-cursor",payload:{visible:true,point:pointFrom(event),anchor:pointAnchor(event.clientX,event.clientY)}}).catch(()=>{});
+}
+function clearCursorBroadcast(){if(presenter&&inkReady)inkChannel.send({type:"broadcast",event:"teacher-cursor",payload:{visible:false}}).catch(()=>{})}
+paper.addEventListener("pointermove",broadcastCursor,{passive:true});paper.addEventListener("pointerdown",broadcastCursor,{passive:true});paper.addEventListener("pointerleave",clearCursorBroadcast);
+cursorToggle.addEventListener("change",()=>{if(!cursorToggle.checked)clearCursorBroadcast()});
 function showPresence(state,label,detail){
  const indicator=el("share-presence");
  indicator.dataset.state=state;el("share-presence-text").textContent=label;
@@ -172,7 +277,7 @@ const chatSettings=el("share-chat-settings-details");
 function syncChatLayout(){
  const dock=document.querySelector(".share-top-dock");
  document.documentElement.style.setProperty("--share-dock-height",Math.ceil(dock?.getBoundingClientRect().height||0)+"px");
- document.documentElement.style.setProperty("--share-chat-height",Math.ceil(chatPanel.getBoundingClientRect().height||0)+"px");
+ document.documentElement.style.setProperty("--share-chat-height",Math.ceil(chatPanel.getBoundingClientRect().height||0)+"px");scheduleFollowLayout();
 }
 el("share-chat-toggle").onclick=()=>{chatInput.focus({preventScroll:true});el("share-chat-log").scrollTop=el("share-chat-log").scrollHeight};
 el("share-chat-close").onclick=()=>{chatSettings.open=!chatSettings.open};
@@ -308,14 +413,17 @@ async function connectInk(){
   teacherZoom=p.value;teacherZoomSync=p.enabled;
   if(teacherZoomSync&&zoomFollow.checked)applyZoom(teacherZoom);
  }).on("broadcast",{event:"zoom-request"},()=>sendZoom())
+ .on("broadcast",{event:"reading-position"},({payload})=>receiveReadingAnchor(payload))
+ .on("broadcast",{event:"reading-request"},()=>sendReadingAnchor())
+ .on("broadcast",{event:"teacher-cursor"},({payload})=>receiveCursor(payload))
  .on("broadcast",{event:"chat-message"},({payload})=>chatAdd(payload))
  .on("broadcast",{event:"chat-translate-request"},({payload})=>chatRequest(payload))
  .on("broadcast",{event:"chat-translation"},({payload})=>chatReceiveTranslation(payload))
  .on("broadcast",{event:"chat-translation-error"},({payload})=>chatReceiveTranslation(payload,true))
- .on("broadcast",{event:"request"},()=>{sendInk();sendZoom()}).subscribe(status=>{
+ .on("broadcast",{event:"request"},()=>{sendInk();sendZoom();sendReadingAnchor()}).subscribe(status=>{
   inkReady=status==="SUBSCRIBED";presenceReady=inkReady;presenceTracked=false;chatConnected();
-  if(inkReady){updatePresence();trackPresence();sendInk();sendZoom();inkChannel.send({type:"broadcast",event:"request",payload:{}})}
-  else{presenceSynced=false;showPresence("offline","Connection lost","Live connection interrupted; participant status unknown")}
+  if(inkReady){updatePresence();trackPresence();sendInk();sendZoom();sendReadingAnchor();requestReadingAnchor();inkChannel.send({type:"broadcast",event:"request",payload:{}})}
+  else{presenceSynced=false;remoteAnchor=null;anchorReceivedAt=0;hideRemoteCursor();showPresence("offline","Connection lost","Live connection interrupted; participant status unknown")}
  });
 }
 let savedSelection=null,selectionTimer=null;
@@ -349,7 +457,7 @@ document.addEventListener("pointerup",e=>{
  clearTimeout(selectionTimer);selectionTimer=setTimeout(()=>{if(captureSelection())highlightSelection()},0);
 });
 document.addEventListener("keydown",e=>{if(tool==="text"&&e.key==="Enter"&&!["INPUT","SELECT","BUTTON","TEXTAREA"].includes(document.activeElement?.tagName)){highlightSelection()}});
-window.addEventListener("resize",()=>paintStrokes());if(window.ResizeObserver)new ResizeObserver(()=>paintStrokes()).observe(paper);
+window.addEventListener("resize",()=>{layoutPaper();paintStrokes();scheduleFollowLayout()});if(window.ResizeObserver){new ResizeObserver(()=>{paintStrokes();positionRemoteCursor()}).observe(paper);new ResizeObserver(()=>{layoutPaper();scheduleFollowLayout()}).observe(paper.closest(".share-page"))}
 function paintStrokes(){
  svg.replaceChildren();
  for(const stroke of sharedStrokes)svg.append(drawStroke(stroke));
@@ -370,19 +478,19 @@ function setTool(next){
   btn.setAttribute("aria-pressed",String(on));
  }
  svg.classList.toggle("is-annotating",tool==="pen"||tool==="highlight");
- highlightButton.hidden=tool!=="text";
+ highlightButton.hidden=tool!=="text";if(tool==="view")resumeReading();
  el("share-draw-hint").textContent=tool==="text"?"Drag across words to highlight automatically. On touchscreens, select text and tap Apply text highlight.": "Teacher and student annotations are shared live while connected.";
  paintStrokes();
 }
 function pointFrom(event){
  const rect=svg.getBoundingClientRect();
- return [Math.max(0,Math.min(1,(event.clientX-rect.left)/Math.max(1,rect.width))),
-  Math.max(0,Math.min(1,(event.clientY-rect.top)/Math.max(1,rect.height)))];
+ return [round4(clamp01((event.clientX-rect.left)/Math.max(1,rect.width))),round4(clamp01((event.clientY-rect.top)/Math.max(1,rect.height)))];
 }
 svg.addEventListener("pointerdown",event=>{
  if(dead||!["pen","highlight"].includes(tool)||event.button!==0)return;
+ if(localStrokes.length>=60){msg("Drawing limit reached. Undo or clear your own annotations before adding more.",true);return}
  event.preventDefault();
- const stroke={tool,color:el("share-ink").value,opacity:Number(opacityPicker.value)/100,width:Number(widthPicker.value)/100,points:[pointFrom(event)]};
+ const stroke={tool,color:el("share-ink").value,opacity:Number(opacityPicker.value)/100,width:Number(widthPicker.value)/100,points:[pointFrom(event)],anchors:[pointAnchor(event.clientX,event.clientY)]};
  active=stroke;
  svg.setPointerCapture(event.pointerId);
  paintStrokes();
@@ -391,21 +499,14 @@ svg.addEventListener("pointermove",event=>{
  if(!active)return;
  const p=pointFrom(event),prev=active.points.at(-1);
  if(Math.hypot((p[0]-prev[0])*svg.clientWidth,(p[1]-prev[1])*svg.clientHeight)<5)return;
- if(active.points.length<320)active.points.push(p);
+ if(active.points.length<320){active.points.push(p);active.anchors.push(pointAnchor(event.clientX,event.clientY))}
  paintStrokes();
 });
 function finish(event){
  if(!active)return;
  const p=pointFrom(event),stroke=active;active=null;
- if(stroke.points.length<2)stroke.points.push([Math.min(1,stroke.points[0][0]+0.001),Math.min(1,stroke.points[0][1]+0.001)]);
- if(presenter&&stroke.tool==="pen"&&stroke.width===1&&["#8456d5","#dc6a85","#46a49a","#dba84b","#28385f"].includes(stroke.color)){
-  sharedStrokes.push(stroke);
-  if(sharedStrokes.length>155)sharedStrokes.shift();
-  queue({annotations:sharedStrokes});
- }else{
-  localStrokes.push(stroke);
-  if(localStrokes.length>60)localStrokes.shift();sendInk();
- }
+ if(stroke.points.length<2){stroke.points.push([Math.min(1,stroke.points[0][0]+0.001),Math.min(1,stroke.points[0][1]+0.001)]);stroke.anchors.push(null)}
+ localStrokes.push(stroke);sendInk();
  paintStrokes();
 }
 svg.addEventListener("pointerup",finish);
@@ -449,29 +550,34 @@ for(const btn of document.querySelectorAll("[data-tool]"))btn.addEventListener("
 el("share-follow").addEventListener("change",()=>{
  canFollow=follow.checked;
  msg(canFollow?"Following presenter when syncing is enabled.":"Follow teacher paused. Scroll independently.");
- if(canFollow&&lesson?.state)scrollToRatio(lesson.state.scrollRatio);
+ if(canFollow)resumeReading();
 });
-for(const control of ["wheel","touchstart"])window.addEventListener(control,()=>{
- if(!presenter&&canFollow&&!isProgrammatic&&syncEnabled&&tool==="view"){
+function pauseFollow(event){
+ if(!presenter&&canFollow&&syncEnabled&&tool==="view"&&event.target instanceof Element&&event.target.closest(".share-workbook-column")){
   canFollow=false;follow.checked=false;msg("Follow teacher paused. Turn it on to resynchronise.");
  }
-},{passive:true});
+}
+window.addEventListener("wheel",event=>{if(Math.abs(event.deltaY)>Math.abs(event.deltaX)&&Math.abs(event.deltaY)>2)pauseFollow(event)},{passive:true});
+let touchOrigin=null;
+window.addEventListener("touchstart",event=>{touchOrigin=event.touches.length===1?{x:event.touches[0].clientX,y:event.touches[0].clientY}:null},{passive:true});
+window.addEventListener("touchmove",event=>{if(touchOrigin&&event.touches.length===1&&Math.abs(event.touches[0].clientY-touchOrigin.y)>12){pauseFollow(event);touchOrigin=null}},{passive:true});
 presentSync.addEventListener("change",()=>{
- syncEnabled=presentSync.checked;
- queue({syncEnabled,scrollRatio:getRatio()});
- msg(syncEnabled?"Presenter scrolling will sync to students with Follow enabled.":"Student scrolling sync is off.");
+ syncEnabled=presentSync.checked;queue({syncEnabled,scrollRatio:getRatio()});sendReadingAnchor();
+ msg(syncEnabled?"Presenter scrolling follows the same lesson text.":"Student scrolling sync is off.");
 });
-let scrollTimer=null;
+let scrollTimer=null,lastRatioSave=0;
 window.addEventListener("scroll",()=>{
- if(!presenter||!syncEnabled||tool!=="view"||!loaded||dead)return;
+ positionRemoteCursor();
+ if(!presenter||!syncEnabled||!loaded||dead)return;
  if(scrollTimer)return;
- scrollTimer=setTimeout(()=>{scrollTimer=null;queue({scrollRatio:getRatio()})},350);
+ scrollTimer=setTimeout(()=>{scrollTimer=null;sendReadingAnchor();if(Date.now()-lastRatioSave>850){lastRatioSave=Date.now();queue({scrollRatio:getRatio()})}},120);
 },{passive:true});
+setInterval(()=>{if(presenter&&loaded&&!dead&&syncEnabled)sendReadingAnchor()},3000);
 function updateState(state){
  if(!state||dead)return;
  if(!lesson)lesson={state};else lesson.state=state;
  const wasSync=syncEnabled;
- syncEnabled=state.syncEnabled===true;
+ if((!presenter&&!freshAnchor())||(presenter&&!pending&&!writing))syncEnabled=state.syncEnabled===true;
  presentSync.checked=syncEnabled;
  if(state.updatedAt!==latestUpdated){
   latestUpdated=state.updatedAt;
@@ -480,9 +586,7 @@ function updateState(state){
    paintStrokes();
   }
  }
- if(!presenter&&canFollow&&syncEnabled){
-  scrollToRatio(Number(state.scrollRatio)||0);
- }
+ if(!presenter&&canFollow&&syncEnabled&&!freshAnchor())scrollToRatio(Number(state.scrollRatio)||0);
  if(!presenter&&wasSync!==syncEnabled){
   msg(syncEnabled?"Teacher scrolling is live; Follow teacher is on.":"Teacher scrolling sync is off. You can browse independently.");
  }
@@ -514,7 +618,7 @@ async function checkPresenter(){
   presenter=true;
   el("share-role").textContent="Teacher · presenter";
   el("share-follow-label").hidden=true;
-  el("share-presenter-label").hidden=false;
+  el("share-presenter-label").hidden=false;el("share-cursor-label").hidden=false;
   el("share-zoom-sync-label").hidden=false;el("share-zoom-follow-label").hidden=true;
   el("share-end").hidden=false;
   syncEnabled=result.state.syncEnabled===true;
@@ -554,7 +658,7 @@ async function open(){
   loaded=true;sharedStrokes=Array.isArray(response.state.annotations)?response.state.annotations:[];
   updateState(response.state);paintStrokes();remaining();
   msg("Lesson loaded. Checking if you're the presenter…");
-  await checkPresenter();chatDefaults();
+  await checkPresenter();roleKnown=true;layoutPaper();chatDefaults();resumeReading();
   connectInk().catch(()=>{msg("Live annotation connection unavailable.",true);showPresence("offline","Status unavailable","Could not connect to the live lesson channel")});
   if(!presenter)msg("Ready to read · no login required. Use Follow teacher to sync scrolling.");
   setInterval(()=>{remaining();poll()},1700);
