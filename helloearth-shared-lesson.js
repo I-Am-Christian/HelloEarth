@@ -212,7 +212,28 @@ inkPicker.addEventListener("input",updateSwatches);updateSwatches();
 
 function validStroke(s){return s&&["pen","highlight"].includes(s.tool)&&colors.has(s.color)&&Array.isArray(s.points)&&s.points.length>=2&&s.points.length<=320&&s.points.every(p=>Array.isArray(p)&&p.length===2&&p.every(n=>typeof n==="number"&&n>=0&&n<=1))&&(!s.anchors||(Array.isArray(s.anchors)&&s.anchors.length===s.points.length&&s.anchors.every(a=>anchorValid(a))))}
 function validMark(m){return m&&colors.has(m.color)&&Number.isInteger(m.start)&&Number.isInteger(m.end)&&m.start>=0&&m.end>m.start&&m.end<=el("share-content").textContent.length}
-function sendInk(){if(!inkReady||dead)return;inkChannel.send({type:"broadcast",event:"ink",payload:{author,strokes:localStrokes.slice(-60),text:textInk.slice(-100)}}).catch(()=>msg("Annotation connection interrupted.",true))}
+let inkRevision=0;
+const inkBatches=new Map(),inkSeenRevisions=new Map();
+function sendInk(){
+ if(!inkReady||dead)return;
+ const revision=++inkRevision,total=Math.max(1,Math.ceil(localStrokes.length/6));
+ for(let index=0;index<total;index++){
+  inkChannel.send({type:"broadcast",event:"ink-batch",payload:{author,revision,index,total,strokes:localStrokes.slice(index*6,index*6+6),text:index===0?textInk.slice():[]}}).then(result=>{if(result!=="ok")msg("Some annotations could not synchronize. Reconnecting may help.",true)}).catch(()=>msg("Annotation connection interrupted.",true));
+ }
+}
+function receiveInkBatch(p){
+ if(dead||!p||typeof p.author!=="string"||p.author===author||p.author.length>64||!Number.isSafeInteger(p.revision)||!Number.isInteger(p.index)||!Number.isInteger(p.total)||p.total<1||p.total>10||p.index<0||p.index>=p.total||!Array.isArray(p.strokes)||p.strokes.length>6||!Array.isArray(p.text)||p.text.length>100)return;
+ if(!inkBatches.has(p.author)&&!guestInk.has(p.author)&&inkBatches.size+guestInk.size>=40)return;
+ if(p.revision<=(inkSeenRevisions.get(p.author)??-1))return;
+ let batch=inkBatches.get(p.author);
+ if(!batch||p.revision>batch.revision){batch={revision:p.revision,total:p.total,parts:new Map(),text:[]};inkBatches.set(p.author,batch)}
+ if(batch.revision!==p.revision||batch.total!==p.total)return;
+ batch.parts.set(p.index,p.strokes.filter(validStroke));
+ if(p.index===0)batch.text=p.text.filter(validMark);
+ if(batch.parts.size!==batch.total)return;
+ const strokes=[];for(let i=0;i<batch.total;i++)strokes.push(...batch.parts.get(i));
+ guestInk.set(p.author,strokes);remoteText.set(p.author,batch.text);inkSeenRevisions.set(p.author,p.revision);inkBatches.delete(p.author);paintStrokes();
+}
 let remoteCursor=null,cursorLast=0,cursorTimer=null;
 const cursorNode=el("share-remote-cursor"),cursorToggle=el("share-cursor-sync");
 function hideRemoteCursor(){remoteCursor=null;cursorNode.hidden=true;clearTimeout(cursorTimer)}
@@ -403,8 +424,9 @@ async function connectInk(){
  const room=Array.from(new Uint8Array(bytes),n=>n.toString(16).padStart(2,"0")).join("");
  inkChannel=db.channel("he-lesson-ink-"+room,{config:{broadcast:{self:false,ack:true},presence:{key:author}}});
  inkChannel.on("presence",{event:"sync"},()=>{presenceSynced=true;updatePresence()})
+ .on("broadcast",{event:"ink-batch"},({payload})=>receiveInkBatch(payload))
  .on("broadcast",{event:"ink"},({payload:p})=>{
-  if(dead||!p||typeof p.author!=="string"||p.author===author||p.author.length>64||(!guestInk.has(p.author)&&guestInk.size>=40))return;
+  if(dead||!p||typeof p.author!=="string"||p.author===author||p.author.length>64||inkSeenRevisions.has(p.author)||(!guestInk.has(p.author)&&guestInk.size>=40))return;
   if(Array.isArray(p.strokes))guestInk.set(p.author,p.strokes.slice(0,60).filter(validStroke));
   if(Array.isArray(p.text))remoteText.set(p.author,p.text.slice(0,100).filter(validMark));
   paintStrokes();
