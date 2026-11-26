@@ -59,7 +59,7 @@ function failure(text){
  el("share-error").hidden=false;el("share-error").textContent=text;
  el("share-content").replaceChildren();
  el("share-title").textContent="Lesson unavailable";msg(text,true);
- el("share-copy").disabled=true;el("share-download").disabled=true;el("share-print").disabled=true;
+ el("share-copy").disabled=true;el("share-download").disabled=true;el("share-print").disabled=true;updateEditingControls();typedLayer.replaceChildren();typedAppendix.replaceChildren();typedAppendix.hidden=true;
 }
 async function api(action,extra={},authorized=false){
  const headers={"content-type":"application/json","apikey":SUPABASE_PUBLISHABLE_KEY};
@@ -545,7 +545,7 @@ function paintStrokes(){
  for(const mark of textInk)paintText(mark);
  for(const stroke of localStrokes)svg.append(drawStroke(stroke,true,geometry));
  if(active)svg.append(drawStroke(active,true,geometry));
- positionRemoteCursor();
+ paintTypedNotes();positionRemoteCursor();
  const canUndo=textInk.length>0||localStrokes.length>0||(presenter&&sharedStrokes.length>0);
  el("share-undo").disabled=!canUndo;
  el("share-clear").disabled=!canUndo;
@@ -559,7 +559,7 @@ function setTool(next){
  }
  svg.classList.toggle("is-annotating",tool==="pen"||tool==="highlight");
  highlightButton.hidden=!["text","underline"].includes(tool);highlightButton.textContent=tool==="underline"?"Apply underline":"Apply text highlight";if(tool==="view")resumeReading();
- el("share-draw-hint").textContent=["text","underline"].includes(tool)?"Drag across words to highlight automatically. On touchscreens, select text and tap Apply text highlight.": "Teacher and student annotations are shared live while connected.";
+ el("share-draw-hint").textContent=tool==="type"?"Click the page to add words, or select an existing text box to edit it.":["text","underline"].includes(tool)?"Drag across words to highlight automatically. On touchscreens, select text and tap Apply text highlight.": "Teacher and student annotations are shared live while connected.";
  paintStrokes();
 }
 function pointFrom(event){
@@ -601,7 +601,7 @@ async function flush(){
  if(!pending||writing||dead)return;
  const data=pending;pending=null;writing=true;lastWrite=Date.now();
  try{
-  const result=await api("update",data,true);
+  const result=await api("update",{...data,contentRevision},true);
   latestUpdated=result.state.updatedAt;
  }catch(error){
   if(error.status===429){pending={...data,...(pending||{})}}
@@ -655,6 +655,7 @@ window.addEventListener("scroll",()=>{
 setInterval(()=>{if(presenter&&loaded&&!dead&&syncEnabled)sendReadingAnchor()},3000);
 function updateState(state){
  if(!state||dead||Number(state.contentRevision||0)<contentRevision)return;
+ editingState(state);
  if(!lesson)lesson={state};else lesson.state=state;
  const wasSync=syncEnabled;
  if((!presenter&&!freshAnchor())||(presenter&&!pending&&!writing))syncEnabled=state.syncEnabled===true;
@@ -676,9 +677,9 @@ async function poll(){
  if(requestInFlight||dead||!loaded)return;
  requestInFlight=true;
  try{
-  const response=await api("state",{contentRevision});
+  const response=await api("state",{contentRevision,typedRevision});
   if(typeof response.markdown==="string"&&Number(response.state?.contentRevision||0)!==contentRevision)applyWorkbookRevision(response);
-  updateState(response.state);
+  applyTypedState(response);updateState(response.state);
   if(seen){msg(presenter?
    (syncEnabled?"Presenter connected · scrolling is shared":"Presenter connected · scrolling sync is off"):
    (syncEnabled&&canFollow?"Live · following teacher":syncEnabled?"Live · independent scrolling":"Connected · awaiting teacher sync"));
@@ -690,24 +691,41 @@ async function poll(){
  }finally{requestInFlight=false}
 }
 function applyWorkbookRevision(response){
- const revision=Number(response.state?.contentRevision||0);if(revision<contentRevision)return;
+ const revision=Number(response.state?.contentRevision||0);if(revision<=contentRevision)return;
  contentRevision=revision;lesson.markdown=response.markdown;active=null;localStrokes=[];textInk=[];sharedStrokes=[];guestInk.clear();remoteText.clear();inkBatches.clear();inkSeenRevisions.clear();remoteAnchor=null;hideRemoteCursor();
- renderWorkbook(el("share-content"),lesson.markdown);layoutPaper();paintStrokes();scheduleFollowLayout();msg("Live workbook updated.");
+ renderWorkbook(el("share-content"),lesson.markdown);paintTypedNotes();layoutPaper();paintStrokes();scheduleFollowLayout();msg("Live workbook updated.");
 }
 const editor=el("share-edit-dialog"),editorText=el("share-edit-text"),editorStatus=el("share-edit-status");
-let editRevision=0;
-el("share-edit-workbook").onclick=()=>{if(!presenter||dead||!loaded)return;editRevision=contentRevision;editorText.value=lesson.markdown;editorStatus.textContent="";editor.showModal()};
+let editRevision=0,studentEditing=false,typedRevision=-1,typedNotes=[],typingDraft=null,typingMove=false,typingBusy=false,permissionBusy=false;
+const typeDialog=el("share-type-dialog"),typedLayer=el("share-typed-layer"),typedAppendix=el("share-typed-appendix");
+function canEdit(){return !dead&&loaded&&roleKnown&&(presenter||studentEditing)}
+function updateEditingControls(){const allowed=canEdit();el("share-edit-workbook").hidden=!allowed;el("share-type-tool").disabled=!allowed;el("share-student-edit-label").hidden=!presenter;el("share-student-edit").disabled=permissionBusy||dead||!loaded;if(!permissionBusy)el("share-student-edit").checked=studentEditing;if(!allowed&&tool==="type")setTool("view");el("share-type-save").disabled=!allowed||typingBusy;el("share-edit-save").disabled=!allowed||editingWorkbook;}
+function applyTypedState(response){if(Array.isArray(response.typedNotes)&&Number(response.state?.typedRevision)>=typedRevision){typedRevision=Number(response.state.typedRevision);typedNotes=response.typedNotes;paintTypedNotes()}}
+function editingState(state){if(!state||Number(state.contentRevision||0)<contentRevision)return;studentEditing=state.studentEditing===true;updateEditingControls()}
+function typedPosition(note){const paperRect=paper.getBoundingClientRect(),block=note.block===null?null:contentBlocks()[note.block];if(block){const b=block.getBoundingClientRect();return [(b.left+b.width*note.bx-paperRect.left)/Math.max(1,paperRect.width),(b.top+b.height*note.by-paperRect.top)/Math.max(1,paperRect.height)]}return [note.x,note.y]}
+function paintTypedNotes(){typedLayer.replaceChildren();typedAppendix.replaceChildren();const old=typedNotes.filter(n=>n.revision!==contentRevision);for(const note of typedNotes){if(note.revision!==contentRevision)continue;const [x,y]=typedPosition(note),box=document.createElement("button");box.type="button";box.className="share-typed-note";box.textContent=note.text;box.style.left=clamp01(x)*100+"%";box.style.top=clamp01(y)*100+"%";box.style.color=note.color;box.style.fontSize=note.size+"px";box.title="Edit classroom text";box.setAttribute("aria-label","Edit text: "+note.text.slice(0,70));box.tabIndex=tool==="type"&&canEdit()?0:-1;box.addEventListener("pointerdown",e=>e.stopPropagation());box.onclick=e=>{e.stopPropagation();if(tool==="type"&&canEdit())openTyped(note)};typedLayer.append(box)}
+ if(old.length){const title=document.createElement("h2");title.textContent="Saved text from earlier edits";typedAppendix.append(title);for(const note of old){const row=document.createElement("div");row.className="share-typed-previous";const text=document.createElement("span");text.textContent=note.text;text.style.color=note.color;row.append(text);if(canEdit()){const edit=document.createElement("button");edit.type="button";edit.textContent="Edit / move";edit.onclick=()=>openTyped(note);row.append(edit)}typedAppendix.append(row)}}typedAppendix.hidden=!old.length;paper.classList.toggle("is-typing",tool==="type"&&canEdit());}
+function pointForText(event){const r=paper.getBoundingClientRect(),blocks=contentBlocks(),index=blocks.findIndex(b=>{const v=b.getBoundingClientRect();return event.clientX>=v.left&&event.clientX<=v.right&&event.clientY>=v.top&&event.clientY<=v.bottom}),b=index>=0?blocks[index].getBoundingClientRect():null;return {x:round4(clamp01((event.clientX-r.left)/Math.max(1,r.width))),y:round4(clamp01((event.clientY-r.top)/Math.max(1,r.height))),block:index>=0?index:null,bx:b?round4(clamp01((event.clientX-b.left)/Math.max(1,b.width))):0,by:b?round4(clamp01((event.clientY-b.top)/Math.max(1,b.height))):0}}
+function openTyped(note){typingDraft={...note};typingMove=false;el("share-type-text").value=note.text||"";el("share-type-color").value=note.color||el("share-ink").value;el("share-type-size").value=String(note.size||16);el("share-type-status").textContent="";const existing=typedNotes.some(n=>n.id===note.id);el("share-type-delete").hidden=!existing;el("share-type-move").hidden=!existing;typeDialog.showModal();el("share-type-text").focus()}
+function readTypedDraft(){return {...typingDraft,text:el("share-type-text").value.trim(),color:el("share-type-color").value,size:Number(el("share-type-size").value)}}
+paper.addEventListener("click",event=>{if(tool!=="type"||!canEdit()||event.target.closest(".share-typed-note,.share-typed-previous,button,a,input,select,textarea"))return;if(typingMove&&typingDraft){openTyped({...typingDraft,...pointForText(event),revision:contentRevision,reposition:true});return}openTyped({id:crypto.randomUUID(),...pointForText(event),text:"",color:el("share-ink").value,size:16,revision:contentRevision})});
+el("share-type-cancel").onclick=()=>{typingMove=false;typeDialog.close()};
+el("share-type-move").onclick=()=>{if(!canEdit())return;typingDraft=readTypedDraft();typingMove=true;setTool("type");typeDialog.close();msg("Click or tap a new position for the text.")};
+async function saveTyped(remove=false){if(!canEdit()||typingBusy||!typingDraft)return;const note=readTypedDraft();if(!remove&&!note.text){el("share-type-status").textContent="Type some words first.";return}if(remove&&!confirm("Delete this text box for everyone?"))return;typingBusy=true;el("share-type-save").disabled=true;el("share-type-delete").disabled=true;el("share-type-status").textContent="Saving…";try{const result=await api("typed-note",{revision:contentRevision,typedRevision,note,remove,reposition:note.reposition===true},presenter);if(typeof result.markdown==="string"&&Number(result.state.contentRevision)!==contentRevision)applyWorkbookRevision(result);applyTypedState(result);updateState(result.state);typeDialog.close();typingDraft=null;typingMove=false;if(inkReady)await chatBroadcast("workbook-edited",{revision:contentRevision,typedRevision});msg("Classroom text updated.")}catch(e){el("share-type-status").textContent=e.message;await poll()}finally{typingBusy=false;el("share-type-delete").disabled=false;updateEditingControls()}}
+el("share-type-save").onclick=()=>saveTyped();el("share-type-delete").onclick=()=>saveTyped(true);
+el("share-student-edit").onchange=async()=>{if(!presenter||permissionBusy)return;const enabled=el("share-student-edit").checked;permissionBusy=true;updateEditingControls();try{const result=await api("student-editing",{enabled},true);updateState(result.state);if(inkReady)await chatBroadcast("workbook-edited",{revision:contentRevision});msg(enabled?"Student editing enabled for this link.":"Student editing disabled.")}catch(e){msg(e.message,true)}finally{permissionBusy=false;updateEditingControls()}};
+el("share-edit-workbook").onclick=()=>{if(!canEdit())return;editRevision=contentRevision;editorText.value=lesson.markdown;editorStatus.textContent="";editor.showModal()};
 el("share-edit-cancel").onclick=()=>editor.close();
 el("share-edit-save").onclick=async()=>{
- if(!presenter||dead||editingWorkbook)return;
+ if(!canEdit()||editingWorkbook)return;
  if(writing){editorStatus.textContent="Please finish the current annotation update before publishing.";return}
  const markdown=editorText.value.trim();if(markdown===lesson.markdown){editor.close();return}
  if(markdown.length<20){editorStatus.textContent="Enter at least 20 characters.";return}
- if(!confirm("Publish edits to the shared workbook? Existing drawings and highlights will be cleared because their positions may no longer match. The original saved lesson is unchanged."))return;
+ if(!confirm("Publish edits to the shared workbook? Existing drawings and highlights will be cleared. Typed text is retained in a saved section and can be moved back onto the page. The original saved lesson is unchanged."))return;
  if(pending&&Object.hasOwn(pending,"annotations")){delete pending.annotations;if(!Object.keys(pending).length)pending=null}
  editingWorkbook=true;el("share-edit-save").disabled=true;
- try{const response=await api("edit-workbook",{markdown,revision:editRevision},true);applyWorkbookRevision(response);updateState(response.state);editor.close();if(inkReady)await chatBroadcast("workbook-edited",{revision:contentRevision});}
- catch(e){editorStatus.textContent=e.message||"Could not publish changes."}finally{editingWorkbook=false;el("share-edit-save").disabled=false}
+ try{const response=await api("edit-workbook",{markdown,revision:editRevision},presenter);applyWorkbookRevision(response);applyTypedState(response);updateState(response.state);editor.close();if(inkReady)await chatBroadcast("workbook-edited",{revision:contentRevision});}
+ catch(e){editorStatus.textContent=e.message||"Could not publish changes.";await poll()}finally{editingWorkbook=false;updateEditingControls()}
 };
 async function checkPresenter(){
  try{
@@ -716,7 +734,7 @@ async function checkPresenter(){
   await db.auth.getUser();
   const result=await api("role",{},true);
   if(!result.presenter)return;
-  presenter=true;assignedStudent=result.student||null;el("share-edit-workbook").hidden=false;
+  presenter=true;assignedStudent=result.student||null;studentEditing=result.state.studentEditing===true;
   el("share-role").textContent="Teacher · presenter";
   el("share-follow-label").hidden=true;
   el("share-presenter-label").hidden=false;el("share-cursor-label").hidden=false;
@@ -740,7 +758,8 @@ el("share-print").addEventListener("click",()=>window.print());
 window.addEventListener("afterprint",schedulePaperLayout);
 el("share-download").addEventListener("click",()=>{
  if(!lesson?.markdown)return;
- const url=URL.createObjectURL(new Blob([lesson.markdown],{type:"text/markdown;charset=utf-8"}));
+ const additions=typedNotes.length?"\n\n## Classroom text additions\n"+typedNotes.map(n=>"- "+n.text).join("\n"):"";
+ const url=URL.createObjectURL(new Blob([lesson.markdown+additions],{type:"text/markdown;charset=utf-8"}));
  const a=document.createElement("a");a.href=url;a.download="helloearth-shared-lesson.md";
  document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1200);
 });
@@ -758,9 +777,9 @@ async function open(){
   document.title=response.topic+" | HelloEarth live lesson";
   el("share-copy").disabled=false;el("share-download").disabled=false;el("share-print").disabled=false;
   loaded=true;sharedStrokes=Array.isArray(response.state.annotations)?response.state.annotations:[];
-  updateState(response.state);paintStrokes();remaining();
+  applyTypedState(response);updateState(response.state);paintStrokes();remaining();
   msg("Lesson loaded. Checking if you're the presenter…");
-  await checkPresenter();roleKnown=true;layoutPaper();chatDefaults();dialogue=mountClassroomDialogue({teacher:presenter,student:assignedStudent,topic:lesson.topic,send:p=>chatBroadcast("dialogue",p)});resumeReading();
+  await checkPresenter();roleKnown=true;updateEditingControls();layoutPaper();chatDefaults();dialogue=mountClassroomDialogue({teacher:presenter,student:assignedStudent,topic:lesson.topic,send:p=>chatBroadcast("dialogue",p)});resumeReading();
   connectInk().catch(()=>{msg("Live annotation connection unavailable.",true);showPresence("offline","Status unavailable","Could not connect to the live lesson channel")});
   if(!presenter)msg("Ready to read · no login required. Use Follow teacher to sync scrolling.");
   setInterval(()=>{remaining();poll()},1700);
