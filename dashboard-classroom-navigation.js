@@ -6,7 +6,7 @@ let progressRequest=0;
 const progressCard=document.createElement("section");progressCard.className="he-recent-learning";progressCard.hidden=true;progressCard.setAttribute("translate","no");
 document.querySelector("#student-detail .ws-action-row")?.after(progressCard);
 document.addEventListener("helloearth:student-opened",async e=>{
- const s=e.detail?.student;if(!s?.id)return;profileLink.href="student-dialogues.html?student="+encodeURIComponent(s.id);const request=++progressRequest;
+ const s=e.detail?.student;if(!s?.id)return;const folder=byId("he-student-folder");if(folder)folder.onclick=()=>document.dispatchEvent(new CustomEvent("helloearth:open-lesson-folder",{detail:{studentId:s.id}}));profileLink.href="student-dialogues.html?student="+encodeURIComponent(s.id);const request=++progressRequest;
  progressCard.hidden=true;progressCard.replaceChildren();
  const {data:{user}}=await db.auth.getUser();if(!user||request!==progressRequest)return;
  const {data,error}=await db.from("he_lesson_reports").select("id,created_at,progress_data").eq("tutor_id",user.id).eq("student_id",s.id).not("progress_data","is",null).order("created_at",{ascending:false}).limit(3);
