@@ -83,8 +83,7 @@ const round4=n=>Math.round(n*10000)/10000;
 function contentBlocks(){return Array.from(el("share-content").children)}
 function readingLine(){
  const dock=document.querySelector(".share-top-dock")?.getBoundingClientRect();
- const chat=el("share-chat")?.getBoundingClientRect();
- const top=Math.max(0,dock?.bottom||0),bottom=window.innerWidth<=850&&chat?Math.min(window.innerHeight,chat.top):window.innerHeight;
+ const top=Math.max(0,dock?.bottom||0),bottom=window.innerHeight;
  return top+Math.max(6,Math.min(40,(bottom-top)*.15));
 }
 function getReadingAnchor(){
@@ -241,7 +240,7 @@ function positionRemoteCursor(){
  if(!remoteCursor||presenter||dead){cursorNode.hidden=true;return}
  const base=svg.getBoundingClientRect(),q=resolvePoint(remoteCursor.point,remoteCursor.anchor),x=base.left+q[0]*base.width,y=base.top+q[1]*base.height;
  const page=paper.closest(".share-page").getBoundingClientRect(),dock=document.querySelector(".share-top-dock").getBoundingClientRect();
- const bottom=window.innerWidth<=850?el("share-chat").getBoundingClientRect().top:window.innerHeight;
+ const bottom=window.innerHeight;
  if(x<Math.max(0,page.left)||x>Math.min(window.innerWidth,page.right)||y<dock.bottom||y>bottom){cursorNode.hidden=true;return}
  cursorNode.hidden=false;cursorNode.style.left=x+"px";cursorNode.style.top=y+"px";
 }
@@ -300,7 +299,7 @@ function syncChatLayout(){
  document.documentElement.style.setProperty("--share-dock-height",Math.ceil(dock?.getBoundingClientRect().height||0)+"px");
  document.documentElement.style.setProperty("--share-chat-height",Math.ceil(chatPanel.getBoundingClientRect().height||0)+"px");scheduleFollowLayout();
 }
-el("share-chat-toggle").onclick=()=>{chatInput.focus({preventScroll:true});el("share-chat-log").scrollTop=el("share-chat-log").scrollHeight};
+el("share-chat-toggle").onclick=()=>{if(!presenter&&canFollow&&syncEnabled){canFollow=false;follow.checked=false;msg("Follow teacher paused while you visit chat. Enable Follow scroll to resume.")}chatPanel.scrollIntoView({block:"start",behavior:"instant"});chatInput.focus({preventScroll:true});el("share-chat-log").scrollTop=el("share-chat-log").scrollHeight};
 el("share-chat-close").onclick=()=>{chatSettings.open=!chatSettings.open};
 chatSettings.addEventListener("toggle",()=>{el("share-chat-close").setAttribute("aria-expanded",String(chatSettings.open));syncChatLayout()});
 if(window.ResizeObserver){const layoutObserver=new ResizeObserver(syncChatLayout);layoutObserver.observe(document.querySelector(".share-top-dock"));layoutObserver.observe(chatPanel)}
