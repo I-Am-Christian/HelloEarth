@@ -1,6 +1,6 @@
 import {db} from "./supabase-client.js";
 import {SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY} from "./supabase-config.js";
-import {renderWorkbook,workbookBlockMarkdown} from "./helloearth-workbook-renderer.js?v=20261126-inline1";
+import {renderWorkbook,workbookBlockMarkdown} from "./helloearth-workbook-renderer.js?v=20261126-eraser1";
 import {mountClassroomDialogue} from "./classroom-dialogue.js?v=20261126-dock2";
 let dialogue=null,assignedStudent=null,contentRevision=0,editingWorkbook=false;
 // One-way tutor presentation. Public guests can view with a signed link,
