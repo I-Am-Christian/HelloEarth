@@ -11,7 +11,8 @@ const pages={
  progress:{title:"Progress",eyebrow:"WORKSPACE / INSIGHTS",caption:"Student development and CEFR assessments."},
  tools:{title:"Tools & records",eyebrow:"WORKSPACE / TOOLS",caption:"Scheduling, lessons, reports and templates in one place."},
  homework:{title:"Homework",eyebrow:"WORKSPACE / ASSIGNMENTS",caption:"Assignment deadlines and completed work."},
- lessons:{title:"Lesson Creation",eyebrow:"WORKSPACE / LESSONS",caption:"Create, edit, and save original teaching materials."},
+ lessons:{title:"Lesson Studio",eyebrow:"WORKSPACE / LESSONS",caption:"Create, edit and save personalised teaching workbooks."},
+ reports:{title:"Lesson Reports",eyebrow:"WORKSPACE / PREMIUM REPORTS",caption:"Transcribe lessons with permission and generate private learning reports."},
  settings:{title:"Settings",eyebrow:"WORKSPACE / PREFERENCES",caption:"Time format and AI connection."}
 };
 const commands=[
@@ -21,7 +22,8 @@ const commands=[
  {title:"Progress",desc:"Assessments and CEFR development",page:"progress",symbol:"▥",terms:"levels charts report"},
  {title:"Bookings & scheduling",desc:"Booking requests and recurring lessons",tool:"schedule",symbol:"▦",terms:"recurring availability"},
  {title:"Homework",desc:"Assignments and due dates",page:"homework",symbol:"▤",terms:"student care homework"},
- {title:"Lesson Creation",desc:"Create lessons manually or with your own OpenAI API",page:"lessons",symbol:"✎",terms:"lesson plans AI API ChatGPT"},
+ {title:"Lesson Studio",desc:"Personalised lesson and homework workbooks",page:"lessons",symbol:"✎",terms:"lesson plans AI workbook"},
+ {title:"Lesson Reports",desc:"Transcription, lesson analysis and reports",page:"reports",symbol:"▥",terms:"transcription speech reporting growth studio"} ,
  {title:"Earnings & reports",desc:"Hours, income and student reports",tool:"business",symbol:"◫",terms:"income money weekly"},
  {title:"Teaching templates",desc:"Reusable lesson material and attendance",tool:"resources",symbol:"✧",terms:"resources attendance cancellation"},
  {title:"Settings",desc:"Time display and API preferences",page:"settings",symbol:"⚙",terms:"settings clock"},
@@ -64,7 +66,7 @@ function action(name){
  case "start-lesson":$("ws-companion-open")?.click();break;
  case "notes":page("students");break;
  case "homework":page("homework");break;
- case "reports":tools("business");break;
+ case "reports":page("reports");break;
  case "unassessed":
   page("students");
   if(($("stat-assess")?.textContent||"0")!=="0"){
