@@ -41,7 +41,7 @@
  ["Apply text highlight","Pas teksmarkering toe","Aplicar resaltado de texto","Aplicar destaque ao texto","Surligner le texte","Zastosuj zakreślenie","Выделить текст","应用文本高亮","Metni vurgula","Áp dụng tô sáng","Text markieren","تمييز النص","הדגש טקסט"]
  ];
  const offline={};for(const row of phrases)for(let i=1;i<row.length;i++){(offline[choices[i][0]]??={})[row[0]]=row[i]}
- const cache=new Map(),pending=new Set(),translators=new Map();let enabled=new Set(),refreshTimer=0,worker=Promise.resolve(),status;
+ const cache=new Map(),pending=new Set(),translators=new Map();let enabled=new Set(),refreshTimer=0,worker=Promise.resolve(),status;try{for(const lang of JSON.parse(localStorage.getItem("helloearth-local-translation-languages")||"[]"))if(supported.has(lang))enabled.add(lang)}catch{}
  const normalize=s=>String(s||"").replace(/\s+/g," ").trim();
  function signal(){clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>document.dispatchEvent(new CustomEvent("helloearth:translationready")),120)}
  async function translator(from,to,download=false){
@@ -56,9 +56,9 @@
   const clean=normalize(text);if(!clean||lang==="en")return undefined;
   if(offline[lang]?.[clean])return offline[lang][clean];
   if(!allowMachine||!enabled.has(lang)||!/[A-Za-z]/.test(clean)||clean.length>1200||/^[\d\s.,:$/%+−-]+$/.test(clean))return undefined;
-  const key=lang+"\n"+clean;if(cache.has(key))return cache.get(key);
+  const key=lang+"\n"+clean;if(cache.has(key))return cache.get(key)||undefined;
   if(pending.has(key)||pending.size>=300||cache.size>=2500)return undefined;
-  pending.add(key);worker=worker.then(async()=>{try{const t=await translator("en",lang),result=String(await t.translate(clean)).trim();if(result)cache.set(key,result)}catch{}finally{pending.delete(key);signal()}});
+  pending.add(key);worker=worker.then(async()=>{try{const t=await translator("en",lang),result=String(await t.translate(clean)).trim();cache.set(key,result||"")}catch{cache.set(key,"")}finally{pending.delete(key);signal()}});
   return undefined;
  }
  function localizeOptions(select){for(const [code,label] of choices)if(!Array.from(select.options).some(o=>o.value===code)){const option=document.createElement("option");option.value=code;option.textContent=label;select.append(option)}}
@@ -83,10 +83,10 @@
   const host=document.querySelector(".share-toolbar-actions,.lesson-toolbar-actions,.auth-top,.ws-sidebar,.pricing-header,.site-header .header-inner,body>header");
   (host||document.body).append(openButton);
   let selected="";document.addEventListener("selectionchange",()=>{if(dialog.open)return;const s=window.getSelection()?.toString().trim();if(s)selected=s.slice(0,4000)});
-  openButton.addEventListener("click",()=>{const active=window.getSelection()?.toString().trim()||selected;input.value=active||"";selected="";source.value=document.documentElement.lang&&supported.has(document.documentElement.lang)?document.documentElement.lang:"en";target.value=source.value==="en"?(localStorageSafe()||"es"):"en";if(target.value===source.value)target.value="es";output.textContent="Translation will appear here.";status.textContent="";dialog.showModal()});
+  openButton.addEventListener("click",()=>{const active=window.getSelection()?.toString().trim()||selected;input.value=active||"";selected="";source.value=document.documentElement.lang&&supported.has(document.documentElement.lang)?document.documentElement.lang:"en";target.value=source.value==="en"?(supported.has(localStorageSafe())?localStorageSafe():"es"):"en";if(target.value===source.value)target.value="es";output.textContent="Translation will appear here.";status.textContent="";dialog.showModal()});
   close.onclick=()=>dialog.close();
   runButton.onclick=async()=>{const text=input.value.trim(),from=source.value,to=target.value;if(!text){status.textContent="Select or type text first.";return}runButton.disabled=true;try{status.textContent="Preparing translation…";const t=await translator(from,to,true);output.textContent=t?await t.translate(text):text;status.textContent="Original text has not been changed."}catch(e){status.textContent=e.message;output.textContent="Translation unavailable."}finally{runButton.disabled=false}};
-  enable.onclick=async()=>{const lang=target.value;if(lang==="en"){status.textContent="Choose a non-English language first.";return}enable.disabled=true;try{status.textContent="Preparing the language pack…";await translator("en",lang,true);enabled.add(lang);if(window.HelloEarthI18n)window.HelloEarthI18n.setLanguage(lang);else{const picker=document.getElementById("site-language");if(picker){picker.value=lang;picker.dispatchEvent(new Event("change"))}}signal();status.textContent="Automatic translation enabled for this page. Lesson text and private records stay unchanged; select text to translate them separately."}catch(e){status.textContent=e.message}finally{enable.disabled=false}};
+  enable.onclick=async()=>{const lang=target.value;if(lang==="en"){status.textContent="Choose a non-English language first.";return}enable.disabled=true;try{status.textContent="Preparing the language pack…";await translator("en",lang,true);enabled.add(lang);try{localStorage.setItem("helloearth-local-translation-languages",JSON.stringify([...enabled]))}catch{}for(const k of cache.keys())if(k.startsWith(lang+"\n")&&!cache.get(k))cache.delete(k);if(window.HelloEarthI18n)window.HelloEarthI18n.setLanguage(lang);else{const picker=document.getElementById("site-language");if(picker){picker.value=lang;picker.dispatchEvent(new Event("change"))}}signal();status.textContent="Automatic translation enabled for this page. Lesson text and private records stay unchanged; select text to translate them separately."}catch(e){status.textContent=e.message}finally{enable.disabled=false}};
  }
  function localStorageSafe(){try{return localStorage.getItem("helloearth-language")}catch{return null}}
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
