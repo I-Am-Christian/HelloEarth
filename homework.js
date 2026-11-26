@@ -97,5 +97,7 @@ el("homework-print").addEventListener("click",()=>{
  // Print-only CSS unhides the text outside the form's textarea.
  window.print();
 });
+// Keep saving during long uninterrupted writing sessions, not only after pauses.
+setInterval(()=>{if(dirty&&!saving)save()},18000);
 window.addEventListener("beforeunload",e=>{if(dirty){e.preventDefault();e.returnValue=""}});
 open();
