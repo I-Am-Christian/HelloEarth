@@ -60,7 +60,7 @@ async function loadCloudStatus(){
   const res=await db.functions.invoke("he-live-transcribe",{body:data});
   if(res.error)throw Error(res.error.message||"Status unavailable");
   cloud=res.data||cloud;updateCloud();
-  if(!cloud.cloudConfigured)showSetup("For reliable audio transcription and class-tab audio, the workspace owner must add an OPENAI_API_KEY secret to Supabase Edge Functions. The existing Anthropic key handles translation, not speech recognition. You can still try supported browser/on-device captions.");
+  if(!cloud.cloudConfigured)showSetup("Cloud speech-to-text has not been enabled for this workspace. Ask the administrator to connect the optional speech service. You can still try browser captions or install an on-device language pack.");
   else showSetup("");
  }catch{cloud.cloudAvailable=false;updateCloud()}
 }
@@ -270,7 +270,7 @@ async function startBrowser(device=false){
     startCloud().catch(error=>{stopListening();say(error.message,true)});
    }else{
     stopListening();
-    say("Browser speech service returned a network error. Your microphone may be fine. Use Install offline speech pack, or connect OPENAI_API_KEY for the cloud fallback.",true);
+    say("Browser speech service returned a network error. Your microphone may be fine. Use Install offline speech pack, or ask the administrator to enable cloud captions.",true);
    }
   }else if(["not-allowed","service-not-allowed","audio-capture","language-not-supported"].includes(err)){
    stopListening();say("Speech recognition: "+err+". Check microphone permissions or try an available offline language pack.",true);
@@ -353,7 +353,7 @@ async function uploadBlob(blob,seconds,whichSession){
  }finally{uploadCount--}
 }
 async function startCloud(){
- if(!cloud.cloudAvailable)throw Error("Cloud speech-to-text isn't available. Add OPENAI_API_KEY to Supabase secrets to enable a reliable fallback.");
+ if(!cloud.cloudAvailable)throw Error("Cloud speech-to-text is not connected or not included in this plan. Browser or on-device captions may still work.");
  if(!window.MediaRecorder)throw Error("This browser doesn't support MediaRecorder.");
  if(recognition){try{recognition.abort()}catch{}recognition=null}
  activeEngine="cloud";cloudChunk();updateState();
