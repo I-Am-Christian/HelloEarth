@@ -13,7 +13,7 @@ const downloadText=(filename,body)=>{
 };
 const splitAnswerKey=text=>{
  const raw=String(text||"");
- const match=/^\s{0,3}(?:#{1,6}\s*)?(?:\*\*)?(?:answer\s*key|answers\s*(?:for\s*teachers?|key)?|solutions?|teacher(?:'s)?\s*(?:notes?|answers?))(?:\*\*)?\s*[:\-]?\s*$/im.exec(raw);
+ const match=/^\s{0,3}(?:#{1,6}\s*)?\*{0,2}(?:answer\s*key|answers\s*(?:for\s*teachers?|key)?|solutions?|teacher(?:'s)?\s*(?:notes?|answers?))\s*[:\-]?\*{0,2}\s*[:\-]?\s*$/im.exec(raw);
  return match?{worksheet:raw.slice(0,match.index).trim(),key:raw.slice(match.index+match[0].length).trim()}:{worksheet:raw.trim(),key:""};
 };
 const homeworkPart=text=>{
