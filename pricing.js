@@ -4,23 +4,16 @@ const root = document.getElementById("pricing-grid");
 let loadedPlans = null;
 const translate = (key, values = {}) => window.HelloEarthI18n?.t(key, values) ?? key.replace(/\{([^}]+)\}/g, (_, field) => String(values[field] ?? ""));
 const featureDescriptions = {
-  free: "Start with your students. Local Atlas is a separate desktop prototype.",
-  starter: "More student capacity with planned local Atlas integration.",
-  growth: "Planned managed cloud Atlas with a capped monthly allowance.",
-  studio: "Planned managed cloud Atlas with a larger monthly allowance."
+  free: "Start organising your student learning records.",
+  starter: "More student space and assisted lesson creation.",
+  growth: "A growing tutor workspace with Nova AI tools.",
+  studio: "For busy tutors managing larger student groups."
 };
 function plannedAiFeatures(plan) {
-  const runtime = plan.planned_atlas_runtime === "cloud" ? "cloud" : "local";
-  const items = [
-    runtime === "local"
-      ? "Local Atlas on your own computer — planned plan integration"
-      : "Cloud-hosted Atlas included when launched — monthly usage cap to be confirmed"
-  ];
-  if (plan.planned_byo_api_support) {
-    items.push("Bring your own supported AI API — planned on every tier");
-  }
-  items.push("Your own AI provider charges you separately");
-  return items;
+ const items=["Nova lesson and homework creation with usage safeguards"];
+ if(plan.planned_byo_api_support)items.push("Option to use your own external API key");
+ items.push("Final AI allowances will be confirmed before paid launch");
+ return items;
 }
 function card(plan) {
   const article = document.createElement("article");
