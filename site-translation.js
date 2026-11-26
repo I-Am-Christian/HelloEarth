@@ -81,7 +81,7 @@
   dialog.append(header,element("p",{},"Translate selected words or sentences without changing the original lesson or student records."),pair,input,actions,status,output,element("p",{},"On-device translation requires a supported browser and language pack. If it is unavailable, use your browser's page translation for non-private pages. Translation may be inaccurate."));
   document.body.append(dialog);
   const host=document.querySelector(".share-toolbar-actions,.lesson-toolbar-actions,.auth-top,.ws-sidebar,.pricing-header,.site-header .header-inner,body>header");
-  (host||document.body).append(openButton);
+  if(!document.querySelector('script[data-hide-launch="true"]'))(host||document.body).append(openButton);
   let selected="";document.addEventListener("selectionchange",()=>{if(dialog.open)return;const s=window.getSelection()?.toString().trim();if(s)selected=s.slice(0,4000)});
   openButton.addEventListener("click",()=>{const active=window.getSelection()?.toString().trim()||selected;input.value=active||"";selected="";source.value=document.documentElement.lang&&supported.has(document.documentElement.lang)?document.documentElement.lang:"en";target.value=source.value==="en"?(supported.has(localStorageSafe())?localStorageSafe():"es"):"en";if(target.value===source.value)target.value="es";output.textContent="Translation will appear here.";status.textContent="";dialog.showModal()});
   close.onclick=()=>dialog.close();
