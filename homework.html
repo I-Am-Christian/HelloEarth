@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width,initial-scale=1">
+ <meta name="referrer" content="no-referrer">
+ <meta name="robots" content="noindex,nofollow">
+ <meta name="color-scheme" content="dark">
+ <meta name="theme-color" content="#151d32">
+ <title>Homework workspace | HelloEarth</title>
+ <link rel="icon" href="logo.svg" type="image/svg+xml">
+ <link rel="stylesheet" href="homework.css?v=20261126-student1">
+ <script type="module" src="homework.js?v=20261126-student1"></script>
+</head>
+<body>
+ <header class="topbar">
+  <div class="brand"><img src="logo.svg" alt="" width="38" height="38"> helloearth<span>.</span></div>
+  <span class="tag">Student homework</span>
+ </header>
+ <main class="workspace">
+  <section class="hero">
+   <div class="eyebrow">YOUR PRIVATE PRACTICE SPACE</div>
+   <h1 id="homework-title">Opening homework…</h1>
+   <p id="homework-subtitle">Your teacher has shared a practice worksheet with you. You can come back to this page until the link expires.</p>
+   <div class="info"><span id="homework-expiry">Checking link…</span><span id="homework-save-status" role="status" aria-live="polite">Preparing your workspace…</span></div>
+  </section>
+  <div id="homework-error" class="error" role="alert" hidden></div>
+  <div id="homework-active" class="columns" hidden>
+   <section class="panel instructions">
+    <h2>Worksheet</h2>
+    <p class="hint">Read the questions below. You can return to the link to finish at any time before it expires.</p>
+    <div id="homework-worksheet" class="worksheet"></div>
+   </section>
+   <section class="panel answer-panel">
+    <div class="answers-heading"><div><h2>Your answers</h2><p class="hint">Write answers here, numbering them to match the questions.</p></div><span class="autosave">Auto-save on</span></div>
+    <label for="homework-answers">Your responses</label>
+    <textarea id="homework-answers" rows="22" maxlength="18000" placeholder="1. My answer is…&#10;&#10;2. My second answer is…" spellcheck="true"></textarea>
+    <div class="actions">
+     <button type="button" id="homework-save" class="primary">Save answers</button>
+     <button type="button" id="homework-download">Download .txt</button>
+     <button type="button" id="homework-print">Print / Save PDF</button>
+    </div>
+    <p class="hint privacy">Anyone with this unique link can see or edit these answers. Keep the link private and share it only with your tutor. Your teacher can review your saved work.</p>
+   </section>
+  </div>
+  <section id="homework-closed" class="panel" hidden>
+   <h2>Link unavailable</h2>
+   <p>This homework may have expired or been closed. Ask your teacher for a new worksheet link.</p>
+   <p>If you previously downloaded your answers, that copy remains available on your device.</p>
+  </section>
+ </main>
+ <footer class="footer">HelloEarth · Your teacher's shared worksheet · No account required</footer>
+</body>
+</html>
