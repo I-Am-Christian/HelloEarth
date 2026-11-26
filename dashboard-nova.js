@@ -43,7 +43,7 @@ function setStatus(message,error=false){
  node.classList.toggle("he-nova-error",error);
 }
 function view(id){
- const allowed=["overview","calendar","students","progress","homework","lessons","tools","settings"];
+ const allowed=["overview","calendar","students","progress","homework","lessons","reports","tools","settings"];
  if(!allowed.includes(id))return false;
  const tab=document.getElementById(id+"-tab");
  if(!tab)return false;
