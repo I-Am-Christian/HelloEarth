@@ -201,9 +201,14 @@ function start(){
  recognitionInstance.onresult=onResult;
  recognitionInstance.onerror=event=>{
   const code=event.error||"unavailable";
+  if(code==="network"){
+   stop();
+   feedback("Browser speech recognition cannot connect. Select Open Live Captions to use an on-device language pack or cloud fallback, then import the transcript here.",true);
+   return;
+  }
   feedback("Microphone recognition: "+code+
-   ". You can still paste a transcript.",true);
-  if(["not-allowed","service-not-allowed","audio-capture"].includes(code))stop();
+   ". You can also import the transcript using Live Captions.",true);
+  if(["not-allowed","service-not-allowed","audio-capture","language-not-supported"].includes(code))stop();
  };
  recognitionInstance.onend=()=>{
   if(!listening||recognition!==recognitionInstance)return;
@@ -276,6 +281,9 @@ el("he-report-transcript").addEventListener("input",()=>{
  typedUsed=true;updateCount();
 });
 el("he-report-start").addEventListener("click",start);
+el("he-report-open-captions").addEventListener("click",()=>{
+ window.HelloEarthLiveCaptions?.show?.();
+});
 el("he-report-stop").addEventListener("click",stop);
 el("he-report-generate").addEventListener("click",generate);
 el("he-report-stop-generate").addEventListener("click",generate);
