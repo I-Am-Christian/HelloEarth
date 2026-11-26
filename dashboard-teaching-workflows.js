@@ -219,7 +219,7 @@ function prepareHomeworkFromLesson(plan){
  el("he-homework-lesson-id").value=plan.id;
  el("he-homework-title").value=("Practice: "+plan.topic).slice(0,800);
  el("he-homework-content").value=split.worksheet;
- el("he-homework-key").value=split.key;
+ el("he-homework-key").value=split.key||splitAnswerKey(source).key;
  el("homework-tab")?.click();
  say("he-homework-feedback",body
   ?"Review the extracted homework and create a 14-day link. Nothing is sent automatically."
@@ -390,7 +390,7 @@ el("he-homework-from-lesson").addEventListener("click",()=>{
  const extracted=homeworkPart(text);
  const split=splitAnswerKey(extracted||"");
  el("he-homework-content").value=split.worksheet;
- el("he-homework-key").value=split.key;
+ el("he-homework-key").value=split.key||splitAnswerKey(text).key;
  el("he-homework-lesson-id").value=activeLessonId||"";
  el("homework-tab")?.click();
  say("he-homework-feedback","Homework draft prepared. Add the assignment details before saving.");
