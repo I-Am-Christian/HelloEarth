@@ -212,7 +212,7 @@ async function obtainAudio(){
  const dest=mixedCtx.createMediaStreamDestination();
  for(const media of [new MediaStream(tabTracks),micStream]){
   const input=mixedCtx.createMediaStreamSource(media);
-  const gain=mixedCtx.createGain();gain.gain.value=media===micStream?.5:1;
+  const gain=mixedCtx.createGain();gain.gain.value=media===micStream?0.85:1;
   input.connect(gain).connect(dest);
  }
  await mixedCtx.resume();
@@ -256,7 +256,8 @@ async function startBrowser(device=false){
    else pending+=(pending?" ":"")+text;
   }
   el("he-translate-interim").textContent=pending?"Hearing: "+pending:"";
-  if(final)addCaption(final,el("he-caption-source").value==="mic"?"Microphone":"Class audio");
+  if(final)addCaption(final,el("he-caption-source").value==="mic"?"Microphone":
+   el("he-caption-source").value==="both"?"Class + microphone":"Class audio");
  };
  engine.onerror=event=>{
   const err=event.error||"unavailable";lastError=err;
@@ -318,15 +319,16 @@ function cloudChunk(){
   if(listening&&activeEngine==="cloud"){
    try{cloudChunk()}catch(error){stopListening();say(error.message,true)}
   }
-  if(blob.size>=400&&seconds>=3){
+  // Stop means stop: do not transmit an unfinished segment after the user stops.
+  if(listening&&activeEngine==="cloud"&&blob.size>=400&&seconds>=3){
    if(uploadCount>=2){say("Speech service is slower than the class. Captions are delayed; skipping a full audio segment.",true)}
-   else uploadBlob(blob,seconds).catch(error=>say(error.message,true));
+   else uploadBlob(blob,seconds,sessionRun).catch(error=>say(error.message,true));
   }
  };
  recorder.start();
  recordTimer=setTimeout(()=>{if(recorder.state==="recording")recorder.stop()},10500);
 }
-async function uploadBlob(blob,seconds){
+async function uploadBlob(blob,seconds,whichSession){
  uploadCount++;
  try{
   const form=new FormData();
@@ -342,7 +344,9 @@ async function uploadBlob(blob,seconds){
    }
    throw Error(msg);
   }
-  if(data?.text)addCaption(data.text,el("he-caption-source").value==="mic"?"Microphone":"Class audio");
+  if(data?.text&&listening&&sessionRun===whichSession)
+   addCaption(data.text,el("he-caption-source").value==="mic"?"Microphone":
+    el("he-caption-source").value==="both"?"Class + microphone":"Class audio");
   say("Cloud captions active. "+(typeof data?.remainingSeconds==="number"&&data.remainingSeconds<1800?
    Math.round(data.remainingSeconds/60)+" allowance minutes left.":"Live transcription running."));
  }finally{uploadCount--}
@@ -459,13 +463,13 @@ el("he-live-translate-close").addEventListener("click",()=>{
  if(pip&&!pip.closed)pip.close();
 });
 el("he-live-translate-pin").addEventListener("click",async()=>{
- if(!documentPictureInPicture?.requestWindow){
+ if(!window.documentPictureInPicture?.requestWindow){
   say("Always-on-top windows need supported desktop Chrome. Captions can still float above HelloEarth.",true);return;
  }
  if(pip&&!pip.closed){pip.focus();return}
  closing=false;
  try{
-  const win=await documentPictureInPicture.requestWindow({width:565,height:720});
+  const win=await window.documentPictureInPicture.requestWindow({width:565,height:720});
   pip=win;win.document.title="HelloEarth · Live captions";
   win.document.body.className="he-pip-body";
   const css=win.document.createElement("link");css.rel="stylesheet";
