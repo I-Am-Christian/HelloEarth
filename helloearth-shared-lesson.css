@@ -102,3 +102,12 @@
 }
 @media(max-width:400px){.share-tool-modes button{min-width:34px;justify-content:center}.share-tool-modes button .share-tool-label{font-size:10px}.share-top-dock .share-color{font-size:0}.share-top-dock .share-toolbar-actions button{padding:5px 6px}}
 @media print{.share-top-dock{display:none!important}}
+
+.share-top-dock .share-toolbar-actions .share-presence{display:inline-flex;gap:6px;align-items:center;white-space:nowrap;border-color:#a5aec844;background:#16213966;color:#e4e9f5;font-size:11px;padding:5px 8px}
+.share-top-dock .share-presence #share-presence-text{border:0;padding:0;color:inherit;font:inherit}
+.share-presence i{display:block;width:8px;height:8px;border-radius:50%;background:#a3acc3;flex:none}
+.share-top-dock .share-presence[data-state=online]{color:#d4fae4;border-color:#68c79770;background:#214a3b}
+.share-presence[data-state=online] i{background:#70e5aa;box-shadow:0 0 0 3px #70e5aa22}
+.share-presence[data-state=offline] i{background:#ff9a9a}
+.share-presence[data-state=waiting] i{background:#e6c47c}
+@media(max-width:730px){.share-top-dock .share-toolbar-actions .share-presence{font-size:10px;padding:5px 6px}.share-top-dock .share-toolbar-actions{justify-content:flex-end}.share-top-dock .share-toolbar-actions #share-role{display:none}}
