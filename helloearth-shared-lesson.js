@@ -103,19 +103,36 @@ async function connectInk(){
   inkReady=status==="SUBSCRIBED";if(inkReady){sendInk();inkChannel.send({type:"broadcast",event:"request",payload:{}})}
  });
 }
+let savedSelection=null,selectionTimer=null;
+function captureSelection(){
+ const selection=window.getSelection(),content=el("share-content");
+ if(!selection||selection.isCollapsed||!selection.rangeCount)return null;
+ const range=selection.getRangeAt(0).cloneRange();
+ if(!content.contains(range.startContainer)||!content.contains(range.endContainer))return null;
+ const start=textOffset(range.startContainer,range.startOffset),end=textOffset(range.endContainer,range.endOffset);
+ return end>start?{start,end}:null;
+}
 function highlightSelection(){
  if(dead||!loaded||tool!=="text")return;
- const selection=window.getSelection();if(!selection||selection.isCollapsed||!selection.rangeCount)return;
- const range=selection.getRangeAt(0),content=el("share-content");
- if(!content.contains(range.startContainer)||!content.contains(range.endContainer))return;
- const start=textOffset(range.startContainer,range.startOffset),end=textOffset(range.endContainer,range.endOffset);
- if(end<=start)return;
- textInk.push({start,end,color:el("share-ink").value});if(textInk.length>100)textInk.shift();
- selection.removeAllRanges();paintStrokes();sendInk();
+ const mark=captureSelection()||savedSelection;
+ if(!mark)return;
+ savedSelection=null;
+ const next={...mark,color:el("share-ink").value};
+ if(!validMark(next))return;
+ if(!textInk.some(m=>m.start===next.start&&m.end===next.end&&m.color===next.color)){
+  textInk.push(next);if(textInk.length>100)textInk.shift();
+ }
+ window.getSelection()?.removeAllRanges();paintStrokes();sendInk();
 }
 const highlightButton=document.createElement("button");highlightButton.type="button";highlightButton.textContent="Apply text highlight";highlightButton.hidden=true;
-highlightButton.addEventListener("pointerdown",e=>e.preventDefault());highlightButton.addEventListener("click",highlightSelection);
+highlightButton.addEventListener("pointerdown",e=>{savedSelection=captureSelection()||savedSelection;e.preventDefault()});
+highlightButton.addEventListener("click",highlightSelection);
 document.querySelector(".share-tool-modes").after(highlightButton);
+document.addEventListener("selectionchange",()=>{if(tool==="text"){const mark=captureSelection();if(mark)savedSelection=mark}});
+document.addEventListener("pointerup",e=>{
+ if(tool!=="text"||e.pointerType==="touch"||!el("share-content").contains(e.target))return;
+ clearTimeout(selectionTimer);selectionTimer=setTimeout(()=>{if(captureSelection())highlightSelection()},0);
+});
 document.addEventListener("keydown",e=>{if(tool==="text"&&e.key==="Enter"&&!["INPUT","SELECT","BUTTON","TEXTAREA"].includes(document.activeElement?.tagName)){highlightSelection()}});
 window.addEventListener("resize",()=>paintStrokes());if(window.ResizeObserver)new ResizeObserver(()=>paintStrokes()).observe(paper);
 function paintStrokes(){
@@ -131,14 +148,15 @@ function paintStrokes(){
  el("share-clear").disabled=!canUndo;
 }
 function setTool(next){
- tool=next;active=null;
+ tool=next;active=null;savedSelection=null;clearTimeout(selectionTimer);
+ paper.classList.toggle("is-text-highlighting",tool==="text");
  for(const btn of document.querySelectorAll("[data-tool]")){
   const on=btn.dataset.tool===tool;btn.classList.toggle("selected",on);
   btn.setAttribute("aria-pressed",String(on));
  }
  svg.classList.toggle("is-annotating",tool==="pen"||tool==="highlight");
  highlightButton.hidden=tool!=="text";
- el("share-draw-hint").textContent=tool==="text"?"Select words with your mouse or touch, then Apply text highlight.": "Teacher and student annotations are shared live while connected.";
+ el("share-draw-hint").textContent=tool==="text"?"Drag across words to highlight automatically. On touchscreens, select text and tap Apply text highlight.": "Teacher and student annotations are shared live while connected.";
  paintStrokes();
 }
 function pointFrom(event){
@@ -147,7 +165,7 @@ function pointFrom(event){
   Math.max(0,Math.min(1,(event.clientY-rect.top)/Math.max(1,rect.height)))];
 }
 svg.addEventListener("pointerdown",event=>{
- if(dead||tool==="view"||event.button!==0)return;
+ if(dead||!["pen","highlight"].includes(tool)||event.button!==0)return;
  event.preventDefault();
  const stroke={tool,color:el("share-ink").value,points:[pointFrom(event)]};
  active=stroke;
