@@ -4,6 +4,36 @@ import {db} from "./supabase-client.js";
 const el=id=>document.getElementById(id);
 const ROOT="he_generation_log";
 const URLfor=id=>new URL("lesson.html#id="+id,location.href).href;
+const publicLinks=new Map();
+async function getPublicLink(row){
+ const cached=publicLinks.get(row.id);
+ if(cached&&Date.now()<Date.parse(cached.expiresAt))return cached.url;
+ await user();
+ const {data,error}=await db.functions.invoke("he-lesson-sharing",{
+  body:{action:"create",sourceKind:"generated",sourceId:row.id}
+ });
+ if(error)throw error;
+ if(!data?.url)throw Error(data?.error||"Student link unavailable.");
+ publicLinks.set(row.id,{url:data.url,expiresAt:data.expiresAt});
+ return data.url;
+}
+async function refreshPublicLinks(){
+ const {data,error}=await db.functions.invoke("he-lesson-sharing",{body:{action:"list"}});
+ if(error)throw error;
+ publicLinks.clear();
+ for(const item of data.shares||[]){
+  if(item.sourceKind==="generated")publicLinks.set(item.sourceId,{url:item.url,expiresAt:item.expiresAt});
+ }
+}
+async function shareNow(row,copy=true){
+ try{
+  const url=await getPublicLink(row);
+  if(current?.id===row.id)showCurrent(row);
+  paint();
+  if(copy)copyFallback(url,"Public student link copied. Anyone with it can open without signing in.");
+  return url;
+ }catch(error){textError("Could not create student link: "+error.message,true);return null}
+}
 let cached=[],loaded=false,loading=false,current=null;
 function remaining(iso){
  const ms=Date.parse(iso)-Date.now();
@@ -33,7 +63,7 @@ function showCurrent(row){
  current=row;
  const box=el("he-generation-current");
  box.hidden=false;
- el("he-generation-url").value=URLfor(row.id);
+ el("he-generation-url").value=publicLinks.get(row.id)?.url||"";
  el("he-generation-expiry").textContent="Temporary generation · "+remaining(row.expires_at);
 }
 function button(title,callback){
@@ -58,18 +88,33 @@ function paint(){
    new Date(row.created_at).toLocaleDateString();
   const timer=document.createElement("span");timer.className="he-expiration-count";
   timer.dataset.expiry=row.expires_at;timer.textContent=remaining(row.expires_at);
+  const publicShare=publicLinks.get(row.id);
   const link=document.createElement("a");
-  link.href=URLfor(row.id);link.target="_blank";link.rel="noopener noreferrer";
-  link.className="he-workbook-link";link.textContent="Open printable lesson ↗";
+  link.href=publicShare?.url||URLfor(row.id);
+  link.target="_blank";link.rel="noopener noreferrer";
+  link.className="he-workbook-link";
+  link.textContent=publicShare?"Open public student lesson ↗":"Tutor-only preview ↗";
   info.append(title,meta,link,timer);
   const actions=document.createElement("div");actions.className="he-work-actions he-inline-actions";
   actions.append(
-   button("Open PDF-style page",()=>window.open(URLfor(row.id),"_blank","noopener")),
-   button("Copy link",()=>copyFallback(URLfor(row.id),"Private lesson link copied.")),
+   button("Tutor preview",()=>window.open(URLfor(row.id),"_blank","noopener")),
+   button(publicShare?"Copy student link":"Create student link",()=>shareNow(row,true)),
+   button("Present lesson",async()=>{
+    const win=window.open("about:blank","_blank");
+    const url=await shareNow(row,false);
+    if(url){if(win)win.location.href=url;else textError("Public link ready. Select Open public student lesson above.")}
+    else if(win)win.close();
+   }),
    button("Delete",async()=>{
     if(!confirm("Delete this temporary lesson now? This cannot be undone."))return;
     try{
      const auth=await user();
+     const existing=publicLinks.get(row.id);
+     if(existing){
+      const rev=await db.functions.invoke("he-lesson-sharing",{body:{action:"revoke",token:decodeURIComponent(new URL(existing.url).hash.slice(3))}});
+      if(rev.error)throw rev.error;
+      publicLinks.delete(row.id);
+     }
      const {error}=await db.from(ROOT).delete().eq("id",row.id).eq("tutor_id",auth.id);
      if(error)throw error;cached=cached.filter(x=>x.id!==row.id);
      if(current?.id===row.id){current=null;el("he-generation-current").hidden=true}
@@ -89,7 +134,9 @@ async function load(){
    .select("id,student_id,topic,cefr_level,duration_minutes,kind,created_at,expires_at")
    .eq("tutor_id",auth.id).gt("expires_at",new Date().toISOString())
    .order("created_at",{ascending:false}).limit(70);
-  if(error)throw error;cached=data||[];loaded=true;paint();
+  if(error)throw error;cached=data||[];loaded=true;
+  try{await refreshPublicLinks()}catch(error){textError("Share links could not be refreshed: "+error.message,true)}
+  paint();
  }catch(err){textError("History unavailable: "+err.message,true)}
  finally{loading=false}
 }
@@ -101,15 +148,23 @@ async function record({studentId,topic,level,duration,markdown,kind="lesson"}){
  }).select("id,student_id,topic,cefr_level,duration_minutes,kind,created_at,expires_at").single();
  if(error)throw error;
  cached.unshift(data);showCurrent(data);paint();
- textError("Printable workbook logged. Private link valid for 14 days.");
+ const link=await shareNow(data,false);
+ if(link)textError("Student-ready lesson link created. Anyone with it can open without signing in.");
+ else textError("Workbook saved, but you need to create its public student link from Generation history.",true);
  return data;
 }
 el("he-generation-refresh")?.addEventListener("click",load);
 el("he-generation-copy")?.addEventListener("click",()=>{
- if(current)copyFallback(URLfor(current.id),"Private lesson link copied.");
+ if(current)shareNow(current,true);
 });
 el("he-generation-open")?.addEventListener("click",()=>{
- if(current)window.open(URLfor(current.id),"_blank","noopener");
+ if(current){
+  const win=window.open("about:blank","_blank");
+  shareNow(current,false).then(url=>{
+   if(url&&win)win.location.href=url;
+   else if(win)win.close();
+  });
+ }
 });
 document.addEventListener("helloearth:view-changed",e=>{
  if(e.detail?.view==="lessons")load();
