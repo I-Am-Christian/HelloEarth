@@ -12,7 +12,7 @@ outer.innerHTML='<button type="button" id="he-nova-launch" aria-haspopup="dialog
  '<button type="button" data-nova-example="Go to students">Students</button></div>'+
  '<form id="he-nova-form" class="he-nova-form"><label for="he-nova-input" class="visually-hidden">Ask Nova</label>'+
  '<textarea id="he-nova-input" rows="2" maxlength="600" placeholder="Try: Make a note for Alex: shy when speaking"></textarea>'+
- '<button id="he-nova-send" type="submit">Send</button></form>'+
+ '<button id="he-nova-send" type="submit">Send</button><label class="he-nova-deep" style="grid-column:1/-1;font-size:11px;display:flex;gap:6px;align-items:center"><input type="checkbox" id="he-nova-deep"> Detailed AI for complex questions</label></form>'+
  '<p id="he-nova-status" role="status" aria-live="polite"></p>'+
  '<p class="he-nova-disclaimer">Student note commands save only to your account. General AI questions may be processed by our AI service provider; avoid sending unnecessary sensitive details.</p>'+
  '</section>';
@@ -89,9 +89,9 @@ async function send(message){
  el("he-nova-send").disabled=true;
  bubble(content,true);
  el("he-nova-input").value="";
- setStatus("Nova is working…");
+ setStatus(el("he-nova-deep").checked?"Preparing detailed AI response…":"Nova is working…");
  try{
-  const {data,error}=await db.functions.invoke("he-nova",{body:{message:content}});
+  const {data,error}=await db.functions.invoke("he-nova",{body:{message:content,detailed:el("he-nova-deep").checked}});
   if(error){
    let msg=error.message||"Nova is unavailable.";
    if(typeof error.context?.json==="function"){
