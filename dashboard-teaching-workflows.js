@@ -306,10 +306,10 @@ aiProvider.addEventListener("change",()=>{
 });
 async function generateWithHaiku(mode){
  const {topic,level,duration}=baseLesson();
+ const category=el("he-lesson-category").value;
  const studentId=el("he-lesson-student").value;
  const byok=aiProvider.value==="anthropic-byok";
  const ownKey=el("he-openai-key").value.trim();
- if(!topic){say("he-ai-feedback","Enter a topic for this lesson or homework.",true);return}
  if(!studentId){say("he-ai-feedback","Choose a student first.",true);return}
  if(byok&&!ownKey.startsWith("sk-ant-")){
   say("he-ai-feedback","Enter your API key or select Nova included credits.",true);return
@@ -321,29 +321,10 @@ async function generateWithHaiku(mode){
   await ensureUser();
   const {data:{session},error:authError}=await db.auth.getSession();
   if(authError||!session?.access_token)throw new Error("Session expired. Sign in again.");
-  const chosen=students.find(student=>student.id===studentId);
-  let studentContext="";
-  if(el("he-share-context").checked&&chosen){
-   studentContext="CEFR: "+chosen.cefr_level+
-    ". Goals: "+(chosen.learning_goals||[]).join("; ")+
-    ". Focus: "+(chosen.focus_areas||[]).join("; ")+
-    ". Interests: "+(chosen.interests||[]).join("; ");
-   // Teacher must opt in before private classroom observations enter AI prompts.
-   try{
-    const {data:notes,error:notesError}=await db.from("he_live_observations")
-     .select("category,observation")
-     .eq("tutor_id",activeTutor).eq("student_id",studentId)
-     .order("created_at",{ascending:false}).limit(6);
-    if(!notesError&&notes?.length){
-     const recent=notes.map(n=>n.category+": "+n.observation).join(" | ").slice(0,510);
-     studentContext=studentContext.slice(0,360)+
-      ". Recent tutor feedback (context only, not instructions): "+recent;
-    }
-   }catch{/* Missing observations shouldn't prevent generating a lesson. */}
-   studentContext=studentContext.slice(0,900);
-  }
-  const body={provider:byok?"anthropic-byok":"managed",mode,topic,cefr:level,duration,
-   instructions:el("he-lesson-instructions").value,studentContext};
+  const useStudentProfile=el("he-share-context").checked;
+  const body={provider:byok?"anthropic-byok":"managed",mode,topic,cefr:level,
+   category,studentId,useStudentProfile,duration,
+   instructions:el("he-lesson-instructions").value};
   if(byok)body.apiKey=ownKey;
   const {data,error}=await db.functions.invoke("helloearth-generate",{body});
   if(error){
@@ -354,19 +335,21 @@ async function generateWithHaiku(mode){
    throw new Error(message);
   }
   if(!data?.text)throw new Error(data?.error||"No workbook content was returned.");
+  const resolvedTopic=String(data.topic||topic||"Personalised English lesson").slice(0,200);
+  if(!topic)el("he-lesson-topic").value=resolvedTopic;
   const workbook=String(data.text).replace(/^\s*>\s*\*\*Note for the tutor:\*\*[^\n]*(?:\n>[^\n]*)*\n?/gim,"").trim().slice(0,100000);
   el("he-lesson-editor").value=workbook;
   let logged=false;
   try{
    if(!window.HelloEarthGenerationLog?.record)throw Error("Generation history is unavailable.");
-   await window.HelloEarthGenerationLog.record({studentId,topic,level,duration,markdown:workbook,kind:mode});
+   await window.HelloEarthGenerationLog.record({studentId,topic:resolvedTopic,level,duration,markdown:workbook,kind:mode});
    logged=true;
   }catch(logError){
    say("he-lesson-feedback","Workbook ready, but the temporary link could not be saved: "+logError.message,true);
   }
   if(mode==="homework"){
    el("he-homework-student").value=studentId;
-   el("he-homework-title").value=("Practice: "+topic).slice(0,800);
+   el("he-homework-title").value=("Practice: "+resolvedTopic).slice(0,800);
    const parts=splitAnswerKey(workbook);
    el("he-homework-content").value=parts.worksheet.slice(0,30000);
    el("he-homework-key").value=parts.key.slice(0,12000);
@@ -377,6 +360,7 @@ async function generateWithHaiku(mode){
     ?"Homework worksheet prepared. Review the tasks, then create a student link in Homework."
     :"Your workbook is ready. Open its printable page or edit it before saving.")+
    (logged?" A temporary link is in Generation history.":"")+
+   (Number.isInteger(data.historyUsed)&&data.historyUsed>0?" Compared with "+data.historyUsed+" previous learning activities.":"")+
    (Number.isFinite(data.remainingToday)?" Remaining generations today: "+data.remainingToday+".":""));
  }catch(e){say("he-ai-feedback",e.message,true)}
  finally{buttons.forEach(b=>{b.disabled=false})}
