@@ -21,20 +21,22 @@ const isQuote=line=>/^\s*>\s?/.test(line||"");
 export function renderWorkbook(target,markdown){
  target.replaceChildren();
  const lines=String(markdown||"").replace(/\r\n?/g,"\n").slice(0,100000).split("\n");
- let i=0;
+ let i=0,blockStart=0;
+ const addBlock=node=>{node.dataset.mdStart=String(blockStart);node.dataset.mdEnd=String(i);target.append(node)};
  while(i<lines.length){
+  blockStart=i;
   const line=lines[i];
   if(!line.trim()){i++;continue}
   if(line.trim().startsWith("~~~")){
    const pre=document.createElement("pre"),contents=[];i++;
    while(i<lines.length&&!lines[i].trim().startsWith("~~~"))contents.push(lines[i++]);
-   if(i<lines.length)i++;pre.textContent=contents.join("\n");target.append(pre);continue;
+   if(i<lines.length)i++;pre.textContent=contents.join("\n");addBlock(pre);continue;
   }
-  if(isRule(line)){target.append(document.createElement("hr"));i++;continue}
+  if(isRule(line)){i++;addBlock(document.createElement("hr"));continue}
   if(isHeader(line)){
    const match=line.match(/^\s{0,3}(#{1,6})\s+(.+?)\s*$/);
    const heading=document.createElement("h"+Math.min(4,match[1].length));
-   appendInline(heading,match[2]);target.append(heading);i++;continue;
+   appendInline(heading,match[2]);i++;addBlock(heading);continue;
   }
   if(line.includes("|")&&i+1<lines.length&&isSeparator(lines[i+1])){
    const headers=rowCells(line),table=document.createElement("table"),
@@ -50,7 +52,7 @@ export function renderWorkbook(target,markdown){
     body.append(tr);i++;
    }
    table.append(body);const wrap=document.createElement("div");wrap.className="workbook-table-wrap";
-   wrap.append(table);target.append(wrap);continue;
+   wrap.append(table);addBlock(wrap);continue;
   }
   if(isBullet(line)||isNumber(line)){
    const ordered=isNumber(line),list=document.createElement(ordered?"ol":"ul");
@@ -59,7 +61,7 @@ export function renderWorkbook(target,markdown){
     appendInline(li,lines[i].replace(ordered?/^\s{0,4}\d+[.)]\s+/:/^\s{0,4}[-*]\s+/,""));
     list.append(li);i++;
    }
-   target.append(list);continue;
+   addBlock(list);continue;
   }
   if(isQuote(line)){
    const quote=document.createElement("blockquote");
@@ -67,7 +69,7 @@ export function renderWorkbook(target,markdown){
     const p=document.createElement("p");
     appendInline(p,lines[i].replace(/^\s*>\s?/,""));quote.append(p);i++;
    }
-   target.append(quote);continue;
+   addBlock(quote);continue;
   }
   const paragraph=[];
   while(i<lines.length&&lines[i].trim()&&!isHeader(lines[i])&&!isBullet(lines[i])&&!isNumber(lines[i])&&!isRule(lines[i])&&!isQuote(lines[i])&&!lines[i].trim().startsWith("~~~")){
@@ -77,10 +79,30 @@ export function renderWorkbook(target,markdown){
   if(paragraph.length){
    const p=document.createElement("p");
    if(paragraph.join(" ").startsWith("**Level:**"))p.className="workbook-meta";
-   appendInline(p,paragraph.join(" "));target.append(p);
+   appendInline(p,paragraph.join(" "));addBlock(p);
   }else{i++}
  }
  if(!target.childNodes.length){
   const p=document.createElement("p");p.textContent="No lesson content yet.";target.append(p);
  }
+}
+
+export function workbookBlockMarkdown(block){
+ const inline=node=>Array.from(node.childNodes).map(n=>{
+  if(n.nodeType===3)return n.textContent.replace(/\r?\n/g," ");
+  if(n.nodeName==="BR")return " ";
+  const t=inline(n);return n.nodeName==="STRONG"||n.nodeName==="B"?"**"+t+"**":n.nodeName==="EM"||n.nodeName==="I"?"*"+t+"*":t;
+ }).join("");
+ const tag=block.tagName;
+ if(/^H[1-4]$/.test(tag))return "#".repeat(Number(tag[1]))+" "+inline(block);
+ if(tag==="UL"||tag==="OL")return Array.from(block.children).map((li,i)=>(tag==="UL"?"- ":(i+1)+". ")+inline(li)).join("\n");
+ if(tag==="BLOCKQUOTE")return Array.from(block.children).map(p=>"> "+inline(p)).join("\n");
+ if(tag==="PRE")return "~~~\n"+block.textContent+"\n~~~";
+ if(block.classList.contains("workbook-table-wrap")){
+  const rows=Array.from(block.querySelectorAll("tr")).map(tr=>Array.from(tr.cells).map(td=>inline(td).replace(/\|/g,"¦")));
+  if(!rows.length)return "";
+  const format=r=>"| "+r.join(" | ")+" |";
+  return [format(rows[0]),format(rows[0].map(()=> "---")),...rows.slice(1).map(format)].join("\n");
+ }
+ return inline(block);
 }
