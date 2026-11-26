@@ -42,9 +42,10 @@ function card(plan) {
   heading.append(name, desc);
 
   const price = document.createElement("div");
+  if(plan.pricing_currency!=="USD")throw Error("Unexpected subscription currency");
   price.className = "plan-price";
   const amount = document.createElement("strong");
-  amount.textContent = "R" + new Intl.NumberFormat("en-ZA").format(plan.monthly_price_zar);
+  amount.textContent = new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(plan.monthly_price_usd);
   const per = document.createElement("small");
   per.textContent = "/month";
   price.append(amount, per);
@@ -81,7 +82,7 @@ function card(plan) {
 async function loadPrices() {
   try {
     const { data, error } = await db.from("helloearth_plans")
-      .select("code,name,monthly_price_zar,max_students,max_notes_monthly,max_notes_total,display_order,planned_atlas_runtime,planned_byo_api_support")
+      .select("code,name,monthly_price_usd,pricing_currency,max_students,max_notes_monthly,max_notes_total,display_order,planned_atlas_runtime,planned_byo_api_support")
       .eq("public_visible", true)
       .order("display_order", { ascending: true });
     if (error) throw error;
