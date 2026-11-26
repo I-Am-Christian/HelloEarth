@@ -63,8 +63,10 @@ async function follow(action){
   if(!view(action.view))return;
   const id=action.view==="homework"?"he-homework-student":"he-lesson-student";
   const select=document.getElementById(id);
-  if(select&&[...select.options].some(x=>x.value===action.studentId))
+  if(select&&[...select.options].some(x=>x.value===action.studentId)){
    select.value=action.studentId;
+   select.dispatchEvent(new Event("change",{bubbles:true}));
+  }
   if(action.topic){
    const topicField=document.getElementById(action.view==="homework"?"he-homework-title":"he-lesson-topic");
    if(topicField)topicField.value=action.topic;
