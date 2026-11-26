@@ -50,7 +50,7 @@ get("he-live-feedback-close").addEventListener("click",()=>{panel.hidden=true});
 root.querySelectorAll("[data-he-flag]").forEach(button=>button.addEventListener("click",()=>{
  get("he-live-category").value=button.dataset.heFlag;get("he-live-note").focus();
 }));
-student.addEventListener("change",refresh);
+student.addEventListener("change",()=>{if(student.value!==document.getElementById("he-lesson-student")?.value)linkedLesson=null;refresh()});
 get("he-live-feedback-save").addEventListener("click",async()=>{
  const studentId=student.value,observation=get("he-live-note").value.trim();
  if(!studentId||!observation){notice("Choose a student and enter an observation.",true);return}
