@@ -43,8 +43,16 @@ const copyLink=async id=>{
   const url=await getHomeworkLink(id);
   el("he-homework-new-link").hidden=false;
   el("he-homework-link-url").value=url;
-  if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(url);say("he-homework-feedback","Link copied. It expires 14 days after creation.");}
-  else {el("he-homework-link-url").focus();el("he-homework-link-url").select();say("he-homework-feedback","Link ready. Copy it from the highlighted field.");}
+  if(navigator.clipboard?.writeText){
+   await navigator.clipboard.writeText(url);
+   say("he-homework-feedback","Link copied. It expires 14 days after creation.");
+   if(!el("lessons-view").hidden)say("he-lesson-feedback","Homework link copied. Share it with the student.");
+  }
+  else {
+   el("homework-tab")?.click();
+   el("he-homework-link-url").focus();el("he-homework-link-url").select();
+   say("he-homework-feedback","Link ready. Copy it from the highlighted field.");
+  }
  }catch(err){say("he-homework-feedback",err.message,true)}
 };
 const openLink=async id=>{
@@ -243,7 +251,10 @@ function renderLessons(){
   }));
   const linked=homeworkRows.find(h=>h.lesson_plan_id===p.id&&
    h.status!=="cancelled"&&Date.now()<Date.parse(h.expires_at));
-  if(linked)actions.append(actionButton("Copy homework link",()=>copyLink(linked.id)));
+  if(linked)actions.append(
+   actionButton("Copy homework link",()=>copyLink(linked.id)),
+   actionButton("Open homework",()=>openLink(linked.id))
+  );
   actions.append(actionButton(linked?"New worksheet":"Create homework link",()=>prepareHomeworkFromLesson(p)));
   actions.append(actionButton("Download lesson",()=>downloadText("helloearth-lesson.md",p.markdown||"")));
   row.append(main,actions);root.append(row);
