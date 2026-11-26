@@ -90,7 +90,7 @@ function readingLine(){
 function getReadingAnchor(){
  const blocks=contentBlocks(),y=readingLine();
  let index=blocks.findIndex(b=>{const r=b.getBoundingClientRect();return r.height>0&&r.bottom>y});
- if(index<0)index=blocks.findLastIndex(b=>b.getBoundingClientRect().height>0);
+ if(index<0)for(let i=blocks.length-1;i>=0;i--){if(blocks[i].getBoundingClientRect().height>0){index=i;break}}
  if(index<0)return {ratio:getRatio(),block:-1,fraction:0,offset:null};
  const block=blocks[index],rect=block.getBoundingClientRect();
  let offset=null;
@@ -158,21 +158,21 @@ function pointAnchor(x,y){
  const r=blocks[index].getBoundingClientRect();
  return [index,round4(clamp01((x-r.left)/Math.max(1,r.width))),round4(clamp01((y-r.top)/Math.max(1,r.height)))];
 }
-function anchorValid(a){return a===null||(Array.isArray(a)&&a.length===3&&Number.isInteger(a[0])&&a[0]>=0&&a[0]<contentBlocks().length&&a.slice(1).every(n=>Number.isFinite(n)&&n>=0&&n<=1))}
-function resolvePoint(point,anchor){
- const base=svg.getBoundingClientRect();
- if(anchor&&anchorValid(anchor)){
-  const r=contentBlocks()[anchor[0]].getBoundingClientRect();
-  if(r.height>0&&r.width>0)return [(r.left+anchor[1]*r.width-base.left)/Math.max(1,base.width),(r.top+anchor[2]*r.height-base.top)/Math.max(1,base.height)];
+function anchorValid(a,blockCount=el("share-content").children.length){return a===null||(Array.isArray(a)&&a.length===3&&Number.isInteger(a[0])&&a[0]>=0&&a[0]<blockCount&&a.slice(1).every(n=>Number.isFinite(n)&&n>=0&&n<=1))}
+function resolvePoint(point,anchor,geometry=null){
+ const base=geometry?.base||svg.getBoundingClientRect();
+ if(anchor){
+  const r=geometry?geometry.blocks[anchor[0]]:contentBlocks()[anchor[0]]?.getBoundingClientRect();
+  if(r&&r.height>0&&r.width>0)return [(r.left+anchor[1]*r.width-base.left)/Math.max(1,base.width),(r.top+anchor[2]*r.height-base.top)/Math.max(1,base.height)];
  }
  return point;
 }
-function pathFor(points,anchors){
- return points.map((p,i)=>{const q=resolvePoint(p,anchors?.[i]);return (i?"L":"M")+(q[0]*1000).toFixed(2)+","+(q[1]*1000).toFixed(2)}).join(" ");
+function pathFor(points,anchors,geometry){
+ return points.map((p,i)=>{const q=resolvePoint(p,anchors?.[i],geometry);return (i?"L":"M")+(q[0]*1000).toFixed(2)+","+(q[1]*1000).toFixed(2)}).join(" ");
 }
-function drawStroke(stroke,local=false){
+function drawStroke(stroke,local=false,geometry=null){
  const path=document.createElementNS(ns,"path");
- path.setAttribute("d",pathFor(stroke.points,stroke.anchors));
+ path.setAttribute("d",pathFor(stroke.points,stroke.anchors,geometry));
  path.setAttribute("stroke",stroke.color);
  path.setAttribute("stroke-width",String((stroke.tool==="highlight"?25:3.5)*inkThickness(stroke.width)));
  path.setAttribute("stroke-opacity",stroke.tool==="highlight"?String(inkOpacity(stroke.opacity,.31)):"0.96");
@@ -210,7 +210,7 @@ for(const swatch of document.querySelectorAll("[data-ink-color]"))swatch.addEven
 function updateSwatches(){for(const swatch of document.querySelectorAll("[data-ink-color]"))swatch.setAttribute("aria-pressed",String(swatch.dataset.inkColor===inkPicker.value))}
 inkPicker.addEventListener("input",updateSwatches);updateSwatches();
 
-function validStroke(s){return s&&["pen","highlight"].includes(s.tool)&&colors.has(s.color)&&Array.isArray(s.points)&&s.points.length>=2&&s.points.length<=320&&s.points.every(p=>Array.isArray(p)&&p.length===2&&p.every(n=>typeof n==="number"&&n>=0&&n<=1))&&(!s.anchors||(Array.isArray(s.anchors)&&s.anchors.length===s.points.length&&s.anchors.every(anchorValid)))}
+function validStroke(s){return s&&["pen","highlight"].includes(s.tool)&&colors.has(s.color)&&Array.isArray(s.points)&&s.points.length>=2&&s.points.length<=320&&s.points.every(p=>Array.isArray(p)&&p.length===2&&p.every(n=>typeof n==="number"&&n>=0&&n<=1))&&(!s.anchors||(Array.isArray(s.anchors)&&s.anchors.length===s.points.length&&s.anchors.every(a=>anchorValid(a))))}
 function validMark(m){return m&&colors.has(m.color)&&Number.isInteger(m.start)&&Number.isInteger(m.end)&&m.start>=0&&m.end>m.start&&m.end<=el("share-content").textContent.length}
 function sendInk(){if(!inkReady||dead)return;inkChannel.send({type:"broadcast",event:"ink",payload:{author,strokes:localStrokes.slice(-60),text:textInk.slice(-100)}}).catch(()=>msg("Annotation connection interrupted.",true))}
 let remoteCursor=null,cursorLast=0,cursorTimer=null;
@@ -443,7 +443,8 @@ function highlightSelection(){
  const next={...mark,color:el("share-ink").value,opacity:Number(opacityPicker.value)/100};
  if(!validMark(next))return;
  if(!textInk.some(m=>m.start===next.start&&m.end===next.end&&m.color===next.color)){
-  textInk.push(next);if(textInk.length>100)textInk.shift();
+  if(textInk.length>=100){msg("Text highlight limit reached. Undo or clear your own marks first.",true);return}
+  textInk.push(next);
  }
  window.getSelection()?.removeAllRanges();paintStrokes();sendInk();
 }
@@ -459,13 +460,15 @@ document.addEventListener("pointerup",e=>{
 document.addEventListener("keydown",e=>{if(tool==="text"&&e.key==="Enter"&&!["INPUT","SELECT","BUTTON","TEXTAREA"].includes(document.activeElement?.tagName)){highlightSelection()}});
 window.addEventListener("resize",()=>{layoutPaper();paintStrokes();scheduleFollowLayout()});if(window.ResizeObserver){new ResizeObserver(()=>{paintStrokes();positionRemoteCursor()}).observe(paper);new ResizeObserver(()=>{layoutPaper();scheduleFollowLayout()}).observe(paper.closest(".share-page"))}
 function paintStrokes(){
+ const geometry={base:svg.getBoundingClientRect(),blocks:contentBlocks().map(b=>b.getBoundingClientRect())};
  svg.replaceChildren();
- for(const stroke of sharedStrokes)svg.append(drawStroke(stroke));
- for(const strokes of guestInk.values())for(const stroke of strokes)svg.append(drawStroke(stroke));
+ for(const stroke of sharedStrokes)svg.append(drawStroke(stroke,false,geometry));
+ for(const strokes of guestInk.values())for(const stroke of strokes)svg.append(drawStroke(stroke,false,geometry));
  for(const marks of remoteText.values())for(const mark of marks)paintText(mark);
  for(const mark of textInk)paintText(mark);
- for(const stroke of localStrokes)svg.append(drawStroke(stroke,true));
- if(active)svg.append(drawStroke(active,true));
+ for(const stroke of localStrokes)svg.append(drawStroke(stroke,true,geometry));
+ if(active)svg.append(drawStroke(active,true,geometry));
+ positionRemoteCursor();
  const canUndo=textInk.length>0||localStrokes.length>0||(presenter&&sharedStrokes.length>0);
  el("share-undo").disabled=!canUndo;
  el("share-clear").disabled=!canUndo;
@@ -505,7 +508,7 @@ svg.addEventListener("pointermove",event=>{
 function finish(event){
  if(!active)return;
  const p=pointFrom(event),stroke=active;active=null;
- if(stroke.points.length<2){stroke.points.push([Math.min(1,stroke.points[0][0]+0.001),Math.min(1,stroke.points[0][1]+0.001)]);stroke.anchors.push(null)}
+ if(stroke.points.length<2){stroke.points.push([Math.min(1,stroke.points[0][0]+0.001),Math.min(1,stroke.points[0][1]+0.001)]);stroke.anchors.push(stroke.anchors[0]? [...stroke.anchors[0]]:null)}
  localStrokes.push(stroke);sendInk();
  paintStrokes();
 }
