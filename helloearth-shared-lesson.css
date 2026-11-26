@@ -339,3 +339,53 @@
 #share-edit-dialog #share-edit-text{height:min(64dvh,640px);min-height:180px;font:14px/1.65 ui-monospace,Consolas,monospace;tab-size:4;white-space:pre-wrap;resize:vertical}
 #share-content.he-inline-enabled [contenteditable=true]{white-space:pre-wrap}
 @media(max-width:730px){#share-edit-dialog #share-edit-text{font-size:16px;height:55dvh}}
+
+/* Modern classroom ribbon: compact, predictable groups; workbook scale unchanged. */
+@media screen{
+.share-top-dock{background:#1c263e;border-bottom:1px solid #64708d60;box-shadow:0 6px 18px #08102533}
+.share-top-dock .share-toolbar{padding:10px clamp(12px,1.5vw,24px);gap:12px;min-height:50px}
+.he-classroom-identity{display:flex;align-items:center;gap:14px;min-width:0;flex:1}
+.he-classroom-identity .toolbar-brand{flex:none;font-size:16px}
+.he-classroom-title{min-width:0;max-width:320px;border-left:1px solid #a0a5c03a;padding-left:13px}
+.he-classroom-title small{display:block;font-size:9px;color:#a8b4d0;letter-spacing:.1em;line-height:1.3}
+.he-classroom-title strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px;font-weight:650;color:#f1edf9}
+.share-top-dock .share-toolbar-actions{flex:0 1 auto;gap:6px}
+.share-top-dock .share-toolbar-actions #share-copy{background:#a68ad3;color:#211934;border-color:#bfa8e6;font-weight:750}
+.share-top-dock .share-toolbar-actions button[aria-expanded=true]{background:#52456f;border-color:#a28ac9;color:#f6efff}
+.share-top-dock .share-toolbar-actions #he-classroom-focus[aria-expanded=true]{background:#303b54;border-color:#8390b234}
+.share-top-dock .share-toolbar-actions #share-role{border:0;padding:3px 5px;color:#b6bcd0;font-weight:550}
+.share-top-dock .share-control-shell{background:#242f48;padding:8px clamp(12px,1.5vw,24px) 5px}
+.share-top-dock .share-main-row{gap:9px;align-items:flex-end;flex:1 1 auto}
+.he-ribbon-group{display:flex;align-items:center;gap:4px;position:relative;padding-top:15px;min-width:0}
+.he-ribbon-group+.he-ribbon-group{border-left:1px solid #a3b2d023;padding-left:10px}
+.he-ribbon-label{position:absolute;top:0;left:0;font:600 9px/1.3 system-ui;color:#a8b4ce;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.he-ribbon-group+.he-ribbon-group .he-ribbon-label{left:10px}
+.share-top-dock .share-separator{display:none}
+.share-top-dock .share-zoom-tools{background:#182238;padding:1px;gap:2px}
+.share-top-dock .share-tools button,.share-top-dock .share-menu summary{min-height:32px;border-radius:7px;font-size:12px;padding:6px 8px}
+.share-top-dock .share-tool-modes{display:flex;gap:4px}
+.share-top-dock .share-tool-modes button{display:inline-flex;align-items:center;gap:5px;background:#29354e;border-color:#9aa9c323}
+.share-top-dock .share-tool-modes button.selected{background:#d8c4f2;color:#292039}
+.share-top-dock .share-tool-modes button>span:first-child{font-size:13px}
+#he-classroom-outline{max-width:155px;min-width:90px;width:130px;background:#19243b;border:1px solid #7986a958;color:#eae5f6;border-radius:7px;font:600 11px system-ui;padding:7px 5px}
+.share-top-dock .share-sync-menu{align-self:flex-end}
+.he-classroom-statusline{display:flex;align-items:center;gap:10px;justify-content:space-between;padding-top:5px;flex-wrap:wrap}
+.share-top-dock .share-inline-actions{flex:1;padding:0;min-height:22px;gap:5px;font-size:11px}
+.share-top-dock .share-inline-actions span{flex:1;min-width:90px;color:#c4cce0}
+.share-top-dock .share-meta{margin:0;flex:0 1 auto;padding:0;font-size:10px}
+.share-top-dock .share-file-menu #share-countdown{display:block;border:0;border-radius:0;font:500 11px system-ui;color:#c2cde2;padding:0 0 7px;border-bottom:1px solid #9aa9c32a}
+#he-classroom-extra-tools:empty{display:none}
+#he-classroom-extra-tools button{width:100%;text-align:left}
+.share-classroom-layout .share-page{padding-top:4px}
+.share-classroom-layout .share-chat,.share-dialogue-slot .he-dialogue-panel{border-radius:12px}
+.share-classroom-layout .share-chat{border-color:#8493b448}
+.share-dialogue-slot .he-dialogue-panel{background:#242f48;color:#f2edfa;border-color:#8493b448}
+.share-dialogue-slot .he-dialogue-top,.share-dialogue-slot .he-dialogue-foot{background:#303b55;color:#f1ebfa}
+.share-dialogue-slot .he-dialogue-status,.share-dialogue-slot .he-dialogue-row small,.share-dialogue-slot .he-dialogue-settings small,.share-dialogue-slot .he-dialogue-config summary{color:#c1b4d7}
+.share-dialogue-slot .he-dialogue-settings{border-color:#8090b23a}
+.share-dialogue-slot .he-dialogue-row{border-color:#8090b23a}
+.share-dialogue-slot .he-dialogue-translated,.share-dialogue-slot .he-dialogue-foot a{color:#d8c0f7}
+.share-dialogue-slot .he-dialogue-diagnostic{background:#39324f;color:#e7cef9}
+}
+@media screen and (max-width:1200px){.he-classroom-title{max-width:220px}.share-top-dock .share-main-row{gap:7px}.he-ribbon-group+.he-ribbon-group{padding-left:7px}.he-ribbon-group+.he-ribbon-group .he-ribbon-label{left:7px}.share-top-dock .share-tool-modes button{font-size:11px;padding:5px 6px}}
+@media screen and (max-width:760px){.share-top-dock .share-toolbar{padding:6px 9px;gap:5px}.he-classroom-identity{flex:1 1 100%;gap:8px}.he-classroom-title{flex:1;max-width:none;padding-left:8px}.he-classroom-title strong{font-size:12px}.share-top-dock .share-toolbar-actions{margin-left:0;flex:1 1 100%;justify-content:flex-start;gap:4px}.share-top-dock .share-control-shell{padding:6px 8px;max-height:35dvh;overflow-y:auto}.share-top-dock .share-tools{align-items:flex-end;gap:6px}.share-top-dock .share-main-row{flex-wrap:wrap;align-items:flex-start;width:100%;gap:8px}.he-ribbon-group+.he-ribbon-group{border-left:0;padding-left:0}.he-ribbon-group+.he-ribbon-group .he-ribbon-label{left:0}.he-ribbon-annotations{flex:1 1 100%}.share-top-dock .share-tools button,.share-top-dock .share-menu summary{min-height:36px}.share-top-dock .share-menu[open] .share-menu-panel{position:fixed;top:calc(var(--share-dock-height,140px) + 4px);right:8px;max-height:50dvh;z-index:50}.he-classroom-statusline{gap:3px}.share-top-dock .share-inline-actions{flex-basis:100%}.share-top-dock .share-meta{font-size:10px}}
