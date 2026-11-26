@@ -10,7 +10,7 @@ const token=decodeURIComponent(location.hash.replace(/^#t=/,""));
 const valid=/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}\.[a-f0-9-]{36}\.[a-f0-9]{64}$/i;
 const ns="http://www.w3.org/2000/svg";
 let loaded=false,presenter=false,lesson=null,latestUpdated="",sharedStrokes=[],localStrokes=[],tool="view",active=null;
-let dead=false,busyPoll=false,seen=false,syncEnabled=false,canFollow=true,isProgrammatic=false;
+let dead=false,busyPoll=false,seen=false,syncEnabled=false,canFollow=false,isProgrammatic=false;
 let writing=false,pending=null,writeTimer=null,lastWrite=0;
 let roleKnown=false,remoteAnchor=null,anchorReceivedAt=0,anchorAuthor="",anchorRevision=0,remoteAnchorRevision=-1,scrollGuard=null,layoutFollowTimer=null;
 let inkChannel=null,inkReady=false,guestInk=new Map(),textInk=[],remoteText=new Map();const author=crypto.randomUUID();
@@ -135,10 +135,10 @@ function followReadingAnchor(anchor){
 }
 function sendReadingAnchor(){
  if(!presenter||!inkReady||dead||!loaded)return;
- inkChannel.send({type:"broadcast",event:"reading-position",payload:{author,revision:++anchorRevision,enabled:syncEnabled,...getReadingAnchor()}}).catch(()=>{});
+ inkChannel.send({type:"broadcast",event:"reading-position",payload:{author,contentRevision,revision:++anchorRevision,enabled:syncEnabled,...getReadingAnchor()}}).catch(()=>{});
 }
 function receiveReadingAnchor(p){
- if(presenter||dead||!p||typeof p.author!=="string"||p.author.length>64||typeof p.enabled!=="boolean"||!Number.isSafeInteger(p.revision)||!Number.isInteger(p.block)||p.block<-1||p.block>=contentBlocks().length||!Number.isFinite(p.fraction)||p.fraction<0||p.fraction>1||!Number.isFinite(p.ratio)||p.ratio<0||p.ratio>1||(p.offset!==null&&(!Number.isInteger(p.offset)||p.offset<0||p.offset>el("share-content").textContent.length)))return;
+ if(presenter||dead||!p||Number(p.contentRevision||0)!==contentRevision||typeof p.author!=="string"||p.author.length>64||typeof p.enabled!=="boolean"||!Number.isSafeInteger(p.revision)||!Number.isInteger(p.block)||p.block<-1||p.block>=contentBlocks().length||!Number.isFinite(p.fraction)||p.fraction<0||p.fraction>1||!Number.isFinite(p.ratio)||p.ratio<0||p.ratio>1||(p.offset!==null&&(!Number.isInteger(p.offset)||p.offset<0||p.offset>el("share-content").textContent.length)))return;
  if(anchorAuthor===p.author&&p.revision<=remoteAnchorRevision)return;
  anchorAuthor=p.author;remoteAnchorRevision=p.revision;anchorReceivedAt=Date.now();remoteAnchor=p;syncEnabled=p.enabled;
  if(syncEnabled)followReadingAnchor(p);
@@ -189,7 +189,7 @@ function resolvePoint(point,anchor,geometry=null){
 function pathFor(points,anchors,geometry){
  return points.map((p,i)=>{const q=resolvePoint(p,anchors?.[i],geometry);return (i?"L":"M")+(q[0]*1000).toFixed(2)+","+(q[1]*1000).toFixed(2)}).join(" ");
 }
-function drawStroke(stroke,local=false,geometry=null){
+function drawStroke(stroke,local=false,geometry=null,owner=author){
  const path=document.createElementNS(ns,"path");
  path.setAttribute("d",pathFor(stroke.points,stroke.anchors,geometry));
  path.setAttribute("stroke",stroke.color);
@@ -197,17 +197,56 @@ function drawStroke(stroke,local=false,geometry=null){
  path.setAttribute("stroke-opacity",stroke.tool==="highlight"?String(inkOpacity(stroke.opacity,.31)):"0.96");
  path.setAttribute("vector-effect","non-scaling-stroke");
  path.setAttribute("data-ink",local?"local":"shared");
+ eraseTargets.set(path,{owner,kind:"stroke",key:markKey(stroke)});
  return path;
 }
 function textNodes(){const walker=document.createTreeWalker(el("share-content"),NodeFilter.SHOW_TEXT);const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);return nodes}
-function textOffset(node,offset){const range=document.createRange();range.selectNodeContents(el("share-content"));range.setEnd(node,offset);return range.toString().length}
+function textOffset(node,offset){const range=document.createRange();range.selectNodeContents(el("share-content"));range.setEnd(node,offset);return range.cloneContents().textContent.length}
 function textRange(start,end){let a=null,b=null,n=0;for(const node of textNodes()){const next=n+node.length;if(!a&&start<=next)a=[node,Math.max(0,start-n)];if(!b&&end<=next)b=[node,Math.max(0,end-n)];n=next}if(!a||!b)return null;const range=document.createRange();range.setStart(...a);range.setEnd(...b);return range}
-function paintText(mark){
- const range=textRange(mark.start,mark.end);if(!range)return;
+const eraseTargets=new WeakMap();
+function markKey(mark){const s=JSON.stringify(mark);let hash=2166136261;for(let i=0;i<s.length;i++){hash^=s.charCodeAt(i);hash=Math.imul(hash,16777619)}return mark.id||String(hash>>>0)}
+function paintText(mark,owner=author){
+ if(!validMark(mark))return;
  const base=svg.getBoundingClientRect();if(!base.width||!base.height)return;
- for(const rect of range.getClientRects()){
-  const node=document.createElementNS(ns,"rect");node.setAttribute("x",(rect.left-base.left)/base.width*1000);node.setAttribute("y",((mark.kind==="underline"?rect.bottom-rect.height*.12:rect.top)-base.top)/base.height*1000);node.setAttribute("width",rect.width/base.width*1000);node.setAttribute("height",(mark.kind==="underline"?Math.max(1.5,rect.height*.075):rect.height)/base.height*1000);node.setAttribute("fill",mark.color);node.setAttribute("opacity",mark.kind==="underline"?"0.95":String(inkOpacity(mark.opacity,.28)));svg.append(node);
+ // Range spanning multiple nodes can include entire element boxes. Paint only
+ // the intersecting text-node glyph rectangles, never container rectangles.
+ let offset=0;
+ for(const textNode of textNodes()){
+  const end=offset+textNode.length,start=Math.max(0,mark.start-offset),stop=Math.min(textNode.length,mark.end-offset);
+  if(stop>start&&textNode.textContent.slice(start,stop).trim()){
+   const range=document.createRange();range.setStart(textNode,start);range.setEnd(textNode,stop);
+   for(const rect of range.getClientRects()){
+    if(rect.width<.5||rect.height<.5)continue;
+    const node=document.createElementNS(ns,"rect");
+    node.setAttribute("x",(rect.left-base.left)/base.width*1000);
+    node.setAttribute("y",((mark.kind==="underline"?rect.bottom-rect.height*.12:rect.top)-base.top)/base.height*1000);
+    node.setAttribute("width",rect.width/base.width*1000);
+    node.setAttribute("height",(mark.kind==="underline"?Math.max(1.5,rect.height*.075):rect.height)/base.height*1000);
+    node.setAttribute("fill",mark.color);node.setAttribute("opacity",mark.kind==="underline"?"0.95":String(inkOpacity(mark.opacity,.28)));
+    eraseTargets.set(node,{owner,kind:"text",key:markKey(mark)});svg.append(node);
+   }
+  }
+  offset=end;if(offset>=mark.end)break;
  }
+}
+function removeOwnMark(kind,key){
+ const list=kind==="text"?textInk:localStrokes,index=list.findIndex(m=>markKey(m)===key);
+ if(index<0)return false;list.splice(index,1);sendInk();paintStrokes();return true;
+}
+function eraseAt(event){
+ if(dead||tool!=="erase"||inlineSaving||inlineDraft)return;
+ const node=document.elementFromPoint(event.clientX,event.clientY),hit=eraseTargets.get(node);if(!hit)return;
+ if(hit.owner===author){removeOwnMark(hit.kind,hit.key);return}
+ if(hit.owner==="saved"){
+  if(!presenter){msg("Only the teacher can erase saved teacher drawings.");return}
+  const index=sharedStrokes.findIndex(m=>markKey(m)===hit.key);if(index>=0){sharedStrokes.splice(index,1);queue({annotations:sharedStrokes});paintStrokes()}return;
+ }
+ if(!inkReady){msg("Reconnect to erase another participant's mark.",true);return}
+ chatBroadcast("erase-mark",{target:hit.owner,kind:hit.kind,key:hit.key,contentRevision}).catch(()=>msg("Erase request could not synchronize.",true));
+}
+function receiveErase(p){
+ if(dead||!p||p.target!==author||p.contentRevision!==contentRevision||!["text","stroke"].includes(p.kind)||typeof p.key!=="string"||p.key.length>64)return;
+ removeOwnMark(p.kind,p.key);
 }
 const colors={has:value=>typeof value==="string"&&/^#[0-9a-f]{6}$/i.test(value)};
 const inkPicker=el("share-ink"),opacityPicker=el("share-opacity"),widthPicker=el("share-width");
@@ -230,7 +269,7 @@ function updateSwatches(){for(const swatch of document.querySelectorAll("[data-i
 inkPicker.addEventListener("input",updateSwatches);updateSwatches();
 
 function validStroke(s){return s&&["pen","highlight"].includes(s.tool)&&colors.has(s.color)&&Array.isArray(s.points)&&s.points.length>=2&&s.points.length<=320&&s.points.every(p=>Array.isArray(p)&&p.length===2&&p.every(n=>typeof n==="number"&&n>=0&&n<=1))&&(!s.anchors||(Array.isArray(s.anchors)&&s.anchors.length===s.points.length&&s.anchors.every(a=>anchorValid(a))))}
-function validMark(m){return m&&(!m.kind||["underline","highlight"].includes(m.kind))&&colors.has(m.color)&&Number.isInteger(m.start)&&Number.isInteger(m.end)&&m.start>=0&&m.end>m.start&&m.end<=el("share-content").textContent.length}
+function validMark(m){return m&&(!m.kind||["underline","highlight"].includes(m.kind))&&colors.has(m.color)&&Number.isInteger(m.start)&&Number.isInteger(m.end)&&m.start>=0&&m.end>m.start&&m.end<=el("share-content").textContent.length&&(!m.quote||typeof m.quote==="string"&&el("share-content").textContent.slice(m.start,m.end)===m.quote)}
 let inkRevision=0;
 const inkBatches=new Map(),inkSeenRevisions=new Map();
 function sendInk(){
@@ -478,6 +517,7 @@ async function connectInk(){
  inkChannel=db.channel("he-lesson-ink-"+room,{config:{broadcast:{self:false,ack:true},presence:{key:author}}});
  inkChannel.on("presence",{event:"sync"},()=>{presenceSynced=true;updatePresence()})
  .on("broadcast",{event:"ink-batch"},({payload})=>receiveInkBatch(payload))
+ .on("broadcast",{event:"erase-mark"},({payload})=>receiveErase(payload))
  .on("broadcast",{event:"ink"},({payload:p})=>{
   if(dead||contentRevision!==0||!p||typeof p.author!=="string"||p.author===author||p.author.length>64||inkSeenRevisions.has(p.author)||(!guestInk.has(p.author)&&guestInk.size>=40))return;
   if(Array.isArray(p.strokes))guestInk.set(p.author,p.strokes.slice(0,60).filter(validStroke));
@@ -517,7 +557,7 @@ function highlightSelection(){
  const mark=captureSelection()||savedSelection;
  if(!mark)return;
  savedSelection=null;
- const next={...mark,kind:tool==="underline"?"underline":"highlight",color:el("share-ink").value,opacity:Number(opacityPicker.value)/100};
+ const next={...mark,id:crypto.randomUUID(),quote:el("share-content").textContent.slice(mark.start,mark.end),kind:tool==="underline"?"underline":"highlight",color:el("share-ink").value,opacity:Number(opacityPicker.value)/100};
  if(!validMark(next))return;
  if(!textInk.some(m=>m.start===next.start&&m.end===next.end&&m.color===next.color&&m.kind===next.kind)){
   if(textInk.length>=100){msg("Text highlight limit reached. Undo or clear your own marks first.",true);return}
@@ -539,12 +579,14 @@ window.addEventListener("resize",schedulePaperLayout);paper.closest(".share-page
 function paintStrokes(){
  const geometry={base:svg.getBoundingClientRect(),blocks:contentBlocks().map(b=>b.getBoundingClientRect())};
  svg.replaceChildren();
- for(const stroke of sharedStrokes)svg.append(drawStroke(stroke,false,geometry));
- for(const strokes of guestInk.values())for(const stroke of strokes)svg.append(drawStroke(stroke,false,geometry));
- for(const marks of remoteText.values())for(const mark of marks)paintText(mark);
- for(const mark of textInk)paintText(mark);
- for(const stroke of localStrokes)svg.append(drawStroke(stroke,true,geometry));
- if(active)svg.append(drawStroke(active,true,geometry));
+ if(!inlineDraft||draftMarkdown()===inlineDraft.base){
+ for(const stroke of sharedStrokes)svg.append(drawStroke(stroke,false,geometry,"saved"));
+ for(const [owner,strokes] of guestInk)for(const stroke of strokes)svg.append(drawStroke(stroke,false,geometry,owner));
+ for(const [owner,marks] of remoteText)for(const mark of marks)paintText(mark,owner);
+ for(const mark of textInk)paintText(mark,author);
+ for(const stroke of localStrokes)svg.append(drawStroke(stroke,true,geometry,author));
+ if(active)svg.append(drawStroke(active,true,geometry,author));
+ }
  paintTypedNotes();positionRemoteCursor();
  const canUndo=textInk.length>0||localStrokes.length>0||(presenter&&sharedStrokes.length>0);
  el("share-undo").disabled=!canUndo;
@@ -557,9 +599,9 @@ function setTool(next){
   const on=btn.dataset.tool===tool;btn.classList.toggle("selected",on);
   btn.setAttribute("aria-pressed",String(on));
  }
- svg.classList.toggle("is-annotating",tool==="pen"||tool==="highlight");
+ svg.classList.toggle("is-annotating",["pen","highlight","erase"].includes(tool));svg.classList.toggle("is-erasing",tool==="erase");
  highlightButton.hidden=!["text","underline"].includes(tool);highlightButton.textContent=tool==="underline"?"Apply underline":"Apply text highlight";if(tool==="view")resumeReading();
- el("share-draw-hint").textContent=tool==="type"?"Click the page to add words, or select an existing text box to edit it.":["text","underline"].includes(tool)?"Drag across words to highlight automatically. On touchscreens, select text and tap Apply text highlight.": "Teacher and student annotations are shared live while connected.";
+ el("share-draw-hint").textContent=tool==="erase"?"Click or drag across an annotation to remove it.":tool==="type"?"Click the page to add words, or select an existing text box to edit it.":["text","underline"].includes(tool)?"Drag across words to highlight automatically. On touchscreens, select text and tap Apply text highlight.": "Teacher and student annotations are shared live while connected.";
  syncInlineEditable();paintStrokes();
 }
 function pointFrom(event){
@@ -567,15 +609,16 @@ function pointFrom(event){
  return [round4(clamp01((event.clientX-rect.left)/Math.max(1,rect.width))),round4(clamp01((event.clientY-rect.top)/Math.max(1,rect.height)))];
 }
 svg.addEventListener("pointerdown",event=>{
- if(dead||!["pen","highlight"].includes(tool)||event.button!==0)return;
+ if(dead||event.button!==0)return;if(tool==="erase"){event.preventDefault();eraseAt(event);return}if(!["pen","highlight"].includes(tool))return;
  if(localStrokes.length>=60){msg("Drawing limit reached. Undo or clear your own annotations before adding more.",true);return}
  event.preventDefault();
- const stroke={tool,color:el("share-ink").value,opacity:Number(opacityPicker.value)/100,width:Number(widthPicker.value)/100,points:[pointFrom(event)],anchors:[pointAnchor(event.clientX,event.clientY)]};
+ const stroke={id:crypto.randomUUID(),tool,color:el("share-ink").value,opacity:Number(opacityPicker.value)/100,width:Number(widthPicker.value)/100,points:[pointFrom(event)],anchors:[pointAnchor(event.clientX,event.clientY)]};
  active=stroke;
  svg.setPointerCapture(event.pointerId);
  paintStrokes();
 });
 svg.addEventListener("pointermove",event=>{
+ if(tool==="erase"){if(event.buttons&1)eraseAt(event);return}
  if(!active)return;
  const p=pointFrom(event),prev=active.points.at(-1);
  if(Math.hypot((p[0]-prev[0])*svg.clientWidth,(p[1]-prev[1])*svg.clientHeight)<5)return;
@@ -629,7 +672,7 @@ el("share-clear").addEventListener("click",()=>{
 for(const btn of document.querySelectorAll("[data-tool]"))btn.addEventListener("click",()=>setTool(btn.dataset.tool));
 el("share-follow").addEventListener("change",()=>{
  canFollow=follow.checked;
- msg(canFollow?"Following presenter when syncing is enabled.":"Follow teacher paused. Scroll independently.");
+ msg(canFollow?"Following presenter when syncing is enabled.":"Scroll independently.");
  if(canFollow)resumeReading();
 });
 function pauseFollow(event){
@@ -669,7 +712,7 @@ function updateState(state){
  }
  if(!presenter&&canFollow&&syncEnabled&&!freshAnchor())scrollToRatio(Number(state.scrollRatio)||0);
  if(!presenter&&wasSync!==syncEnabled){
-  msg(syncEnabled?"Teacher scrolling is live; Follow teacher is on.":"Teacher scrolling sync is off. You can browse independently.");
+  msg(syncEnabled?(canFollow?"Following teacher.":"Teacher sync is available. Enable Follow scroll to join."):"Teacher scrolling sync is off. You can browse independently.");
  }
 }
 let requestInFlight=false;
@@ -717,7 +760,9 @@ async function saveTyped(remove=false){if(!canEdit()||typingBusy||!typingDraft)r
 el("share-type-save").onclick=()=>saveTyped();el("share-type-delete").onclick=()=>saveTyped(true);
 el("share-student-edit").onchange=async()=>{if(!presenter||permissionBusy)return;const enabled=el("share-student-edit").checked;permissionBusy=true;updateEditingControls();try{const result=await api("student-editing",{enabled},true);updateState(result.state);if(inkReady)await chatBroadcast("workbook-edited",{revision:contentRevision});msg(enabled?"Student editing enabled for this link.":"Student editing disabled.")}catch(e){msg(e.message,true)}finally{permissionBusy=false;updateEditingControls()}};
 el("share-edit-workbook").onclick=()=>{if(!canEdit()||inlineDraft||inlineSaving)return;editRevision=contentRevision;editorText.value=lesson.markdown;editorStatus.textContent="";editor.showModal()};
-el("share-edit-cancel").onclick=()=>editor.close();
+el("share-edit-cancel").onclick=()=>{if(editorText.value!==lesson.markdown&&!confirm("Discard unsaved notepad changes?"))return;editor.close()};
+editor.addEventListener("cancel",e=>{if(editorText.value!==lesson.markdown&&!confirm("Discard unsaved notepad changes?"))e.preventDefault()});
+editorText.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="s"){e.preventDefault();el("share-edit-save").click()}});
 el("share-edit-save").onclick=async()=>{
  if(!canEdit()||editingWorkbook)return;
  if(writing){editorStatus.textContent="Please finish the current annotation update before publishing.";return}
@@ -738,27 +783,27 @@ function syncInlineEditable(){
  const enabled=canEdit()&&tool==="view"&&!inlineSaving;
  inlineRoot.classList.toggle("he-inline-enabled",enabled);
  for(const node of inlineRoot.querySelectorAll(inlineTargets)){
-  const allow=enabled&&(!inlineDraft||inlineDraft.node===node);
-  node.contentEditable=allow?"true":"false";node.spellcheck=allow;node.tabIndex=allow?0:-1;
+  const allow=enabled&&(!inlineDraft||inlineDraft.block.contains(node));
+  if(node.contentEditable!==(allow?"true":"false"))node.contentEditable=allow?"true":"false";node.spellcheck=allow;node.tabIndex=allow?0:-1;
  }
  inlineSave.disabled=!inlineDraft||inlineSaving;inlineDiscard.disabled=!inlineDraft||inlineSaving;inlineCopy.disabled=!inlineDraft;inlineAdd.disabled=!enabled||Boolean(inlineDraft);
 }
 function topBlock(node){let block=node;while(block&&block.parentElement!==inlineRoot)block=block.parentElement;return block}
 inlineRoot.addEventListener("focusin",e=>{
  const node=e.target.closest(inlineTargets);if(!node||!canEdit()||tool!=="view"||inlineSaving)return;
- if(inlineDraft){if(inlineDraft.node!==node){node.blur();inlineHint("Save or discard the current edit first.")}return}
+ if(inlineDraft){if(inlineDraft.block.contains(node)){inlineDraft.node=node;return}node.blur();inlineHint("Save or discard the current edit first.");return}
  const block=topBlock(node);if(!block||!block.dataset.mdStart||!block.dataset.mdEnd)return;
  inlineDraft={node,block,revision:contentRevision,base:lesson.markdown,original:workbookBlockMarkdown(block),start:Number(block.dataset.mdStart),end:Number(block.dataset.mdEnd)};
- inlineFailed=false;syncInlineEditable();inlineHint("Editing · saves when you leave this field.");
+ inlineFailed=false;syncInlineEditable();inlineHint("Editing · Ctrl+S to save, or click outside this section.");
  if(!presenter&&canFollow){canFollow=false;follow.checked=false}
 });
 inlineRoot.addEventListener("compositionstart",()=>inlineComposing=true);
 inlineRoot.addEventListener("compositionend",()=>inlineComposing=false);
-inlineRoot.addEventListener("input",()=>{if(inlineDraft){inlineHint("Unsaved edit");schedulePaperLayout()}});
+inlineRoot.addEventListener("input",()=>{if(inlineDraft){inlineHint("Unsaved edit · Ctrl+S to save");schedulePaperLayout()}});
 inlineRoot.addEventListener("paste",e=>{if(!inlineDraft||!inlineRoot.contains(e.target))return;e.preventDefault();document.execCommand("insertText",false,(e.clipboardData?.getData("text/plain")||"").slice(0,12000))});
 inlineRoot.addEventListener("drop",e=>{if(inlineDraft)e.preventDefault()});
-inlineRoot.addEventListener("keydown",e=>{if(!inlineDraft||e.isComposing)return;if(e.key==="Escape"){e.preventDefault();discardInline()}else if(e.key==="Enter"&&inlineDraft.node.tagName!=="PRE"){e.preventDefault();commitInline()}});
-inlineRoot.addEventListener("focusout",()=>{setTimeout(()=>{if(inlineDraft&&!inlineSaving&&!inlineFailed&&!inlineComposing&&document.activeElement!==inlineDraft.node&&!document.activeElement?.closest("#share-inline-actions"))commitInline()},0)});
+inlineRoot.addEventListener("keydown",e=>{if(!inlineDraft||e.isComposing)return;if(e.key==="Escape"){e.preventDefault();discardInline()}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="s"){e.preventDefault();commitInline()}else if(e.key==="Enter"&&inlineDraft.node.tagName!=="PRE"){e.preventDefault();document.execCommand("insertLineBreak",false,null)}});
+inlineRoot.addEventListener("focusout",()=>{setTimeout(()=>{if(inlineDraft&&!inlineSaving&&!inlineFailed&&!inlineComposing&&!inlineDraft.block.contains(document.activeElement)&&!document.activeElement?.closest("#share-inline-actions"))commitInline()},0)});
 function draftMarkdown(){
  if(!inlineDraft)return null;
  const d=inlineDraft,updated=workbookBlockMarkdown(d.block),lines=d.base.replace(/\r\n?/g,"\n").split("\n");
@@ -767,7 +812,7 @@ function draftMarkdown(){
 }
 async function commitInline(){
  if(!inlineDraft||inlineSaving||!canEdit())return;
- const d=inlineDraft,markdown=draftMarkdown();if(markdown===d.base){inlineDraft=null;inlineFailed=false;syncInlineEditable();inlineHint("Tap any text to edit.");return}
+ const d=inlineDraft,markdown=draftMarkdown();if(markdown===d.base){inlineDraft=null;inlineFailed=false;syncInlineEditable();paintStrokes();inlineHint("Tap any text to edit.");return}
  if(!markdown||markdown.trim().length<20||markdown.length>31000){inlineHint("Workbook must contain 20–31,000 characters. Edit your draft or copy it.");return}
  if(writing){inlineFailed=true;inlineHint("An annotation is saving. Tap Save edit to retry.");return}
  inlineSaving=true;inlineFailed=false;syncInlineEditable();inlineHint("Saving edit…");
@@ -797,8 +842,8 @@ async function checkPresenter(){
   el("share-presenter-label").hidden=false;el("share-cursor-label").hidden=false;
   el("share-zoom-sync-label").hidden=false;el("share-zoom-follow-label").hidden=true;
   el("share-end").hidden=false;
-  syncEnabled=result.state.syncEnabled===true;
-  presentSync.checked=syncEnabled;
+  syncEnabled=false;presentSync.checked=false;zoomSync=false;zoomControl.checked=false;
+  queue({syncEnabled:false,scrollRatio:getRatio()});
   msg("Presenter mode active. Use Sync students' scrolling when you want learners to follow.");
  }catch{ /* Guests are viewers. Login is never required to read. */ }
 }
