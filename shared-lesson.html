@@ -4,8 +4,8 @@
 <meta name="theme-color" content="#1d2b46"><title>Shared Lesson | HelloEarth</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="stylesheet" href="helloearth-lesson.css?v=20261126-first1">
-<link rel="stylesheet" href="helloearth-shared-lesson.css?v=20261126-textfix2">
-<script type="module" src="helloearth-shared-lesson.js?v=20261126-textfix2"></script></head>
+<link rel="stylesheet" href="helloearth-shared-lesson.css?v=20261126-zoom2">
+<script type="module" src="helloearth-shared-lesson.js?v=20261126-zoom2"></script></head>
 <body>
 <header class="lesson-toolbar share-toolbar">
  <a href="index.html" class="toolbar-brand">✦ HelloEarth <span>Live Lesson</span></a>
@@ -21,7 +21,11 @@
  <nav class="share-tools" aria-label="Shared lesson tools">
   <label class="share-follow" id="share-follow-label"><input type="checkbox" id="share-follow" checked> Follow teacher</label>
   <label class="share-follow" id="share-presenter-label" hidden><input type="checkbox" id="share-presenter-sync"> <strong>Sync students' scrolling</strong></label>
-  <div class="share-separator" aria-hidden="true"></div>
+  <div class="share-zoom-tools" role="group" aria-label="Lesson zoom">
+<button type="button" id="share-zoom-out" aria-label="Zoom out">−</button><button type="button" id="share-zoom-reset" aria-label="Reset zoom"><span id="share-zoom-value">100%</span></button><button type="button" id="share-zoom-in" aria-label="Zoom in">+</button>
+<label class="share-follow" id="share-zoom-follow-label"><input type="checkbox" id="share-zoom-follow" checked> Follow zoom</label>
+<label class="share-follow" id="share-zoom-sync-label" hidden><input type="checkbox" id="share-zoom-sync"> Sync zoom</label></div>
+<div class="share-separator" aria-hidden="true"></div>
   <div class="share-tool-modes" role="group" aria-label="Annotation tools">
    <button type="button" data-tool="view" class="selected" aria-pressed="true">↕ Scroll</button>
    <button type="button" data-tool="pen" aria-pressed="false">✎ Draw</button>
