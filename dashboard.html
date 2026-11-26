@@ -265,26 +265,32 @@
     </section>
     
     <section id="homework-view" class="ws-view" role="tabpanel" aria-labelledby="homework-tab" hidden>
-      <div class="he-work-heading"><h2>Homework</h2><p>Create, assign, and track independent practice for each student.</p></div>
+      <div class="he-work-heading"><h2>Homework links</h2><p>Create a private 14-day worksheet. Copy the link or download a file—nothing is sent automatically.</p></div>
       <div class="he-work-grid">
         <section class="he-work-card" aria-labelledby="he-homework-new-title">
-          <h3 id="he-homework-new-title">Assign homework</h3>
+          <h3 id="he-homework-new-title">Create shareable worksheet</h3>
           <form id="he-homework-form">
             <label>Student<select id="he-homework-student" required><option value="">Choose a student</option></select></label>
-            <label>Assignment / instructions<textarea id="he-homework-title" maxlength="800" rows="5" required placeholder="e.g. Complete the past tense worksheet and write five examples."></textarea></label>
-             <label>Exercises and answer key<textarea id="he-homework-content" maxlength="30000" rows="12" placeholder="Full homework worksheet (optional). Generate with Claude or write your own exercises."></textarea></label>
-            <label>Due date<input type="date" id="he-homework-due" required></label>
-            <div class="he-work-actions"><button id="he-homework-save" type="submit" class="he-primary">Assign homework</button><button type="button" id="he-homework-create-ai">Generate with Claude</button></div>
+            <label>Worksheet title / instructions<textarea id="he-homework-title" maxlength="800" rows="3" required placeholder="e.g. Past tense revision: answer the following questions"></textarea></label>
+             <label>Student worksheet<textarea id="he-homework-content" maxlength="30000" rows="12" required placeholder="Write questions here or generate an exercise. Students see this text only."></textarea></label><label>Teacher answer key (private)<textarea id="he-homework-key" maxlength="12000" rows="5" placeholder="Correct answers and marking notes. Never shown on student links."></textarea></label><input type="hidden" id="he-homework-lesson-id" value="">
+            <input type="hidden" id="he-homework-due">
+            <div class="he-work-actions"><button id="he-homework-save" type="submit" class="he-primary">Create 14-day link</button><button type="button" id="he-homework-create-ai">Generate with Claude</button></div>
           </form>
-          <p id="he-homework-feedback" class="he-work-message" role="status" aria-live="polite"></p>
+          <p id="he-homework-feedback" class="he-work-message" role="status" aria-live="polite"></p><div id="he-homework-new-link" class="he-share-result" hidden><strong>Shareable homework link</strong><input id="he-homework-link-url" readonly aria-label="Shareable homework link"><div class="he-work-actions"><button type="button" id="he-homework-link-copy">Copy link</button><button type="button" id="he-homework-link-open">Open in new tab</button></div><p>Expires 14 days after creation. Anyone with the link can edit the worksheet answers until then.</p></div>
         </section>
         <section class="he-work-card" aria-labelledby="he-homework-list-title">
-          <h3 id="he-homework-list-title">Assignments</h3>
+          <h3 id="he-homework-list-title">Shared worksheets</h3>
           <label>Filter by student<select id="he-homework-filter"><option value="">All students</option></select></label>
           <div id="he-homework-list" class="he-record-list" aria-live="polite"><p class="he-record-empty">Loading assignments…</p></div>
         </section>
       </div>
     </section>
+    <dialog id="he-homework-review-dialog" class="he-homework-review-dialog" aria-label="Student homework answers">
+      <form method="dialog" class="he-review-dialog-header"><h2 id="he-review-title">Student answers</h2><button type="submit" aria-label="Close">×</button></form>
+      <p id="he-review-meta" class="he-work-help"></p>
+      <pre id="he-review-content"></pre>
+      <div class="he-work-actions"><button type="button" id="he-review-copy">Copy answers</button><button type="button" id="he-review-download">Download answers</button></div>
+    </dialog>
     <section id="lessons-view" class="ws-view" role="tabpanel" aria-labelledby="lessons-tab" hidden>
       <div class="he-work-heading"><h2>Lesson Creation</h2><p>Build lessons and homework with HelloEarth's managed Claude Haiku 5.5, or connect your own Anthropic API key.</p><div class="he-work-actions"><button type="button" id="he-open-teaching" class="he-primary">Open Teaching Companion · Feedback &amp; Exercise Links</button></div></div>
       <div class="he-work-grid">
@@ -314,7 +320,7 @@
           <section class="he-work-card" aria-labelledby="he-lesson-editor-title">
             <h3 id="he-lesson-editor-title">Editable lesson</h3>
             <label>Lesson content<textarea id="he-lesson-editor" class="he-lesson-editor" rows="16" maxlength="100000" placeholder="Start from a manual template or generate an AI draft, then edit it here…"></textarea></label>
-            <div class="he-work-actions"><button type="button" id="he-lesson-save" class="he-primary">Save lesson to student</button><button type="button" id="he-homework-from-lesson">Create homework</button></div>
+            <div class="he-work-actions"><button type="button" id="he-lesson-save" class="he-primary">Save lesson to student</button><button type="button" id="he-homework-from-lesson">Prepare homework link</button><button type="button" id="he-lesson-download">Download lesson</button><button type="button" id="he-lesson-copy">Copy lesson text</button></div>
             <p id="he-lesson-feedback" class="he-work-message" role="status" aria-live="polite"></p>
           </section>
           <section class="he-work-card he-work-history" aria-labelledby="he-lesson-saved-title">
@@ -445,4 +451,4 @@
     </form>
   </div>
 </div>
-<script type="module" src="dashboard-extras.js?v=20261117-extras2"></script><script type="module" src="dashboard-navigation.js?v=20261123-halfhour2"></script><script type="module" src="dashboard-features.js?v=20261117-suite10"></script><script type="module" src="dashboard-suite.js?v=20261120-database1"></script><script type="module" src="dashboard-ux.js?v=20261122-learning1"></script><script type="module" src="dashboard-calendar-optimizer.js?v=20261125-preview2"></script><script type="module" src="dashboard-week-timetable.js?v=20261123-halfhour1"></script><script type="module" src="dashboard-calendar-scheduling.js?v=20261123-halfhour2"></script><script type="module" src="dashboard-teaching-workflows.js?v=20261126-haiku2"></script></body></html>
+<script type="module" src="dashboard-extras.js?v=20261117-extras2"></script><script type="module" src="dashboard-navigation.js?v=20261123-halfhour2"></script><script type="module" src="dashboard-features.js?v=20261117-suite10"></script><script type="module" src="dashboard-suite.js?v=20261120-database1"></script><script type="module" src="dashboard-ux.js?v=20261122-learning1"></script><script type="module" src="dashboard-calendar-optimizer.js?v=20261125-preview2"></script><script type="module" src="dashboard-week-timetable.js?v=20261123-halfhour1"></script><script type="module" src="dashboard-calendar-scheduling.js?v=20261123-halfhour2"></script><script type="module" src="dashboard-teaching-workflows.js?v=20261126-share1"></script></body></html>
