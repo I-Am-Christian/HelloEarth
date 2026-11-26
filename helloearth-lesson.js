@@ -1,7 +1,8 @@
 import {db} from "./supabase-client.js";
 import {renderWorkbook} from "./helloearth-workbook-renderer.js";
 const el=id=>document.getElementById(id);
-const id=decodeURIComponent(location.hash.replace(/^#(?:id=)?/,""));
+const saved=location.hash.startsWith("#saved=");
+const id=decodeURIComponent(location.hash.replace(/^#(?:id=|saved=)?/,""));
 const valid=/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i;
 let lesson=null;
 function message(text,error=false){
@@ -22,10 +23,13 @@ async function open(){
   message("This is a tutor-only lesson link. Please sign in to HelloEarth first, then reopen this link.",true);
   return;
  }
- const {data,error}=await db.from("he_generation_log")
-  .select("id,tutor_id,topic,cefr_level,duration_minutes,markdown,created_at,expires_at")
-  .eq("id",id).eq("tutor_id",user.id).gt("expires_at",new Date().toISOString()).maybeSingle();
- if(error||!data){message("This lesson is unavailable or its 14-day link has expired.",true);return}
+ let query=db.from(saved?"atlas_lesson_plans":"he_generation_log")
+  .select(saved?"id,tutor_id,topic,cefr_level,duration_minutes,markdown,created_at":
+   "id,tutor_id,topic,cefr_level,duration_minutes,markdown,created_at,expires_at,kind")
+  .eq("id",id).eq("tutor_id",user.id);
+ if(!saved)query=query.gt("expires_at",new Date().toISOString());
+ const {data,error}=await query.maybeSingle();
+ if(error||!data){message("This lesson is unavailable, not owned by this account, or its temporary link has expired.",true);return}
  lesson=data;
  el("lesson-title").textContent=data.topic;
  el("lesson-level").textContent="CEFR "+data.cefr_level;
@@ -35,7 +39,9 @@ async function open(){
  document.title=data.topic+" | HelloEarth lesson";
  for(const name of ["lesson-copy","lesson-download","lesson-print"])el(name).disabled=false;
  message("Private tutor preview · Printable A4 workbook");
- lifespan();setInterval(lifespan,60000);
+ if(saved){el("lesson-life").textContent="Saved in student records · no 14-day expiry";}
+ else{lifespan();setInterval(lifespan,60000);}
+ if(data.kind==="homework")document.querySelector(".paper-identity-tag").textContent="HOMEWORK";
 }
 function saveFile(filename,text){
  const blob=new Blob([text],{type:"text/markdown;charset=utf-8"}),url=URL.createObjectURL(blob);
