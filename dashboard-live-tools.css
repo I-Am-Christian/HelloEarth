@@ -110,3 +110,7 @@
  .he-caption-stream{max-height:180px}
  .he-caption-row .he-caption-original{font-size:14px}
 }
+
+
+.he-caption-setting-row button{border:1px solid #9f8dbd;border-radius:8px;padding:7px 10px;background:#374565;color:#f4eaff;font-weight:750;font-size:11px;cursor:pointer}
+.he-caption-setting-row button:disabled{opacity:.45;cursor:default}
