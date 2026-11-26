@@ -1,0 +1,53 @@
+:root{font-family:'DM Sans',system-ui,-apple-system,Segoe UI,sans-serif;color:#eef3ff;background:#10182a}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 90% 3%,#6649853c,transparent 45%),linear-gradient(135deg,#111a2d,#17243a 65%,#131f31);color:#edf1ff}
+button,textarea{font:inherit}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:14px clamp(18px,5vw,75px);border-bottom:1px solid #6978a03d;background:#141c30d9}
+.brand{display:flex;gap:9px;align-items:center;font-size:22px;font-weight:850;letter-spacing:-.7px}
+.brand img{width:36px;height:36px}
+.brand span{color:#dea9f1}
+.tag{border:1px solid #a5a6c373;border-radius:100px;padding:7px 12px;color:#c8d8fa;font-size:12px}
+.workspace{width:min(1500px,calc(100% - 32px));margin:26px auto 50px}
+.hero{padding:24px clamp(17px,3vw,35px);border:1px solid #7783a74b;border-radius:16px;background:linear-gradient(115deg,#2c3456,#222d47)}
+.eyebrow{font-size:11px;font-weight:750;letter-spacing:.1em;color:#dcb7ee}
+h1{font-size:clamp(25px,3.1vw,40px);line-height:1.18;margin:9px 0 10px;overflow-wrap:anywhere}
+.hero p{font-size:14px;line-height:1.65;margin:0;color:#bbc8e0}
+.info{display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap;margin-top:17px;color:#d8e2f5;font-size:12px}
+#homework-save-status{color:#b7e1d4}
+.columns{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:18px;margin-top:18px;align-items:start}
+.panel{background:#1a2840;border:1px solid #7685a14f;border-radius:15px;padding:23px}
+.panel h2{margin:0 0 8px;font-size:20px}
+.hint{color:#aebfd9;font-size:12px;line-height:1.65}
+.worksheet{margin-top:23px;line-height:1.75;overflow-wrap:anywhere;color:#e9eef9}
+.worksheet h2{font-size:19px;color:#e9c5f1;margin:21px 0 11px}
+.worksheet h3{font-size:15px;color:#e9c5f1;margin:20px 0 9px}
+.worksheet p{margin:12px 0;white-space:pre-wrap}
+.worksheet ul,.worksheet ol{padding-left:25px}
+.worksheet li{margin:5px 0;white-space:pre-wrap}
+.worksheet .raw{white-space:pre-wrap;font-family:inherit}
+.answers-heading{display:flex;justify-content:space-between;gap:10px}
+.autosave{align-self:start;background:#193d40;border:1px solid #64a397;color:#a9e5d6;border-radius:99px;font-size:11px;padding:6px 9px;white-space:nowrap}
+.answer-panel label{display:block;color:#e5e9f7;font-size:12px;font-weight:700;margin-top:20px;margin-bottom:8px}
+textarea{width:100%;min-height:420px;border-radius:10px;padding:16px;background:#101c31;color:#f9f6ff;border:1px solid #7486a9;font-size:14px;line-height:1.7;resize:vertical}
+textarea:focus{outline:2px solid #d19fe8;outline-offset:1px}
+.actions{display:flex;flex-wrap:wrap;gap:9px;margin:15px 0}
+button{border-radius:9px;border:1px solid #9e9ac17c;background:#334365;color:#f9f5ff;padding:10px 14px;font-weight:720;font-size:12px;cursor:pointer}
+button.primary{background:#d9b0ec;color:#271b36;border-color:#eed5fa}
+button:hover{filter:brightness(1.12)}
+button:disabled{opacity:.5;cursor:wait}
+.error{margin:20px 0;padding:16px;border-radius:12px;border:1px solid #d28d9d;background:#593443;color:#fff}
+.footer{padding:22px;text-align:center;color:#a8b6d1;font-size:12px}
+[hidden]{display:none!important}
+@media(max-width:850px){.columns{grid-template-columns:1fr}.workspace{margin-top:13px}.panel{padding:17px}textarea{min-height:260px}}
+@media print{
+ :root,body{background:white!important;color:#111!important}
+ .topbar,.actions,.autosave,.privacy,.footer,#homework-save-status{display:none!important}
+ .workspace{width:100%;margin:0}
+ .hero,.panel{background:white!important;color:#111!important;border:0;padding:8px 0}
+ .columns{display:block}
+ .hero{page-break-after:avoid}
+ .hero p,.hint{color:#333!important}
+ .worksheet{color:#111}
+ textarea{display:none!important}
+ #homework-print-answers{white-space:pre-wrap;font-size:12pt;line-height:1.6;border:1px solid #888;padding:15px;display:block!important}
+}
