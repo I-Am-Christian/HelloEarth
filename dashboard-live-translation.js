@@ -8,6 +8,21 @@ launch.id="he-live-translate-launch";launch.type="button";launch.textContent="ðŸ
 launch.title="Live translation";(launchers||document.body).append(launch);
 const el=id=>panel.querySelector("#"+id);
 const source=el("he-translate-source"),target=el("he-translate-target");
+function studentTranslationLanguage(studentId){
+ const student=(window.HelloEarthWorkspace?.students||[]).find(x=>x.id===studentId);
+ const preferred=String(student?.translation_language||"").toLowerCase();
+ const names={polish:"pl",portuguese:"pt",spanish:"es",chinese:"zh",turkish:"tr",
+  vietnamese:"vi",afrikaans:"af",french:"fr",german:"de",russian:"ru",arabic:"ar",english:"en"};
+ const code=Object.keys(names).find(x=>preferred.includes(x));
+ if(code)target.value=names[code];
+}
+document.addEventListener("helloearth:lesson-selected",event=>{
+ studentTranslationLanguage(event.detail?.studentId);
+});
+document.getElementById("he-lesson-student")?.addEventListener("change",event=>{
+ studentTranslationLanguage(event.target.value);
+});
+
 const input=el("he-translate-input"),output=el("he-translate-output");
 let busy=false,recognition=null,listening=false,pip=null,closing=false;
 let translator=null,pair="",autoTimer=null,autoQueue="",lastAuto=0;
