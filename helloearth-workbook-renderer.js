@@ -1,9 +1,10 @@
 /* Safe HelloEarth classroom workbook Markdown renderer. Never parses raw HTML. */
 function appendInline(parent,input){
- const text=String(input||""),re=/(\*\*[^*\n]+\*\*|\*[^*\n]+\*)/g;
+ const text=String(input||""),re=/(\*\*[^*\n]+\*\*|\*[^*\n]+\*|<br\s*\/?\s*>)/gi;
  let start=0;
  for(const m of text.matchAll(re)){
   if(m.index>start)parent.append(document.createTextNode(text.slice(start,m.index)));
+  if(/^<br/i.test(m[0])){parent.append(document.createElement("br"));start=m.index+m[0].length;continue}
   const bold=m[0].startsWith("**");
   const child=document.createElement(bold?"strong":"em");
   child.textContent=m[0].slice(bold?2:1,bold?-2:-1);
@@ -89,9 +90,9 @@ export function renderWorkbook(target,markdown){
 
 export function workbookBlockMarkdown(block){
  const inline=node=>Array.from(node.childNodes).map(n=>{
-  if(n.nodeType===3)return n.textContent.replace(/\r?\n/g," ");
-  if(n.nodeName==="BR")return " ";
-  const t=inline(n);return n.nodeName==="STRONG"||n.nodeName==="B"?"**"+t+"**":n.nodeName==="EM"||n.nodeName==="I"?"*"+t+"*":t;
+  if(n.nodeType===3)return n.textContent.replace(/\r?\n/g,"<br>");
+  if(n.nodeName==="BR")return "<br>";
+  const t=inline(n);if(n.nodeName==="DIV"||n.nodeName==="P")return "<br>"+t;return n.nodeName==="STRONG"||n.nodeName==="B"?"**"+t+"**":n.nodeName==="EM"||n.nodeName==="I"?"*"+t+"*":t;
  }).join("");
  const tag=block.tagName;
  if(/^H[1-4]$/.test(tag))return "#".repeat(Number(tag[1]))+" "+inline(block);
