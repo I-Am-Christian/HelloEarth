@@ -45,7 +45,7 @@ function msg(content,error=false){
 }
 function failure(text){
  presenceReady=false;presenceTracked=false;presenceSynced=false;showPresence("offline","Disconnected","Lesson connection ended");
- dead=true;loaded=false;if(inkChannel){db.removeChannel(inkChannel);inkReady=false}
+ dead=true;loaded=false;if(inkChannel){db.removeChannel(inkChannel);inkReady=false}chatConnected();
  el("share-error").hidden=false;el("share-error").textContent=text;
  el("share-content").replaceChildren();
  el("share-title").textContent="Lesson unavailable";msg(text,true);
@@ -159,6 +159,135 @@ async function trackPresence(){
 }
 window.addEventListener("pagehide",()=>{if(inkChannel&&presenceTracked)inkChannel.untrack().catch(()=>{})});
 window.addEventListener("pageshow",e=>{if(e.persisted&&inkReady&&!dead)trackPresence()});
+const chatPanel=el("share-chat"),chatInput=el("share-chat-input"),chatTarget=el("share-chat-target"),chatSource=el("share-chat-source");
+const chatMessages=new Map(),chatTranslations=new Map(),chatJobs=new Set(),chatRequests=new Set();
+const chatLanguages=new Set(Array.from(chatTarget.options,o=>o.value));
+let chatUnread=0,chatLastSend=0,chatSending=false,chatCloudCalls=0,chatCloudTail=Promise.resolve(),chatEpoch=0;
+function chatStatus(text){el("share-chat-status").textContent=text}
+function chatConnected(){
+ el("share-chat-send").disabled=!inkReady||dead||chatSending;
+ chatStatus(inkReady&&!dead?"Live · session only":"Disconnected · messages remain here");
+}
+function chatOpen(open){
+ chatPanel.hidden=!open;el("share-chat-toggle").setAttribute("aria-expanded",String(open));
+ if(open){chatUnread=0;el("share-chat-unread").hidden=true;el("share-chat-log").scrollTop=el("share-chat-log").scrollHeight}
+ else el("share-chat-toggle").focus();
+}
+el("share-chat-toggle").onclick=()=>chatOpen(chatPanel.hidden);
+el("share-chat-close").onclick=()=>chatOpen(false);
+function chatDefaults(){
+ const lang=(navigator.language||"en").toLowerCase().split("-")[0];
+ chatSource.value=chatTarget.value=presenter?"en":chatLanguages.has(lang)?lang:"en";
+ el("share-chat-relay-label").hidden=!presenter;
+}
+function chatMessageValid(p){
+ return p&&typeof p.id==="string"&&/^[a-f0-9-]{36}$/i.test(p.id)&&typeof p.author==="string"&&/^[a-f0-9-]{36}$/i.test(p.author)&&typeof p.text==="string"&&p.text.trim().length>0&&p.text.length<=580&&chatLanguages.has(p.source)&&typeof p.cloud==="boolean"&&["teacher","viewer"].includes(p.role);
+}
+function chatBroadcast(event,payload){
+ if(!inkReady||dead||!inkChannel)return Promise.resolve("error");
+ return inkChannel.send({type:"broadcast",event,payload});
+}
+function chatTranslationKey(id,target){return id+":"+target}
+function chatShowTranslation(m,target,text){
+ chatTranslations.set(chatTranslationKey(m.id,target),text);
+ if(chatTarget.value!==target||!el("share-chat-auto").checked||!chatMessages.has(m.id))return;
+ m.translation.textContent="Translation · "+text;m.translation.hidden=false;m.retry.hidden=true;
+}
+function chatTranslationError(m,target,message){
+ if(chatTarget.value!==target||!chatMessages.has(m.id))return;
+ m.translation.textContent=message;m.translation.hidden=false;m.retry.hidden=false;
+}
+async function chatNative(text,from,to){
+ if(!window.Translator?.availability||!window.Translator?.create)return null;
+ let translator;
+ try{
+  const pair={sourceLanguage:from,targetLanguage:to};
+  if(await window.Translator.availability(pair)!=="available")return null;
+  translator=await window.Translator.create(pair);return String(await translator.translate(text)).trim();
+ }catch{return null}finally{try{translator?.destroy()}catch{}}
+}
+function chatCloud(m,target){
+ const key=chatTranslationKey(m.id,target);
+ if(chatTranslations.has(key))return Promise.resolve(chatTranslations.get(key));
+ if(!presenter||!el("share-chat-relay").checked||!m.cloud||!inkReady||dead||chatCloudCalls>=60||chatJobs.size>=8)return Promise.reject(Error("Cloud translation unavailable or limit reached"));
+ if(chatJobs.has(key))return chatCloudTail.then(()=>{if(chatTranslations.has(key))return chatTranslations.get(key);throw Error("Translation unavailable")});
+ chatJobs.add(key);chatCloudCalls++;
+ const task=chatCloudTail.then(async()=>{
+  if(dead||!inkReady||!el("share-chat-relay").checked)throw Error("Cloud translation disabled");
+  const {data,error}=await db.functions.invoke("he-translate",{body:{text:m.text,source:m.source,target}});
+  if(error||typeof data?.translation!=="string"||!data.translation.trim())throw Error("Translation service unavailable");
+  const translated=data.translation.slice(0,1800);chatShowTranslation(m,target,translated);return translated;
+ });
+ chatCloudTail=task.catch(()=>{}).then(()=>new Promise(resolve=>setTimeout(resolve,3800)));
+ return task.finally(()=>chatJobs.delete(key));
+}
+async function chatTranslate(m){
+ const target=chatTarget.value;
+ if(!el("share-chat-auto").checked||m.source===target||m.author===author){m.translation.hidden=true;m.retry.hidden=true;return}
+ const key=chatTranslationKey(m.id,target);
+ if(chatTranslations.has(key)){chatShowTranslation(m,target,chatTranslations.get(key));return}
+ m.translation.hidden=false;m.translation.textContent="Translating…";m.retry.hidden=true;
+ const native=await chatNative(m.text,m.source,target);
+ if(!chatMessages.has(m.id)||dead)return;
+ if(native){chatShowTranslation(m,target,native);return}
+ if(!m.cloud){chatTranslationError(m,target,"Original shown · sender has not enabled cloud translation.");return}
+ if(presenter){
+  try{chatShowTranslation(m,target,await chatCloud(m,target))}
+  catch{chatTranslationError(m,target,"Translation unavailable · check cloud translation settings.")}
+ }else{
+  chatRequests.add(key);
+  try{if(await chatBroadcast("chat-translate-request",{id:m.id,target,requester:author})!=="ok")throw Error("Offline")}
+  catch{chatTranslationError(m,target,"Translation unavailable · connection lost.");return}
+  setTimeout(()=>{if(chatRequests.delete(key)&&!chatTranslations.has(key))chatTranslationError(m,target,"Translation pending or unavailable · retry when tutor is online.")},25000);
+ }
+}
+function chatAdd(p){
+ if(!chatMessageValid(p)||chatMessages.has(p.id)||dead)return;
+ const log=el("share-chat-log");log.querySelector(".share-chat-empty")?.remove();
+ const row=document.createElement("article");row.className="share-chat-message";row.classList.toggle("own",p.author===author);
+ const header=document.createElement("header");header.textContent=(p.author===author?"You":p.role==="teacher"?"Teacher":"Participant")+" · "+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+ const body=document.createElement("p");body.textContent=p.text;
+ const translation=document.createElement("p");translation.className="share-chat-translation";translation.hidden=true;
+ const retry=document.createElement("button");retry.type="button";retry.className="share-chat-retry";retry.textContent="Retry translation";retry.hidden=true;
+ const m={...p,row,translation,retry};retry.onclick=()=>chatTranslate(m);
+ row.append(header,body,translation,retry);log.append(row);chatMessages.set(p.id,m);
+ while(chatMessages.size>120){const first=chatMessages.keys().next().value;chatMessages.get(first).row.remove();chatMessages.delete(first);for(const k of chatTranslations.keys())if(k.startsWith(first+":"))chatTranslations.delete(k)}
+ log.scrollTop=log.scrollHeight;
+ if(chatPanel.hidden&&p.author!==author){chatUnread++;el("share-chat-unread").textContent=String(Math.min(chatUnread,99));el("share-chat-unread").hidden=false}
+ chatTranslate(m);
+}
+async function chatRequest(p){
+ if(!presenter||dead||!p||typeof p.id!=="string"||!chatLanguages.has(p.target)||typeof p.requester!=="string"||!inkChannel?.presenceState()?.[p.requester])return;
+ const m=chatMessages.get(p.id);if(!m||!m.cloud||m.source===p.target)return;
+ try{
+  const key=chatTranslationKey(m.id,p.target);
+  const translated=chatTranslations.get(key)||await chatNative(m.text,m.source,p.target)||await chatCloud(m,p.target);
+  await chatBroadcast("chat-translation",{id:m.id,target:p.target,text:translated});
+ }catch{await chatBroadcast("chat-translation-error",{id:m.id,target:p.target})}
+}
+function chatReceiveTranslation(p,failed=false){
+ if(!p||typeof p.id!=="string"||!chatLanguages.has(p.target))return;
+ const key=chatTranslationKey(p.id,p.target),m=chatMessages.get(p.id);
+ if(!m||!chatRequests.has(key))return;
+ chatRequests.delete(key);
+ if(failed){chatTranslationError(m,p.target,"Translation unavailable · ask your tutor to enable cloud translation.");return}
+ if(typeof p.text==="string"&&p.text.trim()&&p.text.length<=1800)chatShowTranslation(m,p.target,p.text);
+}
+el("share-chat-form").addEventListener("submit",async e=>{
+ e.preventDefault();const text=chatInput.value.trim();
+ if(!text||!inkReady||dead||chatSending||Date.now()-chatLastSend<700)return;
+ const p={id:crypto.randomUUID(),author,role:presenter?"teacher":"viewer",source:chatSource.value,text:text.slice(0,580),cloud:el("share-chat-cloud").checked};
+ chatSending=true;chatLastSend=Date.now();chatConnected();
+ try{if(await chatBroadcast("chat-message",p)!=="ok")throw Error("Send failed");chatAdd(p);if(chatInput.value.trim()===text)chatInput.value=""}
+ catch{chatStatus("Message not sent · retry")}
+ finally{chatSending=false;el("share-chat-send").disabled=!inkReady||dead}
+});
+chatInput.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();el("share-chat-form").requestSubmit()}});
+for(const id of ["share-chat-auto","share-chat-target"])el(id).addEventListener("change",()=>{for(const m of Array.from(chatMessages.values()).slice(-15))chatTranslate(m)});
+el("share-chat-export").onclick=()=>{
+ const text=Array.from(chatMessages.values()).map(m=>(m.author===author?"You":m.role==="teacher"?"Teacher":"Participant")+" ["+m.source+"]: "+m.text+(chatTranslations.get(chatTranslationKey(m.id,chatTarget.value))?"\nTranslation: "+chatTranslations.get(chatTranslationKey(m.id,chatTarget.value)):"")).join("\n\n");
+ const url=URL.createObjectURL(new Blob([text],{type:"text/plain;charset=utf-8"}));const a=document.createElement("a");a.href=url;a.download="helloearth-classroom-chat.txt";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
 async function connectInk(){
  const bytes=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(token));
  const room=Array.from(new Uint8Array(bytes),n=>n.toString(16).padStart(2,"0")).join("");
@@ -174,8 +303,12 @@ async function connectInk(){
   teacherZoom=p.value;teacherZoomSync=p.enabled;
   if(teacherZoomSync&&zoomFollow.checked)applyZoom(teacherZoom);
  }).on("broadcast",{event:"zoom-request"},()=>sendZoom())
+ .on("broadcast",{event:"chat-message"},({payload})=>chatAdd(payload))
+ .on("broadcast",{event:"chat-translate-request"},({payload})=>chatRequest(payload))
+ .on("broadcast",{event:"chat-translation"},({payload})=>chatReceiveTranslation(payload))
+ .on("broadcast",{event:"chat-translation-error"},({payload})=>chatReceiveTranslation(payload,true))
  .on("broadcast",{event:"request"},()=>{sendInk();sendZoom()}).subscribe(status=>{
-  inkReady=status==="SUBSCRIBED";presenceReady=inkReady;presenceTracked=false;
+  inkReady=status==="SUBSCRIBED";presenceReady=inkReady;presenceTracked=false;chatConnected();
   if(inkReady){updatePresence();trackPresence();sendInk();sendZoom();inkChannel.send({type:"broadcast",event:"request",payload:{}})}
   else{presenceSynced=false;showPresence("offline","Connection lost","Live connection interrupted; participant status unknown")}
  });
@@ -416,7 +549,7 @@ async function open(){
   loaded=true;sharedStrokes=Array.isArray(response.state.annotations)?response.state.annotations:[];
   updateState(response.state);paintStrokes();remaining();
   msg("Lesson loaded. Checking if you're the presenter…");
-  await checkPresenter();
+  await checkPresenter();chatDefaults();
   connectInk().catch(()=>{msg("Live annotation connection unavailable.",true);showPresence("offline","Status unavailable","Could not connect to the live lesson channel")});
   if(!presenter)msg("Ready to read · no login required. Use Follow teacher to sync scrolling.");
   setInterval(()=>{remaining();poll()},1700);
