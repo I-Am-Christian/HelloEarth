@@ -147,14 +147,15 @@
 .share-classroom-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(290px,350px);gap:12px;align-items:start;max-width:1560px;margin:0 auto;padding:12px 12px 0}
 .share-workbook-column{min-width:0}
 .share-classroom-layout .share-page{padding:0 0 20px;min-width:0}
-.share-classroom-layout .share-chat{position:sticky;top:calc(var(--share-dock-height,110px) + 12px);right:auto;bottom:auto;left:auto;z-index:15;width:100%;height:clamp(240px,calc(100dvh - var(--share-dock-height,110px) - 24px),900px);min-width:0;border-radius:12px}
+.share-classroom-layout .share-chat{position:relative;top:auto;right:auto;bottom:auto;left:auto;z-index:auto;align-self:start;justify-self:end;width:100%;height:clamp(240px,calc(100dvh - var(--share-dock-height,110px) - 24px),650px);min-width:0;border-radius:12px;scroll-margin-top:calc(var(--share-dock-height,110px) + 12px)}
 .share-chat-settings-details{flex:none;background:#f0edf7;border-bottom:1px solid #e2deeb;max-height:40%;overflow:auto}
 .share-chat-settings-details summary{padding:7px 12px;color:#52416f;font-size:11px;font-weight:650;cursor:pointer}
 .share-chat-settings-details .share-chat-settings{max-height:none;border-bottom:0}
 .share-chat-header{flex:none}.share-chat-footer{flex:none}#share-chat-form{flex:none}
 @media(max-width:850px){
- .share-classroom-layout{display:block;padding:8px 8px calc(var(--share-chat-height,220px) + 20px)}
- .share-classroom-layout .share-chat{position:fixed;top:auto;left:8px;right:8px;bottom:max(6px,env(safe-area-inset-bottom));z-index:50;width:auto;height:clamp(175px,32dvh,300px);border-radius:12px}
+ .share-classroom-layout{display:flex;flex-direction:column;padding:8px 8px 20px;gap:10px}
+ .share-workbook-column{width:100%;order:1}
+ .share-classroom-layout .share-chat{position:relative;top:auto;left:auto;right:auto;bottom:auto;z-index:auto;order:0;align-self:flex-end;width:min(100%,350px);height:clamp(200px,34dvh,300px);border-radius:12px}
  .share-classroom-layout .share-chat:has(.share-chat-settings-details[open]){height:min(55dvh,420px)}
  .share-chat-header{padding:6px 10px}.share-chat-header strong{font-size:13px}.share-chat-header small{margin:0;font-size:10px}.share-chat-header button{height:32px;width:32px;font-size:18px}
  .share-chat-settings-details summary{padding:4px 10px}.share-chat-log{padding:6px 8px;gap:5px}.share-chat-message{padding:5px 8px}.share-chat-message p{font-size:12px}
