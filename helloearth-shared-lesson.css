@@ -34,3 +34,7 @@
 .share-paper.is-text-highlighting #share-content,.share-paper.is-text-highlighting #share-content *{user-select:text!important;-webkit-user-select:text!important;cursor:text}
 .share-paper.is-text-highlighting .share-annotation-layer,.share-paper.is-text-highlighting .share-annotation-layer *{pointer-events:none!important;touch-action:auto!important}
 .share-paper.is-text-highlighting #share-content::selection,.share-paper.is-text-highlighting #share-content *::selection{background:#c7b2f4;color:#1f1730}
+
+.share-zoom-tools{display:flex;align-items:center;gap:5px;flex-wrap:wrap}.share-zoom-tools button{min-width:36px;min-height:36px;touch-action:manipulation}.share-zoom-tools [hidden]{display:none!important}.share-page{overflow-x:auto;overscroll-behavior-x:contain}.share-paper{box-sizing:border-box}.share-zoom-tools #share-zoom-reset{min-width:58px;font-variant-numeric:tabular-nums}
+@media(max-width:730px){.share-zoom-tools{width:100%;gap:8px}.share-zoom-tools button{min-width:44px;min-height:44px;font-size:16px}.share-zoom-tools .share-follow{min-height:44px}.share-control-shell{max-height:45vh;overflow-y:auto}.share-page{padding-inline:8px}.share-paper{margin-inline:auto}}
+@media print{.share-paper{zoom:1!important}}
