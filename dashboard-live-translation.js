@@ -37,6 +37,7 @@ function previewMicLanguage(studentId){
   vietnamese:"vi",afrikaans:"af",french:"fr",german:"de",russian:"ru",arabic:"ar",english:"en"};
  const code=Object.keys(names).find(x=>name.includes(x));
  if(code)target.value=names[code];
+ else if(locale[name])target.value=name;
 }
 document.addEventListener("helloearth:lesson-selected",e=>previewMicLanguage(e.detail?.studentId));
 document.getElementById("he-lesson-student")?.addEventListener("change",e=>previewMicLanguage(e.target.value));
@@ -403,6 +404,7 @@ async function startSharing(){
   say("Confirm participants' consent before sharing their words.",true);return;
  }
  if(!crypto?.subtle){say("A secure browser is required for verified student captions.",true);return}
+ if(roomChannel&&Date.now()>=roomUntil)endSharing();
  if(roomChannel){el("he-caption-share-box").hidden=false;return}
  const bytes=crypto.getRandomValues(new Uint8Array(20));
  room=[...bytes].map(x=>x.toString(16).padStart(2,"0")).join("");
@@ -471,7 +473,7 @@ for(const id of ["he-caption-source","he-translate-source","he-caption-engine"])
  });
 }
 el("he-live-translate-close").addEventListener("click",()=>{
- closing=true;stopListening();panel.hidden=true;
+ closing=true;stopListening();translationQueue.length=0;endSharing();panel.hidden=true;
  if(pip&&!pip.closed)pip.close();
 });
 el("he-live-translate-pin").addEventListener("click",async()=>{
