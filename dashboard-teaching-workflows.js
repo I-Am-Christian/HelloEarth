@@ -346,7 +346,7 @@ async function generateWithHaiku(mode){
   if(byok)body.apiKey=ownKey;
   const {data,error}=await db.functions.invoke("helloearth-generate",{body});
   if(error){
-   let message=error.message||"Claude generation failed.";
+   let message=error.message||"Nova could not complete this generation.";
    if(typeof error.context?.json==="function"){
     try{const detail=await error.context.json();if(detail?.error)message=detail.error}catch{}
    }
