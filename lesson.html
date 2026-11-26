@@ -4,8 +4,8 @@
 <meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#17233b"><title>Lesson preview | HelloEarth</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg">
-<link rel="stylesheet" href="helloearth-lesson.css?v=20261126-first1">
-<script type="module" src="helloearth-lesson.js?v=20261126-first2"></script>
+<link rel="stylesheet" href="helloearth-lesson.css?v=20261126-share1">
+<script type="module" src="helloearth-lesson.js?v=20261126-share1"></script>
 </head>
 <body>
 <header class="lesson-toolbar"><a href="dashboard.html#lessons" class="toolbar-brand">✦ HelloEarth <span>Lessons</span></a><div class="lesson-toolbar-actions">
@@ -13,7 +13,15 @@
 <button id="lesson-copy" type="button" disabled>Copy text</button>
 <button id="lesson-download" type="button" disabled>Download .md</button>
 <button id="lesson-print" class="primary" type="button" disabled>Print / Save PDF</button>
+<button id="lesson-share" class="primary" type="button" disabled>Share with student</button>
+<button id="lesson-present" type="button" disabled>Present live</button>
 </div></header>
+<div id="lesson-share-tools" class="lesson-share-tools" hidden>
+ <strong>Student-ready public link · no login required</strong>
+ <input id="lesson-share-url" readonly aria-label="Public student lesson link">
+ <button id="lesson-share-copy" type="button">Copy link</button>
+ <small>Anyone with this link can view the workbook until it expires. Teacher-only answer keys are omitted.</small>
+</div>
 <main class="lesson-screen"><section class="lesson-paper" aria-label="Print-ready lesson workbook">
 <header class="paper-top"><div class="paper-identity"><div class="paper-brand">✦ helloearth<span>.</span></div><div class="paper-kicker">CLASSROOM WORKBOOK</div></div><div class="paper-identity-tag">LESSON PLAN</div></header>
 <div id="lesson-error" class="lesson-error" hidden></div>
