@@ -31,6 +31,59 @@ function selectAvatar(index){photoEpoch++;photoBusy=false;clearDraftPreview();ph
 function renderAvatarGallery(){let grid=$("student-avatar-grid"),start=photoPage*PAGE_SIZE+1,end=Math.min(AVATAR_COUNT,start+PAGE_SIZE-1);grid.replaceChildren();$("student-avatar-page").textContent=start+"–"+end+" of "+AVATAR_COUNT;$("student-avatar-prev").disabled=photoPage===0;$("student-avatar-next").disabled=end===AVATAR_COUNT;for(let n=start;n<=end;n++){let b=document.createElement("button");b.type="button";b.title="Avatar "+n;b.setAttribute("aria-label","Select avatar "+n);b.setAttribute("aria-pressed",String(photoDraft.index===n&&!photoDraft.path&&!photoDraft.blob));let a=document.createElement("span");a.className="he-profile-avatar";a.append(placeholderSVG(n));b.append(a);b.addEventListener("click",()=>selectAvatar(n));grid.append(b)}}
 function initPhotoEditor(student){photoEpoch++;photoBusy=false;clearDraftPreview();photoDraft={index:student?avatarNumber(student):randomAvatar(null),path:student?.photo_path||null,blob:null,preview:null};photoPage=photoDraft.index?Math.floor((photoDraft.index-1)/PAGE_SIZE):0;$("student-avatar-gallery").hidden=true;$("student-avatar-browse").setAttribute("aria-expanded","false");$("student-photo-file").value="";setPhotoStatus("Upload only with the student's permission. Photos are private.");refreshPhotoPreview()}
 $("student-photo-upload").onclick=()=>$("student-photo-file").click();
+const quickPhotoInput=$("selected-photo-file"),quickPhotoButton=$("selected-photo-upload"),quickPhotoRemove=$("selected-photo-remove"),quickPhotoStatus=$("selected-photo-status");
+let quickPhotoBusy=false,quickPhotoStudent=null;
+function syncQuickPhotoControls(){
+ const student=state.selected;
+ quickPhotoButton.disabled=quickPhotoBusy||!student;
+ quickPhotoRemove.disabled=quickPhotoBusy||!student?.photo_path;
+ quickPhotoButton.textContent=student?.photo_path?"Change photo":"Add photo";
+}
+async function prepareQuickPhoto(file){
+ if(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>12000000)throw Error("Choose a JPG, PNG or WebP under 12 MB.");
+ const url=URL.createObjectURL(file);
+ try{
+  const image=new Image();image.src=url;await image.decode();
+  const w=image.naturalWidth,h=image.naturalHeight;
+  if(!w||!h||w*h>50000000)throw Error("Image dimensions are too large.");
+  const canvas=document.createElement("canvas");canvas.width=canvas.height=320;
+  const ctx=canvas.getContext("2d"),size=Math.min(w,h);ctx.fillStyle="#e3e0e9";ctx.fillRect(0,0,320,320);
+  ctx.drawImage(image,(w-size)/2,(h-size)/2,size,size,0,0,320,320);
+  const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",.82));
+  if(!blob||blob.size>262144)throw Error("Could not compress this image.");
+  return blob;
+ }finally{URL.revokeObjectURL(url)}
+}
+async function saveQuickPhoto(student,file){
+ if(quickPhotoBusy||!student||!state.user)return;
+ quickPhotoBusy=true;syncQuickPhotoControls();quickPhotoStatus.textContent=file?"Preparing and uploading photo…":"Removing photo…";
+ const tutor=state.user.id;let newPath=null,committed=false;
+ try{
+  if(file){
+   const blob=await prepareQuickPhoto(file);
+   newPath=tutor+"/"+student.id+"/"+crypto.randomUUID()+".jpg";
+   const {error}=await db.storage.from(PHOTO_BUCKET).upload(newPath,blob,{contentType:"image/jpeg",upsert:false});if(error)throw error;
+  }
+  const {data,error}=await db.from("atlas_students").update({photo_path:newPath,updated_at:new Date().toISOString()}).eq("id",student.id).eq("tutor_id",tutor).select().single();
+  if(error||!data)throw error||Error("Profile update did not return a record.");
+  committed=true;
+  if(student.photo_path&&student.photo_path!==newPath){
+   const {error:cleanup}=await db.storage.from(PHOTO_BUCKET).remove([student.photo_path]);if(cleanup)console.warn("Old photo cleanup failed",cleanup.message);
+   dropCachedPhoto(student.photo_path);
+  }
+  const index=state.students.findIndex(s=>s.id===student.id);if(index>=0)state.students[index]=data;
+  if(state.selected?.id===student.id){state.selected=data;renderAvatar($("selected-avatar"),data);quickPhotoStatus.textContent=file?"Photo saved.":"Photo removed."}
+  renderStudents();
+  document.dispatchEvent(new CustomEvent("helloearth:workspace-data",{detail:{userId:tutor,students:state.students}}));
+ }catch(error){
+  if(newPath&&!committed)await db.storage.from(PHOTO_BUCKET).remove([newPath]).catch(()=>{});
+  quickPhotoStatus.textContent=committed?"Photo saved; refresh the profile.":"Could not save photo: "+(error.message||"Unknown error");
+ }finally{quickPhotoBusy=false;syncQuickPhotoControls()}
+}
+quickPhotoButton.onclick=()=>{if(!state.selected||quickPhotoBusy)return;if(!confirm("Upload a student photo only with permission. Continue?"))return;quickPhotoStudent=state.selected;quickPhotoInput.click()};
+quickPhotoInput.onchange=()=>{const file=quickPhotoInput.files?.[0],student=quickPhotoStudent;quickPhotoInput.value="";quickPhotoStudent=null;if(file&&student)saveQuickPhoto(student,file)};
+quickPhotoRemove.onclick=()=>{if(state.selected?.photo_path&&confirm("Remove this student's photo?"))saveQuickPhoto(state.selected,null)};
+
 $("student-avatar-random").onclick=()=>selectAvatar(randomAvatar(photoDraft.index));
 $("student-photo-remove").onclick=()=>selectAvatar(null);
 $("student-avatar-browse").onclick=()=>{let el=$("student-avatar-gallery");el.hidden=!el.hidden;$("student-avatar-browse").setAttribute("aria-expanded",String(!el.hidden));if(!el.hidden)renderAvatarGallery()};
@@ -207,7 +260,7 @@ async function openStudent(id) {
   document.dispatchEvent(new CustomEvent("helloearth:student-opened", {detail:{student:s}}));
   $("student-detail").hidden = false;
   $("selected-name").textContent = s.display_name;
-  $("selected-nickname").textContent=s.nickname||"";$("selected-nickname").hidden=!s.nickname;renderAvatar($("selected-avatar"),s);
+  $("selected-nickname").textContent=s.nickname||"";$("selected-nickname").hidden=!s.nickname;renderAvatar($("selected-avatar"),s);syncQuickPhotoControls();if(!quickPhotoBusy)quickPhotoStatus.textContent="";
   const target = $("student-fields");
   target.replaceChildren(
     labelledField("CEFR level", s.cefr_level === "UNASSESSED" ? "Not assessed yet" : s.cefr_level),
