@@ -1,6 +1,6 @@
 import {db} from "./supabase-client.js";
 import {SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY} from "./supabase-config.js";
-import {renderWorkbook} from "./helloearth-workbook-renderer.js";
+import {renderWorkbook,workbookBlockMarkdown} from "./helloearth-workbook-renderer.js?v=20261126-inline1";
 import {mountClassroomDialogue} from "./classroom-dialogue.js?v=20261126-analysis1";
 let dialogue=null,assignedStudent=null,contentRevision=0,editingWorkbook=false;
 // One-way tutor presentation. Public guests can view with a signed link,
@@ -115,7 +115,7 @@ function getReadingAnchor(){
  return {block:index,fraction:clamp01((y-rect.top)/Math.max(1,rect.height)),offset,ratio:getRatio()};
 }
 function scrollAbsolute(target){
- if(!roleKnown||!canFollow||presenter||!syncEnabled||tool!=="view"||dead)return;
+ if(!roleKnown||!canFollow||presenter||!syncEnabled||tool!=="view"||dead||inlineDraft||inlineSaving)return;
  const max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight),clamped=Math.max(0,Math.min(max,target));
  if(Math.abs(window.scrollY-clamped)<4)return;
  isProgrammatic=true;clearTimeout(scrollGuard);window.scrollTo({top:clamped,behavior:"instant"});
@@ -146,7 +146,7 @@ function receiveReadingAnchor(p){
 function freshAnchor(){return inkReady&&remoteAnchor&&Date.now()-anchorReceivedAt<10000}
 function requestReadingAnchor(){if(inkReady&&!presenter)inkChannel.send({type:"broadcast",event:"reading-request",payload:{}}).catch(()=>{})}
 function resumeReading(){
- if(!roleKnown||!loaded||dead||presenter||!canFollow||tool!=="view")return;
+ if(!roleKnown||!loaded||dead||presenter||!canFollow||tool!=="view"||inlineDraft||inlineSaving)return;
  if(freshAnchor()){if(remoteAnchor.enabled)followReadingAnchor(remoteAnchor)}
  else if(syncEnabled&&lesson?.state)scrollToRatio(lesson.state.scrollRatio);
  requestReadingAnchor();
@@ -560,7 +560,7 @@ function setTool(next){
  svg.classList.toggle("is-annotating",tool==="pen"||tool==="highlight");
  highlightButton.hidden=!["text","underline"].includes(tool);highlightButton.textContent=tool==="underline"?"Apply underline":"Apply text highlight";if(tool==="view")resumeReading();
  el("share-draw-hint").textContent=tool==="type"?"Click the page to add words, or select an existing text box to edit it.":["text","underline"].includes(tool)?"Drag across words to highlight automatically. On touchscreens, select text and tap Apply text highlight.": "Teacher and student annotations are shared live while connected.";
- paintStrokes();
+ syncInlineEditable();paintStrokes();
 }
 function pointFrom(event){
  const rect=svg.getBoundingClientRect();
@@ -674,10 +674,11 @@ function updateState(state){
 }
 let requestInFlight=false;
 async function poll(){
- if(requestInFlight||dead||!loaded)return;
+ if(requestInFlight||dead||!loaded||inlineDraft||inlineSaving)return;
  requestInFlight=true;
  try{
   const response=await api("state",{contentRevision,typedRevision});
+  if(inlineDraft||inlineSaving)return;
   if(typeof response.markdown==="string"&&Number(response.state?.contentRevision||0)!==contentRevision)applyWorkbookRevision(response);
   applyTypedState(response);updateState(response.state);
   if(seen){msg(presenter?
@@ -693,14 +694,14 @@ async function poll(){
 function applyWorkbookRevision(response){
  const revision=Number(response.state?.contentRevision||0);if(revision<=contentRevision)return;
  contentRevision=revision;lesson.markdown=response.markdown;active=null;localStrokes=[];textInk=[];sharedStrokes=[];guestInk.clear();remoteText.clear();inkBatches.clear();inkSeenRevisions.clear();remoteAnchor=null;hideRemoteCursor();
- renderWorkbook(el("share-content"),lesson.markdown);paintTypedNotes();layoutPaper();paintStrokes();scheduleFollowLayout();msg("Live workbook updated.");
+ renderWorkbook(el("share-content"),lesson.markdown);syncInlineEditable();paintTypedNotes();layoutPaper();paintStrokes();scheduleFollowLayout();msg("Live workbook updated.");
 }
 const editor=el("share-edit-dialog"),editorText=el("share-edit-text"),editorStatus=el("share-edit-status");
 let editRevision=0,studentEditing=false,typedRevision=-1,typedNotes=[],typingDraft=null,typingMove=false,typingBusy=false,permissionBusy=false,typingBaseRevision=0,typingBaseTypedRevision=-1;
 const typeDialog=el("share-type-dialog"),typedLayer=el("share-typed-layer"),typedAppendix=el("share-typed-appendix");
 const typedPrint=document.createElement("section");typedPrint.className="share-typed-print";typedPrint.setAttribute("translate","no");typedAppendix.after(typedPrint);
 function canEdit(){return !dead&&loaded&&roleKnown&&(presenter||studentEditing)}
-function updateEditingControls(){const allowed=canEdit();el("share-edit-workbook").hidden=!allowed;el("share-type-tool").disabled=!allowed;el("share-student-edit-label").hidden=!presenter;el("share-student-edit").disabled=permissionBusy||dead||!loaded;if(!permissionBusy)el("share-student-edit").checked=studentEditing;if(!allowed&&tool==="type")setTool("view");el("share-type-save").disabled=!allowed||typingBusy;el("share-edit-save").disabled=!allowed||editingWorkbook;}
+function updateEditingControls(){const allowed=canEdit();el("share-edit-workbook").hidden=!allowed;el("share-type-tool").disabled=!allowed;el("share-student-edit-label").hidden=!presenter;el("share-student-edit").disabled=permissionBusy||dead||!loaded;if(!permissionBusy)el("share-student-edit").checked=studentEditing;if(!allowed&&tool==="type")setTool("view");syncInlineEditable();el("share-type-save").disabled=!allowed||typingBusy;el("share-edit-save").disabled=!allowed||editingWorkbook;}
 function applyTypedState(response){if(Array.isArray(response.typedNotes)&&Number(response.state?.typedRevision)>=typedRevision){typedRevision=Number(response.state.typedRevision);typedNotes=response.typedNotes;paintTypedNotes()}}
 function editingState(state){if(!state||Number(state.contentRevision||0)<contentRevision)return;studentEditing=state.studentEditing===true;updateEditingControls()}
 function typedPosition(note){const paperRect=paper.getBoundingClientRect(),block=note.block===null?null:contentBlocks()[note.block];if(block){const b=block.getBoundingClientRect();return [(b.left+b.width*note.bx-paperRect.left)/Math.max(1,paperRect.width),(b.top+b.height*note.by-paperRect.top)/Math.max(1,paperRect.height)]}return [note.x,note.y]}
@@ -715,7 +716,7 @@ el("share-type-move").onclick=()=>{if(!canEdit())return;typingDraft=readTypedDra
 async function saveTyped(remove=false){if(!canEdit()||typingBusy||!typingDraft)return;if(typingBaseRevision!==contentRevision||typingBaseTypedRevision!==typedRevision){el("share-type-status").textContent="The lesson or text boxes changed. Copy your draft, close this editor and reopen the text box before saving.";return}const note=readTypedDraft();if(!remove&&!note.text){el("share-type-status").textContent="Type some words first.";return}if(remove&&!confirm("Delete this text box for everyone?"))return;typingBusy=true;el("share-type-save").disabled=true;el("share-type-delete").disabled=true;el("share-type-status").textContent="Saving…";try{const result=await api("typed-note",{revision:typingBaseRevision,typedRevision:typingBaseTypedRevision,note,remove,reposition:note.reposition===true},presenter);if(typeof result.markdown==="string"&&Number(result.state.contentRevision)!==contentRevision)applyWorkbookRevision(result);applyTypedState(result);updateState(result.state);typeDialog.close();typingDraft=null;typingMove=false;if(inkReady)await chatBroadcast("workbook-edited",{revision:contentRevision,typedRevision});msg("Classroom text updated.")}catch(e){el("share-type-status").textContent=e.message;await poll()}finally{typingBusy=false;el("share-type-delete").disabled=false;updateEditingControls()}}
 el("share-type-save").onclick=()=>saveTyped();el("share-type-delete").onclick=()=>saveTyped(true);
 el("share-student-edit").onchange=async()=>{if(!presenter||permissionBusy)return;const enabled=el("share-student-edit").checked;permissionBusy=true;updateEditingControls();try{const result=await api("student-editing",{enabled},true);updateState(result.state);if(inkReady)await chatBroadcast("workbook-edited",{revision:contentRevision});msg(enabled?"Student editing enabled for this link.":"Student editing disabled.")}catch(e){msg(e.message,true)}finally{permissionBusy=false;updateEditingControls()}};
-el("share-edit-workbook").onclick=()=>{if(!canEdit())return;editRevision=contentRevision;editorText.value=lesson.markdown;editorStatus.textContent="";editor.showModal()};
+el("share-edit-workbook").onclick=()=>{if(!canEdit()||inlineDraft||inlineSaving)return;editRevision=contentRevision;editorText.value=lesson.markdown;editorStatus.textContent="";editor.showModal()};
 el("share-edit-cancel").onclick=()=>editor.close();
 el("share-edit-save").onclick=async()=>{
  if(!canEdit()||editingWorkbook)return;
@@ -728,6 +729,61 @@ el("share-edit-save").onclick=async()=>{
  try{const response=await api("edit-workbook",{markdown,revision:editRevision},presenter);applyWorkbookRevision(response);applyTypedState(response);updateState(response.state);editor.close();if(inkReady)await chatBroadcast("workbook-edited",{revision:contentRevision});}
  catch(e){editorStatus.textContent=e.message||"Could not publish changes.";await poll()}finally{editingWorkbook=false;updateEditingControls()}
 };
+// Inline editing: one source block at a time, revision-checked on blur/Save.
+const inlineRoot=el("share-content"),inlineStatus=el("share-inline-status"),inlineSave=el("share-inline-save"),inlineDiscard=el("share-inline-discard"),inlineCopy=el("share-inline-copy"),inlineAdd=el("share-inline-add");
+let inlineDraft=null,inlineSaving=false,inlineComposing=false,inlineFailed=false;
+const inlineTargets="h1,h2,h3,h4,p,li,td,th,pre";
+function inlineHint(value){inlineStatus.textContent=value}
+function syncInlineEditable(){
+ const enabled=canEdit()&&tool==="view"&&!inlineSaving;
+ inlineRoot.classList.toggle("he-inline-enabled",enabled);
+ for(const node of inlineRoot.querySelectorAll(inlineTargets)){
+  const allow=enabled&&(!inlineDraft||inlineDraft.node===node);
+  node.contentEditable=allow?"true":"false";node.spellcheck=allow;node.tabIndex=allow?0:-1;
+ }
+ inlineSave.disabled=!inlineDraft||inlineSaving;inlineDiscard.disabled=!inlineDraft||inlineSaving;inlineCopy.disabled=!inlineDraft;inlineAdd.disabled=!enabled||Boolean(inlineDraft);
+}
+function topBlock(node){let block=node;while(block&&block.parentElement!==inlineRoot)block=block.parentElement;return block}
+inlineRoot.addEventListener("focusin",e=>{
+ const node=e.target.closest(inlineTargets);if(!node||!canEdit()||tool!=="view"||inlineSaving)return;
+ if(inlineDraft){if(inlineDraft.node!==node){node.blur();inlineHint("Save or discard the current edit first.")}return}
+ const block=topBlock(node);if(!block||!block.dataset.mdStart||!block.dataset.mdEnd)return;
+ inlineDraft={node,block,revision:contentRevision,base:lesson.markdown,original:workbookBlockMarkdown(block),start:Number(block.dataset.mdStart),end:Number(block.dataset.mdEnd)};
+ inlineFailed=false;syncInlineEditable();inlineHint("Editing · saves when you leave this field.");
+ if(!presenter&&canFollow){canFollow=false;follow.checked=false}
+});
+inlineRoot.addEventListener("compositionstart",()=>inlineComposing=true);
+inlineRoot.addEventListener("compositionend",()=>inlineComposing=false);
+inlineRoot.addEventListener("input",()=>{if(inlineDraft){inlineHint("Unsaved edit");schedulePaperLayout()}});
+inlineRoot.addEventListener("paste",e=>{if(!inlineDraft||!inlineRoot.contains(e.target))return;e.preventDefault();document.execCommand("insertText",false,(e.clipboardData?.getData("text/plain")||"").slice(0,12000))});
+inlineRoot.addEventListener("drop",e=>{if(inlineDraft)e.preventDefault()});
+inlineRoot.addEventListener("keydown",e=>{if(!inlineDraft||e.isComposing)return;if(e.key==="Escape"){e.preventDefault();discardInline()}else if(e.key==="Enter"&&inlineDraft.node.tagName!=="PRE"){e.preventDefault();commitInline()}});
+inlineRoot.addEventListener("focusout",()=>{setTimeout(()=>{if(inlineDraft&&!inlineSaving&&!inlineFailed&&!inlineComposing&&document.activeElement!==inlineDraft.node&&!document.activeElement?.closest("#share-inline-actions"))commitInline()},0)});
+function draftMarkdown(){
+ if(!inlineDraft)return null;
+ const d=inlineDraft,updated=workbookBlockMarkdown(d.block),lines=d.base.replace(/\r\n?/g,"\n").split("\n");
+ if(updated===d.original)return d.base;
+ lines.splice(d.start,d.end-d.start,updated);return lines.join("\n");
+}
+async function commitInline(){
+ if(!inlineDraft||inlineSaving||!canEdit())return;
+ const d=inlineDraft,markdown=draftMarkdown();if(markdown===d.base){inlineDraft=null;inlineFailed=false;syncInlineEditable();inlineHint("Tap any text to edit.");return}
+ if(!markdown||markdown.trim().length<20||markdown.length>31000){inlineHint("Workbook must contain 20–31,000 characters. Edit your draft or copy it.");return}
+ if(writing){inlineFailed=true;inlineHint("An annotation is saving. Tap Save edit to retry.");return}
+ inlineSaving=true;inlineFailed=false;syncInlineEditable();inlineHint("Saving edit…");
+ try{
+  const response=await api("edit-workbook",{markdown,revision:d.revision},presenter);
+  inlineDraft=null;applyWorkbookRevision(response);applyTypedState(response);updateState(response.state);
+  if(inkReady)chatBroadcast("workbook-edited",{revision:contentRevision}).catch(()=>{});
+  inlineHint("Saved and shared · tap any text to edit.");
+ }catch(e){inlineFailed=true;inlineHint(e.status===409?"Another edit was saved first. Copy your draft, then discard to reload.":e.message+" — your draft is still here.")}
+ finally{inlineSaving=false;syncInlineEditable()}
+}
+function discardInline(){if(!inlineDraft||inlineSaving)return;if(draftMarkdown()!==inlineDraft.base&&!confirm("Discard this unsaved edit?"))return;inlineDraft=null;inlineFailed=false;renderWorkbook(inlineRoot,lesson.markdown);syncInlineEditable();paintStrokes();schedulePaperLayout();inlineHint("Draft discarded. Refreshing shared lesson…");poll()}
+inlineSave.onclick=commitInline;inlineDiscard.onclick=discardInline;
+inlineCopy.onclick=async()=>{const draft=draftMarkdown();if(!draft)return;try{await navigator.clipboard.writeText(draft);inlineHint("Draft copied.")}catch{inlineHint("Select and copy the edited text manually.")}};
+inlineAdd.onclick=async()=>{if(!canEdit()||inlineDraft||inlineSaving)return;const markdown=lesson.markdown+"\n\nNew paragraph — tap here to edit.";if(markdown.length>31000){inlineHint("Workbook length limit reached.");return}inlineSaving=true;syncInlineEditable();try{const response=await api("edit-workbook",{markdown,revision:contentRevision},presenter);applyWorkbookRevision(response);applyTypedState(response);updateState(response.state);if(inkReady)chatBroadcast("workbook-edited",{revision:contentRevision}).catch(()=>{});inlineHint("Paragraph added. Tap it to edit.");requestAnimationFrame(()=>inlineRoot.lastElementChild?.scrollIntoView({block:"center"}))}catch(e){inlineHint(e.message)}finally{inlineSaving=false;syncInlineEditable();poll()}};
+window.addEventListener("beforeunload",e=>{if(inlineDraft&&draftMarkdown()!==inlineDraft.base){e.preventDefault();e.returnValue=""}});
 async function checkPresenter(){
  try{
   const {data:{session}}=await db.auth.getSession();
