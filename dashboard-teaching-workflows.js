@@ -13,15 +13,15 @@ const downloadText=(filename,body)=>{
 };
 const splitAnswerKey=text=>{
  const raw=String(text||"");
- const match=/^\\s{0,3}#{1,6}\\s*(?:answer\\s*key|answers\\s*(?:for\\s*teachers?|key)?|solutions?|teacher(?:'s)?\\s*(?:notes?|answers?))\\s*[:\\-]?\\s*$/im.exec(raw);
+ const match=/^\s{0,3}#{1,6}\s*(?:answer\s*key|answers\s*(?:for\s*teachers?|key)?|solutions?|teacher(?:'s)?\s*(?:notes?|answers?))\s*[:\-]?\s*$/im.exec(raw);
  return match?{worksheet:raw.slice(0,match.index).trim(),key:raw.slice(match.index+match[0].length).trim()}:{worksheet:raw.trim(),key:""};
 };
 const homeworkPart=text=>{
  const raw=String(text||"");
- const section=/^\\s{0,3}#{1,4}\\s*(?:homework|independent\\s+practice)\\s*[:\\-]?\\s*$/im.exec(raw);
+ const section=/^\s{0,3}#{1,4}\s*(?:homework|independent\s+practice)\s*[:\-]?\s*$/im.exec(raw);
  if(!section)return "";
  const rest=raw.slice(section.index+section[0].length);
- const end=/^\\s{0,3}#{1,4}\\s+\\S/m.exec(rest);
+ const end=/^\s{0,3}#{1,4}\s+\S/m.exec(rest);
  return (end?rest.slice(0,end.index):rest).trim();
 };
 const extractError=async error=>{
@@ -123,7 +123,7 @@ function renderHomework(){
   }
   actions.append(actionButton("View answers",()=>reviewHomework(h)));
   actions.append(actionButton("Download worksheet",()=>{
-   downloadText("helloearth-worksheet.txt",h.title+"\\n\\n"+splitAnswerKey(h.content_markdown).worksheet);
+   downloadText("helloearth-worksheet.txt",h.title+"\n\n"+splitAnswerKey(h.content_markdown).worksheet);
   }));
   row.append(main,actions);root.append(row);
  }
@@ -147,7 +147,7 @@ el("he-review-copy").addEventListener("click",async()=>{
 el("he-review-download").addEventListener("click",()=>{
  if(!reviewWorksheet)return;
  downloadText("helloearth-student-answers.txt",
-  reviewWorksheet.title+"\\n\\nSTUDENT ANSWERS\\n"+String(reviewWorksheet.student_answers||""));
+  reviewWorksheet.title+"\n\nSTUDENT ANSWERS\n"+String(reviewWorksheet.student_answers||""));
 });
 el("he-homework-link-copy").addEventListener("click",async()=>{
  const input=el("he-homework-link-url");
@@ -162,7 +162,7 @@ el("he-homework-form").addEventListener("submit",async e=>{
  e.preventDefault();
  const studentId=el("he-homework-student").value,title=clean(el("he-homework-title").value);
  const raw=clean(el("he-homework-content").value),split=splitAnswerKey(raw);
- const teacherKey=[clean(el("he-homework-key").value),split.key].filter(Boolean).join("\\n\\n");
+ const teacherKey=[clean(el("he-homework-key").value),split.key].filter(Boolean).join("\n\n");
  const lessonPlanId=el("he-homework-lesson-id").value||null;
  if(!studentId||!title||!split.worksheet){say("he-homework-feedback","Select a student, title and worksheet.",true);return}
  if(teacherKey.length>12000){say("he-homework-feedback","The private answer key must be shorter than 12,000 characters.",true);return}
