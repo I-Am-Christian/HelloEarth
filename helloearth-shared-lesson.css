@@ -38,3 +38,67 @@
 .share-zoom-tools{display:flex;align-items:center;gap:5px;flex-wrap:wrap}.share-zoom-tools button{min-width:36px;min-height:36px;touch-action:manipulation}.share-zoom-tools [hidden]{display:none!important}.share-page{overflow-x:auto;overscroll-behavior-x:contain}.share-paper{box-sizing:border-box}.share-zoom-tools #share-zoom-reset{min-width:58px;font-variant-numeric:tabular-nums}
 @media(max-width:730px){.share-zoom-tools{width:100%;gap:8px}.share-zoom-tools button{min-width:44px;min-height:44px;font-size:16px}.share-zoom-tools .share-follow{min-height:44px}.share-control-shell{max-height:45vh;overflow-y:auto}.share-page{padding-inline:8px}.share-paper{margin-inline:auto}}
 @media print{.share-paper{zoom:1!important}}
+
+/* Compact classroom dock: one sticky element, no fixed header offset. */
+.share-top-dock{position:sticky;top:0;z-index:30;isolation:isolate;background:#202943;border-bottom:1px solid #7c83aa55;box-shadow:0 6px 22px #05091b38;overflow:visible}
+.share-top-dock [hidden]{display:none!important}
+.share-top-dock .share-toolbar{position:static;z-index:auto;box-shadow:none;background:transparent;border:0;gap:8px;padding:8px clamp(10px,2vw,26px)}
+.share-top-dock .toolbar-brand{white-space:nowrap;font-size:16px}
+.share-top-dock .share-toolbar-actions{gap:6px;min-width:0;justify-content:flex-end}
+.share-top-dock .share-toolbar-actions span{font-size:11px;padding:4px 8px}
+.share-top-dock .share-control-shell{position:static;z-index:auto;max-height:none;overflow:visible;background:#26304b;border:0;border-top:1px solid #b4bad21b;backdrop-filter:none;padding:6px clamp(10px,2vw,26px) 7px}
+.share-top-dock .share-tools{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 14px;align-items:center;min-width:0}
+.share-main-row,.share-sync-row{display:flex;flex-wrap:wrap;gap:5px;align-items:center;min-width:0}
+.share-sync-row{gap:10px}
+.share-top-dock .share-zoom-tools{width:auto;gap:3px;flex-wrap:nowrap;flex-shrink:0;padding:2px;border-radius:9px;background:#171f34}
+.share-top-dock .share-tools button,.share-top-dock .share-toolbar-actions button,.share-menu summary{min-height:32px;padding:5px 8px;border:1px solid #a9b2d125;background:#303b58;border-radius:7px;font-size:11px;font-weight:650;color:#f0effb;white-space:nowrap;touch-action:manipulation}
+.share-top-dock .share-tools button:hover,.share-top-dock .share-toolbar-actions button:hover,.share-menu summary:hover{background:#43506e}
+.share-top-dock .share-tools button.selected,.share-top-dock .share-tools button[aria-pressed=true]{background:#d6c4f6;color:#291f43;border-color:#eee5ff}
+.share-top-dock .share-zoom-tools button{min-width:32px;font-size:15px}
+.share-top-dock .share-zoom-tools #share-zoom-reset{font-size:12px;min-width:49px}
+.share-tool-modes{display:flex;gap:3px;flex-wrap:nowrap}
+.share-tool-modes button{display:flex;gap:4px;align-items:center}
+.share-tool-modes button>span:first-child{font-size:14px;line-height:1}
+.share-top-dock .share-separator{height:22px;margin:0 2px}
+.share-top-dock .share-follow{background:#1e2941;border:1px solid #a4acc522;border-radius:7px;padding:5px 7px;min-height:30px;white-space:nowrap;font-weight:600;font-size:11px}
+.share-top-dock .share-color{gap:4px}
+.share-top-dock .share-color input[type=color]{width:32px;height:32px;border-radius:8px}
+.share-top-dock .share-meta{margin-top:5px;gap:4px 12px;font-size:10px;line-height:1.3}
+.share-menu{position:relative;flex:none}
+.share-menu summary{display:flex;align-items:center;gap:4px;cursor:pointer;list-style:none}
+.share-menu summary::-webkit-details-marker{display:none}
+.share-menu summary>span{border:0!important;padding:0!important}
+.share-menu[open]>summary{background:#d6c4f6;color:#291f43}
+.share-menu-panel{position:absolute;top:calc(100% + 7px);right:0;z-index:40;display:grid;gap:9px;width:max-content;max-width:min(300px,calc(100vw - 20px));padding:12px;border:1px solid #65718f;background:#26314e;color:#f1effb;border-radius:12px;box-shadow:0 12px 36px #090f25aa}
+.share-file-menu .share-menu-panel{min-width:160px}
+.share-style-panel{width:270px;font:12px system-ui}
+.share-style-panel strong{font-weight:650}
+.share-style-panel .share-swatches{gap:6px}
+.share-top-dock .share-style-panel .share-swatches button{width:24px;height:24px;min-height:24px;padding:0;border-radius:50%;background:var(--swatch);border:1px solid #ffffff88}
+.share-range{display:grid;grid-template-columns:1fr auto;align-items:center;gap:5px;font-size:12px}
+.share-range output{font-variant-numeric:tabular-nums;color:#e1ccff}
+.share-range input{grid-column:1/-1;width:100%;margin:3px 0;accent-color:#c5a8ee;cursor:pointer}
+.share-ink-preview{background:#8456d54d;color:#20253b;background-clip:padding-box;border:5px solid white;border-radius:7px;padding:8px;text-align:center;box-shadow:inset 0 0 0 100px #ffffff30}
+.share-top-dock button:focus-visible,.share-menu summary:focus-visible,.share-range input:focus-visible{outline:2px solid #e1ccff;outline-offset:2px}
+.share-top-dock button:disabled{opacity:.38;cursor:default}
+@media(max-width:730px){
+ .share-top-dock .share-toolbar{padding:6px 8px;gap:4px}
+ .share-top-dock .toolbar-brand{font-size:15px}
+ .share-top-dock .toolbar-brand span{display:none}
+ .share-top-dock .share-toolbar-actions{gap:4px;flex:1;flex-wrap:wrap}
+ .share-top-dock #share-countdown{display:none}
+ .share-top-dock .share-toolbar-actions #share-role{font-size:10px;padding:3px 5px}
+ .share-top-dock .share-control-shell{padding:5px 8px}
+ .share-top-dock .share-tools{gap:5px}
+ .share-main-row{gap:4px;width:100%}
+ .share-top-dock .share-tools button,.share-menu summary{min-height:38px;padding:5px 7px}
+ .share-top-dock .share-zoom-tools button{min-height:38px;min-width:33px;padding:4px}
+ .share-top-dock .share-follow{min-height:30px;padding:3px 6px}
+ .share-top-dock .share-meta #share-draw-hint{display:none}
+ .share-top-dock .share-meta{font-size:10px}
+ .share-menu{position:static}
+ .share-menu-panel{right:8px;top:calc(100% + 4px);max-height:55vh;overflow-y:auto;overscroll-behavior:contain}
+ .share-top-dock .share-separator{display:none}
+}
+@media(max-width:400px){.share-tool-modes button{min-width:34px;justify-content:center}.share-tool-modes button .share-tool-label{font-size:10px}.share-top-dock .share-color{font-size:0}.share-top-dock .share-toolbar-actions button{padding:5px 6px}}
+@media print{.share-top-dock{display:none!important}}
