@@ -83,7 +83,38 @@ async function ensureUser(){
 function presetLevel(){
  const s=students.find(s=>s.id===el("he-lesson-student").value);
  if(s&&levels.includes(s.cefr_level))el("he-lesson-level").value=s.cefr_level;
+ el("he-share-context").checked=s?.ai_context_enabled===true;
+ const topicField=el("he-lesson-topic");
+ if(topicField.dataset.autoSuggested&&topicField.value===topicField.dataset.autoSuggested){
+  topicField.value="";delete topicField.dataset.autoSuggested;
+ }
 }
+el("he-share-context").addEventListener("change",async event=>{
+ const chosen=students.find(s=>s.id===el("he-lesson-student").value);
+ const checked=event.target.checked;
+ if(!chosen){
+  event.target.checked=false;
+  say("he-ai-feedback","Choose a student before enabling profile personalisation.",true);
+  return;
+ }
+ try{
+  const tutor=await ensureUser();
+  const {error}=await db.from("atlas_students")
+    .update({ai_context_enabled:checked})
+    .eq("id",chosen.id).eq("tutor_id",tutor);
+  if(error)throw error;
+  chosen.ai_context_enabled=checked;
+  say("he-ai-feedback",checked?
+   "Personalisation enabled for this student. Nova will use learning goals, interests and skill focus.":
+   "Personalisation disabled for this student. Nova will use category and lesson history only.");
+ }catch(err){
+  event.target.checked=!checked;
+  say("he-ai-feedback","Couldn't save personalisation preference: "+err.message,true);
+ }
+});
+el("he-lesson-topic").addEventListener("input",event=>{
+ delete event.target.dataset.autoSuggested;
+});
 el("he-lesson-student").addEventListener("change",presetLevel);
 el("he-homework-due").value=dateToday();
 function listRow(parent,title,meta,body,actionText,onClick){
@@ -306,6 +337,8 @@ aiProvider.addEventListener("change",()=>{
 });
 async function generateWithHaiku(mode){
  const {topic,level,duration}=baseLesson();
+ const topicField=el("he-lesson-topic");
+ const requestTopic=topicField.dataset.autoSuggested===topic?"":topic;
  const category=el("he-lesson-category").value;
  const studentId=el("he-lesson-student").value;
  const byok=aiProvider.value==="anthropic-byok";
@@ -322,7 +355,7 @@ async function generateWithHaiku(mode){
   const {data:{session},error:authError}=await db.auth.getSession();
   if(authError||!session?.access_token)throw new Error("Session expired. Sign in again.");
   const useStudentProfile=el("he-share-context").checked;
-  const body={provider:byok?"anthropic-byok":"managed",mode,topic,cefr:level,
+  const body={provider:byok?"anthropic-byok":"managed",mode,topic:requestTopic,cefr:level,
    category,studentId,useStudentProfile,duration,
    instructions:el("he-lesson-instructions").value};
   if(byok)body.apiKey=ownKey;
@@ -336,7 +369,10 @@ async function generateWithHaiku(mode){
   }
   if(!data?.text)throw new Error(data?.error||"No workbook content was returned.");
   const resolvedTopic=String(data.topic||topic||"Personalised English lesson").slice(0,200);
-  if(!topic)el("he-lesson-topic").value=resolvedTopic;
+  if(!requestTopic){
+   el("he-lesson-topic").value=resolvedTopic;
+   el("he-lesson-topic").dataset.autoSuggested=resolvedTopic;
+  }
   const workbook=String(data.text).replace(/^\s*>\s*\*\*Note for the tutor:\*\*[^\n]*(?:\n>[^\n]*)*\n?/gim,"").trim().slice(0,100000);
   el("he-lesson-editor").value=workbook;
   let logged=false;
