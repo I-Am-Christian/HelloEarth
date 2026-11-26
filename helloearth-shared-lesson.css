@@ -263,3 +263,69 @@
 #share-content.he-inline-enabled [contenteditable=true]:hover{box-shadow:0 0 0 1px #bba6da66}
 #share-content.he-inline-enabled [contenteditable=true]:focus{outline:1px solid #9679bd;outline-offset:3px;background:#f9f6ff}
 @media print{.share-inline-actions{display:none!important}#share-content [contenteditable]{outline:none!important;box-shadow:none!important;background:transparent!important}}
+
+/* Classroom workspace: two independent, scroll-sticky communication rails. */
+@media screen {
+.share-top-dock .share-toolbar{padding:7px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.share-top-dock .share-toolbar-actions{margin-left:auto;justify-content:flex-end;gap:5px}
+.share-top-dock .share-toolbar-actions button,.share-top-dock .share-tools button,.share-top-dock .share-menu summary{min-height:30px;padding:5px 8px;border-radius:6px;font-size:11px}
+.share-top-dock .share-toolbar-actions #share-countdown{font-size:10px;border:0;padding:3px 5px;color:#aeb9d5}
+.share-top-dock .share-control-shell{padding:5px 14px}
+.share-top-dock .share-tools{justify-content:flex-start;gap:6px}
+.share-top-dock .share-main-row{width:auto;flex:1;gap:4px}
+.share-top-dock .share-sync-menu{margin-left:auto}
+.share-top-dock .share-sync-menu .share-sync-row{display:grid;gap:5px;min-width:190px}
+.share-top-dock .share-sync-menu:not([open]) .share-menu-panel{display:none}
+.share-top-dock .share-sync-menu .share-follow{white-space:normal}
+.share-top-dock .share-inline-actions{padding:3px 0;min-height:20px;font-size:10px;gap:5px}
+.share-top-dock .share-inline-actions span{min-width:0;color:#b5bdd6}
+.share-top-dock .share-meta{margin:0;padding:0;font-size:10px;color:#aebad4}
+.share-top-dock .share-meta #share-draw-hint{display:none}
+.share-top-dock .share-color{font-size:0}
+.share-top-dock .share-color input[type=color]{height:28px;width:28px}
+.share-classroom-layout,.share-classroom-layout.chat-closed,.share-classroom-layout:not(.chat-closed){--rail:minmax(220px,280px);display:grid;grid-template-columns:var(--rail) minmax(0,1fr) var(--rail);gap:12px;align-items:start;max-width:1800px;padding:12px 14px 24px;overflow:visible}
+.share-classroom-layout.dialogue-closed{grid-template-columns:minmax(0,1fr) var(--rail)}
+.share-classroom-layout.chat-closed{grid-template-columns:var(--rail) minmax(0,1fr)}
+.share-classroom-layout.dialogue-closed.chat-closed{grid-template-columns:minmax(0,1fr);max-width:1460px}
+.share-classroom-layout .share-dialogue-slot{grid-column:1;grid-row:1;position:sticky;top:calc(var(--share-dock-height,110px) + 12px);min-width:0;height:calc(100dvh - var(--share-dock-height,110px) - 24px);min-height:190px;max-height:800px;z-index:8}
+.share-classroom-layout .share-workbook-column{grid-column:2;grid-row:1;min-width:0;width:100%}
+.share-classroom-layout.dialogue-closed .share-workbook-column{grid-column:1}
+.share-classroom-layout .share-chat,.share-classroom-layout .share-chat:has(.share-chat-settings-details[open]){grid-column:3;grid-row:1;position:sticky;top:calc(var(--share-dock-height,110px) + 12px);align-self:start;max-width:none;width:100%;height:calc(100dvh - var(--share-dock-height,110px) - 24px);min-height:190px;max-height:800px;z-index:8}
+.share-classroom-layout.dialogue-closed .share-chat{grid-column:2}
+.share-classroom-layout .share-chat[hidden],.share-dialogue-slot[hidden]{display:none!important}
+.share-dialogue-slot .he-dialogue-panel{display:flex;flex-direction:column;width:100%;height:100%;margin:0;border-radius:12px;min-height:0;box-shadow:0 5px 20px #15182a22}
+.share-dialogue-slot .he-dialogue-top{flex-wrap:wrap;padding:10px;gap:5px}
+.share-dialogue-slot .he-dialogue-top strong{font-size:13px;flex:1}
+.share-dialogue-slot .he-dialogue-status{flex:0 0 100%;order:3;overflow-wrap:anywhere}
+.share-dialogue-slot .he-dialogue-controls{display:flex;gap:5px;padding:7px 9px;flex-wrap:wrap;flex:none}
+.share-dialogue-slot .he-dialogue-controls button{flex:1;min-width:0;padding:7px 6px}
+.share-dialogue-slot .he-dialogue-config{max-height:42%;overflow:auto;flex:none;border-bottom:1px solid #e0d9ed}
+.share-dialogue-slot .he-dialogue-config summary{font-size:11px;color:#655182;padding:7px 10px;cursor:pointer}
+.share-dialogue-slot .he-dialogue-settings{display:grid;gap:7px;padding:7px 10px}
+.share-dialogue-slot .he-dialogue-settings label{align-items:center;white-space:normal}
+.share-dialogue-slot .he-dialogue-settings select{max-width:100%;min-width:0;flex:1}
+.share-dialogue-slot .he-dialogue-settings small{line-height:1.45}
+.share-dialogue-slot .he-dialogue-diagnostic{margin:0;padding:6px 10px;font-size:11px;overflow-wrap:anywhere;color:#735c92;background:#ede8f6;flex:none;max-height:86px;overflow:auto}
+.share-dialogue-slot .he-dialogue-diagnostic:empty{display:none}
+.share-dialogue-slot .he-dialogue-log{height:auto;flex:1;min-height:45px;overflow-y:auto}
+.share-dialogue-slot .he-dialogue-foot{flex-wrap:wrap;flex:none;justify-content:flex-start;gap:5px}
+.share-dialogue-slot .he-dialogue-foot a{font-size:11px;color:#62438f}
+}
+@media screen and (max-width:1050px){
+.share-classroom-layout,.share-classroom-layout.chat-closed,.share-classroom-layout:not(.chat-closed),.share-classroom-layout.dialogue-closed,.share-classroom-layout.dialogue-closed.chat-closed{display:block;padding:8px 10px 20px}
+.share-classroom-layout .share-dialogue-slot,.share-classroom-layout .share-chat,.share-classroom-layout .share-chat:has(.share-chat-settings-details[open]){position:fixed;top:calc(var(--share-dock-height,110px) + 8px);height:min(420px,calc(100dvh - var(--share-dock-height,110px) - 16px));min-height:140px;width:min(270px,44vw);z-index:20;box-shadow:0 10px 32px #0b102477}
+.share-classroom-layout .share-dialogue-slot{left:8px;right:auto}
+.share-classroom-layout .share-chat,.share-classroom-layout .share-chat:has(.share-chat-settings-details[open]){right:8px;left:auto}
+.share-classroom-layout .share-workbook-column{width:100%}
+}
+@media screen and (max-width:600px){
+.share-top-dock .share-toolbar{padding:5px 8px}
+.share-top-dock .share-control-shell{padding:4px 8px}
+.share-top-dock .share-tools button,.share-top-dock .share-toolbar-actions button,.share-top-dock .share-menu summary{min-height:32px;padding:4px 6px}
+.share-top-dock .share-toolbar-actions{gap:3px}
+.share-top-dock .share-main-row{flex-basis:100%}
+.share-top-dock .share-tool-modes{gap:3px}
+.share-top-dock .share-sync-menu{margin-left:0}
+.share-classroom-layout .share-dialogue-slot,.share-classroom-layout .share-chat,.share-classroom-layout .share-chat:has(.share-chat-settings-details[open]){width:min(290px,86vw);height:min(330px,calc(100dvh - var(--share-dock-height,150px) - 16px))}
+}
+@media print{.share-dialogue-slot,.share-classroom-layout .share-chat{display:none!important}}
