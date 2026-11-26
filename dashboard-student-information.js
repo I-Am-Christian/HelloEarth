@@ -95,6 +95,9 @@ if(detail&&fields){
   }),
   button("✦ Ask Nova",()=>{
    document.getElementById("he-nova-launch")?.click();
+  }),
+  button("▥ Lesson reports",()=>{
+   if(selectedStudent?.id)window.HelloEarthLessonReports?.openForStudent?.(selectedStudent.id);
   })
  );
  observations.append(title,actions,list);
