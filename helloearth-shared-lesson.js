@@ -299,9 +299,40 @@ function syncChatLayout(){
  document.documentElement.style.setProperty("--share-dock-height",Math.ceil(dock?.getBoundingClientRect().height||0)+"px");
  document.documentElement.style.setProperty("--share-chat-height",Math.ceil(chatPanel.getBoundingClientRect().height||0)+"px");scheduleFollowLayout();
 }
-el("share-chat-toggle").onclick=()=>{if(!presenter&&canFollow&&syncEnabled){canFollow=false;follow.checked=false;msg("Follow teacher paused while you visit chat. Enable Follow scroll to resume.")}chatPanel.scrollIntoView({block:"start",behavior:"instant"});chatInput.focus({preventScroll:true});el("share-chat-log").scrollTop=el("share-chat-log").scrollHeight};
-el("share-chat-close").onclick=()=>{chatSettings.open=!chatSettings.open};
-chatSettings.addEventListener("toggle",()=>{el("share-chat-close").setAttribute("aria-expanded",String(chatSettings.open));syncChatLayout()});
+const classroomLayout=chatPanel.closest(".share-classroom-layout"),chatToggle=el("share-chat-toggle");
+function setChatOpen(open,visit=false){
+ const before=el("share-content").getBoundingClientRect(),line=readingLine();
+ const anchor=loaded&&before.top<=line&&before.bottom>line?getReadingAnchor():null;
+ chatPanel.hidden=!open;classroomLayout.classList.toggle("chat-closed",!open);
+ chatToggle.setAttribute("aria-expanded",String(open));chatToggle.title=open?"Close classroom chat":"Open classroom chat";
+ chatToggle.querySelector(".share-chat-toggle-label").textContent=open?"Close chat":"Chat";
+ if(open){chatUnread=0;el("share-chat-unread").hidden=true}
+ else chatSettings.open=false;
+ layoutPaper();syncChatLayout();
+ requestAnimationFrame(()=>{
+  paintStrokes();
+  if(open&&visit){
+   const rect=chatPanel.getBoundingClientRect(),dock=document.querySelector(".share-top-dock").getBoundingClientRect();
+   if(rect.top<dock.bottom||rect.top>=window.innerHeight){
+    if(!presenter&&canFollow&&syncEnabled){canFollow=false;follow.checked=false;msg("Follow teacher paused while you visit chat. Enable Follow scroll to resume.")}
+    chatPanel.scrollIntoView({block:"start",behavior:"instant"});
+   }
+   chatInput.focus({preventScroll:true});el("share-chat-log").scrollTop=el("share-chat-log").scrollHeight;
+  }else if(anchor&&anchor.block>=0){
+   const rect=contentBlocks()[anchor.block]?.getBoundingClientRect();
+   if(rect){let top=rect.top+anchor.fraction*rect.height;
+    if(Number.isInteger(anchor.offset)){try{const range=textRange(anchor.offset,anchor.offset+1)?.getClientRects()[0];if(range?.height)top=range.top}catch{}}
+    window.scrollBy({top:top-readingLine(),behavior:"instant"});
+   }
+  }
+  scheduleFollowLayout();
+ });
+ if(!open&&visit)chatToggle.focus({preventScroll:true});
+}
+chatToggle.onclick=()=>setChatOpen(chatPanel.hidden,true);
+el("share-chat-close").onclick=()=>setChatOpen(false,true);
+el("share-chat-settings-button").onclick=()=>{chatSettings.open=!chatSettings.open};
+chatSettings.addEventListener("toggle",()=>{el("share-chat-settings-button").setAttribute("aria-expanded",String(chatSettings.open));syncChatLayout()});
 if(window.ResizeObserver){const layoutObserver=new ResizeObserver(syncChatLayout);layoutObserver.observe(document.querySelector(".share-top-dock"));layoutObserver.observe(chatPanel)}
 window.addEventListener("resize",syncChatLayout);
 syncChatLayout();
