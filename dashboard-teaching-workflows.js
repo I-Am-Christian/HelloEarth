@@ -13,7 +13,7 @@ const downloadText=(filename,body)=>{
 };
 const splitAnswerKey=text=>{
  const raw=String(text||"");
- const match=/^\s{0,3}#{1,6}\s*(?:answer\s*key|answers\s*(?:for\s*teachers?|key)?|solutions?|teacher(?:'s)?\s*(?:notes?|answers?))\s*[:\-]?\s*$/im.exec(raw);
+ const match=/^\s{0,3}(?:#{1,6}\s*)?(?:\*\*)?(?:answer\s*key|answers\s*(?:for\s*teachers?|key)?|solutions?|teacher(?:'s)?\s*(?:notes?|answers?))(?:\*\*)?\s*[:\-]?\s*$/im.exec(raw);
  return match?{worksheet:raw.slice(0,match.index).trim(),key:raw.slice(match.index+match[0].length).trim()}:{worksheet:raw.trim(),key:""};
 };
 const homeworkPart=text=>{
@@ -122,18 +122,20 @@ function renderHomework(){
    actions.append(actionButton("Copy link",()=>copyLink(h.id)),actionButton("Open tab",()=>openLink(h.id)));
   }
   actions.append(actionButton("View answers",()=>reviewHomework(h)));
+  if(h.teacher_answer_key)actions.append(actionButton("Teacher key",()=>reviewHomework(h,true)));
   actions.append(actionButton("Download worksheet",()=>{
    downloadText("helloearth-worksheet.txt",h.title+"\n\n"+splitAnswerKey(h.content_markdown).worksheet);
   }));
   row.append(main,actions);root.append(row);
  }
 }
-function reviewHomework(h){
- reviewWorksheet=h;
- el("he-review-title").textContent=h.title;
- el("he-review-meta").textContent=selectedName(h.student_id)+" · "+(h.student_last_saved_at?
-  "Last saved "+new Date(h.student_last_saved_at).toLocaleString():"No answers saved yet");
- const answer=String(h.student_answers||"").trim();
+function reviewHomework(h,showKey=false){
+ reviewWorksheet={...h,reviewText:showKey?h.teacher_answer_key:(h.student_answers||"")};
+ el("he-review-title").textContent=(showKey?"Teacher answer key: ":"Student answers: ")+h.title;
+ el("he-review-meta").textContent=showKey?"Private tutor-only answers and marking notes.":
+  selectedName(h.student_id)+" · "+(h.student_last_saved_at?
+   "Last saved "+new Date(h.student_last_saved_at).toLocaleString():"No answers saved yet");
+ const answer=String(reviewWorksheet.reviewText||"").trim();
  el("he-review-content").textContent=answer||"No student responses saved yet.";
  const dialog=el("he-homework-review-dialog");
  if(typeof dialog.showModal==="function")dialog.showModal();
@@ -141,13 +143,13 @@ function reviewHomework(h){
 }
 el("he-review-copy").addEventListener("click",async()=>{
  if(!reviewWorksheet)return;
- try{await navigator.clipboard.writeText(reviewWorksheet.student_answers||"");}
+ try{await navigator.clipboard.writeText(reviewWorksheet.reviewText||"");}
  catch{say("he-homework-feedback","Couldn't copy answers. Use Download instead.",true)}
 });
 el("he-review-download").addEventListener("click",()=>{
  if(!reviewWorksheet)return;
  downloadText("helloearth-student-answers.txt",
-  reviewWorksheet.title+"\n\nSTUDENT ANSWERS\n"+String(reviewWorksheet.student_answers||""));
+  reviewWorksheet.title+"\n\n"+String(reviewWorksheet.reviewText||""));
 });
 el("he-homework-link-copy").addEventListener("click",async()=>{
  const input=el("he-homework-link-url");
