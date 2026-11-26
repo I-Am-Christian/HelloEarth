@@ -30,3 +30,7 @@
 .share-color input[type=color]{width:36px;height:32px;padding:2px;border:1px solid #8b96b3;border-radius:8px;background:conic-gradient(#f44,#ff4,#4f4,#4ff,#44f,#f4f,#f44);cursor:pointer}
 .share-color input[type=color]::-webkit-color-swatch-wrapper{padding:4px}.share-color input[type=color]::-webkit-color-swatch{border:1px solid white;border-radius:50%}
 .share-swatches{display:flex;gap:4px;align-items:center;flex-wrap:wrap}.share-swatches button,.share-swatches button[aria-pressed=true]{width:24px;height:24px;padding:0;border-radius:50%;background:var(--swatch);border:1px solid #ffffff88}.share-swatches button[aria-pressed=true]{outline:2px solid #fff;outline-offset:2px}
+
+.share-paper.is-text-highlighting #share-content,.share-paper.is-text-highlighting #share-content *{user-select:text!important;-webkit-user-select:text!important;cursor:text}
+.share-paper.is-text-highlighting .share-annotation-layer,.share-paper.is-text-highlighting .share-annotation-layer *{pointer-events:none!important;touch-action:auto!important}
+.share-paper.is-text-highlighting #share-content::selection,.share-paper.is-text-highlighting #share-content *::selection{background:#c7b2f4;color:#1f1730}
