@@ -191,7 +191,7 @@
 .share-classroom-layout .share-chat:has(.share-chat-settings-details[open]){height:clamp(160px,calc(100dvh - var(--share-dock-height,110px) - 24px),720px)}
 .share-classroom-layout.chat-closed{display:block;max-width:1460px}
 .share-classroom-layout .share-page{overflow-x:auto;overflow-y:hidden;max-width:100%;padding:0 0 14px;overflow-anchor:none}
-.share-paper-frame{position:relative;margin-inline:auto;min-width:0;max-width:none;overflow:visible}
+.share-paper-frame{position:relative;margin-inline:auto;min-width:0;max-width:none;overflow:hidden;border-radius:8px;background:#fff}
 .share-paper-frame .share-paper{position:absolute;top:0;left:0;margin:0!important;transform-origin:0 0;max-width:none;flex:none}
 .share-paper-frame .share-paper .workbook-body{min-width:0;overflow-wrap:break-word}
 .share-paper-frame .share-paper .workbook-table-wrap{max-width:100%}
