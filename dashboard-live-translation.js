@@ -1,5 +1,5 @@
 import {db} from "./supabase-client.js";
-const wrapper=document.createElement("div");wrapper.innerHTML="<section class=\"he-live-panel he-live-captions\" id=\"he-live-translate-panel\" aria-label=\"Live lesson captions and translations\" hidden>\n <div class=\"he-live-panel-header\"><h2>🎙 Live captions</h2><div>\n <button type=\"button\" id=\"he-live-translate-pin\" title=\"Open an always-on-top window when supported\">⧉</button>\n <button type=\"button\" id=\"he-live-translate-close\" aria-label=\"Close captions\">×</button></div></div>\n <p class=\"he-caption-subheading\">Transcribe first. Show optional translations in class and on a temporary student-view link.</p>\n <div class=\"he-caption-statusline\"><span id=\"he-caption-state\" class=\"he-caption-pill\">Not listening</span>\n <span id=\"he-caption-cloud\" class=\"he-caption-pill\">Checking speech service…</span>\n <span id=\"he-caption-time\">00:00</span></div>\n <div class=\"he-caption-grid\">\n  <label>Class audio source<select id=\"he-caption-source\">\n   <option value=\"mic\">My microphone</option><option value=\"tab\">Class browser tab audio</option>\n   <option value=\"both\">Class tab + my microphone</option>\n  </select></label>\n  <label>Speech recognition<select id=\"he-caption-engine\">\n   <option value=\"auto\" selected>Automatic / fallback</option>\n   <option value=\"device\">On-device (if installed)</option>\n   <option value=\"browser\">Browser speech service</option>\n   <option value=\"cloud\">Cloud captions (if connected)</option>\n  </select></label>\n </div>\n <div class=\"he-caption-grid he-translate-languages\">\n  <label>Spoken language<select id=\"he-translate-source\">\n   <option value=\"en\" selected>English</option><option value=\"pl\">Polish</option>\n   <option value=\"pt\">Portuguese</option><option value=\"es\">Spanish</option>\n   <option value=\"zh\">Chinese</option><option value=\"tr\">Turkish</option>\n   <option value=\"vi\">Vietnamese</option><option value=\"af\">Afrikaans</option>\n   <option value=\"fr\">French</option><option value=\"de\">German</option>\n   <option value=\"ru\">Russian</option><option value=\"ar\">Arabic</option>\n  </select></label>\n  <label>Translate into<select id=\"he-translate-target\">\n   <option value=\"en\">English</option><option value=\"pl\" selected>Polish</option>\n   <option value=\"pt\">Portuguese</option><option value=\"es\">Spanish</option>\n   <option value=\"zh\">Chinese</option><option value=\"tr\">Turkish</option>\n   <option value=\"vi\">Vietnamese</option><option value=\"af\">Afrikaans</option>\n   <option value=\"fr\">French</option><option value=\"de\">German</option>\n   <option value=\"ru\">Russian</option><option value=\"ar\">Arabic</option>\n  </select></label>\n </div>\n <div class=\"he-caption-setting-row\">\n  <label><input type=\"checkbox\" id=\"he-translate-auto\"><span>Translate finished captions automatically</span></label>\n  <button type=\"button\" id=\"he-caption-install\">Install offline speech pack</button>\n </div>\n <label class=\"he-caption-consent\"><input type=\"checkbox\" id=\"he-caption-consent\">\n <span>I have permission from all lesson participants (and a guardian where required) to transcribe this class, share captions if I choose, and use speech services.</span></label>\n <div class=\"he-caption-primary-actions\">\n  <button type=\"button\" id=\"he-translate-mic\" class=\"he-caption-primary\">▶ Start captions</button>\n  <button type=\"button\" id=\"he-caption-stop\" disabled>■ Stop captions</button>\n  <button type=\"button\" id=\"he-caption-share\">Share with student</button>\n </div>\n <div class=\"he-caption-setup\" id=\"he-caption-setup\" hidden></div>\n <p id=\"he-translate-status\" class=\"he-caption-status\" role=\"status\" aria-live=\"polite\">Start with microphone, or choose your lesson tab to capture class audio where the browser permits it.</p>\n <div class=\"he-caption-actions-line\"><strong class=\"he-caption-caption-title\">LIVE TRANSCRIPT</strong><div class=\"he-caption-secondary-actions\">\n  <button type=\"button\" id=\"he-caption-download\">Download</button>\n  <button type=\"button\" id=\"he-caption-report\">Use for report</button>\n  <button type=\"button\" id=\"he-caption-clear\">Clear</button>\n </div></div>\n <div id=\"he-caption-feed\" class=\"he-caption-stream\" aria-label=\"Live transcript\" role=\"log\" aria-live=\"polite\" aria-relevant=\"additions\">\n  <p id=\"he-caption-empty\" class=\"he-caption-activity\">Spoken phrases will appear here during the lesson.</p>\n </div>\n <div id=\"he-translate-interim\" class=\"he-caption-interim\" aria-live=\"polite\"></div>\n <div id=\"he-caption-share-box\" class=\"he-caption-share\" hidden>\n  <strong>Live student viewing link</strong>\n  <p>Only new captions are broadcast for up to 90 minutes. Anyone with the link can join, so share it privately.</p>\n  <div class=\"he-caption-share-line\"><input readonly id=\"he-caption-share-url\" aria-label=\"Student caption link\">\n   <button type=\"button\" id=\"he-caption-copy-url\">Copy link</button>\n   <button type=\"button\" id=\"he-caption-stop-share\">End sharing</button>\n  </div>\n </div>\n <div class=\"he-caption-text-entry\">\n  <textarea id=\"he-translate-input\" maxlength=\"600\" rows=\"2\" placeholder=\"Add a phrase manually or type text to translate…\"></textarea>\n  <button type=\"button\" id=\"he-translate-now\">Add / Translate</button>\n  <button type=\"button\" id=\"he-translate-copy\" title=\"Copy latest caption\">Copy last</button>\n </div>\n <p class=\"he-caption-activity\">For class-tab audio, select the Preply tab and enable “Share tab audio” in the browser prompt. Browser recognition may use external speech services; optional cloud captioning also sends short audio segments to the speech provider. Audio and live captions aren't automatically stored in student records.</p>\n</section>";
+const wrapper=document.createElement("div");wrapper.innerHTML="<section class=\"he-live-panel he-live-captions\" id=\"he-live-translate-panel\" aria-label=\"Live lesson captions and translations\" hidden>\n <div class=\"he-live-panel-header\"><h2>🎙 Live captions</h2><div>\n <button type=\"button\" id=\"he-live-translate-pin\" title=\"Open an always-on-top window when supported\">⧉</button>\n <button type=\"button\" id=\"he-live-translate-close\" aria-label=\"Close captions\">×</button></div></div>\n <p class=\"he-caption-subheading\">Transcribe first. Show optional translations in class and on a temporary student-view link.</p>\n <div class=\"he-caption-statusline\"><span id=\"he-caption-state\" class=\"he-caption-pill\">Not listening</span>\n <span id=\"he-caption-cloud\" class=\"he-caption-pill\">Checking speech service…</span>\n <span id=\"he-caption-time\">00:00</span></div>\n <div class=\"he-caption-grid\">\n  <label>Class audio source<select id=\"he-caption-source\">\n   <option value=\"mic\">My microphone</option><option value=\"tab\">Class browser tab audio</option>\n   <option value=\"both\">Class tab + my microphone</option>\n  </select></label>\n  <label>Speech recognition<select id=\"he-caption-engine\">\n   <option value=\"auto\" selected>Automatic / fallback</option>\n   <option value=\"device\">On-device (if installed)</option>\n   <option value=\"browser\">Browser speech service</option>\n   <option value=\"cloud\">Cloud captions (if connected)</option>\n  </select></label>\n </div>\n <div class=\"he-caption-grid he-translate-languages\">\n  <label>Spoken language<select id=\"he-translate-source\">\n   <option value=\"en\" selected>English</option><option value=\"pl\">Polish</option>\n   <option value=\"pt\">Portuguese</option><option value=\"es\">Spanish</option>\n   <option value=\"zh\">Chinese</option><option value=\"tr\">Turkish</option>\n   <option value=\"vi\">Vietnamese</option><option value=\"af\">Afrikaans</option>\n   <option value=\"fr\">French</option><option value=\"de\">German</option>\n   <option value=\"ru\">Russian</option><option value=\"ar\">Arabic</option>\n  </select></label>\n  <label>Translate into<select id=\"he-translate-target\">\n   <option value=\"en\">English</option><option value=\"pl\" selected>Polish</option>\n   <option value=\"pt\">Portuguese</option><option value=\"es\">Spanish</option>\n   <option value=\"zh\">Chinese</option><option value=\"tr\">Turkish</option>\n   <option value=\"vi\">Vietnamese</option><option value=\"af\">Afrikaans</option>\n   <option value=\"fr\">French</option><option value=\"de\">German</option>\n   <option value=\"ru\">Russian</option><option value=\"ar\">Arabic</option>\n  </select></label>\n </div>\n <div class=\"he-caption-setting-row\">\n  <label><input type=\"checkbox\" id=\"he-translate-auto\" checked><span>Translate spoken audio automatically</span></label>\n  <button type=\"button\" id=\"he-caption-install\">Install offline speech pack</button>\n </div>\n <div class=\"he-caption-setting-row\"><label><input type=\"checkbox\" id=\"he-translate-speak\"><span>Speak translations aloud (use headphones to avoid feedback)</span></label><button type=\"button\" id=\"he-translate-silence\">Stop translated audio</button></div>\n <label class=\"he-caption-consent\"><input type=\"checkbox\" id=\"he-caption-consent\">\n <span>I have permission from all lesson participants (and a guardian where required) to transcribe this class, share captions if I choose, and use speech services.</span></label>\n <div class=\"he-caption-primary-actions\">\n  <button type=\"button\" id=\"he-translate-mic\" class=\"he-caption-primary\">▶ Start captions</button>\n  <button type=\"button\" id=\"he-caption-stop\" disabled>■ Stop captions</button>\n  <button type=\"button\" id=\"he-caption-share\">Share with student</button>\n </div>\n <div class=\"he-caption-setup\" id=\"he-caption-setup\" hidden></div>\n <p id=\"he-translate-status\" class=\"he-caption-status\" role=\"status\" aria-live=\"polite\">Start with microphone, or choose your lesson tab to capture class audio where the browser permits it.</p>\n <div class=\"he-caption-actions-line\"><strong class=\"he-caption-caption-title\">LIVE TRANSCRIPT</strong><div class=\"he-caption-secondary-actions\">\n  <button type=\"button\" id=\"he-caption-download\">Download</button>\n  <button type=\"button\" id=\"he-caption-report\">Use for report</button>\n  <button type=\"button\" id=\"he-caption-clear\">Clear</button>\n </div></div>\n <div id=\"he-caption-feed\" class=\"he-caption-stream\" aria-label=\"Live transcript\" role=\"log\" aria-live=\"polite\" aria-relevant=\"additions\">\n  <p id=\"he-caption-empty\" class=\"he-caption-activity\">Spoken phrases will appear here during the lesson.</p>\n </div>\n <div id=\"he-translate-interim\" class=\"he-caption-interim\" aria-live=\"polite\"></div>\n <div id=\"he-caption-share-box\" class=\"he-caption-share\" hidden>\n  <strong>Live student viewing link</strong>\n  <p>Only new captions are broadcast for up to 90 minutes. Anyone with the link can join, so share it privately.</p>\n  <div class=\"he-caption-share-line\"><input readonly id=\"he-caption-share-url\" aria-label=\"Student caption link\">\n   <button type=\"button\" id=\"he-caption-copy-url\">Copy link</button>\n   <button type=\"button\" id=\"he-caption-stop-share\">End sharing</button>\n  </div>\n </div>\n <div class=\"he-caption-text-entry\">\n  <textarea id=\"he-translate-input\" maxlength=\"600\" rows=\"2\" placeholder=\"Add a phrase manually or type text to translate…\"></textarea>\n  <button type=\"button\" id=\"he-translate-now\">Add / Translate</button>\n  <button type=\"button\" id=\"he-translate-copy\" title=\"Copy latest caption\">Copy last</button>\n </div>\n <p class=\"he-caption-activity\">For class-tab audio, select the Preply tab and enable “Share tab audio” in the browser prompt. Browser recognition may use external speech services; optional cloud captioning also sends short audio segments to the speech provider. Audio and live captions aren't automatically stored in student records.</p>\n</section>";
 const panel=wrapper.firstElementChild;document.body.append(panel);
 const launch=document.createElement("button");launch.id="he-live-translate-launch";
 launch.type="button";launch.textContent="🎙 Live captions";
@@ -116,15 +116,36 @@ function addCaption(raw,who){
  segments.push(item);dirty=true;makeRow(item);
  broadcast({type:"caption",seq:item.seq,source:item.source,text:item.text});
  if(el("he-translate-auto").checked&&source.value!==target.value){
-  translationQueue.push(item);processTranslations();
+  item.translationSource=source.value;item.translationTarget=target.value;translationQueue.push(item);processTranslations();
  }
 }
 let nativeTranslator=null,nativePair="";
-async function translateLocal(text){
+function speakTranslation(text,lang){
+ if(!window.speechSynthesis||!window.SpeechSynthesisUtterance){say("Translated text is available, but this browser does not support audio playback.",true);return}
+ const utterance=new SpeechSynthesisUtterance(text);
+ utterance.lang=locale[lang]||lang;
+ const voices=window.speechSynthesis.getVoices();
+ const voice=voices.find(v=>v.lang.toLowerCase()===utterance.lang.toLowerCase())||voices.find(v=>v.lang.toLowerCase().split("-")[0]===lang);
+ if(voice)utterance.voice=voice;
+ utterance.onerror=e=>{if(!["canceled","interrupted"].includes(e.error))say("Translated audio unavailable: "+e.error,true)};
+ // Keep live playback current rather than building a long audio backlog.
+ window.speechSynthesis.cancel();
+ window.speechSynthesis.speak(utterance);
+}
+function silenceTranslation(){window.speechSynthesis?.cancel()}
+el("he-translate-silence").addEventListener("click",()=>{el("he-translate-speak").checked=false;silenceTranslation()});
+el("he-translate-speak").addEventListener("change",()=>{
+ if(!el("he-translate-speak").checked){silenceTranslation();return}
+ el("he-translate-auto").checked=true;
+ if(!window.speechSynthesis){el("he-translate-speak").checked=false;say("This browser does not support spoken translations.",true);return}
+ say("Spoken translations enabled. Use headphones so translated speech is not captured again.");
+});
+
+async function translateLocal(text,from,to){
  if(!window.Translator?.create||!window.Translator?.availability)return null;
  try{
-  const params={sourceLanguage:source.value,targetLanguage:target.value};
-  const key=source.value+"-"+target.value;
+  const params={sourceLanguage:from,targetLanguage:to};
+  const key=from+"-"+to;
   if(!nativeTranslator||nativePair!==key){
    if(await window.Translator.availability(params)!=="available")return null;
    nativeTranslator=await window.Translator.create(params);nativePair=key;
@@ -132,12 +153,12 @@ async function translateLocal(text){
   return String(await nativeTranslator.translate(text)).trim();
  }catch{return null}
 }
-async function translationFor(text){
- if(source.value===target.value)return text;
- const local=await translateLocal(text);
+async function translationFor(text,from,to){
+ if(from===to)return text;
+ const local=await translateLocal(text,from,to);
  if(local!==null)return local;
  const {data,error}=await db.functions.invoke("he-translate",{
-  body:{text:text.slice(0,580),source:source.value,target:target.value}
+  body:{text:text.slice(0,580),source:from,target:to}
  });
  if(error){
   let msg=error.message||"Translation service unavailable";
@@ -158,9 +179,12 @@ async function processTranslations(){
    const elapsed=Date.now()-lastTranslate;
    if(elapsed<3800)await new Promise(resolve=>setTimeout(resolve,3800-elapsed));
    lastTranslate=Date.now();
-   const translated=await translationFor(item.text);
+   const translated=await translationFor(item.text,item.translationSource,item.translationTarget);
+   if(!segments.includes(item))continue;
    item.translation=translated;
    item.translationNode.textContent=translated;item.translationNode.hidden=false;
+   const play=document.createElement("button");play.type="button";play.textContent="🔊 Play translation";play.addEventListener("click",()=>speakTranslation(translated,item.translationTarget));item.node.append(play);
+   if(listening&&el("he-translate-speak").checked)speakTranslation(translated,item.translationTarget);
    broadcast({type:"translation",seq:item.seq,translation:translated});
   }catch(error){
    say("Captions are working, but translation is currently unavailable: "+error.message,true);
@@ -177,6 +201,7 @@ function stopTracks(){
  if(mixedCtx){mixedCtx.close().catch(()=>{});mixedCtx=null}
 }
 function stopListening(flush=false){
+ silenceTranslation();
  if(flush&&mediaRecorder?.state==="recording")flushRecorder=mediaRecorder;
  listening=false;sessionRun++;
  if(recordTimer){clearTimeout(recordTimer);recordTimer=null}
