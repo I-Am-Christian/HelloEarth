@@ -61,6 +61,11 @@ function card(plan) {
     translate("{count} notes stored in total",{count:new Intl.NumberFormat("en-ZA").format(plan.max_notes_total)}),
     "Private Google / email sign-in",
     "CEFR levels, goals and student history",
+    plan.code==="studio"
+      ? "12 transcript-based lesson reports per month (planned)"
+      : plan.code==="growth"
+        ? "2 transcript-based lesson reports per month (planned)"
+        : "AI transcript reports available on Growth and Studio",
     ...plannedAiFeatures(plan)
   ];
   for (const feature of features) {
