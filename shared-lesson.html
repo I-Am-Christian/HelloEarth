@@ -1,0 +1,55 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive"><meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#1d2b46"><title>Shared Lesson | HelloEarth</title>
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="stylesheet" href="helloearth-lesson.css?v=20261126-first1">
+<link rel="stylesheet" href="helloearth-shared-lesson.css?v=20261126-share1">
+<script type="module" src="helloearth-shared-lesson.js?v=20261126-share1"></script></head>
+<body>
+<header class="lesson-toolbar share-toolbar">
+ <a href="index.html" class="toolbar-brand">✦ HelloEarth <span>Live Lesson</span></a>
+ <div class="share-toolbar-actions">
+  <span id="share-role">Student view</span>
+  <span id="share-countdown">Checking link…</span>
+  <button type="button" id="share-copy" disabled>Copy link</button>
+  <button type="button" id="share-download" disabled>Download .md</button>
+  <button type="button" id="share-print" disabled>Print / Save PDF</button>
+ </div>
+</header>
+<div class="share-control-shell">
+ <nav class="share-tools" aria-label="Shared lesson tools">
+  <label class="share-follow" id="share-follow-label"><input type="checkbox" id="share-follow" checked> Follow teacher</label>
+  <label class="share-follow" id="share-presenter-label" hidden><input type="checkbox" id="share-presenter-sync"> <strong>Sync students' scrolling</strong></label>
+  <div class="share-separator" aria-hidden="true"></div>
+  <div class="share-tool-modes" role="group" aria-label="Annotation tools">
+   <button type="button" data-tool="view" class="selected" aria-pressed="true">↕ Scroll</button>
+   <button type="button" data-tool="pen" aria-pressed="false">✎ Draw</button>
+   <button type="button" data-tool="highlight" aria-pressed="false">▰ Highlight</button>
+  </div>
+  <label class="share-color">Ink <select id="share-ink">
+    <option value="#8456d5">Purple</option><option value="#dc6a85">Pink</option>
+    <option value="#46a49a">Teal</option><option value="#dba84b">Gold</option>
+    <option value="#28385f">Navy</option>
+  </select></label>
+  <button type="button" id="share-undo" disabled>Undo</button>
+  <button type="button" id="share-clear" disabled>Clear</button>
+  <button type="button" id="share-end" hidden>End sharing</button>
+ </nav>
+ <div class="share-meta"><span id="share-connection" role="status" aria-live="polite">Opening lesson…</span>
+ <span id="share-draw-hint">Students can draw or highlight locally. Teacher annotations appear for everyone.</span></div>
+</div>
+<div id="share-error" class="share-error" role="alert" hidden></div>
+<main class="lesson-screen share-page">
+ <section class="lesson-paper share-paper" id="share-paper" aria-label="Shared classroom workbook">
+  <header class="paper-top"><div class="paper-identity"><div class="paper-brand">✦ helloearth<span>.</span></div><div class="paper-kicker">SHARED CLASSROOM WORKBOOK</div></div><div class="paper-identity-tag">LIVE LESSON</div></header>
+  <div class="paper-topic"><p class="paper-small">YOUR CLASSROOM</p><h1 id="share-title">Loading lesson…</h1>
+   <div class="paper-pills"><span id="share-level">CEFR</span><span id="share-duration">50 minutes</span><span id="share-date">Shared lesson</span></div>
+  </div>
+  <article id="share-content" class="workbook-body"></article>
+  <footer class="paper-footer"><span>HelloEarth · Classroom workbook</span><span>Private link · Not indexed</span></footer>
+  <svg id="share-annotations" class="share-annotation-layer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-label="Lesson drawing and highlighting layer"></svg>
+ </section>
+</main>
+<p class="share-footnote">Anyone with this valid link can view the lesson. Scrolling sync is optional; you can turn off Follow teacher to read at your own pace. Drawings on a student's screen are local to that browser; tutor drawings are shared. Check accuracy before relying on lesson content.</p>
+</body></html>
