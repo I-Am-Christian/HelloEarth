@@ -305,5 +305,12 @@ window.addEventListener("beforeunload",e=>{
   e.preventDefault();e.returnValue="";
  }
 });
+window.HelloEarthLessonReports={
+ openForStudent(id){
+  selectedLessonStudent=id;
+  el("reports-tab")?.click();
+  populateStudents(id);refresh();
+ }
+};
 populateStudents();statusLabel();
 if(!el("reports-view").hidden){loadPlan();refresh()}
