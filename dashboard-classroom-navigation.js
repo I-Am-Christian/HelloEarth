@@ -1,7 +1,21 @@
+import {db} from "./supabase-client.js";
 const byId=id=>document.getElementById(id);
 const view=id=>byId(id+"-tab")?.click();
 const profileLink=byId("he-student-dialogues");
-document.addEventListener("helloearth:student-opened",e=>{if(e.detail?.student?.id)profileLink.href="student-dialogues.html?student="+encodeURIComponent(e.detail.student.id)});
+let progressRequest=0;
+const progressCard=document.createElement("section");progressCard.className="he-recent-learning";progressCard.hidden=true;progressCard.setAttribute("translate","no");
+document.querySelector("#student-detail .ws-action-row")?.after(progressCard);
+document.addEventListener("helloearth:student-opened",async e=>{
+ const s=e.detail?.student;if(!s?.id)return;profileLink.href="student-dialogues.html?student="+encodeURIComponent(s.id);const request=++progressRequest;
+ progressCard.hidden=true;progressCard.replaceChildren();
+ const {data:{user}}=await db.auth.getUser();if(!user||request!==progressRequest)return;
+ const {data,error}=await db.from("he_lesson_reports").select("id,created_at,progress_data").eq("tutor_id",user.id).eq("student_id",s.id).not("progress_data","is",null).order("created_at",{ascending:false}).limit(3);
+ if(request!==progressRequest||error||!data?.length)return;
+ const heading=document.createElement("h3");heading.textContent="Recent lesson observations";progressCard.append(heading);
+ const hint=document.createElement("small");hint.textContent="AI draft · verify against the original speech. Confirmed CEFR and skill ratings are unchanged.";progressCard.append(hint);
+ for(const report of data){const p=report.progress_data||{},row=document.createElement("div");row.className="he-recent-learning-row";const date=document.createElement("strong");date.textContent=new Date(p.lessonStartedAt||report.created_at).toLocaleDateString();const summary=document.createElement("p");summary.textContent=p.summary||"Lesson review";row.append(date,summary);const next=document.createElement("small");next.textContent=(p.nextSteps||[]).length?"Next: "+p.nextSteps.join(" · "):"";row.append(next);progressCard.append(row)}
+ const link=document.createElement("a");link.className="ws-mini-btn";link.href=profileLink.href;link.textContent="Review lesson history & teacher feedback";progressCard.append(link);progressCard.hidden=false
+});
 const overview=byId("overview-view");
 if(overview){
  const section=document.createElement("section");section.className="he-daily-actions";section.setAttribute("aria-label","Quick actions");
