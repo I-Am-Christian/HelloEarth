@@ -10,13 +10,14 @@ const ns="http://www.w3.org/2000/svg";
 let loaded=false,presenter=false,lesson=null,latestUpdated="",sharedStrokes=[],localStrokes=[],tool="view",active=null;
 let dead=false,busyPoll=false,seen=false,syncEnabled=false,canFollow=true,isProgrammatic=false;
 let writing=false,pending=null,writeTimer=null,lastWrite=0;
+let inkChannel=null,inkReady=false,guestInk=new Map(),textInk=[],remoteText=new Map();const author=crypto.randomUUID();
 const paper=el("share-paper"),svg=el("share-annotations"),follow=el("share-follow"),presentSync=el("share-presenter-sync");
 function msg(content,error=false){
  const node=el("share-connection");node.textContent=content;
  node.style.color=error?"#ffb8c6":"#c7deee";
 }
 function failure(text){
- dead=true;loaded=false;
+ dead=true;loaded=false;if(inkChannel){db.removeChannel(inkChannel);inkReady=false}
  el("share-error").hidden=false;el("share-error").textContent=text;
  el("share-content").replaceChildren();
  el("share-title").textContent="Lesson unavailable";msg(text,true);
@@ -70,12 +71,57 @@ function drawStroke(stroke,local=false){
  path.setAttribute("data-ink",local?"local":"shared");
  return path;
 }
+function textNodes(){const walker=document.createTreeWalker(el("share-content"),NodeFilter.SHOW_TEXT);const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);return nodes}
+function textOffset(node,offset){const range=document.createRange();range.selectNodeContents(el("share-content"));range.setEnd(node,offset);return range.toString().length}
+function textRange(start,end){let a=null,b=null,n=0;for(const node of textNodes()){const next=n+node.length;if(!a&&start<=next)a=[node,Math.max(0,start-n)];if(!b&&end<=next)b=[node,Math.max(0,end-n)];n=next}if(!a||!b)return null;const range=document.createRange();range.setStart(...a);range.setEnd(...b);return range}
+function paintText(mark){
+ const range=textRange(mark.start,mark.end);if(!range)return;
+ const base=svg.getBoundingClientRect();if(!base.width||!base.height)return;
+ for(const rect of range.getClientRects()){
+  const node=document.createElementNS(ns,"rect");node.setAttribute("x",(rect.left-base.left)/base.width*1000);node.setAttribute("y",(rect.top-base.top)/base.height*1000);node.setAttribute("width",rect.width/base.width*1000);node.setAttribute("height",rect.height/base.height*1000);node.setAttribute("fill",mark.color);node.setAttribute("opacity",".28");svg.append(node);
+ }
+}
+const colors=new Set(["#8456d5","#dc6a85","#46a49a","#dba84b","#28385f"]);
+function validStroke(s){return s&&["pen","highlight"].includes(s.tool)&&colors.has(s.color)&&Array.isArray(s.points)&&s.points.length>=2&&s.points.length<=320&&s.points.every(p=>Array.isArray(p)&&p.length===2&&p.every(n=>typeof n==="number"&&n>=0&&n<=1))}
+function validMark(m){return m&&colors.has(m.color)&&Number.isInteger(m.start)&&Number.isInteger(m.end)&&m.start>=0&&m.end>m.start&&m.end<=el("share-content").textContent.length}
+function sendInk(){if(!inkReady||dead)return;inkChannel.send({type:"broadcast",event:"ink",payload:{author,strokes:presenter?[]:localStrokes.slice(-60),text:textInk.slice(-100)}}).catch(()=>msg("Annotation connection interrupted.",true))}
+async function connectInk(){
+ const bytes=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(token));
+ const room=Array.from(new Uint8Array(bytes),n=>n.toString(16).padStart(2,"0")).join("");
+ inkChannel=db.channel("he-lesson-ink-"+room,{config:{broadcast:{self:false,ack:true}}});
+ inkChannel.on("broadcast",{event:"ink"},({payload:p})=>{
+  if(dead||!p||typeof p.author!=="string"||p.author===author||p.author.length>64||(!guestInk.has(p.author)&&guestInk.size>=40))return;
+  if(Array.isArray(p.strokes))guestInk.set(p.author,p.strokes.slice(0,60).filter(validStroke));
+  if(Array.isArray(p.text))remoteText.set(p.author,p.text.slice(0,100).filter(validMark));
+  paintStrokes();
+ }).on("broadcast",{event:"request"},()=>sendInk()).subscribe(status=>{
+  inkReady=status==="SUBSCRIBED";if(inkReady){sendInk();inkChannel.send({type:"broadcast",event:"request",payload:{}})}
+ });
+}
+function highlightSelection(){
+ if(dead||!loaded||tool!=="text")return;
+ const selection=window.getSelection();if(!selection||selection.isCollapsed||!selection.rangeCount)return;
+ const range=selection.getRangeAt(0),content=el("share-content");
+ if(!content.contains(range.startContainer)||!content.contains(range.endContainer))return;
+ const start=textOffset(range.startContainer,range.startOffset),end=textOffset(range.endContainer,range.endOffset);
+ if(end<=start)return;
+ textInk.push({start,end,color:el("share-ink").value});if(textInk.length>100)textInk.shift();
+ selection.removeAllRanges();paintStrokes();sendInk();
+}
+const highlightButton=document.createElement("button");highlightButton.type="button";highlightButton.textContent="Apply text highlight";highlightButton.hidden=true;
+highlightButton.addEventListener("pointerdown",e=>e.preventDefault());highlightButton.addEventListener("click",highlightSelection);
+document.querySelector(".share-tool-modes").after(highlightButton);
+document.addEventListener("keydown",e=>{if(tool==="text"&&e.key==="Enter"&&!["INPUT","SELECT","BUTTON","TEXTAREA"].includes(document.activeElement?.tagName)){highlightSelection()}});
+window.addEventListener("resize",()=>paintStrokes());if(window.ResizeObserver)new ResizeObserver(()=>paintStrokes()).observe(paper);
 function paintStrokes(){
  svg.replaceChildren();
  for(const stroke of sharedStrokes)svg.append(drawStroke(stroke));
+ for(const strokes of guestInk.values())for(const stroke of strokes)svg.append(drawStroke(stroke));
+ for(const marks of remoteText.values())for(const mark of marks)paintText(mark);
+ for(const mark of textInk)paintText(mark);
  for(const stroke of localStrokes)svg.append(drawStroke(stroke,true));
  if(active)svg.append(drawStroke(active,true));
- const canUndo=presenter?sharedStrokes.length>0:localStrokes.length>0;
+ const canUndo=textInk.length>0||(presenter?sharedStrokes.length>0:localStrokes.length>0);
  el("share-undo").disabled=!canUndo;
  el("share-clear").disabled=!canUndo;
 }
@@ -85,10 +131,9 @@ function setTool(next){
   const on=btn.dataset.tool===tool;btn.classList.toggle("selected",on);
   btn.setAttribute("aria-pressed",String(on));
  }
- svg.classList.toggle("is-annotating",tool!=="view");
- el("share-draw-hint").textContent=tool==="view"?
-  (presenter?"Presenters can draw directly on the workbook; annotations appear to students.":"Your annotations remain local. Teacher marks appear for everyone.") :
-  (presenter?"Drawing is shared with lesson viewers.":"Your drawing stays on your screen and is not sent to the tutor.");
+ svg.classList.toggle("is-annotating",tool==="pen"||tool==="highlight");
+ highlightButton.hidden=tool!=="text";
+ el("share-draw-hint").textContent=tool==="text"?"Select words with your mouse or touch, then Apply text highlight.": "Teacher and student annotations are shared live while connected.";
  paintStrokes();
 }
 function pointFrom(event){
@@ -121,7 +166,7 @@ function finish(event){
   queue({annotations:sharedStrokes});
  }else{
   localStrokes.push(stroke);
-  if(localStrokes.length>150)localStrokes.shift();
+  if(localStrokes.length>60)localStrokes.shift();sendInk();
  }
  paintStrokes();
 }
@@ -149,16 +194,18 @@ async function flush(){
  }
 }
 el("share-undo").addEventListener("click",()=>{
- if(presenter){
-  if(sharedStrokes.length){sharedStrokes.pop();queue({annotations:sharedStrokes})}
- }else localStrokes.pop();
+ if(tool==="text"&&textInk.length)textInk.pop();
+ else if(presenter&&sharedStrokes.length){sharedStrokes.pop();queue({annotations:sharedStrokes})}
+ else if(!presenter&&localStrokes.length)localStrokes.pop();
+ else textInk.pop();sendInk();
  paintStrokes();
 });
 el("share-clear").addEventListener("click",()=>{
- if(!confirm(presenter?"Clear all tutor drawing marks for everyone?":"Clear your local annotations?"))return;
+ if(!confirm("Clear your own annotations for everyone?"))return;
+ textInk=[];sendInk();
  if(presenter){sharedStrokes=[];queue({annotations:[]})}
  else localStrokes=[];
- paintStrokes();
+ sendInk();paintStrokes();
 });
 for(const btn of document.querySelectorAll("[data-tool]"))btn.addEventListener("click",()=>setTool(btn.dataset.tool));
 el("share-follow").addEventListener("change",()=>{
@@ -269,6 +316,7 @@ async function open(){
   updateState(response.state);paintStrokes();remaining();
   msg("Lesson loaded. Checking if you're the presenter…");
   await checkPresenter();
+  connectInk().catch(()=>msg("Live annotation connection unavailable.",true));
   if(!presenter)msg("Ready to read · no login required. Use Follow teacher to sync scrolling.");
   setInterval(()=>{remaining();poll()},1700);
  }catch(error){failure(error.message)}
