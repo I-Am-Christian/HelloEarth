@@ -13,7 +13,7 @@ const locale={en:"en-US",pl:"pl-PL",pt:"pt-BR",es:"es-ES",zh:"zh-CN",tr:"tr-TR",
 let listening=false,activeEngine="",audioStream=null,displayStream=null,micStream=null,mixedCtx=null;
 let recognition=null,mediaRecorder=null,recordTimer=null,clockTimer=null,sessionStarted=0,sessionRun=0;
 let uploadCount=0,lastError="",pip=null,closing=false,cloud={cloudAvailable:false,eligible:false,cloudConfigured:false};
-let segments=[],seq=0,interim="",translationQueue=[],translateBusy=false,lastTranslate=0;
+let segments=[],seq=0,interim="",translationQueue=[],translateBusy=false,lastTranslate=0,dirty=false;
 let room=null,roomChannel=null,roomKey=null,roomUntil=0,roomReady=false,roomUrl="";
 const cap=160000,maxRows=300;
 const say=(text,error=false)=>{
@@ -112,7 +112,7 @@ function addCaption(raw,who){
   stopListening();return;
  }
  const item={seq:++seq,created:Date.now(),source:who||"Speech",text,translation:""};
- segments.push(item);makeRow(item);
+ segments.push(item);dirty=true;makeRow(item);
  broadcast({type:"caption",seq:item.seq,source:item.source,text:item.text});
  if(el("he-translate-auto").checked&&source.value!==target.value){
   translationQueue.push(item);processTranslations();
@@ -365,13 +365,15 @@ async function startListening(){
   say("Confirm consent from class participants before transcribing audio.",true);return;
  }
  if(!navigator.mediaDevices){say("Microphone capture requires a secure browser and HTTPS.",true);return}
- listening=true;sessionStarted=Date.now();sessionRun++;
+ listening=true;sessionStarted=Date.now();const currentRun=++sessionRun;
  const choice=el("he-caption-engine").value;
  el("he-translate-interim").textContent="";
  updateState();
  try{
   await obtainAudio();
+  if(!listening||sessionRun!==currentRun){stopTracks();return}
   const offline=await localAvailability();
+  if(!listening||sessionRun!==currentRun){stopTracks();return}
   if(choice==="device"){
    if(offline!=="available")throw Error("On-device language pack isn't installed. Select Install offline speech pack first.");
    await startBrowser(true);
@@ -431,11 +433,13 @@ el("he-caption-stop").addEventListener("click",()=>{stopListening();say("Transcr
 el("he-caption-share").addEventListener("click",()=>startSharing().catch(e=>say(e.message,true)));
 el("he-caption-stop-share").addEventListener("click",()=>{endSharing();say("Student viewing link stopped receiving captions.")});
 el("he-caption-copy-url").addEventListener("click",()=>copy(roomUrl));
-el("he-caption-download").addEventListener("click",()=>download("helloearth-class-captions.txt",recordsText()));
+el("he-caption-download").addEventListener("click",()=>{
+ download("helloearth-class-captions.txt",recordsText());dirty=false;
+});
 el("he-caption-clear").addEventListener("click",()=>{
  if(listening){say("Stop live captions before clearing the transcript.",true);return}
  if(segments.length&&!confirm("Clear the transcript from this browser tab?"))return;
- segments=[];seq=0;translationQueue.length=0;feed.replaceChildren();
+ segments=[];seq=0;dirty=false;translationQueue.length=0;feed.replaceChildren();
  const p=document.createElement("p");p.id="he-caption-empty";p.className="he-caption-activity";
  p.textContent="Captions cleared. Start a new session whenever you're ready.";feed.append(p);
  say("Transcript cleared from this tab.");
@@ -448,7 +452,7 @@ el("he-caption-report").addEventListener("click",()=>{
  if(complete.length>35000)alert("Lesson Reports currently analyses up to 35,000 characters at a time. The final 35,000 characters will be imported; download the full class transcript separately.");
  if(window.HelloEarthLessonReports?.useTranscript){
   window.HelloEarthLessonReports.useTranscript(transcript);
-  panel.hidden=true;document.getElementById("reports-tab")?.click();
+  dirty=false;panel.hidden=true;document.getElementById("reports-tab")?.click();
  }else{
   copy(transcript);say("Transcript copied. Paste it in Lesson Reports.");
  }
@@ -487,6 +491,6 @@ el("he-live-translate-pin").addEventListener("click",async()=>{
 });
 window.HelloEarthLiveCaptions={show,getTranscript:recordsText,stop:stopListening};
 window.addEventListener("beforeunload",event=>{
- if(listening){event.preventDefault();event.returnValue=""}
+ if(listening||dirty){event.preventDefault();event.returnValue=""}
 });
 updateState();updateCloud();
