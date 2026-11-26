@@ -4,8 +4,8 @@
 <meta name="theme-color" content="#1d2b46"><title>Shared Lesson | HelloEarth</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="stylesheet" href="helloearth-lesson.css?v=20261126-first1">
-<link rel="stylesheet" href="helloearth-shared-lesson.css?v=20261126-inline2">
-<script type="module" src="helloearth-shared-lesson.js?v=20261126-inline2"></script><link rel="stylesheet" href="page-i18n.css?v=20261126-all1"><script src="site-translation.js?v=20261126-all1" defer></script><script src="page-i18n.js?v=20261126-all1" defer></script></head>
+<link rel="stylesheet" href="helloearth-shared-lesson.css?v=20261126-classroom-dock1">
+<script type="module" src="helloearth-shared-lesson.js?v=20261126-classroom-dock1"></script><link rel="stylesheet" href="page-i18n.css?v=20261126-all1"><script src="site-translation.js?v=20261126-all1" defer></script><script src="page-i18n.js?v=20261126-all1" defer></script></head>
 <body>
 <div class="share-top-dock">
 <header class="lesson-toolbar share-toolbar">
@@ -15,7 +15,7 @@
   <span id="share-presence" class="share-presence" data-state="waiting" role="status" aria-live="polite"><i aria-hidden="true"></i><span id="share-presence-text">Connecting…</span></span>
   <span id="share-countdown">Checking link…</span>
   <button type="button" id="share-copy" disabled title="Copy lesson link">Copy link</button><button type="button" id="share-edit-workbook" hidden>✎ Edit lesson</button>
-  <button type="button" id="share-chat-toggle" aria-controls="share-chat" aria-expanded="true" title="Close classroom chat"><span class="share-chat-toggle-label">Close chat</span> <span id="share-chat-unread" hidden>0</span></button>
+  <button type="button" id="share-chat-toggle" aria-controls="share-chat" aria-expanded="true" title="Close classroom chat"><span class="share-chat-toggle-label">Chat</span> <span id="share-chat-unread" hidden>0</span></button>
   <details class="share-menu share-file-menu"><summary aria-label="More lesson actions">More <span aria-hidden="true">⌄</span></summary><div class="share-menu-panel"><button type="button" id="share-download" disabled>Download .md</button><button type="button" id="share-print" disabled>Print / Save PDF</button><button type="button" id="share-end" hidden>End sharing</button></div></details>
  </div>
 </header>
@@ -27,7 +27,7 @@
 </div>
 <div class="share-separator" aria-hidden="true"></div>
   <div class="share-tool-modes" role="group" aria-label="Annotation tools">
-   <button type="button" data-tool="view" class="selected" aria-pressed="true"><span aria-hidden="true">↕</span><span class="share-tool-label">Scroll</span></button>
+   <button type="button" data-tool="view" class="selected" aria-pressed="true"><span aria-hidden="true">↕</span><span class="share-tool-label">Edit / scroll</span></button>
    <button type="button" data-tool="pen" aria-pressed="false"><span aria-hidden="true">✎</span><span class="share-tool-label">Draw</span></button>
    <button type="button" data-tool="highlight" aria-pressed="false"><span aria-hidden="true">▰</span><span class="share-tool-label">Marker</span></button>
    <button type="button" data-tool="text" aria-pressed="false"><span aria-hidden="true">T</span><span class="share-tool-label">Highlight text</span></button><button type="button" data-tool="type" id="share-type-tool" aria-pressed="false" disabled title="Place editable text on the workbook"><span aria-hidden="true">Aa</span><span class="share-tool-label">Add text</span></button><button type="button" data-tool="underline" aria-pressed="false"><span aria-hidden="true" style="text-decoration:underline">U</span><span class="share-tool-label">Underline</span></button>
@@ -42,14 +42,14 @@
   <div id="share-ink-preview" class="share-ink-preview">Sample highlighted text</div><button type="button" id="share-style-reset">Reset style</button></div></details>
   <button type="button" id="share-undo" disabled title="Undo your last annotation" aria-label="Undo annotation">↶</button>
   <button type="button" id="share-clear" disabled title="Clear your annotations" aria-label="Clear annotations">Clear</button>
-  </div><div class="share-sync-row"><label class="share-follow" id="share-student-edit-label" hidden><input type="checkbox" id="share-student-edit"> Allow student editing</label><label class="share-follow" id="share-follow-label"><input type="checkbox" id="share-follow" checked> Follow scroll</label><label class="share-follow" id="share-presenter-label" hidden><input type="checkbox" id="share-presenter-sync"> Sync scroll</label><label class="share-follow" id="share-zoom-follow-label"><input type="checkbox" id="share-zoom-follow" checked> Follow zoom</label><label class="share-follow" id="share-zoom-sync-label" hidden><input type="checkbox" id="share-zoom-sync"> Sync zoom</label><label class="share-follow" id="share-cursor-label"><input type="checkbox" id="share-cursor-sync" checked> Share cursor</label></div>
+  </div><details class="share-menu share-sync-menu"><summary>Sync &amp; access <span aria-hidden="true">⌄</span></summary><div class="share-menu-panel share-sync-row"><label class="share-follow" id="share-student-edit-label" hidden><input type="checkbox" id="share-student-edit"> Allow student editing</label><label class="share-follow" id="share-follow-label"><input type="checkbox" id="share-follow" checked> Follow scroll</label><label class="share-follow" id="share-presenter-label" hidden><input type="checkbox" id="share-presenter-sync"> Sync scroll</label><label class="share-follow" id="share-zoom-follow-label"><input type="checkbox" id="share-zoom-follow" checked> Follow zoom</label><label class="share-follow" id="share-zoom-sync-label" hidden><input type="checkbox" id="share-zoom-sync"> Sync zoom</label><label class="share-follow" id="share-cursor-label"><input type="checkbox" id="share-cursor-sync" checked> Share cursor</label></div></details>
  </nav>
- <div id="share-inline-actions" class="share-inline-actions" translate="no"><span id="share-inline-status" role="status">Tap any text to edit.</span><button type="button" id="share-inline-add" disabled>+ Paragraph</button><button type="button" id="share-inline-save" disabled>Save edit</button><button type="button" id="share-inline-discard" disabled>Discard</button><button type="button" id="share-inline-copy" disabled>Copy draft</button></div><div class="share-meta"><span id="share-connection" role="status" aria-live="polite">Opening lesson…</span>
+ <div id="share-inline-actions" class="share-inline-actions" translate="no"><span id="share-inline-status" role="status">Tap text to edit.</span><button type="button" id="share-inline-add" disabled>+ Paragraph</button><button type="button" id="share-inline-save" disabled>Save edit</button><button type="button" id="share-inline-discard" disabled>Discard</button><button type="button" id="share-inline-copy" disabled>Copy draft</button></div><div class="share-meta"><span id="share-connection" role="status" aria-live="polite">Opening lesson…</span>
  <span id="share-draw-hint">Teacher and student annotations are shared live while connected.</span></div>
 </div>
 </div>
 <div id="share-error" class="share-error" role="alert" hidden></div>
-<div class="share-classroom-layout"><div class="share-workbook-column"><main class="lesson-screen share-page">
+<div class="share-classroom-layout dialogue-closed"><div id="share-dialogue-slot" class="share-dialogue-slot" hidden></div><div class="share-workbook-column"><main class="lesson-screen share-page">
  <div class="share-paper-frame" id="share-paper-frame">
  <section class="lesson-paper share-paper" id="share-paper" aria-label="Shared classroom workbook">
   <header class="paper-top"><div class="paper-identity"><div class="paper-brand">✦ helloearth<span>.</span></div><div class="paper-kicker">SHARED CLASSROOM WORKBOOK</div></div><div class="paper-identity-tag">LIVE LESSON</div></header>
