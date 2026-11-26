@@ -11,6 +11,7 @@ let loaded=false,presenter=false,lesson=null,latestUpdated="",sharedStrokes=[],l
 let dead=false,busyPoll=false,seen=false,syncEnabled=false,canFollow=true,isProgrammatic=false;
 let writing=false,pending=null,writeTimer=null,lastWrite=0;
 let inkChannel=null,inkReady=false,guestInk=new Map(),textInk=[],remoteText=new Map();const author=crypto.randomUUID();
+let presenceReady=false,presenceTracked=false,presenceSynced=false;
 const paper=el("share-paper"),svg=el("share-annotations"),follow=el("share-follow"),presentSync=el("share-presenter-sync");
 let zoom=100,teacherZoom=100,zoomSync=false,teacherZoomSync=false,zoomRevision=0,remoteZoomRevision=-1;
 const zoomFollow=el("share-zoom-follow"),zoomControl=el("share-zoom-sync");
@@ -43,6 +44,7 @@ function msg(content,error=false){
  node.style.color=error?"#ffb8c6":"#c7deee";
 }
 function failure(text){
+ presenceReady=false;presenceTracked=false;presenceSynced=false;showPresence("offline","Disconnected","Lesson connection ended");
  dead=true;loaded=false;if(inkChannel){db.removeChannel(inkChannel);inkReady=false}
  el("share-error").hidden=false;el("share-error").textContent=text;
  el("share-content").replaceChildren();
@@ -130,11 +132,39 @@ inkPicker.addEventListener("input",updateSwatches);updateSwatches();
 function validStroke(s){return s&&["pen","highlight"].includes(s.tool)&&colors.has(s.color)&&Array.isArray(s.points)&&s.points.length>=2&&s.points.length<=320&&s.points.every(p=>Array.isArray(p)&&p.length===2&&p.every(n=>typeof n==="number"&&n>=0&&n<=1))}
 function validMark(m){return m&&colors.has(m.color)&&Number.isInteger(m.start)&&Number.isInteger(m.end)&&m.start>=0&&m.end>m.start&&m.end<=el("share-content").textContent.length}
 function sendInk(){if(!inkReady||dead)return;inkChannel.send({type:"broadcast",event:"ink",payload:{author,strokes:localStrokes.slice(-60),text:textInk.slice(-100)}}).catch(()=>msg("Annotation connection interrupted.",true))}
+function showPresence(state,label,detail){
+ const indicator=el("share-presence");
+ indicator.dataset.state=state;el("share-presence-text").textContent=label;
+ indicator.title=detail;indicator.setAttribute("aria-label",detail);
+}
+function updatePresence(){
+ if(dead)return;
+ if(!presenceReady||!presenceTracked||!presenceSynced||!inkChannel){
+  showPresence("waiting","Connecting…","Checking who has joined the lesson");return;
+ }
+ const state=inkChannel.presenceState();
+ const others=Object.entries(state).filter(([key,metas])=>key!==author&&Array.isArray(metas)&&metas.length>0);
+ const count=others.length;
+ if(!count){showPresence("alone","Only you online","No other connected lesson tabs");return}
+ showPresence("online",count+(count===1?" other online":" others online"),count+" other connected lesson "+(count===1?"tab":"tabs")+"; "+(count+1)+" including you");
+}
+async function trackPresence(){
+ try{
+  const result=await inkChannel.track({role:presenter?"teacher":"viewer"});
+  if(result!=="ok")throw Error("Presence tracking unavailable");
+  presenceTracked=true;updatePresence();
+ }catch{
+  presenceTracked=false;showPresence("offline","Status unavailable","Participant status could not be verified");
+ }
+}
+window.addEventListener("pagehide",()=>{if(inkChannel&&presenceTracked)inkChannel.untrack().catch(()=>{})});
+window.addEventListener("pageshow",e=>{if(e.persisted&&inkReady&&!dead)trackPresence()});
 async function connectInk(){
  const bytes=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(token));
  const room=Array.from(new Uint8Array(bytes),n=>n.toString(16).padStart(2,"0")).join("");
- inkChannel=db.channel("he-lesson-ink-"+room,{config:{broadcast:{self:false,ack:true}}});
- inkChannel.on("broadcast",{event:"ink"},({payload:p})=>{
+ inkChannel=db.channel("he-lesson-ink-"+room,{config:{broadcast:{self:false,ack:true},presence:{key:author}}});
+ inkChannel.on("presence",{event:"sync"},()=>{presenceSynced=true;updatePresence()})
+ .on("broadcast",{event:"ink"},({payload:p})=>{
   if(dead||!p||typeof p.author!=="string"||p.author===author||p.author.length>64||(!guestInk.has(p.author)&&guestInk.size>=40))return;
   if(Array.isArray(p.strokes))guestInk.set(p.author,p.strokes.slice(0,60).filter(validStroke));
   if(Array.isArray(p.text))remoteText.set(p.author,p.text.slice(0,100).filter(validMark));
@@ -145,7 +175,9 @@ async function connectInk(){
   if(teacherZoomSync&&zoomFollow.checked)applyZoom(teacherZoom);
  }).on("broadcast",{event:"zoom-request"},()=>sendZoom())
  .on("broadcast",{event:"request"},()=>{sendInk();sendZoom()}).subscribe(status=>{
-  inkReady=status==="SUBSCRIBED";if(inkReady){sendInk();sendZoom();inkChannel.send({type:"broadcast",event:"request",payload:{}})}
+  inkReady=status==="SUBSCRIBED";presenceReady=inkReady;presenceTracked=false;
+  if(inkReady){updatePresence();trackPresence();sendInk();sendZoom();inkChannel.send({type:"broadcast",event:"request",payload:{}})}
+  else{presenceSynced=false;showPresence("offline","Connection lost","Live connection interrupted; participant status unknown")}
  });
 }
 let savedSelection=null,selectionTimer=null;
@@ -385,7 +417,7 @@ async function open(){
   updateState(response.state);paintStrokes();remaining();
   msg("Lesson loaded. Checking if you're the presenter…");
   await checkPresenter();
-  connectInk().catch(()=>msg("Live annotation connection unavailable.",true));
+  connectInk().catch(()=>{msg("Live annotation connection unavailable.",true);showPresence("offline","Status unavailable","Could not connect to the live lesson channel")});
   if(!presenter)msg("Ready to read · no login required. Use Follow teacher to sync scrolling.");
   setInterval(()=>{remaining();poll()},1700);
  }catch(error){failure(error.message)}
