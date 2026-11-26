@@ -167,6 +167,12 @@ el("he-homework-form").addEventListener("submit",async e=>{
  if(!studentId||!title||!split.worksheet){say("he-homework-feedback","Select a student, title and worksheet.",true);return}
  if(teacherKey.length>12000){say("he-homework-feedback","The private answer key must be shorter than 12,000 characters.",true);return}
  const btn=el("he-homework-save");btn.disabled=true;
+ // Open a tab while the submit gesture is active to avoid popup blockers.
+ const tab=window.open("about:blank","_blank");
+ if(tab){
+  tab.opener=null;
+  try{tab.document.title="Preparing HelloEarth homework";tab.document.body.textContent="Preparing your student worksheet…"}catch{}
+ }
  try{
   await ensureUser();
   const {data,error}=await db.from("he_homework").insert({
@@ -177,10 +183,14 @@ el("he-homework-form").addEventListener("submit",async e=>{
   if(error)throw error;
   el("he-homework-title").value="";el("he-homework-content").value="";
   el("he-homework-key").value="";el("he-homework-lesson-id").value="";
-  say("he-homework-feedback","Worksheet created. Share its link by copying it—no message was sent.");
+  const url=await getHomeworkLink(data.id);
+  el("he-homework-new-link").hidden=false;
+  el("he-homework-link-url").value=url;
+  if(tab)tab.location.replace(url);
+  else say("he-homework-feedback","Worksheet created. Popup blocked—use Open in new tab below.");
   await loadHomework();
-  await copyLink(data.id);
- }catch(err){say("he-homework-feedback",err.message,true)}
+  say("he-homework-feedback","Worksheet created and ready to share. No message was sent.");
+ }catch(err){if(tab)tab.close();say("he-homework-feedback",err.message,true)}
  finally{btn.disabled=false}
 });
 async function loadLessons(){
