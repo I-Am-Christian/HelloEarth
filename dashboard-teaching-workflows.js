@@ -505,6 +505,7 @@ async function generateWithHaiku(mode){
     :"Your workbook is ready. Open its printable page or edit it before saving.")+
    (logged?" A temporary link is in Generation history.":"")+
    (Number.isInteger(data.historyUsed)&&data.historyUsed>0?" Compared with "+data.historyUsed+" previous learning activities.":"")+
+   (Number.isInteger(data.archiveUsed)&&data.archiveUsed>0?" Consulted "+data.archiveUsed+" of "+data.archiveAvailable+" learner-specific archived sources.":"")+
    (Number.isFinite(data.remainingToday)?" Remaining generations today: "+data.remainingToday+".":""));
  }catch(e){say("he-ai-feedback",e.message,true)}
  finally{buttons.forEach(b=>{b.disabled=false})}
