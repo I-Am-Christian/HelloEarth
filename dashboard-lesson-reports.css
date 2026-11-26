@@ -1,0 +1,49 @@
+/* Premium lesson transcription and report workspace: HelloEarth visual language */
+.he-reports-view{max-width:1450px;width:min(calc(100% - 24px),1450px)}
+.he-premium-label{display:inline-block;vertical-align:middle;margin-left:8px;font-size:10px;font-weight:800;letter-spacing:.03em;border:1px solid #cbabe7;border-radius:99px;color:#edceff;background:#6f5a9c44;padding:5px 10px}
+.he-report-entitlement{margin:14px 0 18px;border:1px solid #9e9dbb77;border-radius:12px;background:linear-gradient(105deg,#273858,#303455);padding:13px 16px;font-size:12px;line-height:1.55;color:#dee8f9}
+.he-report-entitlement strong{display:block;color:#f9ecff;font-size:14px;margin-bottom:3px}
+.he-report-entitlement a{color:#e1c3ff;font-weight:750;text-decoration:underline}
+.he-report-entitlement.is-locked{border-color:#bbaa9070;background:#3d3844}
+.he-report-layout{display:grid;grid-template-columns:minmax(0,1.07fr) minmax(0,.93fr);gap:16px;align-items:start}
+.he-report-card{background:#1e2d48;border:1px solid #8794b062;border-radius:15px;padding:clamp(14px,2vw,23px);min-width:0;box-shadow:0 7px 25px #07102033;color:#e9edf9}
+.he-report-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:13px;margin-bottom:14px}
+.he-report-card-head h3{font-size:19px;font-weight:800;color:#f5ecff;margin:0 0 4px}
+.he-report-card-head p{color:#b7c6db;font-size:11px;margin:0;line-height:1.5}
+.he-report-card-head>button{border:1px solid #8392ae;border-radius:8px;background:#334466;color:#f6f0ff;padding:8px 12px;cursor:pointer}
+.he-report-card label{display:block;color:#ebecfa;font-weight:730;font-size:12px;margin:15px 0 10px}
+.he-report-card select,.he-report-card textarea{width:100%;min-width:0;box-sizing:border-box;background:#101d34;color:#f3f5ff;border:1px solid #7f8bab;border-radius:9px;padding:12px;line-height:1.55;font-size:12px;margin-top:7px}
+.he-report-card select{min-height:43px}
+.he-report-card textarea{resize:vertical;min-height:290px;font-family:'DM Sans',system-ui,sans-serif;font-size:13px}
+.he-report-card textarea:focus,.he-report-card select:focus{outline:2px solid #d8afe9;outline-offset:1px}
+.he-report-consent{display:flex!important;align-items:flex-start;gap:9px;line-height:1.55;font-weight:550!important;color:#d3dfeb!important;cursor:pointer}
+.he-report-consent input{flex:0 0 auto;accent-color:#c6a0e9;margin-top:3px}
+.he-report-note{font-size:11px;color:#b2c1da;line-height:1.6;margin:10px 0}
+.he-report-capture-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:13px 0}
+.he-report-capture-actions button{border:1px solid #8d93b0;background:#364463;color:#f4edff;border-radius:9px;padding:10px 13px;cursor:pointer;font-weight:750;font-size:11px}
+.he-report-capture-actions button.he-report-primary{background:#d9b7e9;color:#2c2039;border-color:#e9d3f3}
+.he-report-capture-actions button:hover:not(:disabled){filter:brightness(1.12)}
+.he-report-capture-actions button:disabled{opacity:.43;cursor:not-allowed}
+.he-report-capture-actions span{font-variant-numeric:tabular-nums;font-size:13px;color:#e5daee;letter-spacing:.06em;font-weight:800;margin-left:auto}
+.he-report-capture-label{font-size:10px;font-weight:800;color:#aed8ca;background:#183a3d;border:1px solid #6cafa7;border-radius:99px;padding:7px 9px;white-space:nowrap}
+.he-report-capture-label.is-recording{color:#ffe4e5;background:#703c51;border-color:#e4a9b5}
+.he-report-interim{min-height:18px;font-size:11px;color:#d6b8e9;margin:3px 0;white-space:pre-wrap}
+#he-report-count{float:right;color:#bbc9de;font-weight:500;font-size:10px}
+.he-report-status{font-size:12px;line-height:1.6;color:#c2e5d9;min-height:18px;margin:12px 0}
+.he-report-status.is-error{color:#ffc1cc}
+.he-report-history{display:flex;flex-direction:column;gap:10px;margin:15px 0;max-height:570px;overflow:auto}
+.he-report-entry{border:1px solid #8292a057;background:linear-gradient(125deg,#293850,#28344e);border-radius:12px;padding:12px}
+.he-report-entry strong{display:block;color:#f5edff;font-size:13px}
+.he-report-entry small{display:block;color:#bbcae3;font-size:10px;margin-top:5px}
+.he-report-entry-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.he-report-entry-actions button{border-radius:8px;border:1px solid #9087b1;background:#374166;padding:7px 10px;color:#f9edff;cursor:pointer;font-size:11px}
+.he-report-empty{font-size:12px;color:#b5c1d5}
+.he-report-current{padding:15px 0 0;border-top:1px solid #8b91af63;margin-top:20px}
+.he-report-current h3{font-size:17px;color:#eedbff;margin:0}
+#he-report-preview{white-space:pre-wrap;overflow-wrap:anywhere;max-height:520px;overflow:auto;
+ font:12px/1.7 'DM Sans',system-ui,sans-serif;background:#122039;padding:14px;border-radius:10px;color:#e4ecf9}
+.he-report-activity{position:fixed;right:19px;bottom:73px;z-index:100097;border-radius:100px;background:#6c3655;
+ border:1px solid #e3a2b9;box-shadow:0 8px 28px #040712a8;color:#ffecf3;padding:10px 14px;font-size:11px;font-weight:800;cursor:pointer}
+.he-report-activity[hidden]{display:none!important}
+@media(max-width:1020px){.he-report-layout{grid-template-columns:1fr}.he-reports-view{width:calc(100% - 20px)}}
+@media(max-width:650px){.he-report-card{padding:14px}.he-report-card-head{flex-wrap:wrap}.he-report-capture-actions span{margin:0}}
