@@ -91,8 +91,8 @@ function drawStroke(stroke,local=false){
  const path=document.createElementNS(ns,"path");
  path.setAttribute("d",pathFor(stroke.points));
  path.setAttribute("stroke",stroke.color);
- path.setAttribute("stroke-width",stroke.tool==="highlight"?"25":"3.5");
- path.setAttribute("stroke-opacity",stroke.tool==="highlight"?"0.31":"0.96");
+ path.setAttribute("stroke-width",String((stroke.tool==="highlight"?25:3.5)*inkThickness(stroke.width)));
+ path.setAttribute("stroke-opacity",stroke.tool==="highlight"?String(inkOpacity(stroke.opacity,.31)):"0.96");
  path.setAttribute("vector-effect","non-scaling-stroke");
  path.setAttribute("data-ink",local?"local":"shared");
  return path;
@@ -104,11 +104,25 @@ function paintText(mark){
  const range=textRange(mark.start,mark.end);if(!range)return;
  const base=svg.getBoundingClientRect();if(!base.width||!base.height)return;
  for(const rect of range.getClientRects()){
-  const node=document.createElementNS(ns,"rect");node.setAttribute("x",(rect.left-base.left)/base.width*1000);node.setAttribute("y",(rect.top-base.top)/base.height*1000);node.setAttribute("width",rect.width/base.width*1000);node.setAttribute("height",rect.height/base.height*1000);node.setAttribute("fill",mark.color);node.setAttribute("opacity",".28");svg.append(node);
+  const node=document.createElementNS(ns,"rect");node.setAttribute("x",(rect.left-base.left)/base.width*1000);node.setAttribute("y",(rect.top-base.top)/base.height*1000);node.setAttribute("width",rect.width/base.width*1000);node.setAttribute("height",rect.height/base.height*1000);node.setAttribute("fill",mark.color);node.setAttribute("opacity",String(inkOpacity(mark.opacity,.28)));svg.append(node);
  }
 }
 const colors={has:value=>typeof value==="string"&&/^#[0-9a-f]{6}$/i.test(value)};
-const inkPicker=el("share-ink");
+const inkPicker=el("share-ink"),opacityPicker=el("share-opacity"),widthPicker=el("share-width");
+function inkOpacity(value,fallback=.3){return typeof value==="number"&&Number.isFinite(value)?Math.min(.75,Math.max(.1,value)):fallback}
+function inkThickness(value){return typeof value==="number"&&Number.isFinite(value)?Math.min(2,Math.max(.5,value)):1}
+function stylePreview(){
+ const opacity=Number(opacityPicker.value),width=Number(widthPicker.value);
+ el("share-opacity-value").textContent=opacity+"%";
+ el("share-width-value").textContent=width+"%";
+ const hex=inkPicker.value;el("share-ink-preview").style.backgroundColor=hex+Math.round(opacity*2.55).toString(16).padStart(2,"0");
+}
+for(const picker of [inkPicker,opacityPicker,widthPicker])picker.addEventListener("input",stylePreview);
+el("share-style-reset").addEventListener("click",()=>{opacityPicker.value="30";widthPicker.value="100";inkPicker.value="#8456d5";inkPicker.dispatchEvent(new Event("input"));stylePreview()});
+for(const menu of document.querySelectorAll(".share-menu"))menu.addEventListener("toggle",()=>{if(menu.open)for(const other of document.querySelectorAll(".share-menu"))if(other!==menu)other.open=false});
+document.addEventListener("pointerdown",e=>{for(const menu of document.querySelectorAll(".share-menu[open]"))if(!menu.contains(e.target))menu.open=false});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")for(const menu of document.querySelectorAll(".share-menu[open]"))menu.open=false});
+stylePreview();
 for(const swatch of document.querySelectorAll("[data-ink-color]"))swatch.addEventListener("click",()=>{inkPicker.value=swatch.dataset.inkColor;inkPicker.dispatchEvent(new Event("input"))});
 function updateSwatches(){for(const swatch of document.querySelectorAll("[data-ink-color]"))swatch.setAttribute("aria-pressed",String(swatch.dataset.inkColor===inkPicker.value))}
 inkPicker.addEventListener("input",updateSwatches);updateSwatches();
@@ -148,7 +162,7 @@ function highlightSelection(){
  const mark=captureSelection()||savedSelection;
  if(!mark)return;
  savedSelection=null;
- const next={...mark,color:el("share-ink").value};
+ const next={...mark,color:el("share-ink").value,opacity:Number(opacityPicker.value)/100};
  if(!validMark(next))return;
  if(!textInk.some(m=>m.start===next.start&&m.end===next.end&&m.color===next.color)){
   textInk.push(next);if(textInk.length>100)textInk.shift();
@@ -198,7 +212,7 @@ function pointFrom(event){
 svg.addEventListener("pointerdown",event=>{
  if(dead||!["pen","highlight"].includes(tool)||event.button!==0)return;
  event.preventDefault();
- const stroke={tool,color:el("share-ink").value,points:[pointFrom(event)]};
+ const stroke={tool,color:el("share-ink").value,opacity:Number(opacityPicker.value)/100,width:Number(widthPicker.value)/100,points:[pointFrom(event)]};
  active=stroke;
  svg.setPointerCapture(event.pointerId);
  paintStrokes();
@@ -214,7 +228,7 @@ function finish(event){
  if(!active)return;
  const p=pointFrom(event),stroke=active;active=null;
  if(stroke.points.length<2)stroke.points.push([Math.min(1,stroke.points[0][0]+0.001),Math.min(1,stroke.points[0][1]+0.001)]);
- if(presenter&&["#8456d5","#dc6a85","#46a49a","#dba84b","#28385f"].includes(stroke.color)){
+ if(presenter&&stroke.tool==="pen"&&stroke.width===1&&["#8456d5","#dc6a85","#46a49a","#dba84b","#28385f"].includes(stroke.color)){
   sharedStrokes.push(stroke);
   if(sharedStrokes.length>155)sharedStrokes.shift();
   queue({annotations:sharedStrokes});
