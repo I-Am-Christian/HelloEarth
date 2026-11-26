@@ -168,13 +168,18 @@ function chatConnected(){
  el("share-chat-send").disabled=!inkReady||dead||chatSending;
  chatStatus(inkReady&&!dead?"Live · session only":"Disconnected · messages remain here");
 }
-function chatOpen(open){
- chatPanel.hidden=!open;el("share-chat-toggle").setAttribute("aria-expanded",String(open));
- if(open){chatUnread=0;el("share-chat-unread").hidden=true;el("share-chat-log").scrollTop=el("share-chat-log").scrollHeight}
- else el("share-chat-toggle").focus();
+const chatSettings=el("share-chat-settings-details");
+function syncChatLayout(){
+ const dock=document.querySelector(".share-top-dock");
+ document.documentElement.style.setProperty("--share-dock-height",Math.ceil(dock?.getBoundingClientRect().height||0)+"px");
+ document.documentElement.style.setProperty("--share-chat-height",Math.ceil(chatPanel.getBoundingClientRect().height||0)+"px");
 }
-el("share-chat-toggle").onclick=()=>chatOpen(chatPanel.hidden);
-el("share-chat-close").onclick=()=>chatOpen(false);
+el("share-chat-toggle").onclick=()=>{chatInput.focus({preventScroll:true});el("share-chat-log").scrollTop=el("share-chat-log").scrollHeight};
+el("share-chat-close").onclick=()=>{chatSettings.open=!chatSettings.open};
+chatSettings.addEventListener("toggle",()=>{el("share-chat-close").setAttribute("aria-expanded",String(chatSettings.open));syncChatLayout()});
+if(window.ResizeObserver){const layoutObserver=new ResizeObserver(syncChatLayout);layoutObserver.observe(document.querySelector(".share-top-dock"));layoutObserver.observe(chatPanel)}
+window.addEventListener("resize",syncChatLayout);
+syncChatLayout();
 function chatDefaults(){
  const lang=(navigator.language||"en").toLowerCase().split("-")[0];
  chatSource.value=chatTarget.value=presenter?"en":chatLanguages.has(lang)?lang:"en";
