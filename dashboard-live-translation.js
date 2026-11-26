@@ -15,7 +15,7 @@ let recognition=null,mediaRecorder=null,recordTimer=null,clockTimer=null,session
 let uploadCount=0,lastError="",pip=null,closing=false,cloud={cloudAvailable:false,eligible:false,cloudConfigured:false};
 let segments=[],seq=0,interim="",translationQueue=[],translateBusy=false,lastTranslate=0;
 let room=null,roomChannel=null,roomKey=null,roomUntil=0,roomReady=false,roomUrl="";
-const cap=35000,maxRows=350;
+const cap=160000,maxRows=300;
 const say=(text,error=false)=>{
  const node=el("he-translate-status");node.textContent=text;node.classList.toggle("he-error",error);
 };
@@ -89,7 +89,8 @@ function makeRow(item){
  const translated=document.createElement("p");translated.className="he-caption-translated";translated.hidden=true;
  row.append(header,original,translated);feed.append(row);
  item.node=row;item.translationNode=translated;
- if(segments.length>maxRows){const old=segments.shift();old.node?.remove()}
+ // Keep the full transcript for download; prune only old DOM nodes for performance.
+ if(segments.length>maxRows)segments[segments.length-maxRows-1]?.node?.remove();
  feed.scrollTop=feed.scrollHeight;
 }
 const toB64=buf=>btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/=/g,"").replace(/\+/g,"-").replace(/\//g,"_");
@@ -107,7 +108,7 @@ function addCaption(raw,who){
  if(!text)return;
  const used=recordsText().length;
  if(used+text.length>cap){
-  say("Transcript limit reached (35,000 characters). Download or transfer it to Reports before continuing.",true);
+  say("Transcript reached the 160,000-character session safety limit. Download it before starting a new session.",true);
   stopListening();return;
  }
  const item={seq:++seq,created:Date.now(),source:who||"Speech",text,translation:""};
@@ -440,7 +441,9 @@ el("he-caption-clear").addEventListener("click",()=>{
 el("he-caption-report").addEventListener("click",()=>{
  if(!segments.length){say("Transcribe or type some speech before generating a report.",true);return}
  stopListening();
- const transcript=recordsText().slice(0,35000);
+ const complete=recordsText();
+ const transcript=complete.length>35000?complete.slice(-35000):complete;
+ if(complete.length>35000)alert("Lesson Reports currently analyses up to 35,000 characters at a time. The final 35,000 characters will be imported; download the full class transcript separately.");
  if(window.HelloEarthLessonReports?.useTranscript){
   window.HelloEarthLessonReports.useTranscript(transcript);
   panel.hidden=true;document.getElementById("reports-tab")?.click();
