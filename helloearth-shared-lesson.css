@@ -329,3 +329,13 @@
 .share-classroom-layout .share-dialogue-slot,.share-classroom-layout .share-chat,.share-classroom-layout .share-chat:has(.share-chat-settings-details[open]){width:min(290px,86vw);height:min(330px,calc(100dvh - var(--share-dock-height,150px) - 16px))}
 }
 @media print{.share-dialogue-slot,.share-classroom-layout .share-chat{display:none!important}}
+
+/* Eraser uses the painted SVG objects rather than a second coordinate system. */
+.share-annotation-layer.is-erasing{cursor:cell;pointer-events:auto;touch-action:none}
+.share-annotation-layer.is-erasing path{pointer-events:stroke;cursor:cell}
+.share-annotation-layer.is-erasing rect{pointer-events:fill;cursor:cell}
+.share-annotation-layer.is-erasing path:hover,.share-annotation-layer.is-erasing rect:hover{filter:drop-shadow(0 0 2px #df6686)}
+#share-edit-dialog{width:min(960px,calc(100vw - 24px));max-width:none}
+#share-edit-dialog #share-edit-text{height:min(64dvh,640px);min-height:180px;font:14px/1.65 ui-monospace,Consolas,monospace;tab-size:4;white-space:pre-wrap;resize:vertical}
+#share-content.he-inline-enabled [contenteditable=true]{white-space:pre-wrap}
+@media(max-width:730px){#share-edit-dialog #share-edit-text{font-size:16px;height:55dvh}}
