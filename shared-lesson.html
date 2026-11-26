@@ -4,8 +4,8 @@
 <meta name="theme-color" content="#1d2b46"><title>Shared Lesson | HelloEarth</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="stylesheet" href="helloearth-lesson.css?v=20261126-first1">
-<link rel="stylesheet" href="helloearth-shared-lesson.css?v=20261126-chat1">
-<script type="module" src="helloearth-shared-lesson.js?v=20261126-chat1"></script></head>
+<link rel="stylesheet" href="helloearth-shared-lesson.css?v=20261126-pinnedchat2">
+<script type="module" src="helloearth-shared-lesson.js?v=20261126-pinnedchat2"></script></head>
 <body>
 <div class="share-top-dock">
 <header class="lesson-toolbar share-toolbar">
@@ -15,7 +15,7 @@
   <span id="share-presence" class="share-presence" data-state="waiting" role="status" aria-live="polite"><i aria-hidden="true"></i><span id="share-presence-text">Connecting…</span></span>
   <span id="share-countdown">Checking link…</span>
   <button type="button" id="share-copy" disabled title="Copy lesson link">Copy link</button>
-  <button type="button" id="share-chat-toggle" aria-controls="share-chat" aria-expanded="false">Chat <span id="share-chat-unread" hidden>0</span></button>
+  <button type="button" id="share-chat-toggle" aria-controls="share-chat" title="Focus classroom chat">Chat <span id="share-chat-unread" hidden>0</span></button>
   <details class="share-menu share-file-menu"><summary aria-label="More lesson actions">More <span aria-hidden="true">⌄</span></summary><div class="share-menu-panel"><button type="button" id="share-download" disabled>Download .md</button><button type="button" id="share-print" disabled>Print / Save PDF</button><button type="button" id="share-end" hidden>End sharing</button></div></details>
  </div>
 </header>
@@ -49,7 +49,7 @@
 </div>
 </div>
 <div id="share-error" class="share-error" role="alert" hidden></div>
-<main class="lesson-screen share-page">
+<div class="share-classroom-layout"><div class="share-workbook-column"><main class="lesson-screen share-page">
  <section class="lesson-paper share-paper" id="share-paper" aria-label="Shared classroom workbook">
   <header class="paper-top"><div class="paper-identity"><div class="paper-brand">✦ helloearth<span>.</span></div><div class="paper-kicker">SHARED CLASSROOM WORKBOOK</div></div><div class="paper-identity-tag">LIVE LESSON</div></header>
   <div class="paper-topic"><p class="paper-small">YOUR CLASSROOM</p><h1 id="share-title">Loading lesson…</h1>
@@ -60,12 +60,12 @@
   <svg id="share-annotations" class="share-annotation-layer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-label="Lesson drawing and highlighting layer"></svg>
  </section>
 </main>
-<p class="share-footnote">Anyone with this valid link can view the lesson. Scrolling sync is optional; you can turn off Follow teacher to read at your own pace. Drawings and selected-text highlights are shared live between connected participants. Guest marks and text highlights are temporary. Check accuracy before relying on lesson content.</p>
-<aside id="share-chat" class="share-chat" aria-label="Classroom chat" hidden>
- <header class="share-chat-header"><div><strong>Classroom chat</strong><small id="share-chat-status" role="status">Connecting…</small></div><button type="button" id="share-chat-close" aria-label="Close chat">×</button></header>
- <div class="share-chat-settings"><label>I'm writing in<select id="share-chat-source"><option value="en">English</option><option value="pl">Polish</option><option value="pt">Portuguese</option><option value="es">Spanish</option><option value="zh">Chinese</option><option value="tr">Turkish</option><option value="vi">Vietnamese</option><option value="af">Afrikaans</option><option value="fr">French</option><option value="de">German</option><option value="ru">Russian</option><option value="ar">Arabic</option><option value="he">Hebrew</option></select></label><label>Translate to<select id="share-chat-target"><option value="en">English</option><option value="pl">Polish</option><option value="pt">Portuguese</option><option value="es">Spanish</option><option value="zh">Chinese</option><option value="tr">Turkish</option><option value="vi">Vietnamese</option><option value="af">Afrikaans</option><option value="fr">French</option><option value="de">German</option><option value="ru">Russian</option><option value="ar">Arabic</option><option value="he">Hebrew</option></select></label><label class="share-chat-check"><input type="checkbox" id="share-chat-auto" checked> Auto-translate incoming messages</label><label class="share-chat-check"><input type="checkbox" id="share-chat-cloud"> Allow cloud translation of my messages</label><label class="share-chat-check" id="share-chat-relay-label" hidden><input type="checkbox" id="share-chat-relay"> Enable classroom cloud translation (uses tutor allowance)</label><small>Original messages are always retained in this tab. Cloud translation is optional and may be inaccurate. Everyone with this lesson link can read the chat.</small></div>
+<p class="share-footnote">Anyone with this valid link can view the lesson. Scrolling sync is optional; you can turn off Follow teacher to read at your own pace. Drawings and selected-text highlights are shared live between connected participants. Guest marks and text highlights are temporary. Check accuracy before relying on lesson content.</p></div>
+<aside id="share-chat" class="share-chat" aria-label="Classroom chat">
+ <header class="share-chat-header"><div><strong>Classroom chat</strong><small id="share-chat-status" role="status">Connecting…</small></div><button type="button" id="share-chat-close" aria-label="Toggle translation settings" aria-controls="share-chat-settings-details" aria-expanded="false" title="Translation settings">⚙</button></header>
+ <details id="share-chat-settings-details" class="share-chat-settings-details"><summary>Languages &amp; translation</summary><div class="share-chat-settings"><label>I'm writing in<select id="share-chat-source"><option value="en">English</option><option value="pl">Polish</option><option value="pt">Portuguese</option><option value="es">Spanish</option><option value="zh">Chinese</option><option value="tr">Turkish</option><option value="vi">Vietnamese</option><option value="af">Afrikaans</option><option value="fr">French</option><option value="de">German</option><option value="ru">Russian</option><option value="ar">Arabic</option><option value="he">Hebrew</option></select></label><label>Translate to<select id="share-chat-target"><option value="en">English</option><option value="pl">Polish</option><option value="pt">Portuguese</option><option value="es">Spanish</option><option value="zh">Chinese</option><option value="tr">Turkish</option><option value="vi">Vietnamese</option><option value="af">Afrikaans</option><option value="fr">French</option><option value="de">German</option><option value="ru">Russian</option><option value="ar">Arabic</option><option value="he">Hebrew</option></select></label><label class="share-chat-check"><input type="checkbox" id="share-chat-auto" checked> Auto-translate incoming messages</label><label class="share-chat-check"><input type="checkbox" id="share-chat-cloud"> Allow cloud translation of my messages</label><label class="share-chat-check" id="share-chat-relay-label" hidden><input type="checkbox" id="share-chat-relay"> Enable classroom cloud translation (uses tutor allowance)</label><small>Original messages are always retained in this tab. Cloud translation is optional and may be inaccurate. Everyone with this lesson link can read the chat.</small></div></details>
  <div id="share-chat-log" class="share-chat-log" role="log" aria-label="Messages" aria-live="polite"><p class="share-chat-empty">Say hello or ask a question.</p></div>
  <form id="share-chat-form"><textarea id="share-chat-input" rows="2" maxlength="580" placeholder="Type a message…" aria-label="Chat message" required></textarea><button type="submit" id="share-chat-send" disabled>Send</button></form>
  <footer class="share-chat-footer"><span>Session only · not saved to student records</span><button type="button" id="share-chat-export">Download chat</button></footer>
-</aside>
+</aside></div>
 </body></html>
