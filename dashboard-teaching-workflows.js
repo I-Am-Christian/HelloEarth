@@ -2,6 +2,35 @@ import { db } from "./supabase-client.js";
 const el=id=>document.getElementById(id);
 const W=()=>window.HelloEarthWorkspace;
 let activeTutor=null, activeLessonId=null, students=[], lessonRows=[], homeworkRows=[], reviewWorksheet=null;
+const savedPublicLinks=new Map();
+async function shareSavedLesson(plan,copy=true){
+ try{
+  await ensureUser();
+  const {data,error}=await db.functions.invoke("he-lesson-sharing",{
+   body:{action:"create",sourceKind:"saved",sourceId:plan.id}
+  });
+  if(error)throw await extractError(error);
+  if(!data?.url)throw Error(data?.error||"Share link missing.");
+  savedPublicLinks.set(plan.id,{url:data.url,expiresAt:data.expiresAt});
+  renderLessons();
+  if(copy){
+   try{await navigator.clipboard.writeText(data.url);
+    say("he-lesson-feedback","Public student link copied. Anyone with it can open without signing in.");
+   }catch{say("he-lesson-feedback","Student lesson link: "+data.url)}
+  }
+  return data.url;
+ }catch(error){
+  say("he-lesson-feedback","Could not create student link: "+error.message,true);return null;
+ }
+}
+async function refreshSavedPublicLinks(){
+ const {data,error}=await db.functions.invoke("he-lesson-sharing",{body:{action:"list"}});
+ if(error)throw await extractError(error);
+ savedPublicLinks.clear();
+ for(const item of data.shares||[]){
+  if(item.sourceKind==="saved")savedPublicLinks.set(item.sourceId,{url:item.url,expiresAt:item.expiresAt});
+ }
+}
 const levels=["A1","A2","B1","B2","C1","C2"];
 const say=(id,msg,err=false)=>{const n=el(id);if(n){n.textContent=msg;n.classList.toggle("is-error",err)}};
 const clean=t=>String(t||"").trim();
@@ -238,7 +267,9 @@ async function loadLessons(){
  try{
   const tutor=await ensureUser();
   const {data,error}=await db.from("atlas_lesson_plans").select("id,student_id,topic,cefr_level,duration_minutes,markdown,created_at").eq("tutor_id",tutor).order("created_at",{ascending:false}).limit(40);
-  if(error)throw error;lessonRows=data||[];renderLessons();
+  if(error)throw error;lessonRows=data||[];
+   try{await refreshSavedPublicLinks()}catch{}
+   renderLessons();
  }catch(e){say("he-lesson-feedback","Could not load saved lessons: "+e.message,true)}
 }
 
@@ -287,6 +318,19 @@ function renderLessons(){
    actionButton("Open homework",()=>openLink(linked.id))
   );
   actions.append(actionButton(linked?"New worksheet":"Create homework link",()=>prepareHomeworkFromLesson(p)));
+  const share=savedPublicLinks.get(p.id);
+   if(share){
+    const a=document.createElement("a");a.href=share.url;
+    a.target="_blank";a.rel="noopener noreferrer";a.className="he-workbook-link";
+    a.textContent="Open student lesson ↗";main.append(a);
+   }
+   actions.append(actionButton(share?"Copy student link":"Share with student",()=>shareSavedLesson(p,true)));
+   actions.append(actionButton("Present live",async()=>{
+    const win=window.open("about:blank","_blank");
+    const url=await shareSavedLesson(p,false);
+    if(url){if(win)win.location.href=url;else say("he-lesson-feedback","Public lesson ready: "+url)}
+    else if(win)win.close();
+   }));
   actions.append(actionButton("PDF view",()=>window.open(new URL("lesson.html#saved="+p.id,location.href).href,"_blank","noopener")));
   actions.append(actionButton("Download lesson",()=>downloadText("helloearth-lesson.md",p.markdown||"")));
   row.append(main,actions);root.append(row);
