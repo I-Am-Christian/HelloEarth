@@ -61,6 +61,11 @@ function card(plan) {
     translate("{count} notes stored in total",{count:new Intl.NumberFormat("en-ZA").format(plan.max_notes_total)}),
     "Private Google / email sign-in",
     "CEFR levels, goals and student history",
+    plan.code==="free"?"Browser-based captions where supported · no cloud minutes":
+    plan.code==="starter"?"20 cloud-caption minutes per month (planned)":
+    plan.code==="growth"?"120 cloud-caption minutes per month (planned)":
+    "360 cloud-caption minutes per month (planned)",
+    "Temporary student-view link for live subtitles",
     plan.code==="studio"
       ? "12 transcript-based lesson reports per month (planned)"
       : plan.code==="growth"
