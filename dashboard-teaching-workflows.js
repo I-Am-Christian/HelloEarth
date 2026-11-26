@@ -268,7 +268,7 @@ el("he-homework-form").addEventListener("submit",async e=>{
 async function loadLessons(){
  try{
   const tutor=await ensureUser();
-  const version=++lessonLoadVersion,all=[];for(let offset=0;;offset+=100){const {data,error}=await db.from("atlas_lesson_plans").select("id,student_id,topic,cefr_level,duration_minutes,markdown,created_at,completed_at,unsaved_at").eq("tutor_id",tutor).order("created_at",{ascending:false}).order("id",{ascending:false}).range(offset,offset+99);if(error)throw error;if(version!==lessonLoadVersion)return;all.push(...(data||[]));if(!data||data.length<100)break}lessonRows=all;
+  const version=++lessonLoadVersion,all=[];for(let offset=0;;offset+=100){const {data,error}=await db.from("atlas_lesson_plans").select("id,student_id,topic,cefr_level,duration_minutes,markdown,created_at,completed_at,unsaved_at,review_note_id,review_assessment_id").eq("tutor_id",tutor).order("created_at",{ascending:false}).order("id",{ascending:false}).range(offset,offset+99);if(error)throw error;if(version!==lessonLoadVersion)return;all.push(...(data||[]));if(!data||data.length<100)break}lessonRows=all;
    try{await refreshSavedPublicLinks()}catch{}
    renderLessons();
  }catch(e){say("he-lesson-feedback","Could not load saved lessons: "+e.message,true)}
@@ -289,7 +289,9 @@ function prepareHomeworkFromLesson(plan){
   :"No standalone Homework section found in this lesson. Add your questions and create a shareable link.");
 }
 async function changeLessonState(p,operation,button){
- if(operation==="delete"&&!confirm("Permanently delete this lesson? Its saved-lesson sharing links will stop working. Existing homework and reports remain."))return;
+ if(operation==="complete"&&!p.completed_at){openLessonReview(p);return}
+ if(operation==="complete"&&p.completed_at&&!confirm("Reopen this lesson? Its existing teacher review will be retained."))return;
+ if(operation==="delete"&&!confirm("Permanently delete this lesson? Its saved-lesson sharing links will stop working. Existing homework, notes, skill assessments and reports remain."))return;
  button.disabled=true;
  try{const tutor=await ensureUser();let result;
  if(operation==="delete")result=await db.from("atlas_lesson_plans").delete().eq("id",p.id).eq("tutor_id",tutor).select("id").single();
@@ -301,6 +303,33 @@ async function changeLessonState(p,operation,button){
  document.dispatchEvent(new CustomEvent("helloearth:workspace-data"));
  }catch(e){say("he-lesson-feedback",e.message,true);button.disabled=false}
 }
+const reviewSkills=[["speaking","Speaking"],["listening","Listening"],["reading","Reading"],["writing","Writing"],["grammar","Grammar"],["confidence","Confidence"]];
+const reviewDialog=document.createElement("dialog");reviewDialog.className="he-lesson-review-dialog";reviewDialog.setAttribute("translate","no");document.body.append(reviewDialog);
+let reviewBusy=false,reviewOpening=false;
+async function openLessonReview(p){
+ if(reviewBusy||reviewOpening||reviewDialog.open)return;reviewOpening=true;
+ const build=(tag,cls="",value="")=>{const n=document.createElement(tag);if(cls)n.className=cls;if(value)n.textContent=value;return n};
+ reviewDialog.replaceChildren();const top=build("div","he-review-header"),title=build("h2","","Lesson review"),close=actionButton("×",()=>reviewDialog.close());close.setAttribute("aria-label","Close review");top.append(title,close);reviewDialog.append(top,build("p","he-review-subtitle",selectedName(p.student_id)+" · "+p.topic),build("p","he-review-loading","Loading existing review…"));reviewDialog.showModal();
+ try{
+  const tutor=await ensureUser();const [note,assessment]=await Promise.all([p.review_note_id?db.from("atlas_lesson_notes").select("lesson_date,summary,strengths,challenges,next_steps,homework").eq("id",p.review_note_id).eq("tutor_id",tutor).eq("student_id",p.student_id).maybeSingle():Promise.resolve({data:null}),p.review_assessment_id?db.from("atlas_skill_assessments").select("speaking,listening,reading,writing,grammar,confidence,assessed_on").eq("id",p.review_assessment_id).eq("tutor_id",tutor).eq("student_id",p.student_id).maybeSingle():Promise.resolve({data:null})]);
+  if(note.error||assessment.error)throw note.error||assessment.error;if(!reviewDialog.open)return;
+  reviewDialog.querySelector(".he-review-loading")?.remove();const form=build("form","he-review-form"),controls={};
+  const makeField=(label,key,max,placeholder,value,rows=2)=>{const field=build("label","he-review-field",label),input=build("textarea");input.rows=rows;input.maxLength=max;input.placeholder=placeholder;input.value=value||"";field.append(input);controls[key]=input;return field};
+  const dateLabel=build("label","he-review-field","Lesson date"),date=build("input");date.type="date";date.required=true;date.max=dateToday();date.value=note.data?.lesson_date||assessment.data?.assessed_on||(p.completed_at?new Date(p.completed_at).toLocaleDateString("en-CA"):dateToday());if(!date.value)date.value=dateToday();dateLabel.append(date);form.append(dateLabel);
+  form.append(makeField("Lesson summary","summary",1500,"What did you cover?",note.data?.summary,2));
+  const fields=build("div","he-review-note-grid");fields.append(makeField("Strengths","strengths",600,"What went well?",(note.data?.strengths||[]).join("\n")),makeField("Difficulties","challenges",600,"What did the student struggle with?",(note.data?.challenges||[]).join("\n")),makeField("Next lesson focus","next_steps",600,"What should you practise next?",(note.data?.next_steps||[]).join("\n")),makeField("Homework / follow-up","homework",1500,"Optional practice or assignment notes",note.data?.homework));form.append(fields);
+  form.append(build("h3","","Skill ratings"),build("p","he-review-hint","Rate performance in this lesson only: 1 = needs substantial support, 3 = developing, 5 = independent. Leave any untested skill unassessed. These are not CEFR levels."));
+  const skills=build("div","he-review-skills"),ratings={};
+  for(const [key,label] of reviewSkills){const field=build("label","he-review-field",label),select=build("select");select.add(new Option("Not assessed",""));for(const n of [1,2,3,4,5])select.add(new Option(n+" / 5",String(n)));select.value=assessment.data?.[key]==null?"":String(assessment.data[key]);field.append(select);ratings[key]=select;skills.append(field)}form.append(skills);
+  const confirmation=build("label","he-review-confirm"),checked=build("input");checked.type="checkbox";checked.required=true;confirmation.append(checked,document.createTextNode(" I confirm this lesson took place and these are my own observations."));form.append(confirmation);
+  const status=build("p","he-review-status");status.setAttribute("role","status");const footer=build("div","he-review-footer"),cancel=actionButton("Cancel",()=>reviewDialog.close()),save=build("button","he-review-primary",p.completed_at?"Save review":"Confirm & complete");save.type="submit";footer.append(cancel,save);form.append(status,footer);reviewDialog.append(form);
+  form.onsubmit=async e=>{e.preventDefault();if(reviewBusy||!checked.checked)return;reviewBusy=true;save.disabled=cancel.disabled=close.disabled=true;status.textContent="Saving review…";
+   try{const {data,error}=await db.rpc("he_confirm_lesson_review",{p_lesson_id:p.id,p_lesson_date:date.value,p_summary:controls.summary.value,p_strengths:controls.strengths.value,p_challenges:controls.challenges.value,p_next_steps:controls.next_steps.value,p_homework:controls.homework.value,p_ratings:Object.fromEntries(reviewSkills.map(([key])=>[key,ratings[key].value?Number(ratings[key].value):null]))});if(error)throw error;if(!data?.completed_at)throw Error("Review not confirmed");Object.assign(p,data);reviewDialog.close();renderLessons();say("he-lesson-feedback","Lesson confirmed. Notes and assessed skills saved to student progress.");document.dispatchEvent(new CustomEvent("helloearth:workspace-data"));loadLessons();}
+   catch(err){status.textContent=err.message||"Review could not be saved."}finally{reviewBusy=false;save.disabled=cancel.disabled=close.disabled=false}
+  };
+ }catch(e){const status=reviewDialog.querySelector(".he-review-loading");if(status)status.textContent=e.message||"Could not load review."}finally{reviewOpening=false}
+}
+reviewDialog.addEventListener("cancel",e=>{if(reviewBusy)e.preventDefault()});
 function renderLessons(){
  const root=el("he-lesson-history");if(!root)return;root.replaceChildren();
  const controls=document.createElement("div");controls.className="he-folder-controls";
@@ -326,8 +355,9 @@ function renderLessons(){
   const meta=document.createElement("small");
   meta.textContent=p.cefr_level+" · "+p.duration_minutes+" min · "+new Date(p.created_at).toLocaleDateString()+(p.completed_at?" · Completed":"")+(p.unsaved_at?" · Unsaved":"");
   main.append(title,meta);
-  const actions=document.createElement("div");actions.className="he-work-actions he-inline-actions";
-  actions.append(actionButton("Open lesson",()=>{
+  const actions=document.createElement("div");actions.className="he-saved-primary-actions";
+  const menu=document.createElement("details");menu.className="he-saved-menu";const menuLabel=document.createElement("summary");menuLabel.textContent="More ⋯";menuLabel.setAttribute("aria-label","More lesson actions");menu.append(menuLabel);const menuBody=document.createElement("div");menuBody.className="he-saved-menu-body";menu.append(menuBody);const group=label=>{const g=document.createElement("div");g.className="he-saved-menu-group";const h=document.createElement("small");h.textContent=label;g.append(h);menuBody.append(g);return g};const work=group("Lesson"),sharing=group("Share & export"),homework=group("Homework"),manage=group("Manage");
+  work.append(actionButton("Edit lesson",()=>{
    activeLessonId=p.id;
    document.dispatchEvent(new CustomEvent("helloearth:lesson-selected",{detail:{id:p.id,studentId:p.student_id}}));
    el("he-lesson-student").value=p.student_id;
@@ -340,29 +370,32 @@ function renderLessons(){
   }));
   const linked=homeworkRows.find(h=>h.lesson_plan_id===p.id&&
    h.status!=="cancelled"&&Date.now()<Date.parse(h.expires_at));
-  if(linked)actions.append(
+  if(linked)homework.append(
    actionButton("Copy homework link",()=>copyLink(linked.id)),
    actionButton("Open homework",()=>openLink(linked.id))
   );
-  actions.append(actionButton(linked?"New worksheet":"Create homework link",()=>prepareHomeworkFromLesson(p)));
+  homework.append(actionButton(linked?"New worksheet":"Create homework link",()=>prepareHomeworkFromLesson(p)));
   const share=savedPublicLinks.get(p.id);
    if(share){
     const a=document.createElement("a");a.href=share.url;
     a.target="_blank";a.rel="noopener noreferrer";a.className="he-workbook-link";
     a.textContent="Open student lesson ↗";main.append(a);
    }
-   actions.append(actionButton(share?"Copy student link":"Share with student",()=>shareSavedLesson(p,true)));
-   actions.append(actionButton("Present live",async()=>{
+   sharing.append(actionButton(share?"Copy student link":"Share with student",()=>shareSavedLesson(p,true)));
+   const present=actionButton("Present live",async()=>{
     const win=window.open("about:blank","_blank");
     const url=await shareSavedLesson(p,false);
     if(url){if(win)win.location.href=url;else say("he-lesson-feedback","Public lesson ready: "+url)}
     else if(win)win.close();
-   }));
-  actions.append(actionButton("PDF view",()=>window.open(new URL("lesson.html#saved="+p.id,location.href).href,"_blank","noopener")));
-  actions.append(actionButton("Download lesson",()=>downloadText("helloearth-lesson.md",p.markdown||"")));
-  const manage=document.createElement("div");manage.className="he-folder-manage";
-  for(const [op,label] of [["complete",p.completed_at?"Reopen":"✓ Complete"],[p.unsaved_at?"restore":"unsave",p.unsaved_at?"Restore":"Unsave"],["delete","Delete"]]){const b=actionButton(label,()=>changeLessonState(p,op,b));if(op==="delete")b.className+=" he-delete-lesson";manage.append(b)}
-  row.append(main,actions,manage);folder.append(row);
+   });present.className="he-saved-present";actions.append(present);
+  sharing.append(actionButton("PDF view",()=>window.open(new URL("lesson.html#saved="+p.id,location.href).href,"_blank","noopener")));
+  sharing.append(actionButton("Download lesson",()=>downloadText("helloearth-lesson.md",p.markdown||"")));
+  const review=actionButton(p.completed_at?"Review":"✓ Complete & review",()=>openLessonReview(p));review.className="he-saved-review";actions.append(review,menu);
+  if(p.completed_at)manage.append(actionButton("Reopen lesson",()=>changeLessonState(p,"complete",menuLabel)));
+  for(const [op,label] of [[p.unsaved_at?"restore":"unsave",p.unsaved_at?"Restore":"Unsave"],["delete","Delete permanently"]]){const b=actionButton(label,()=>changeLessonState(p,op,b));if(op==="delete")b.className+=" he-delete-lesson";manage.append(b)}
+  menuBody.addEventListener("click",e=>{if(e.target.closest("button"))menu.open=false});
+  if(p.review_note_id){const badge=document.createElement("span");badge.className="he-saved-reviewed";badge.textContent="Review saved";main.append(badge)}
+  row.append(main,actions);folder.append(row);
  }
  }
 }
