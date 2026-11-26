@@ -1,7 +1,7 @@
 import {db} from "./supabase-client.js";
 import {SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY} from "./supabase-config.js";
 import {renderWorkbook,workbookBlockMarkdown} from "./helloearth-workbook-renderer.js?v=20261126-inline1";
-import {mountClassroomDialogue} from "./classroom-dialogue.js?v=20261126-analysis1";
+import {mountClassroomDialogue} from "./classroom-dialogue.js?v=20261126-dock2";
 let dialogue=null,assignedStudent=null,contentRevision=0,editingWorkbook=false;
 // One-way tutor presentation. Public guests can view with a signed link,
 // follow scrolling, and make LOCAL drawings; only the owner can save/sync.
@@ -328,7 +328,7 @@ function setChatOpen(open,visit=false){
  const anchor=loaded&&before.top<=line&&before.bottom>line?getReadingAnchor():null;
  chatPanel.hidden=!open;classroomLayout.classList.toggle("chat-closed",!open);
  chatToggle.setAttribute("aria-expanded",String(open));chatToggle.title=open?"Close classroom chat":"Open classroom chat";
- chatToggle.querySelector(".share-chat-toggle-label").textContent=open?"Close chat":"Chat";
+ chatToggle.querySelector(".share-chat-toggle-label").textContent="Chat";
  if(open){chatUnread=0;el("share-chat-unread").hidden=true}
  else chatSettings.open=false;
  layoutPaper();syncChatLayout();
