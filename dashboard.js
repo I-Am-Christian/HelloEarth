@@ -13,6 +13,31 @@ function arrayLines(id) {
 function initials(name) {
   return (name || "?").split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0].toUpperCase()).join("");
 }
+// Avatar catalogue is static and never contains student information.
+const PHOTO_BUCKET="student-profile-photos", AVATAR_COUNT=500, PAGE_SIZE=50;
+let photoDraft={index:null,path:null,blob:null,preview:null},photoEpoch=0,photoPage=0,photoBusy=false;
+const photoCache=new Map();
+function avatarNumber(s){if(s?.avatar_index>=1&&s.avatar_index<=AVATAR_COUNT)return Number(s.avatar_index);return null}
+function randomAvatar(current){const used=new Set(state.students.map(avatarNumber).filter(Boolean));const available=Array.from({length:AVATAR_COUNT},(_,i)=>i+1).filter(n=>n!==current&&!used.has(n));const choices=available.length?available:Array.from({length:AVATAR_COUNT},(_,i)=>i+1).filter(n=>n!==current);return choices[Math.floor(Math.random()*choices.length)]}
+function placeholderSVG(index){const ns="http://www.w3.org/2000/svg",svg=document.createElementNS(ns,"svg"),use=document.createElementNS(ns,"use");svg.setAttribute("viewBox","0 0 100 100");svg.setAttribute("aria-hidden","true");use.setAttribute("href","./student-avatars.svg#avatar-"+index);svg.append(use);return svg}
+function photoURL(path){if(!path)return Promise.resolve(null);if(!photoCache.has(path)){let p=db.storage.from(PHOTO_BUCKET).download(path).then(({data,error})=>{if(error||!data){photoCache.delete(path);return null}return URL.createObjectURL(data)}).catch(()=>{photoCache.delete(path);return null});photoCache.set(path,p)}return photoCache.get(path)}
+function dropCachedPhoto(path){let p=photoCache.get(path);photoCache.delete(path);if(p)p.then(u=>{if(u)URL.revokeObjectURL(u)})}
+window.addEventListener("pagehide",()=>{for(let p of photoCache.values())p.then(u=>{if(u)URL.revokeObjectURL(u)});photoCache.clear()});
+function renderAvatar(el,s,preview=null){el.classList.add("he-avatar-visual");const stamp=String((Number(el.dataset.renderStamp)||0)+1);el.dataset.renderStamp=stamp;el.replaceChildren();let index=avatarNumber(s);if(index)el.append(placeholderSVG(index));else el.textContent=initials(s?.display_name||"?");const attach=url=>{if(!url||el.dataset.renderStamp!==stamp)return;const img=document.createElement("img");img.alt="";img.decoding="async";img.onload=()=>{if(el.dataset.renderStamp===stamp)el.replaceChildren(img)};img.src=url};if(preview)attach(preview);else if(s?.photo_path)photoURL(s.photo_path).then(attach)}
+function refreshPhotoPreview(){renderAvatar($("student-photo-preview"),{display_name:$("student-name").value,avatar_index:photoDraft.index,photo_path:photoDraft.path},photoDraft.preview)}
+function clearDraftPreview(){if(photoDraft.preview)URL.revokeObjectURL(photoDraft.preview);photoDraft.preview=null;photoDraft.blob=null}
+function setPhotoStatus(t){$("student-photo-status").textContent=t}
+function selectAvatar(index){photoEpoch++;photoBusy=false;clearDraftPreview();photoDraft.index=index;photoDraft.path=null;refreshPhotoPreview();renderAvatarGallery();setPhotoStatus(index?"Placeholder "+index+" selected. Save to apply.":"Initials selected. Save to apply.")}
+function renderAvatarGallery(){let grid=$("student-avatar-grid"),start=photoPage*PAGE_SIZE+1,end=Math.min(AVATAR_COUNT,start+PAGE_SIZE-1);grid.replaceChildren();$("student-avatar-page").textContent=start+"–"+end+" of "+AVATAR_COUNT;$("student-avatar-prev").disabled=photoPage===0;$("student-avatar-next").disabled=end===AVATAR_COUNT;for(let n=start;n<=end;n++){let b=document.createElement("button");b.type="button";b.title="Avatar "+n;b.setAttribute("aria-label","Select avatar "+n);b.setAttribute("aria-pressed",String(photoDraft.index===n&&!photoDraft.path&&!photoDraft.blob));let a=document.createElement("span");a.className="he-profile-avatar";a.append(placeholderSVG(n));b.append(a);b.addEventListener("click",()=>selectAvatar(n));grid.append(b)}}
+function initPhotoEditor(student){photoEpoch++;photoBusy=false;clearDraftPreview();photoDraft={index:student?avatarNumber(student):randomAvatar(null),path:student?.photo_path||null,blob:null,preview:null};photoPage=photoDraft.index?Math.floor((photoDraft.index-1)/PAGE_SIZE):0;$("student-avatar-gallery").hidden=true;$("student-avatar-browse").setAttribute("aria-expanded","false");$("student-photo-file").value="";setPhotoStatus("Upload only with the student's permission. Photos are private.");refreshPhotoPreview()}
+$("student-photo-upload").onclick=()=>$("student-photo-file").click();
+$("student-avatar-random").onclick=()=>selectAvatar(randomAvatar(photoDraft.index));
+$("student-photo-remove").onclick=()=>selectAvatar(null);
+$("student-avatar-browse").onclick=()=>{let el=$("student-avatar-gallery");el.hidden=!el.hidden;$("student-avatar-browse").setAttribute("aria-expanded",String(!el.hidden));if(!el.hidden)renderAvatarGallery()};
+$("student-avatar-prev").onclick=()=>{photoPage=Math.max(0,photoPage-1);renderAvatarGallery()};
+$("student-avatar-next").onclick=()=>{photoPage=Math.min(Math.ceil(AVATAR_COUNT/PAGE_SIZE)-1,photoPage+1);renderAvatarGallery()};
+$("student-name").addEventListener("input",refreshPhotoPreview);
+$("student-photo-file").onchange=async event=>{const file=event.target.files?.[0];event.target.value="";if(!file)return;if(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>12_000_000){setPhotoStatus("Choose a JPG, PNG or WebP under 12 MB.");return}const epoch=++photoEpoch;photoBusy=true;setPhotoStatus("Preparing a private thumbnail…");let src=URL.createObjectURL(file);try{let im=new Image();im.src=src;await im.decode();if(!im.naturalWidth||!im.naturalHeight||im.naturalWidth*im.naturalHeight>50_000_000)throw Error("Image dimensions are too large.");let c=document.createElement("canvas");c.width=c.height=320;let size=Math.min(im.naturalWidth,im.naturalHeight),ctx=c.getContext("2d");ctx.fillStyle="#e3e0e9";ctx.fillRect(0,0,320,320);ctx.drawImage(im,(im.naturalWidth-size)/2,(im.naturalHeight-size)/2,size,size,0,0,320,320);let blob=await new Promise(resolve=>c.toBlob(resolve,"image/jpeg",.82));if(!blob||blob.size>262144)throw Error("The image could not be compressed.");if(epoch!==photoEpoch)return;clearDraftPreview();photoDraft.blob=blob;photoDraft.path=null;photoDraft.preview=URL.createObjectURL(blob);refreshPhotoPreview();setPhotoStatus("Photo ready. Save to upload securely.");renderAvatarGallery()}catch(e){if(epoch===photoEpoch)setPhotoStatus("Could not prepare this photo. Try a different image.")}finally{URL.revokeObjectURL(src);if(epoch===photoEpoch)photoBusy=false}};
 function labelledField(label, content) {
   const div = document.createElement("div");
   div.className = "ws-field";
@@ -97,7 +122,7 @@ function renderStudents() {
   grid.replaceChildren();
   const q = $("student-search").value.trim().toLowerCase();
   const visible = state.students.filter(student => [
-    student.display_name, student.cefr_level, ...(student.learning_goals || []), ...(student.interests || [])
+    student.display_name, student.nickname, student.cefr_level, ...(student.learning_goals || []), ...(student.interests || [])
   ].join(" ").toLowerCase().includes(q));
   if (!visible.length) {
     const empty = document.createElement("div");
@@ -119,7 +144,7 @@ function renderStudents() {
     head.className = "student-card-head";
     const avatar = document.createElement("span");
     avatar.className = "student-avatar";
-    avatar.textContent = initials(student.display_name);
+    renderAvatar(avatar,student);
     avatar.classList.add("i18n-user-content");
     const level = document.createElement("span");
     level.className = "cefr-pill";
@@ -132,7 +157,7 @@ function renderStudents() {
     const goal = document.createElement("p");
     goal.textContent = (student.learning_goals || []).slice(0, 2).join(" · ") || "Learning goals not recorded yet";
     if (student.learning_goals?.length) goal.classList.add("i18n-user-content");
-    body.append(name, goal);
+    body.append(name);if(student.nickname){const nick=document.createElement('p');nick.className='he-nickname i18n-user-content';nick.textContent=student.nickname;body.append(nick)}body.append(goal);
     const footer = document.createElement("span");
     footer.className = "student-card-footer";
     footer.textContent = "View student →";
@@ -182,6 +207,7 @@ async function openStudent(id) {
   document.dispatchEvent(new CustomEvent("helloearth:student-opened", {detail:{student:s}}));
   $("student-detail").hidden = false;
   $("selected-name").textContent = s.display_name;
+  $("selected-nickname").textContent=s.nickname||"";$("selected-nickname").hidden=!s.nickname;renderAvatar($("selected-avatar"),s);
   const target = $("student-fields");
   target.replaceChildren(
     labelledField("CEFR level", s.cefr_level === "UNASSESSED" ? "Not assessed yet" : s.cefr_level),
@@ -255,6 +281,7 @@ function startStudentForm(edit) {
     ? "Update this learner's goals and progress."
     : "Only store information you have permission to keep.";
   $("student-name").value = student?.display_name || "";
+  $("student-nickname").value=student?.nickname||"";initPhotoEditor(student);
   $("student-cefr").value = student?.cefr_level || "UNASSESSED";
   $("student-goals").value = (student?.learning_goals || []).join("\n");
   $("student-focus").value = (student?.focus_areas || []).join("\n");
@@ -372,6 +399,10 @@ $("student-search").addEventListener("input", renderStudents);
 
 $("student-form").addEventListener("submit", async event => {
   event.preventDefault();
+  if(photoBusy){statusMessage($("modal-feedback"),"The photo is still being prepared. Try saving again.",true);return}
+  let uploadedPath=null,saved=false;
+  const edit=state.editMode,studentId=edit?state.selected.id:crypto.randomUUID(),oldPath=edit?state.selected.photo_path:null;
+  const draft={...photoDraft};
   setBusy("save-student", true);
   statusMessage($("modal-feedback"), "");
   try {
@@ -379,6 +410,9 @@ $("student-form").addEventListener("submit", async event => {
     if (!name) throw new Error("A student name is required.");
     const payload = {
       display_name: name,
+      nickname: $("student-nickname").value.trim()||null,
+      avatar_index: draft.index,
+      photo_path: draft.path,
       cefr_level: $("student-cefr").value,
       learning_goals: arrayLines("student-goals"),
       focus_areas: arrayLines("student-focus"),
@@ -395,20 +429,24 @@ $("student-form").addEventListener("submit", async event => {
       lesson_history_notes: $("student-history").value.trim(),
       updated_at: new Date().toISOString()
     };
-    if (state.editMode) {
+    if(draft.blob){const path=state.user.id+"/"+studentId+"/"+crypto.randomUUID()+".jpg";const {error}=await db.storage.from(PHOTO_BUCKET).upload(path,draft.blob,{contentType:"image/jpeg",upsert:false});if(error)throw error;uploadedPath=path;payload.photo_path=path}
+    if (edit) {
       const { data, error } = await db.from("atlas_students").update(payload)
-        .eq("id", state.selected.id).eq("tutor_id", state.user.id).select().single();
+        .eq("id", studentId).eq("tutor_id", state.user.id).select().single();
       if (error) throw error;
       if (!data) throw new Error("The student could not be updated.");
       state.selected = data;
     } else {
       const { data, error } = await db.from("atlas_students").insert({
-        ...payload, id: crypto.randomUUID(), tutor_id: state.user.id,
+        ...payload, id: studentId, tutor_id: state.user.id,
         ai_context_enabled: false
       }).select().single();
       if (error) throw error;
       if (!data) throw new Error("The student could not be created.");
     }
+    saved=true;
+    if(oldPath&&oldPath!==payload.photo_path){const {error}=await db.storage.from(PHOTO_BUCKET).remove([oldPath]);if(error)console.warn("Previous photo cleanup failed",error.message);dropCachedPhoto(oldPath)}
+    clearDraftPreview();
     hideModal("student-modal");
     await loadStudents();
     await loadPlan();
@@ -416,6 +454,7 @@ $("student-form").addEventListener("submit", async event => {
     else $("student-detail").hidden = true;
     loadingMessage("Student saved securely.");
   } catch (err) {
+    if(uploadedPath&&!saved)await db.storage.from(PHOTO_BUCKET).remove([uploadedPath]).catch(()=>{});
     statusMessage($("modal-feedback"), message(err), true);
   } finally { setBusy("save-student", false); }
 });
