@@ -4,7 +4,25 @@ const el=id=>document.getElementById(id);
 const saved=location.hash.startsWith("#saved=");
 const id=decodeURIComponent(location.hash.replace(/^#(?:id=|saved=)?/,""));
 const valid=/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i;
-let lesson=null;
+let lesson=null,sharedUrl="";
+async function createShare(){
+ if(!lesson)throw Error("Open a lesson first.");
+ const {data,error}=await db.functions.invoke("he-lesson-sharing",{
+  body:{action:"create",sourceKind:saved?"saved":"generated",sourceId:id}
+ });
+ if(error){
+  let msg=error.message||"Couldn't create a student link.";
+  if(typeof error.context?.json==="function"){
+   try{const details=await error.context.json();if(details?.error)msg=details.error}catch{}
+  }
+  throw Error(msg);
+ }
+ if(!data?.url)throw Error(data?.error||"No share link returned.");
+ sharedUrl=data.url;
+ el("lesson-share-tools").hidden=false;
+ el("lesson-share-url").value=sharedUrl;
+ return sharedUrl;
+}
 function message(text,error=false){
  const node=el("lesson-status");node.textContent=text;
  if(error){el("lesson-error").hidden=false;el("lesson-error").textContent=text}
@@ -37,7 +55,7 @@ async function open(){
  el("lesson-date").textContent=new Date(data.created_at).toLocaleDateString();
  renderWorkbook(el("lesson-content"),data.markdown);
  document.title=data.topic+" | HelloEarth lesson";
- for(const name of ["lesson-copy","lesson-download","lesson-print"])el(name).disabled=false;
+ for(const name of ["lesson-copy","lesson-download","lesson-print","lesson-share","lesson-present"])el(name).disabled=false;
  message("Private tutor preview · Printable A4 workbook");
  if(saved){el("lesson-life").textContent="Saved in student records · no 14-day expiry";}
  else{lifespan();setInterval(lifespan,60000);}
@@ -54,5 +72,25 @@ el("lesson-copy").addEventListener("click",async()=>{
  if(!lesson)return;
  try{await navigator.clipboard.writeText(lesson.markdown);message("Lesson text copied.")}
  catch{message("Couldn't copy automatically. Download the Markdown file instead.",true)}
+});
+el("lesson-share").addEventListener("click",async()=>{
+ try{
+  const url=await createShare();
+  try{await navigator.clipboard.writeText(url);message("Public student lesson link copied. Anyone with the link can view it without signing in.")}
+  catch{el("lesson-share-url").focus();el("lesson-share-url").select();message("Student link selected. Press Ctrl+C to copy.")}
+ }catch(err){message(err.message,true)}
+});
+el("lesson-share-copy").addEventListener("click",async()=>{
+ if(!sharedUrl)return;
+ try{await navigator.clipboard.writeText(sharedUrl);message("Student link copied.")}
+ catch{el("lesson-share-url").select();message("Student link selected. Press Ctrl+C to copy.")}
+});
+el("lesson-present").addEventListener("click",async()=>{
+ const win=window.open("about:blank","_blank");
+ try{
+  const url=await createShare();
+  if(win)win.location.href=url;
+  else message("Popup blocked. Use the student link above to open your presenter view.");
+ }catch(err){if(win)win.close();message(err.message,true)}
 });
 open();
