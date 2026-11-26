@@ -267,7 +267,7 @@
     </section>
     
     <section id="homework-view" class="ws-view" role="tabpanel" aria-labelledby="homework-tab" hidden>
-      <div class="he-work-heading"><h2>Homework links</h2><p>Create a private 14-day worksheet. Copy the link or download a file—nothing is sent automatically.</p></div>
+      <div class="he-work-heading"><h2>Homework links</h2><p>Create a private 14-day worksheet or prepare one with Nova. Copy the link or download it—nothing is sent automatically.</p></div>
       <div class="he-work-grid">
         <section class="he-work-card" aria-labelledby="he-homework-new-title">
           <h3 id="he-homework-new-title">Create shareable worksheet</h3>
@@ -276,7 +276,7 @@
             <label>Worksheet title / instructions<textarea id="he-homework-title" maxlength="800" rows="3" required placeholder="e.g. Past tense revision: answer the following questions"></textarea></label>
              <label>Student worksheet<textarea id="he-homework-content" maxlength="30000" rows="12" required placeholder="Write questions here or generate an exercise. Students see this text only."></textarea></label><label>Teacher answer key (private)<textarea id="he-homework-key" maxlength="12000" rows="5" placeholder="Correct answers and marking notes. Never shown on student links."></textarea></label><input type="hidden" id="he-homework-lesson-id" value="">
             <input type="hidden" id="he-homework-due">
-            <div class="he-work-actions"><button id="he-homework-save" type="submit" class="he-primary">Create 14-day link</button><button type="button" id="he-homework-create-ai">Generate with Claude</button></div>
+            <div class="he-work-actions"><button id="he-homework-save" type="submit" class="he-primary">Create 14-day link</button><button type="button" id="he-homework-create-ai">Create with Nova</button></div>
           </form>
           <p id="he-homework-feedback" class="he-work-message" role="status" aria-live="polite"></p><div id="he-homework-new-link" class="he-share-result" hidden><strong>Shareable homework link</strong><input id="he-homework-link-url" readonly aria-label="Shareable homework link"><div class="he-work-actions"><button type="button" id="he-homework-link-copy">Copy link</button><button type="button" id="he-homework-link-open">Open in new tab</button></div><p>Expires 14 days after creation. Anyone with the link can edit the worksheet answers until then.</p></div>
         </section>
@@ -294,7 +294,7 @@
       <div class="he-work-actions"><button type="button" id="he-review-copy">Copy answers</button><button type="button" id="he-review-download">Download answers</button></div>
     </dialog>
     <section id="lessons-view" class="ws-view" role="tabpanel" aria-labelledby="lessons-tab" hidden>
-      <div class="he-work-heading"><h2>Lesson Creation</h2><p>Build lessons and homework with HelloEarth's managed Claude Haiku 5.5, or connect your own Anthropic API key.</p><div class="he-work-actions"><button type="button" id="he-open-teaching" class="he-primary">Open Teaching Companion · Feedback &amp; Exercise Links</button></div></div>
+      <div class="he-work-heading"><h2>Lesson Studio</h2><p>Design beautiful, printable CEFR workbooks with Nova, your HelloEarth teaching assistant.</p><div class="he-work-actions"><button type="button" id="he-open-teaching" class="he-primary">Open Teaching Companion · Feedback &amp; Exercise Links</button></div></div>
       <div class="he-work-grid">
         <section class="he-work-card" aria-labelledby="he-lesson-new-title">
           <h3 id="he-lesson-new-title">Lesson details</h3>
@@ -307,14 +307,14 @@
           <label>Instructions / preferences<textarea id="he-lesson-instructions" rows="3" maxlength="2400" placeholder="Conversation-led, Polish translations, avoid homework, use workplace examples…"></textarea></label>
           <div class="he-work-actions"><button type="button" id="he-lesson-template">Create manual template</button></div>
           <details id="he-ai-integration">
-            <summary><span aria-hidden="true">✦</span> AI-assisted lessons &amp; homework · Claude Haiku 5.5</summary>
+            <summary><span aria-hidden="true">✦</span> Create with Nova · lessons &amp; homework</summary>
              <p class="he-work-help">HelloEarth AI is included with a limited monthly allowance during early access. Daily and monthly server-side limits protect against unexpected charges.</p>
-             <label>AI billing<select id="he-ai-provider"><option value="managed" selected>HelloEarth AI — included (default)</option><option value="anthropic-byok">My own Anthropic API key</option></select></label>
-             <label id="he-ai-personal-key-row" hidden>My Anthropic API key (used only for this request)<input id="he-openai-key" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-…" aria-describedby="he-api-notice"></label>
-             <p class="he-work-help">Model: <strong>Claude Haiku 5.5</strong>. Each generated draft must be reviewed by the tutor before it is used with a student.</p>
-             <label class="he-consent"><input type="checkbox" id="he-share-context"><span>Include this student's CEFR level, learning goals, focus areas and interests. I have permission to share these details with Anthropic.</span></label>
+             <label>Generation plan<select id="he-ai-provider"><option value="managed" selected>Nova · included with subscription</option><option value="anthropic-byok">Connect my own API key (advanced)</option></select></label>
+             <label id="he-ai-personal-key-row" hidden>Your own API key (used only for this request)<input id="he-openai-key" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-…" aria-describedby="he-api-notice"></label>
+             <p class="he-work-help">Nova follows a consistent teaching-workbook format with learning objectives, vocabulary tables, speaking tasks, reading or listening exercises, and an answer key. You can review and edit every draft.</p>
+             <label class="he-consent"><input type="checkbox" id="he-share-context"><span>Include this student's CEFR level, learning goals, focus areas and interests. I have permission to use these details in AI-powered lesson preparation.</span></label>
              <p class="he-work-help" id="he-api-notice">Only the lesson topic, CEFR level, duration and instructions are sent by default. AI responses may be incomplete or inaccurate.</p>
-             <div class="he-work-actions"><button type="button" id="he-lesson-generate" class="he-primary">Generate lesson with Haiku</button><button type="button" id="he-homework-ai-generate">Generate homework with Haiku</button></div>
+             <div class="he-work-actions"><button type="button" id="he-lesson-generate" class="he-primary">✦ Generate lesson with Nova</button><button type="button" id="he-homework-ai-generate">Generate homework with Nova</button></div>
              <p id="he-ai-feedback" class="he-work-message" role="status" aria-live="polite"></p>
           </details>
         </section>
@@ -322,12 +322,25 @@
           <section class="he-work-card" aria-labelledby="he-lesson-editor-title">
             <h3 id="he-lesson-editor-title">Editable lesson</h3>
             <label>Lesson content<textarea id="he-lesson-editor" class="he-lesson-editor" rows="16" maxlength="100000" placeholder="Start from a manual template or generate an AI draft, then edit it here…"></textarea></label>
-            <div class="he-work-actions"><button type="button" id="he-lesson-save" class="he-primary">Save lesson to student</button><button type="button" id="he-homework-from-lesson">Prepare homework link</button><button type="button" id="he-lesson-download">Download lesson</button><button type="button" id="he-lesson-copy">Copy lesson text</button></div>
+            <div class="he-work-actions"><button type="button" id="he-lesson-save" class="he-primary">Save lesson to student</button><button type="button" id="he-homework-from-lesson">Prepare homework link</button><button type="button" id="he-lesson-download">Download lesson</button><button type="button" id="he-lesson-copy">Copy lesson text</button></div><div class="he-generated-share" id="he-generation-current" hidden>
+ <strong>✦ Your printable workbook is ready</strong>
+ <p>Your private lesson opens in a clean A4-style page. Print it or save it as PDF.</p>
+ <div class="he-generated-address"><input id="he-generation-url" readonly aria-label="Lesson preview link"><button type="button" id="he-generation-copy">Copy link</button><button type="button" id="he-generation-open" class="he-primary">Open workbook</button></div>
+ <small id="he-generation-expiry" aria-live="polite">Temporary draft · available for 14 days.</small>
+ </div>
             <p id="he-lesson-feedback" class="he-work-message" role="status" aria-live="polite"></p>
           </section>
           <section class="he-work-card he-work-history" aria-labelledby="he-lesson-saved-title">
             <h3 id="he-lesson-saved-title">Saved lessons</h3>
             <div id="he-lesson-history" class="he-record-list" aria-live="polite"><p class="he-record-empty">Loading lessons…</p></div>
+          </section>
+          <section class="he-work-card he-generation-history" aria-labelledby="he-generation-log-title">
+            <div class="he-generation-log-head"><div><h3 id="he-generation-log-title">Generation history</h3><p>Each draft has a private printable link and is automatically removed after 14 days.</p></div><button type="button" id="he-generation-refresh">Refresh</button></div>
+            <div class="he-template-demo"><strong>What a Nova workbook looks like</strong>
+              <span>HELICOPTERS · A1 · 50 MINUTES</span><p>Learning Objectives → Vocabulary Table → Pronunciation → Warm-Up → Guided Practice → Speaking → Reading / Listening → Homework → Answer Key.</p>
+            </div>
+            <div id="he-generation-list" class="he-record-list" aria-live="polite"><p class="he-record-empty">No generated workbooks yet.</p></div>
+            <p id="he-generation-feedback" class="he-work-message" role="status" aria-live="polite"></p>
           </section>
         </div>
       </div>
@@ -339,7 +352,7 @@
     <select id="he-time-format"><option value="24h">24-hour (14:30)</option><option value="12h">12-hour (2:30 PM)</option></select></div>
    <p class="he-settings-example" id="he-time-example">Example: 14:30</p>
   </div>
-  <div class="he-settings-card" style="margin-top:16px"><h3>Claude AI</h3><p>HelloEarth manages Haiku 5.5 by default with fair usage limits. Under Lesson Creation you may switch to your own Anthropic API key for individual requests; keys are not saved in your account.</p><button type="button" data-open-view="lessons" class="ws-mini-btn">Open Lesson Creation</button></div>
+  <div class="he-settings-card" style="margin-top:16px"><h3>Nova · HelloEarth assistant</h3><p>Your subscription includes a managed AI allowance for workbooks and workspace help. You can optionally use your own API key for individual teaching-material requests. Student information is shared with AI services only when you choose to include it.</p><button type="button" data-open-view="lessons" class="ws-mini-btn">Open Lesson Studio</button></div>
  </section>
   </main>
 <nav id="ux-mobile-nav" class="ux-mobile-nav" aria-label="Mobile primary navigation">
@@ -360,7 +373,7 @@
     <button type="button" data-ux-more-tool="business"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h18v14H3V7Zm0 0V5h15m-3 10h6"/></svg><span><strong>Reports &amp; records</strong><small>Hours, income and reports</small></span><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
     <button type="button" data-ux-more-tool="resources"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h10l4 4v14H5V3Zm10 0v5h4M8 12h8m-8 4h8"/></svg><span><strong>Teaching templates</strong><small>Reusable lessons and attendance</small></span><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
     
-    <button type="button" data-ux-more-view="lessons"><span>✎</span><span><strong>Lesson Creation</strong><small>Manual lessons and your own AI</small></span></button>
+    <button type="button" data-ux-more-view="lessons"><span>✎</span><span><strong>Lesson Studio</strong><small>Beautiful lessons with Nova</small></span></button>
     <button type="button" data-ux-more-view="homework"><span>▤</span><span><strong>Homework</strong><small>Assignments and deadlines</small></span></button>
   </div>
   <a class="ux-more-website" href="index.html"><svg class="ux-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-10 10h20M12 2c3 3 4 7 4 10s-1 7-4 10M12 2c-3 3-4 7-4 10s1 7 4 10"/></svg> Visit Hello Earth website</a>
@@ -455,4 +468,4 @@
     </form>
   </div>
 </div>
-<script type="module" src="dashboard-extras.js?v=20261117-extras2"></script><script type="module" src="dashboard-navigation.js?v=20261123-halfhour2"></script><script type="module" src="dashboard-features.js?v=20261117-suite10"></script><script type="module" src="dashboard-suite.js?v=20261120-database1"></script><script type="module" src="dashboard-ux.js?v=20261122-learning1"></script><script type="module" src="dashboard-calendar-optimizer.js?v=20261125-preview2"></script><script type="module" src="dashboard-week-timetable.js?v=20261123-halfhour1"></script><script type="module" src="dashboard-calendar-scheduling.js?v=20261123-halfhour2"></script><script type="module" src="dashboard-teaching-workflows.js?v=20261126-share4"></script><script type="module" src="dashboard-live-feedback.js?v=20261126-live2"></script><script type="module" src="dashboard-live-translation.js?v=20261126-live2"></script></body></html>
+<script type="module" src="dashboard-extras.js?v=20261117-extras2"></script><script type="module" src="dashboard-navigation.js?v=20261123-halfhour2"></script><script type="module" src="dashboard-features.js?v=20261117-suite10"></script><script type="module" src="dashboard-suite.js?v=20261120-database1"></script><script type="module" src="dashboard-ux.js?v=20261122-learning1"></script><script type="module" src="dashboard-calendar-optimizer.js?v=20261125-preview2"></script><script type="module" src="dashboard-week-timetable.js?v=20261123-halfhour1"></script><script type="module" src="dashboard-calendar-scheduling.js?v=20261123-halfhour2"></script><script type="module" src="dashboard-teaching-workflows.js?v=20261126-nova1"></script><script type="module" src="dashboard-live-feedback.js?v=20261126-live2"></script><script type="module" src="dashboard-live-translation.js?v=20261126-live2"></script></body></html>
