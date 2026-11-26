@@ -111,3 +111,34 @@
 .share-presence[data-state=offline] i{background:#ff9a9a}
 .share-presence[data-state=waiting] i{background:#e6c47c}
 @media(max-width:730px){.share-top-dock .share-toolbar-actions .share-presence{font-size:10px;padding:5px 6px}.share-top-dock .share-toolbar-actions{justify-content:flex-end}.share-top-dock .share-toolbar-actions #share-role{display:none}}
+
+/* Private-link classroom chat, independent from the workbook zoom and scrolling. */
+.share-chat[hidden],#share-chat-unread[hidden]{display:none!important}
+.share-top-dock #share-chat-toggle{display:inline-flex;align-items:center;gap:5px}
+.share-top-dock #share-chat-unread{padding:1px 5px;border:0;background:#d6c4f6;color:#271e3d;border-radius:20px;font-size:10px;font-weight:800}
+.share-chat{position:fixed;right:16px;bottom:16px;z-index:50;width:min(390px,calc(100vw - 32px));height:min(650px,calc(100dvh - 32px));display:flex;flex-direction:column;background:#f8f7fc;color:#292740;border:1px solid #b4aacb;border-radius:16px;box-shadow:0 15px 60px #07102388;overflow:hidden;font:13px/1.45 system-ui,sans-serif}
+.share-chat-header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#30294c;color:#f4efff;gap:8px}
+.share-chat-header strong{font-size:15px}.share-chat-header small{display:block;color:#d0c4e6;font-size:11px;margin-top:2px}
+.share-chat-header button{border:1px solid #ffffff33;border-radius:8px;background:#ffffff14;color:white;width:34px;height:34px;font-size:24px;line-height:1}
+.share-chat-settings{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;padding:9px 12px;border-bottom:1px solid #e2deeb;max-height:34%;overflow:auto;background:#f0edf7}
+.share-chat-settings label{font-size:11px;font-weight:650;min-width:0}
+.share-chat-settings select{display:block;width:100%;margin-top:3px;padding:6px 7px;border:1px solid #c9c0d9;border-radius:7px;background:white;color:#2d2841;font:inherit;min-height:32px}
+.share-chat-settings .share-chat-check{grid-column:1/-1;display:flex;align-items:center;gap:5px;font-weight:500}
+.share-chat-check[hidden]{display:none!important}.share-chat-check input{accent-color:#7956ae}
+.share-chat-settings small{grid-column:1/-1;font-size:10px;color:#685e7c}
+.share-chat-log{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:12px;display:flex;flex-direction:column;gap:9px;scrollbar-width:thin}
+.share-chat-empty{font-size:12px;color:#716983;text-align:center;margin:auto}
+.share-chat-message{align-self:flex-start;width:fit-content;max-width:93%;min-width:100px;background:white;border:1px solid #dfd8eb;padding:8px 10px;border-radius:11px 11px 11px 3px;overflow-wrap:anywhere}
+.share-chat-message.own{align-self:flex-end;background:#e8def7;border-color:#d5c3eb;border-radius:11px 11px 3px 11px}
+.share-chat-message header{font-size:10px;color:#77688e;font-weight:650}
+.share-chat-message p{margin:5px 0 0;white-space:pre-wrap;font-size:13px;line-height:1.5}
+.share-chat-message .share-chat-translation{border-top:1px solid #c8bddb;padding-top:6px;color:#4e3a75;font-size:12px}
+.share-chat-retry{margin-top:6px;background:transparent;color:#624191;border:0;font-size:11px;text-decoration:underline;padding:0}
+#share-chat-form{display:flex;gap:7px;padding:9px;border-top:1px solid #e0dbe9;background:#fff;align-items:stretch}
+#share-chat-input{flex:1;min-width:0;resize:vertical;max-height:100px;border:1px solid #cdc3dc;border-radius:8px;padding:8px;font:14px/1.4 system-ui;color:#292740;background:white}
+#share-chat-send{background:#7150aa;color:#fff;border:0;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700}
+#share-chat-send:disabled{opacity:.4;cursor:default}
+.share-chat-footer{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 9px;font-size:10px;color:#716983}
+.share-chat-footer button{background:none;color:#624191;border:0;padding:4px;font-size:11px;text-decoration:underline}
+@media(max-width:730px){.share-chat{right:8px;left:8px;bottom:max(8px,env(safe-area-inset-bottom));width:auto;height:min(600px,calc(100dvh - 16px));border-radius:12px}.share-chat-settings{max-height:35%}#share-chat-input{font-size:16px}.share-chat-header button{width:42px;height:42px}.share-chat-footer{padding-bottom:8px}}
+@media print{.share-chat{display:none!important}}
