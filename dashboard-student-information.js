@@ -102,12 +102,34 @@ if(detail&&fields){
  );
  observations.append(title,actions,list);
  fields.parentNode.insertBefore(observations,fields.nextSibling);
+ const reviewBox=document.createElement("section");reviewBox.className="he-student-recent-feedback";reviewBox.id="he-student-review-timeline";
+ const reviewHeading=document.createElement("div");reviewHeading.className="he-student-observations-header";reviewHeading.innerHTML="<h3>Lesson summary &amp; evaluation</h3><p>Recent transcript-based AI drafts. Evidence is provisional until the teacher confirms it.</p>";
+ const reviewList=document.createElement("div");reviewBox.append(reviewHeading,reviewList);observations.before(reviewBox);
+ async function refreshReviews(id){
+  reviewList.textContent="Loading lesson summaries…";
+  try{const {data:{user}}=await db.auth.getUser();if(!user)throw Error("Sign in again.");
+   const {data,error}=await db.from("he_lesson_reports").select("id,created_at,title,report_markdown,progress_data").eq("tutor_id",user.id).eq("student_id",id).order("created_at",{ascending:false}).limit(5);if(error)throw error;if(selectedStudent?.id!==id)return;reviewList.replaceChildren();
+   if(!data?.length){reviewList.textContent="No saved lesson reviews yet. With permission, stop and analyse a recorded class to build this history.";return}
+   for(const [i,row] of data.entries()){
+    const p=row.progress_data||{};const entry=document.createElement("details");entry.className="he-student-observation";entry.open=i===0;
+    const label=document.createElement("summary");label.textContent=new Date(row.created_at).toLocaleDateString()+" · "+(row.title||"Lesson review");entry.append(label);
+    const markdownSection=pattern=>{const section=String(row.report_markdown||"").split(/^##\s+/m).find(x=>pattern.test(x));return section?section.split("\n").slice(1).join("\n").trim().slice(0,1300):""};
+    const append=(title,value)=>{if(!value)return;const h=document.createElement("strong");h.textContent=title;const text=document.createElement("p");text.textContent=value;entry.append(h,text)};
+    append("Summary",p.summary||markdownSection(/^(?:Lesson summary|Lesson Snapshot)/i));
+    append("Skill evaluation",Array.isArray(p.skills)?p.skills.map(x=>x.skill+": "+x.observation).join("\n"):markdownSection(/^(?:Skill observations|Skill assessment|CEFR)/i));
+    append("Next lesson",Array.isArray(p.nextSteps)?p.nextSteps.join("\n"):markdownSection(/^(?:Next lesson|Suggested next lesson|Areas to practise)/i));
+    append("Limitations",p.limitations||"Transcript-based evidence only; unassessed skills are not scored.");
+    reviewList.append(entry);
+   }
+  }catch(e){if(selectedStudent?.id===id)reviewList.textContent="Could not load lesson reviews: "+e.message}
+ }
+
  function show(tab){
   detailCurrent=tab;
   for(const b of tabs.querySelectorAll("button"))b.setAttribute("aria-pressed",String(b.dataset.tab===tab));
   for(const section of fields.querySelectorAll(".he-profile-section"))
    section.hidden=section.dataset.section!==tab;
-  observations.hidden=tab!=="records"&&tab!=="snapshot";
+  observations.hidden=tab!=="records"&&tab!=="snapshot";reviewBox.hidden=observations.hidden;
  }
  function fieldTitle(field){return field.querySelector("strong")?.textContent||""}
  function arrange(student){
@@ -149,7 +171,7 @@ if(detail&&fields){
    createStat("Translation",student.translation_language==="none"?"Not selected":student.translation_language||"Not selected")
   );
   show("snapshot");
-  refreshNotes(student.id);
+  refreshNotes(student.id);refreshReviews(student.id);
  }
  async function refreshNotes(id){
   const list=document.getElementById("he-student-recent-list");
@@ -184,7 +206,8 @@ if(detail&&fields){
  document.addEventListener("helloearth:nova-student-saved",e=>{
   if(e.detail?.studentId===selectedStudent?.id)refreshNotes(selectedStudent.id);
  });
+ document.addEventListener("helloearth:lesson-report-saved",e=>{if(selectedStudent?.id===e.detail?.studentId)refreshReviews(selectedStudent.id)});
  document.addEventListener("helloearth:view-changed",e=>{
-  if(e.detail?.view==="students"&&selectedStudent?.id&&!detail.hidden)refreshNotes(selectedStudent.id);
+  if(e.detail?.view==="students"&&selectedStudent?.id&&!detail.hidden){refreshNotes(selectedStudent.id);refreshReviews(selectedStudent.id)}
  });
 }
