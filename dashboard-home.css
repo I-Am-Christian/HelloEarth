@@ -50,3 +50,10 @@
 .he-auto-prep p{margin:7px 0;font-size:12px;line-height:1.5;color:#d2cae1}.he-auto-prep #he-auto-prep-status{font-weight:650;color:#dbcaf7}
 .he-auto-switch{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px}.he-auto-switch input{position:absolute;opacity:0;width:1px;height:1px}.he-auto-switch>span:first-of-type{width:36px;height:21px;border-radius:99px;background:#5a5874;padding:3px;box-sizing:border-box;display:block}.he-auto-switch>span:first-of-type::after{content:"";display:block;width:15px;height:15px;border-radius:50%;background:#fff;transition:transform .15s}.he-auto-switch input:checked+span{background:#9e83ce}.he-auto-switch input:checked+span::after{transform:translateX(15px)}.he-auto-switch input:focus-visible+span{outline:2px solid white;outline-offset:3px}.he-auto-switch input:disabled+span{opacity:.5}
 .he-auto-prep-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.he-auto-prep-actions button,.he-auto-prep-actions a:not([hidden]){border:1px solid #aa93d3;border-radius:8px;padding:7px 11px;font-size:12px;background:#51426e;color:white;text-decoration:none;cursor:pointer}
+
+#overview-view .he-schedule-lesson-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+#overview-view .he-schedule-lesson-actions .he-prepare-lesson{background:#a88bd3;color:#221a34;border:1px solid #c4abe8;border-radius:9px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer}
+#overview-view .he-schedule-lesson-actions .he-complete-lesson{background:#314b4b;color:#d5f2df;border:1px solid #8ab5a5;border-radius:9px;padding:8px 12px;font-size:12px;font-weight:650;cursor:pointer}
+#overview-view .he-schedule-lesson-actions button:disabled{opacity:.55;cursor:default}
+#overview-view .he-upcoming-item{flex-wrap:wrap}
+@media(max-width:650px){#overview-view .he-upcoming-item .he-schedule-lesson-actions{flex:1 1 100%;padding-left:0}}
