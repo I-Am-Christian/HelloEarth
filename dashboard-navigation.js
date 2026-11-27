@@ -383,9 +383,9 @@ async function refreshEvents(){
   const upcoming=upcomingReads.filter(item=>item.status==="fulfilled")
    .flatMap(item=>item.value).sort((a,b)=>eventDate(a.start)-eventDate(b.start));
   document.dispatchEvent(new CustomEvent("helloearth:upcoming-events",{detail:{
-   connected:true,events:upcoming.map(e=>({
+   connected:true,complete:upcomingReads.every(item=>item.status==="fulfilled"),events:upcoming.map(e=>({
     id:e.id,calendarId:e.calendarId,summary:e.summary,start:e.start,end:e.end,
-    calendarName:e.calendarName,extendedProperties:e.extendedProperties
+    calendarName:e.calendarName,status:e.status,transparency:e.transparency,extendedProperties:e.extendedProperties
    }))
   }}));
  }catch(error){
