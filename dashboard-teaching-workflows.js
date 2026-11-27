@@ -339,6 +339,15 @@ async function openLessonReview(p){
  }catch(e){const status=reviewDialog.querySelector(".he-review-loading");if(status)status.textContent=e.message||"Could not load review."}finally{reviewOpening=false}
 }
 reviewDialog.addEventListener("cancel",e=>{if(reviewBusy)e.preventDefault()});
+document.addEventListener("helloearth:review-saved-lesson",async event=>{
+ try{
+  const tutor=await ensureUser(),id=event.detail?.lessonId;
+  if(!id)return;
+  const {data,error}=await db.from("atlas_lesson_plans").select("id,student_id,topic,cefr_level,duration_minutes,markdown,created_at,completed_at,unsaved_at,review_note_id,review_assessment_id").eq("id",id).eq("tutor_id",tutor).eq("student_id",event.detail.studentId).single();
+  if(error||!data)throw Error(error?.message||"Lesson not found");
+  await openLessonReview(data);
+ }catch(e){alert("Could not open lesson review: "+e.message)}
+});
 function renderLessons(){
  const root=el("he-lesson-history");if(!root)return;root.replaceChildren();
  const controls=document.createElement("div");controls.className="he-folder-controls";
