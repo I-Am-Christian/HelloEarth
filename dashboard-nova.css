@@ -37,3 +37,19 @@
 #he-nova-status.he-nova-error{color:#ffb4c7}
 .he-nova-disclaimer{font-size:9px;color:#acb9d3;margin:4px 12px 10px;line-height:1.45}
 @media(max-width:760px){#he-nova-launch{left:10px;bottom:72px;padding:9px 12px}#he-nova-panel{left:7px;bottom:120px;width:min(420px,calc(100vw - 14px));height:min(580px,calc(100dvh - 140px))}}
+
+/* Match the public Nova panel: compact chat, vertical composer, no workspace grid inheritance. */
+#he-nova-root #he-nova-panel{width:min(370px,calc(100vw - 24px));height:auto;max-height:calc(100dvh - 100px);background:#222039;border-radius:15px;overflow:auto;box-sizing:border-box}
+#he-nova-root .he-nova-head{background:#312b49;padding:12px 14px;flex:none}
+#he-nova-root .he-nova-messages{height:220px;min-height:100px;flex:0 1 auto;overflow:auto;padding:12px;gap:8px}
+#he-nova-root .he-nova-message{padding:9px 11px;border-radius:9px;max-width:95%;font-size:13px;line-height:1.5;box-sizing:border-box}
+#he-nova-root .he-nova-bot{background:#312b49;color:#f2ecff;border:0}
+#he-nova-root .he-nova-user{background:#665095;color:white;border:0}
+#he-nova-root .he-nova-examples{padding:0 12px 8px;border:0;flex:none}
+#he-nova-root .he-nova-form{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:6px;align-items:stretch;padding:0 12px 8px;flex:none;margin:0;width:auto}
+#he-nova-root .he-nova-form .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+#he-nova-root #he-nova-input{width:100%;box-sizing:border-box;min-height:52px;background:#191c30;color:#f3ecff;border:1px solid #a48acb;font:13px/1.4 system-ui}
+#he-nova-root .he-nova-deep{grid-row:2;display:flex!important;align-items:center;gap:5px;color:#d4c5e8;font-size:11px}
+#he-nova-root .he-nova-deep input{width:auto;height:auto;margin:0}
+#he-nova-root #he-nova-send{grid-row:3;width:100%;background:#5b467f;color:#fff;border:1px solid #9d85ca;padding:8px 10px;border-radius:7px}
+@media(max-width:760px){#he-nova-root #he-nova-panel{max-height:calc(100dvh - 135px)}#he-nova-root .he-nova-messages{height:180px}#he-nova-root #he-nova-input{font-size:16px}}
