@@ -8,14 +8,14 @@ const faq=[
  [/\b(?:homework|assignment|worksheet)\b/i,"Create homework in the dashboard or generate targeted exercises from a completed lesson review. Review the worksheet and private answer key before sharing."],
  [/\b(?:progress|assessment|rating|feedback|review)\b/i,"Student profiles show notes and confirmed skill ratings. Choose Complete & review in Saved lessons to record difficulties and next steps."],
  [/\b(?:lesson|workbook|classroom|teach)\b/i,"Nova creates CEFR-aligned workbooks with exercises and answer keys. You can save them in student folders, share a classroom link, and edit together during class."],
- [/\b(?:atlas|nova|ai)\b/i,"Nova is HelloEarth's teaching assistant. Atlas is a separate project. Quick questions use keyword help; detailed AI support requires a signed-in account."],
+ [/\b(?:atlas|nova|ai)\b/i,"Nova is HelloEarth's teaching assistant. Atlas is a separate project. Quick questions use keyword help; free AI product guidance is available without signing in."],
  [/\b(?:student|learner|privacy|private|data)\b/i,"Student records are private to the signed-in educator. Nova can use the selected learner's records for lesson personalisation when permitted."],
  [/\b(?:calendar|schedule|booking)\b/i,"Use the Calendar in your signed-in workspace to organise your teaching schedule."],
  [/^(?:hi|hello|hey|help)[!. ]*$/i,"Hi! Ask about lessons, homework, progress, classroom tools or pricing."]
 ];
 async function ask(value){const text=value.trim().slice(0,600);if(!text||busy)return;busy=true;send.disabled=true;bubble(text,true);input.value="";
- try{if(!deep.checked){bubble(faq.find(([p])=>p.test(text))?.[1]||"I can answer common HelloEarth questions. For a more complex request, select Detailed AI and sign in.");return}
- const {data:{session}}=await db.auth.getSession();if(!session){bubble("Detailed AI is available after signing in. Open the private workspace to continue.");return}
- bubble("Preparing a detailed answer…");const waiting=log.lastElementChild;const {data,error}=await db.functions.invoke("he-nova",{body:{message:text,detailed:true,explainOnly:true}});waiting.remove();if(error){let msg=error.message;try{msg=(await error.context.json()).error||msg}catch{}throw Error(msg)}bubble(data?.message||"No answer returned.");
+ try{const quick=faq.find(([p])=>p.test(text))?.[1];if(!deep.checked&&quick){bubble(quick);return}
+ bubble("Preparing a free AI answer…");const waiting=log.lastElementChild;try{const {data,error}=await db.functions.invoke("he-public-nova",{body:{message:text}});if(error){let msg=error.message;try{msg=(await error.context.json()).error||msg}catch{}throw Error(msg)}bubble(data?.message||"No answer returned.");}finally{waiting.remove()}
+
  }catch(e){bubble("Nova couldn't answer: "+e.message)}finally{busy=false;send.disabled=false}}
 form.addEventListener("submit",e=>{e.preventDefault();ask(input.value)});for(const b of document.querySelectorAll("[data-ask]"))b.onclick=()=>ask(b.dataset.ask);
