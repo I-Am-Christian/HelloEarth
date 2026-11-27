@@ -10,15 +10,26 @@ const token=decodeURIComponent(location.hash.replace(/^#t=/,""));
 const valid=/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}\.[a-f0-9-]{36}\.[a-f0-9]{64}$/i;
 const ns="http://www.w3.org/2000/svg";
 let loaded=false,presenter=false,lesson=null,latestUpdated="",sharedStrokes=[],localStrokes=[],tool="view",active=null;
-let dead=false,busyPoll=false,seen=false,syncEnabled=false,canFollow=false,isProgrammatic=false;
+let dead=false,busyPoll=false,seen=false,syncEnabled=true,canFollow=true,isProgrammatic=false;
 let writing=false,pending=null,writeTimer=null,lastWrite=0;
 let roleKnown=false,remoteAnchor=null,anchorReceivedAt=0,anchorAuthor="",anchorRevision=0,remoteAnchorRevision=-1,scrollGuard=null,layoutFollowTimer=null;
 let inkChannel=null,inkReady=false,guestInk=new Map(),textInk=[],remoteText=new Map();const author=crypto.randomUUID();
 let presenceReady=false,presenceTracked=false,presenceSynced=false;
 const paper=el("share-paper"),paperFrame=el("share-paper-frame"),svg=el("share-annotations"),follow=el("share-follow"),presentSync=el("share-presenter-sync");
 let paperScale=1,layoutWidth=0,layoutFrameRAF=0;
-let zoom=100,teacherZoom=100,zoomSync=false,teacherZoomSync=false,zoomRevision=0,remoteZoomRevision=-1;
+let zoom=100,teacherZoom=100,zoomSync=true,teacherZoomSync=true,zoomRevision=0,remoteZoomRevision=-1;
 const zoomFollow=el("share-zoom-follow"),zoomControl=el("share-zoom-sync");
+function studentLocked(){return !presenter&&syncEnabled&&!dead}
+let lockedTop=null;
+function updateViewAccess(){
+ const locked=studentLocked();document.documentElement.classList.toggle("he-teacher-locked",locked);document.body.classList.toggle("he-student-view",roleKnown&&!presenter);document.body.classList.toggle("he-student-readonly",roleKnown&&!presenter&&!studentEditing);
+ canFollow=!presenter&&syncEnabled;follow.checked=canFollow;follow.disabled=true;el("share-follow-label").hidden=true;zoomFollow.checked=locked;zoomFollow.disabled=locked;el("share-zoom-follow-label").hidden=locked||presenter;
+ el("he-classroom-outline").disabled=locked||el("he-classroom-outline").options.length<=1;
+ el("share-zoom-out").disabled=locked||zoom<=75;el("share-zoom-in").disabled=locked||zoom>=200;el("share-zoom-reset").disabled=locked;
+ if(locked){if(lockedTop===null)lockedTop=window.scrollY;}else lockedTop=null;
+ if(roleKnown&&!presenter&&!studentEditing&&tool!=="view")setTool("view");
+ const label=el("share-view-lock");if(label){label.hidden=presenter||!roleKnown;label.textContent=locked?"Teacher controls view":"Independent reading";}
+}
 function applyZoom(value){
  const next=Math.max(75,Math.min(200,Math.round(Number(value)/5)*5));
  if(!Number.isFinite(next)||next===zoom)return;
@@ -28,7 +39,7 @@ function applyZoom(value){
  const horizontal=clamp01((x-rect.left)/Math.max(1,rect.width));
  zoom=next;layoutPaper();
  el("share-zoom-value").textContent=zoom+"%";
- el("share-zoom-out").disabled=zoom<=75;el("share-zoom-in").disabled=zoom>=200;
+ el("share-zoom-out").disabled=studentLocked()||zoom<=75;el("share-zoom-in").disabled=studentLocked()||zoom>=200;
  const after=paper.getBoundingClientRect();
  if(line>=rect.top&&line<=rect.bottom)window.scrollBy({top:after.top+anchor*after.height-line,behavior:"instant"});
  page.scrollLeft+=after.left+horizontal*after.width-x;
@@ -39,7 +50,7 @@ function sendZoom(){
  inkChannel.send({type:"broadcast",event:"zoom",payload:{author,value:zoom,enabled:zoomSync,revision:++zoomRevision}}).catch(()=>msg("Zoom sync connection interrupted.",true));
 }
 function manualZoom(value){
- if(!loaded||dead)return;
+ if(!loaded||dead||studentLocked())return;
  if(!presenter)zoomFollow.checked=false;
  applyZoom(value);if(presenter&&zoomSync)sendZoom();
 }
@@ -115,9 +126,9 @@ function getReadingAnchor(){
  return {block:index,fraction:clamp01((y-rect.top)/Math.max(1,rect.height)),offset,ratio:getRatio()};
 }
 function scrollAbsolute(target){
- if(!roleKnown||!canFollow||presenter||!syncEnabled||tool!=="view"||dead||inlineDraft||inlineSaving)return;
+ if(!roleKnown||!canFollow||presenter||!syncEnabled||dead||inlineDraft||inlineSaving)return;
  const max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight),clamped=Math.max(0,Math.min(max,target));
- if(Math.abs(window.scrollY-clamped)<4)return;
+ lockedTop=clamped;if(Math.abs(window.scrollY-clamped)<4)return;
  isProgrammatic=true;clearTimeout(scrollGuard);window.scrollTo({top:clamped,behavior:"instant"});
  scrollGuard=setTimeout(()=>{isProgrammatic=false},180);
 }
@@ -140,13 +151,13 @@ function sendReadingAnchor(){
 function receiveReadingAnchor(p){
  if(presenter||dead||!p||Number(p.contentRevision||0)!==contentRevision||typeof p.author!=="string"||p.author.length>64||typeof p.enabled!=="boolean"||!Number.isSafeInteger(p.revision)||!Number.isInteger(p.block)||p.block<-1||p.block>=contentBlocks().length||!Number.isFinite(p.fraction)||p.fraction<0||p.fraction>1||!Number.isFinite(p.ratio)||p.ratio<0||p.ratio>1||(p.offset!==null&&(!Number.isInteger(p.offset)||p.offset<0||p.offset>el("share-content").textContent.length)))return;
  if(anchorAuthor===p.author&&p.revision<=remoteAnchorRevision)return;
- anchorAuthor=p.author;remoteAnchorRevision=p.revision;anchorReceivedAt=Date.now();remoteAnchor=p;syncEnabled=p.enabled;
- if(syncEnabled)followReadingAnchor(p);
+ anchorAuthor=p.author;remoteAnchorRevision=p.revision;anchorReceivedAt=Date.now();remoteAnchor=p;
+ if(syncEnabled&&p.enabled)followReadingAnchor(p);
 }
 function freshAnchor(){return inkReady&&remoteAnchor&&Date.now()-anchorReceivedAt<10000}
 function requestReadingAnchor(){if(inkReady&&!presenter)inkChannel.send({type:"broadcast",event:"reading-request",payload:{}}).catch(()=>{})}
 function resumeReading(){
- if(!roleKnown||!loaded||dead||presenter||!canFollow||tool!=="view"||inlineDraft||inlineSaving)return;
+ if(!roleKnown||!loaded||dead||presenter||!canFollow||inlineDraft||inlineSaving)return;
  if(freshAnchor()){if(remoteAnchor.enabled)followReadingAnchor(remoteAnchor)}
  else if(syncEnabled&&lesson?.state)scrollToRatio(lesson.state.scrollRatio);
  requestReadingAnchor();
@@ -376,8 +387,7 @@ function setChatOpen(open,visit=false){
   if(open&&visit){
    const rect=chatPanel.getBoundingClientRect(),dock=document.querySelector(".share-top-dock").getBoundingClientRect();
    if(window.innerWidth<=760&&(rect.top<dock.bottom||rect.top>=window.innerHeight)){
-    if(!presenter&&canFollow&&syncEnabled){canFollow=false;follow.checked=false;msg("Follow teacher paused while you visit chat. Enable Follow scroll to resume.")}
-    chatPanel.scrollIntoView({block:"start",behavior:"instant"});
+    if(!studentLocked())chatPanel.scrollIntoView({block:"start",behavior:"instant"});
    }
    chatInput.focus({preventScroll:true});el("share-chat-log").scrollTop=el("share-chat-log").scrollHeight;
   }else if(anchor&&anchor.block>=0){
@@ -526,7 +536,7 @@ async function connectInk(){
  }).on("broadcast",{event:"zoom"},({payload:p})=>{
   if(presenter||dead||!p||typeof p.value!=="number"||!Number.isFinite(p.value)||p.value<75||p.value>200||typeof p.enabled!=="boolean")return;
   teacherZoom=p.value;teacherZoomSync=p.enabled;
-  if(teacherZoomSync&&zoomFollow.checked)applyZoom(teacherZoom);
+  if(teacherZoomSync&&(studentLocked()||zoomFollow.checked))applyZoom(teacherZoom);
  }).on("broadcast",{event:"zoom-request"},()=>sendZoom())
  .on("broadcast",{event:"reading-position"},({payload})=>receiveReadingAnchor(payload))
  .on("broadcast",{event:"reading-request"},()=>sendReadingAnchor())
@@ -593,6 +603,7 @@ function paintStrokes(){
  el("share-clear").disabled=!canUndo;
 }
 function setTool(next){
+ if(roleKnown&&!presenter&&!studentEditing&&next!=="view")return;
  tool=next;active=null;savedSelection=null;clearTimeout(selectionTimer);
  paper.classList.toggle("is-text-highlighting",["text","underline"].includes(tool));
  for(const btn of document.querySelectorAll("[data-tool]")){
@@ -670,27 +681,23 @@ el("share-clear").addEventListener("click",()=>{
  sendInk();paintStrokes();
 });
 for(const btn of document.querySelectorAll("[data-tool]"))btn.addEventListener("click",()=>setTool(btn.dataset.tool));
-el("share-follow").addEventListener("change",()=>{
- canFollow=follow.checked;
- msg(canFollow?"Following presenter when syncing is enabled.":"Scroll independently.");
- if(canFollow)resumeReading();
-});
-function pauseFollow(event){
- if(!presenter&&canFollow&&syncEnabled&&tool==="view"&&event.target instanceof Element&&event.target.closest(".share-workbook-column")){
-  canFollow=false;follow.checked=false;msg("Follow teacher paused. Turn it on to resynchronise.");
- }
+function blockManualScroll(event){
+ if(!studentLocked())return;
+ const target=event.target;
+ if(target instanceof Element&&target.closest(".share-chat,.share-dialogue-slot,.share-menu-panel,dialog,input,textarea,select,[contenteditable=true]"))return;
+ if(event.cancelable)event.preventDefault();
 }
-window.addEventListener("wheel",event=>{if(Math.abs(event.deltaY)>Math.abs(event.deltaX)&&Math.abs(event.deltaY)>2)pauseFollow(event)},{passive:true});
-let touchOrigin=null;
-window.addEventListener("touchstart",event=>{touchOrigin=event.touches.length===1?{x:event.touches[0].clientX,y:event.touches[0].clientY}:null},{passive:true});
-window.addEventListener("touchmove",event=>{if(touchOrigin&&event.touches.length===1&&Math.abs(event.touches[0].clientY-touchOrigin.y)>12){pauseFollow(event);touchOrigin=null}},{passive:true});
+window.addEventListener("wheel",blockManualScroll,{passive:false});
+window.addEventListener("touchmove",event=>{if(event.touches.length===1)blockManualScroll(event)},{passive:false});
+window.addEventListener("keydown",event=>{if(["ArrowDown","ArrowUp","ArrowLeft","ArrowRight","PageDown","PageUp","Home","End"," "].includes(event.key)&&!(event.target instanceof Element&&event.target.closest("button,input,textarea,select,[contenteditable=true],.share-chat,.share-dialogue-slot,.share-menu-panel,dialog")))blockManualScroll(event)});
 presentSync.addEventListener("change",()=>{
- syncEnabled=presentSync.checked;queue({syncEnabled,scrollRatio:getRatio()});sendReadingAnchor();
+ if(!presenter)return;syncEnabled=presentSync.checked;zoomSync=syncEnabled;zoomControl.checked=zoomSync;queue({syncEnabled,scrollRatio:getRatio()});sendReadingAnchor();sendZoom();
  msg(syncEnabled?"Presenter scrolling follows the same lesson text.":"Student scrolling sync is off.");
 });
 let scrollTimer=null,lastRatioSave=0;
 window.addEventListener("scroll",()=>{
  positionRemoteCursor();
+ if(studentLocked()&&!isProgrammatic&&!inlineDraft&&!inlineSaving&&lockedTop!==null&&Math.abs(window.scrollY-lockedTop)>4){scrollAbsolute(lockedTop);return}
  if(!presenter||!syncEnabled||!loaded||dead)return;
  if(scrollTimer)return;
  scrollTimer=setTimeout(()=>{scrollTimer=null;sendReadingAnchor();if(Date.now()-lastRatioSave>850){lastRatioSave=Date.now();queue({scrollRatio:getRatio()})}},120);
@@ -701,7 +708,8 @@ function updateState(state){
  editingState(state);
  if(!lesson)lesson={state};else lesson.state=state;
  const wasSync=syncEnabled;
- if((!presenter&&!freshAnchor())||(presenter&&!pending&&!writing))syncEnabled=state.syncEnabled===true;
+ if(!presenter||(!pending&&!writing))syncEnabled=state.syncEnabled===true;
+ updateViewAccess();
  presentSync.checked=syncEnabled;
  if(state.updatedAt!==latestUpdated){
   latestUpdated=state.updatedAt;
@@ -710,9 +718,9 @@ function updateState(state){
    paintStrokes();
   }
  }
- if(!presenter&&canFollow&&syncEnabled&&!freshAnchor())scrollToRatio(Number(state.scrollRatio)||0);
+ if(!presenter&&canFollow&&syncEnabled){if(freshAnchor()&&remoteAnchor.enabled)followReadingAnchor(remoteAnchor);else scrollToRatio(Number(state.scrollRatio)||0);if(!wasSync){requestReadingAnchor();if(inkReady)inkChannel.send({type:"broadcast",event:"zoom-request",payload:{}}).catch(()=>{})}}
  if(!presenter&&wasSync!==syncEnabled){
-  msg(syncEnabled?(canFollow?"Following teacher.":"Teacher sync is available. Enable Follow scroll to join."):"Teacher scrolling sync is off. You can browse independently.");
+  msg(syncEnabled?"Teacher controls your lesson view.":"Teacher has enabled independent reading.");
  }
 }
 let requestInFlight=false;
@@ -795,7 +803,7 @@ inlineRoot.addEventListener("focusin",e=>{
  const block=topBlock(node);if(!block||!block.dataset.mdStart||!block.dataset.mdEnd)return;
  inlineDraft={node,block,revision:contentRevision,base:lesson.markdown,original:workbookBlockMarkdown(block),start:Number(block.dataset.mdStart),end:Number(block.dataset.mdEnd)};
  inlineFailed=false;syncInlineEditable();inlineHint("Editing · Ctrl+S to save, or click outside this section.");
- if(!presenter&&canFollow){canFollow=false;follow.checked=false}
+ if(!presenter&&studentLocked())inlineHint("Teacher controls navigation; save or discard to resume following.")
 });
 inlineRoot.addEventListener("compositionstart",()=>inlineComposing=true);
 inlineRoot.addEventListener("compositionend",()=>inlineComposing=false);
@@ -842,9 +850,9 @@ async function checkPresenter(){
   el("share-presenter-label").hidden=false;el("share-cursor-label").hidden=false;
   el("share-zoom-sync-label").hidden=false;el("share-zoom-follow-label").hidden=true;
   el("share-end").hidden=false;
-  syncEnabled=false;presentSync.checked=false;zoomSync=false;zoomControl.checked=false;
-  queue({syncEnabled:false,scrollRatio:getRatio()});
-  msg("Presenter mode active. Use Sync students' scrolling when you want learners to follow.");
+  syncEnabled=true;presentSync.checked=true;zoomSync=true;zoomControl.checked=true;
+  queue({syncEnabled:true,scrollRatio:getRatio()});
+  msg("Teacher control enabled. Turn off Teacher controls view to allow independent reading.");
  }catch{ /* Guests are viewers. Login is never required to read. */ }
 }
 el("share-end").addEventListener("click",async()=>{
@@ -881,9 +889,9 @@ async function open(){
   loaded=true;sharedStrokes=Array.isArray(response.state.annotations)?response.state.annotations:[];
   applyTypedState(response);updateState(response.state);paintStrokes();remaining();
   msg("Lesson loaded. Checking if you're the presenter…");
-  await checkPresenter();roleKnown=true;updateEditingControls();layoutPaper();chatDefaults();dialogue=mountClassroomDialogue({teacher:presenter,student:assignedStudent,topic:lesson.topic,send:p=>chatBroadcast("dialogue",p)});resumeReading();
+  await checkPresenter();roleKnown=true;updateEditingControls();updateViewAccess();layoutPaper();chatDefaults();dialogue=mountClassroomDialogue({teacher:presenter,student:assignedStudent,topic:lesson.topic,send:p=>chatBroadcast("dialogue",p)});resumeReading();
   connectInk().catch(()=>{msg("Live annotation connection unavailable.",true);showPresence("offline","Status unavailable","Could not connect to the live lesson channel")});
-  if(!presenter)msg("Ready to read · no login required. Use Follow teacher to sync scrolling.");
+  if(!presenter)msg(syncEnabled?"Ready · following teacher":"Ready · independent reading");
   setInterval(()=>{remaining();poll()},1700);
  }catch(error){failure(error.message)}
 }
