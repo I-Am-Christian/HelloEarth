@@ -414,3 +414,13 @@
 .he-teacher-locked .he-student-view .share-chat:not([hidden]),.he-teacher-locked .he-student-view .share-dialogue-slot:not([hidden]){position:fixed;top:auto;bottom:12px;right:10px;left:auto;width:min(340px,calc(100vw - 20px));z-index:40;max-height:45dvh;overflow:auto}
 .he-teacher-locked .he-student-view .share-dialogue-slot:not([hidden]){left:10px;right:auto;bottom:calc(12px + env(safe-area-inset-bottom))}
 }
+
+/* A single scroll controller for teacher-led presentation. */
+html.he-teacher-locked{overflow-y:hidden;scrollbar-gutter:stable;scroll-behavior:auto!important;overflow-anchor:none}
+.he-teacher-locked body,.he-teacher-locked .share-workbook-column,.he-teacher-locked .share-page{overflow-anchor:none}
+.he-teacher-locked .share-chat,.he-teacher-locked .he-dialogue-log,.he-teacher-locked .he-dialogue-config,.he-teacher-locked .share-menu-panel{overscroll-behavior:contain;touch-action:pan-y}
+.share-dialogue-slot .he-recording-notice{padding:7px 10px;margin:0;background:#39324f;color:#e7cef9;font-size:11px;line-height:1.4;flex:none}
+.share-dialogue-slot .he-recording-notice[hidden],.share-dialogue-slot .he-audio-meters[hidden]{display:none}
+.share-dialogue-slot .he-audio-meters{display:grid;gap:4px;padding:7px 10px;flex:none}
+.share-dialogue-slot .he-audio-meters label{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;color:#c1b4d7}
+.share-dialogue-slot .he-audio-meters meter{width:48%;height:10px}
