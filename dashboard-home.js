@@ -11,6 +11,51 @@ if(overview){
  upcoming.innerHTML='<div class="he-upcoming-head"><h3>Up next</h3><button type="button" id="he-see-all">See calendar</button></div><div class="he-upcoming-list" id="he-upcoming-list"><p class="he-upcoming-empty">Connect Google Calendar to see your upcoming lessons here.</p></div>';
  const insert=overview.querySelector(".ws-summary");if(insert){overview.insertBefore(upcoming,insert);overview.insertBefore(hero,upcoming);overview.insertBefore(intro,hero)}
  const go=view=>document.getElementById(view+"-tab")?.click();
+ const autoCard=document.createElement("section");autoCard.className="he-auto-prep";autoCard.innerHTML='<div class="he-auto-prep-head"><div><small>NOVA · AUTOMATIC PREPARATION</small><h3>Prepare my next lesson</h3></div><label class="he-auto-switch"><input type="checkbox" id="he-auto-prep-toggle" disabled><span aria-hidden="true"></span><span class="he-auto-switch-label">Enable</span></label></div><p>One private lesson draft per matched appointment, beginning 15 minutes before class. Uses the latest consented lesson review and your normal Nova allowance. Includes optional practice; never sends homework automatically.</p><p id="he-auto-prep-status" role="status">Checking setting…</p><div class="he-auto-prep-actions"><button type="button" id="he-auto-open-studio">Lesson Studio</button><a id="he-auto-ready" hidden target="_blank" rel="noopener">Open prepared lesson ↗</a></div>';
+ hero.after(autoCard);
+ const autoToggle=autoCard.querySelector("#he-auto-prep-toggle"),autoStatus=autoCard.querySelector("#he-auto-prep-status"),autoReady=autoCard.querySelector("#he-auto-ready");
+ autoCard.querySelector("#he-auto-open-studio").onclick=()=>go("lessons");
+ let autoOwner=null,autoEvents=[],autoComplete=false,autoSynced=false,autoBusy=false,autoAgain=false,autoHasCalendar=false;
+ const autoApi=async body=>{const {data,error}=await db.functions.invoke("helloearth-notifications",{body});if(error){let msg=error.message;try{msg=(await error.context.json()).error||msg}catch{}throw Error(msg)}return data};
+ async function autoStatusRefresh(){
+  if(!autoOwner||!autoToggle.checked||autoBusy)return;
+  const {data,error}=await db.from("he_auto_lesson_jobs").select("state,starts_at,generation_id,message").eq("tutor_id",autoOwner).gte("starts_at",new Date(Date.now()-60*60000).toISOString()).order("starts_at").limit(8);
+  if(error)return;
+  const latest=(data||[]).filter(x=>x.state==="ready"&&x.generation_id).at(0);
+  autoReady.hidden=!latest;if(latest)autoReady.href="lesson.html#id="+encodeURIComponent(latest.generation_id);
+  const next=(data||[]).find(x=>Date.parse(x.starts_at)>Date.now()&&x.state!=="cancelled")||latest;
+  if(next)autoStatus.textContent=(next.state==="pending"?"Queued for "+new Date(Date.parse(next.starts_at)-15*60000).toLocaleString():next.state==="running"?"Nova is preparing your lesson…":next.state==="ready"?"Your lesson is ready for review.":next.message||"Preparation "+next.state)+".";
+  else if(autoSynced)autoStatus.textContent="No eligible appointments queued. Link a student, enable personalisation and save a lesson review.";
+ }
+ const norm=x=>String(x||"").normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}]+/gu," ").trim();
+ async function syncAuto(){
+  if(!autoOwner||!autoToggle.checked||!autoHasCalendar)return;
+  if(autoBusy){autoAgain=true;return}
+  const students=window.HelloEarthWorkspace?.students;if(!Array.isArray(students)||!students.length)return;
+  autoBusy=true;
+  try{
+   const events=[];
+   for(const e of autoEvents){
+    if(!e.id||!e.calendarId||!e.start?.dateTime||!e.end?.dateTime||e.status==="cancelled"||e.transparency==="transparent")continue;
+    const linked=e.extendedProperties?.private?.helloearth_student_id;
+    const name=norm(e.summary);const candidates=linked?students.filter(s=>s.id===linked):/\b(lesson|class|tutoring|preply)\b/.test(name)?students.filter(s=>{const n=norm(s.display_name);return n.length>=4&&(" "+name+" ").includes(" "+n+" ")}):[];
+    if(candidates.length!==1||candidates[0].ai_context_enabled!==true)continue;
+    const start=Date.parse(e.start.dateTime),end=Date.parse(e.end.dateTime);if(start<=Date.now()||!Number.isFinite(end)||end<=start)continue;
+    const event_key=Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(e.calendarId+"|"+e.id)))).map(n=>n.toString(16).padStart(2,"0")).join("");
+    events.push({event_key,student_id:candidates[0].id,starts_at:new Date(start).toISOString(),duration_minutes:Math.max(20,Math.min(120,Math.round((end-start)/60000)))});
+   }
+   const result=await autoApi({action:"auto-lesson-sync",events:events.slice(0,200),complete:autoComplete&&events.length<=200});
+   autoSynced=true;autoStatus.textContent=(result.queued||0)+" eligible appointments synced. Drafts are prepared 15 minutes before class.";
+  }catch(e){autoStatus.textContent="Could not sync automatic lessons: "+e.message}
+  finally{autoBusy=false;if(autoAgain){autoAgain=false;syncAuto()}else autoStatusRefresh()}
+ }
+ autoToggle.addEventListener("change",async()=>{const desired=autoToggle.checked;autoToggle.disabled=true;try{await autoApi({action:"auto-lesson-toggle",enabled:desired});autoStatus.textContent=desired?"Enabled. Syncing your calendar…":"Automatic lesson preparation is off.";if(desired)syncAuto();else autoReady.hidden=true}catch(e){autoToggle.checked=!desired;autoStatus.textContent=e.message}finally{autoToggle.disabled=false}});
+ document.addEventListener("helloearth:upcoming-events",e=>{autoHasCalendar=Boolean(e.detail?.connected);autoEvents=e.detail?.events||[];autoComplete=e.detail?.complete===true;syncAuto()});
+ document.addEventListener("helloearth:studentsloaded",syncAuto);
+ document.addEventListener("helloearth:calendar-disconnected",()=>{autoHasCalendar=false;autoEvents=[];autoComplete=false;if(autoToggle.checked){autoApi({action:"auto-lesson-sync",events:[],complete:true}).catch(()=>{});autoStatus.textContent="Calendar disconnected. Connect to queue lessons again."}});
+ db.auth.getUser().then(async({data})=>{autoOwner=data?.user?.id;if(!autoOwner)return;const {data:setting,error}=await db.from("he_auto_lesson_settings").select("enabled").eq("tutor_id",autoOwner).maybeSingle();if(error)throw error;autoToggle.checked=setting?.enabled===true;autoToggle.disabled=false;autoStatus.textContent=autoToggle.checked?"Enabled · awaiting calendar sync":"Off · enable to prepare lessons automatically";if(autoToggle.checked){syncAuto();autoStatusRefresh()}}).catch(()=>{autoStatus.textContent="Automatic preparation setting unavailable."});
+ setInterval(autoStatusRefresh,30000);
+
  document.getElementById("he-next-calendar")?.addEventListener("click",()=>go("calendar"));
  document.getElementById("he-next-students")?.addEventListener("click",()=>go("students"));
  document.getElementById("he-see-all")?.addEventListener("click",()=>go("calendar"));
