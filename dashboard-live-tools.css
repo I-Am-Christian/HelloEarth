@@ -114,3 +114,12 @@
 
 .he-caption-setting-row button{border:1px solid #9f8dbd;border-radius:8px;padding:7px 10px;background:#374565;color:#f4eaff;font-weight:750;font-size:11px;cursor:pointer}
 .he-caption-setting-row button:disabled{opacity:.45;cursor:default}
+
+/* Live audio processing controls */
+.he-caption-audio-settings{border:1px solid rgba(147,128,181,.35);border-radius:10px;padding:9px 12px;margin:8px 0}
+.he-caption-audio-settings summary{cursor:pointer;font-weight:600;font-size:13px}
+.he-caption-audio-settings .he-caption-grid{margin-top:10px}
+.he-caption-audio-settings input[type=checkbox]{width:auto;accent-color:#9176bc}
+.he-caption-audio-settings input[type=range]{width:100%;padding:0;accent-color:#9176bc}
+.he-caption-audio-settings output{font-variant-numeric:tabular-nums;font-weight:600;margin-left:5px}
+.he-caption-audio-settings p{margin:7px 0 0}
