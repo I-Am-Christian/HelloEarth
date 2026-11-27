@@ -97,14 +97,19 @@ const openLink=async id=>{
  }catch(err){if(tab)tab.close();say("he-homework-feedback",err.message,true)}
 };
 
+const lessonStudentSelect=el("he-lesson-student");
+const studentSearch=document.createElement("input");studentSearch.type="search";studentSearch.placeholder="Search students by name…";studentSearch.setAttribute("aria-label","Search students");studentSearch.className="he-lesson-student-search";lessonStudentSelect.before(studentSearch);
+function filterLessonStudents(){const q=studentSearch.value.trim().toLowerCase();let matches=0,last=null;for(const option of lessonStudentSelect.options){if(!option.value){option.hidden=false;continue}option.hidden=Boolean(q&&!option.textContent.toLowerCase().includes(q)&&option.value!==lessonStudentSelect.value);if(q&&option.textContent.toLowerCase().includes(q)){matches++;last=option}}return matches===1?last:null}
+studentSearch.addEventListener("input",filterLessonStudents);studentSearch.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();const match=filterLessonStudents();if(match){lessonStudentSelect.value=match.value;lessonStudentSelect.dispatchEvent(new Event("change"));studentSearch.value="";filterLessonStudents()}else lessonStudentSelect.focus()}});
 function studentOptions(){
  students=W()?.students||[];
  for(const id of ["he-lesson-student","he-homework-student","he-homework-filter"]){
   const select=el(id),choice=select.value;select.replaceChildren();
   const defaultOption=document.createElement("option");defaultOption.value="";defaultOption.textContent=id==="he-homework-filter"?"All students":"Choose a student";select.append(defaultOption);
-  students.forEach(s=>{const o=document.createElement("option");o.value=s.id;o.textContent=s.display_name;select.append(o)});
+  [...students].sort((a,b)=>a.display_name.localeCompare(b.display_name)).forEach(s=>{const o=document.createElement("option");o.value=s.id;o.textContent=s.display_name;select.append(o)});
   if([...select.options].some(o=>o.value===choice))select.value=choice;
  }
+ filterLessonStudents();
 }
 function selectedName(id){return students.find(s=>s.id===id)?.display_name||"Student"}
 async function ensureUser(){
@@ -170,6 +175,10 @@ async function loadHomework(){
 function actionButton(label,onClick){
  const b=document.createElement("button");b.type="button";b.textContent=label;b.addEventListener("click",onClick);return b;
 }
+async function removeHomework(h){
+ if(!confirm("Delete this homework assignment permanently? Its student link and submitted answers will no longer be available."))return;
+ try{const tutor=await ensureUser();const {data,error}=await db.from("he_homework").delete().eq("id",h.id).eq("tutor_id",tutor).select("id");if(error)throw error;if(!data?.length)throw Error("Assignment could not be deleted.");el("he-homework-new-link").hidden=true;el("he-homework-link-url").value="";await loadHomework();say("he-homework-feedback","Homework deleted and its student link revoked.");}catch(e){say("he-homework-feedback",e.message,true)}
+}
 function renderHomework(){
  const root=el("he-homework-list");root.replaceChildren();
  const filter=el("he-homework-filter").value;
@@ -193,9 +202,9 @@ function renderHomework(){
   }
   actions.append(actionButton("View answers",()=>reviewHomework(h)));
   if(h.teacher_answer_key)actions.append(actionButton("Teacher key",()=>reviewHomework(h,true)));
-  actions.append(actionButton("Download worksheet",()=>{
-   downloadText("helloearth-worksheet.txt",h.title+"\n\n"+splitAnswerKey(h.content_markdown).worksheet);
-  }));
+  const more=document.createElement("details");more.className="he-saved-menu he-homework-menu";const summary=document.createElement("summary");summary.textContent="More ⋯";summary.setAttribute("aria-label","More homework actions");more.append(summary);
+  more.append(actionButton("Download worksheet",()=>downloadText("helloearth-worksheet.txt",h.title+"\n\n"+splitAnswerKey(h.content_markdown).worksheet)));
+  const remove=actionButton("Delete assignment",()=>removeHomework(h));remove.className="he-homework-delete";more.append(remove);actions.append(more);
   row.append(main,actions);root.append(row);
  }
 }
@@ -250,7 +259,7 @@ el("he-homework-form").addEventListener("submit",async e=>{
   const {data,error}=await db.from("he_homework").insert({
    tutor_id:activeTutor,student_id:studentId,lesson_plan_id:lessonPlanId,
    title:title.slice(0,800),content_markdown:split.worksheet.slice(0,30000),
-   teacher_answer_key:teacherKey,due_on:null,status:"assigned"
+   teacher_answer_key:teacherKey,due_on:null,status:"assigned",expires_at:new Date(Date.now()+14*86400000).toISOString()
   }).select("id").single();
   if(error)throw error;
   el("he-homework-title").value="";el("he-homework-content").value="";
