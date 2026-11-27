@@ -10,6 +10,36 @@ const source=el("he-translate-source"),target=el("he-translate-target");
 const sessionControls=document.createElement("div");sessionControls.className="he-caption-grid";
 sessionControls.innerHTML='<label>Assigned student<select id="he-caption-student"></select></label><label><input type="checkbox" id="he-caption-dual"> Separate teacher microphone and student tab audio</label><label>Teacher language<select id="he-caption-teacher-language"></select></label><label><input type="checkbox" id="he-caption-auto-report" checked> Generate private report when I finish</label>';
 el("he-caption-source").closest(".he-caption-grid").after(sessionControls);
+const audioControls=document.createElement("details");audioControls.className="he-caption-audio-settings";
+audioControls.innerHTML='<summary>Audio settings · noise &amp; volume</summary><div class="he-caption-grid"><label><input type="checkbox" id="he-mic-noise" checked> Microphone noise suppression</label><label><input type="checkbox" id="he-mic-echo" checked> Echo cancellation</label><label><input type="checkbox" id="he-mic-agc" checked> Automatic microphone gain</label><label>Teacher microphone gain <output id="he-mic-gain-value">100%</output><input type="range" id="he-mic-gain" min="50" max="300" step="10" value="100"></label><label>Student / class tab boost <output id="he-tab-gain-value">100%</output><input type="range" id="he-tab-gain" min="50" max="400" step="10" value="100"></label><label><input type="checkbox" id="he-tab-monitor"> Listen to boosted tab audio (headphones)</label></div><p class="he-caption-activity">Boost applies to captured audio for captions and reports. Listening boost requires supported tab audio replacement; choose it before starting. Noise suppression affects your microphone, not the remote microphone. Use headphones and increase gain gradually.</p><p class="he-caption-activity" id="he-audio-status" role="status"></p>';
+sessionControls.after(audioControls);
+let micGainNode=null,tabGainNode=null,teacherProcessed=null,studentProcessed=null,monitorNode=null;
+const audioStatus=message=>{el("he-audio-status").textContent=message};
+const gainValue=id=>Number(el(id).value)/100;
+for(const id of ["he-mic-noise","he-mic-echo","he-mic-agc","he-mic-gain","he-tab-gain","he-tab-monitor"]){
+ const control=el(id);
+ if(id!=="he-tab-monitor"){try{const v=localStorage.getItem("helloearth.audio."+id);if(v!==null){if(control.type==="checkbox")control.checked=v==="true";else control.value=v}}catch{}}
+ const refresh=()=>{
+  if(control.type==="range"){
+   el(id+"-value").textContent=control.value+"%";
+   const node=id==="he-mic-gain"?micGainNode:tabGainNode;
+   if(node&&mixedCtx)node.gain.setTargetAtTime(gainValue(id),mixedCtx.currentTime,0.035);
+  }
+  if(id!=="he-tab-monitor"){try{localStorage.setItem("helloearth.audio."+id,control.type==="checkbox"?String(control.checked):control.value)}catch{}}
+ };
+ control.addEventListener(control.type==="range"?"input":"change",refresh);refresh();
+}
+function micConstraints(){return {echoCancellation:el("he-mic-echo").checked,noiseSuppression:el("he-mic-noise").checked,autoGainControl:el("he-mic-agc").checked}}
+function processedAudio(stream,kind,monitor=false){
+ const src=mixedCtx.createMediaStreamSource(stream),gain=mixedCtx.createGain(),limit=mixedCtx.createDynamicsCompressor(),dest=mixedCtx.createMediaStreamDestination();
+ gain.gain.value=gainValue(kind==="mic"?"he-mic-gain":"he-tab-gain");
+ limit.threshold.value=-12;limit.knee.value=8;limit.ratio.value=12;limit.attack.value=0.003;limit.release.value=0.2;
+ src.connect(gain).connect(limit).connect(dest);
+ if(kind==="mic")micGainNode=gain;else tabGainNode=gain;
+ if(monitor){monitorNode=limit;limit.connect(mixedCtx.destination)}
+ return dest.stream;
+}
+
 const assigned=el("he-caption-student"),teacherLanguage=el("he-caption-teacher-language");
 teacherLanguage.innerHTML=source.innerHTML;teacherLanguage.value="en";
 let assignedId="",dualSession=false,dualRecorders=new Set(),dualPending=new Set(),dualTimers=new Set(),finishing=false;
@@ -50,6 +80,7 @@ function updateState(){
  el("he-translate-mic").disabled=listening;
  el("he-caption-stop").disabled=!listening;
  el("he-caption-install").disabled=listening;
+ for(const id of ["he-mic-noise","he-mic-echo","he-mic-agc","he-tab-monitor"])el(id).disabled=listening;
 }
 function previewMicLanguage(studentId){
  const student=(window.HelloEarthWorkspace?.students||[]).find(x=>x.id===studentId);
@@ -215,10 +246,10 @@ async function processTranslations(){
  translateBusy=false;
 }
 function stopTracks(){
- for(const stream of [audioStream,displayStream,micStream]){
+ for(const stream of [audioStream,displayStream,micStream,teacherProcessed,studentProcessed]){
   if(stream)for(const track of stream.getTracks()){try{track.stop()}catch{}}
  }
- audioStream=null;displayStream=null;micStream=null;
+ audioStream=null;displayStream=null;micStream=null;teacherProcessed=null;studentProcessed=null;micGainNode=null;tabGainNode=null;monitorNode=null;
  if(mixedCtx){mixedCtx.close().catch(()=>{});mixedCtx=null}
 }
 function stopListening(flush=false){
@@ -245,30 +276,37 @@ function updateTime(){
 }
 async function obtainAudio(){
  const selected=el("he-caption-source").value;
- if(selected==="mic"){
-  micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false});
-  audioStream=new MediaStream(micStream.getAudioTracks());
-  return;
+ const wantMonitor=selected!=="mic"&&el("he-tab-monitor").checked;
+ audioStatus("");
+ const Ctx=window.AudioContext||window.webkitAudioContext;
+ if(!Ctx)throw Error("Audio processing requires a browser with Web Audio support.");
+ if(selected!=="mic"){
+  const options={video:true,audio:wantMonitor?{suppressLocalAudioPlayback:true}:true,preferCurrentTab:false,systemAudio:"include",surfaceSwitching:"include"};
+  displayStream=await navigator.mediaDevices.getDisplayMedia(options);
+  const tabTracks=displayStream.getAudioTracks();
+  if(!tabTracks.length)throw Error("The shared tab did not provide audio. Select the Preply browser tab and enable Share tab audio.");
+  displayStream.getVideoTracks().forEach(t=>t.addEventListener("ended",()=>{
+   if(listening){stopListening();say("The class-tab screen share ended. Captions stopped.")}
+  },{once:true}));
  }
- displayStream=await navigator.mediaDevices.getDisplayMedia({
-  video:true,audio:true,preferCurrentTab:false,systemAudio:"include",surfaceSwitching:"include"
- });
- const tabTracks=displayStream.getAudioTracks();
- if(!tabTracks.length)throw Error("The shared tab did not provide audio. Select the Preply browser tab and enable Share tab audio.");
- displayStream.getVideoTracks().forEach(t=>t.addEventListener("ended",()=>{
-  if(listening){stopListening();say("The class-tab screen share ended. Captions stopped.")}
- },{once:true}));
- if(selected==="tab"){audioStream=new MediaStream(tabTracks);return}
- micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false});
- mixedCtx=new (window.AudioContext||window.webkitAudioContext)();
- const dest=mixedCtx.createMediaStreamDestination();
- for(const media of [new MediaStream(tabTracks),micStream]){
-  const input=mixedCtx.createMediaStreamSource(media);
-  const gain=mixedCtx.createGain();gain.gain.value=media===micStream?0.85:1;
-  input.connect(gain).connect(dest);
+ if(selected!=="tab")micStream=await navigator.mediaDevices.getUserMedia({audio:micConstraints(),video:false});
+ mixedCtx=new Ctx();
+ if(micStream)teacherProcessed=processedAudio(micStream,"mic");
+ if(displayStream){
+  const tracks=displayStream.getAudioTracks();
+  const confirmed=wantMonitor&&tracks[0]?.getSettings?.().suppressLocalAudioPlayback===true;
+  studentProcessed=processedAudio(new MediaStream(tracks),"tab",confirmed);
+  if(wantMonitor&&!confirmed)audioStatus("Listening boost unavailable: this browser did not confirm original tab playback is suppressed. Caption boost remains active.");
+  else if(confirmed)audioStatus("Boosted class audio is playing through HelloEarth. Use headphones.");
+ }
+ if(selected==="mic")audioStream=teacherProcessed;
+ else if(selected==="tab")audioStream=studentProcessed;
+ else{
+  const dest=mixedCtx.createMediaStreamDestination(),mix=mixedCtx.createDynamicsCompressor();
+  for(const stream of [teacherProcessed,studentProcessed])mixedCtx.createMediaStreamSource(stream).connect(mix);
+  mix.connect(dest);audioStream=dest.stream;
  }
  await mixedCtx.resume();
- audioStream=dest.stream;
 }
 async function localAvailability(){
  const Ctor=Recognition();
@@ -334,13 +372,12 @@ async function startBrowser(device=false){
   setTimeout(()=>{
    if(!listening||recognition!==engine)return;
    try{
-    if(el("he-caption-source").value==="mic")engine.start();
-    else engine.start(audioStream.getAudioTracks()[0]);
+    try{engine.start(audioStream.getAudioTracks()[0])}catch(e){if(el("he-caption-source").value!=="mic")throw e;audioStatus("Browser speech recognition may bypass microphone processing. Use cloud captions for reliable gain.");engine.start()}
    }catch(e){stopListening();say("Couldn't restart speech recognition: "+e.message,true)}
   },500);
  };
  if(el("he-caption-source").value==="mic"){
-  try{engine.start(audioStream.getAudioTracks()[0])}catch{engine.start()}
+  try{engine.start(audioStream.getAudioTracks()[0])}catch{audioStatus("Browser speech recognition may bypass microphone processing. Use cloud captions for reliable gain.");engine.start()}
  }else{
   try{engine.start(audioStream.getAudioTracks()[0])}
   catch{throw Error("This browser cannot recognise shared-tab audio directly. Use the cloud captions option.")}
@@ -471,7 +508,7 @@ async function startListening(){
  try{
   await obtainAudio();
   if(!listening||sessionRun!==currentRun){stopTracks();return}
-  if(dualSession){activeEngine="cloud";dualChunk(micStream,"Teacher",teacherLanguage.value,currentRun);dualChunk(new MediaStream(displayStream.getAudioTracks()),"Student",source.value,currentRun);clockTimer=setInterval(updateTime,1000);updateState();say("Separate teacher and student channels active. Use headphones.");return}
+  if(dualSession){activeEngine="cloud";dualChunk(teacherProcessed,"Teacher",teacherLanguage.value,currentRun);dualChunk(studentProcessed,"Student",source.value,currentRun);clockTimer=setInterval(updateTime,1000);updateState();say("Separate teacher and student channels active. Use headphones.");return}
   const offline=await localAvailability();
   if(!listening||sessionRun!==currentRun){stopTracks();return}
   if(choice==="device"){
@@ -583,7 +620,7 @@ el("he-live-translate-pin").addEventListener("click",async()=>{
   pip=win;win.document.title="HelloEarth · Live captions";
   win.document.body.className="he-pip-body";
   const css=win.document.createElement("link");css.rel="stylesheet";
-  css.href=new URL("dashboard-live-tools.css?v=20261126-captions1",location.href).href;
+  css.href=new URL("dashboard-live-tools.css?v=20261127-audio1",location.href).href;
   win.document.head.append(css);win.document.body.append(panel);panel.hidden=false;
   win.addEventListener("pagehide",()=>{
    document.body.append(panel);panel.hidden=closing;pip=null;closing=false;
