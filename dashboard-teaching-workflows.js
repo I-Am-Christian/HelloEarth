@@ -117,7 +117,7 @@ function presetLevel(){
  el("he-share-context").checked=s?.ai_context_enabled===true;
  const topicField=el("he-lesson-topic");
  if(topicField.dataset.autoSuggested&&topicField.value===topicField.dataset.autoSuggested){
-  topicField.value="";delete topicField.dataset.autoSuggested;
+  topicField.value="";delete topicField.dataset.autoSuggested;delete topicField.dataset.autoFocus;delete topicField.dataset.autoCategory;
  }
 }
 el("he-share-context").addEventListener("change",async event=>{
@@ -144,7 +144,7 @@ el("he-share-context").addEventListener("change",async event=>{
  }
 });
 el("he-lesson-topic").addEventListener("input",event=>{
- delete event.target.dataset.autoSuggested;
+ delete event.target.dataset.autoSuggested;delete event.target.dataset.autoFocus;delete event.target.dataset.autoCategory;
 });
 el("he-lesson-student").addEventListener("change",presetLevel);
 el("he-homework-due").value=dateToday();
@@ -361,7 +361,7 @@ function renderLessons(){
    activeLessonId=p.id;
    document.dispatchEvent(new CustomEvent("helloearth:lesson-selected",{detail:{id:p.id,studentId:p.student_id}}));
    el("he-lesson-student").value=p.student_id;
-   el("he-lesson-topic").value=p.topic;
+   el("he-lesson-topic").value=p.topic;delete el("he-lesson-topic").dataset.autoSuggested;delete el("he-lesson-topic").dataset.autoFocus;delete el("he-lesson-topic").dataset.autoCategory;
    el("he-lesson-level").value=p.cefr_level;
    el("he-lesson-duration").value=p.duration_minutes;
    el("he-lesson-editor").value=p.markdown;
@@ -446,8 +446,8 @@ aiProvider.addEventListener("change",()=>{
 async function generateWithHaiku(mode){
  const {topic,level,duration}=baseLesson();
  const topicField=el("he-lesson-topic");
- const requestTopic=topicField.dataset.autoSuggested===topic?"":topic;
  const category=el("he-lesson-category").value;
+ const requestTopic=topicField.dataset.autoSuggested===topic?(topicField.dataset.autoCategory===category?topicField.dataset.autoFocus||"":""):topic;
  const studentId=el("he-lesson-student").value;
  const byok=aiProvider.value==="anthropic-byok";
  const ownKey=el("he-openai-key").value.trim();
@@ -477,9 +477,12 @@ async function generateWithHaiku(mode){
   }
   if(!data?.text)throw new Error(data?.error||"No workbook content was returned.");
   const resolvedTopic=String(data.topic||topic||"Personalised English lesson").slice(0,200);
-  if(!requestTopic){
+  if(data.autoTopic===true||!requestTopic){
    el("he-lesson-topic").value=resolvedTopic;
    el("he-lesson-topic").dataset.autoSuggested=resolvedTopic;
+   el("he-lesson-topic").dataset.autoFocus=requestTopic;
+   const categoryField=el("he-lesson-category");if([...categoryField.options].some(o=>o.value===data.category))categoryField.value=data.category;
+   topicField.dataset.autoCategory=categoryField.value;
   }
   const workbook=String(data.text).replace(/^\s*>\s*\*\*Note for the tutor:\*\*[^\n]*(?:\n>[^\n]*)*\n?/gim,"").trim().slice(0,100000);
   el("he-lesson-editor").value=workbook;
@@ -503,6 +506,7 @@ async function generateWithHaiku(mode){
    (mode==="homework"
     ?"Homework worksheet prepared. Review the tasks, then create a student link in Homework."
     :"Your workbook is ready. Open its printable page or edit it before saving.")+
+   (data.autoTopic?" Nova selected: "+resolvedTopic+".":"")+
    (logged?" A temporary link is in Generation history.":"")+
    (Number.isInteger(data.historyUsed)&&data.historyUsed>0?" Compared with "+data.historyUsed+" previous learning activities.":"")+
    (Number.isInteger(data.archiveUsed)&&data.archiveUsed>0?" Consulted "+data.archiveUsed+" of "+data.archiveAvailable+" learner-specific archived sources.":"")+
@@ -532,7 +536,7 @@ el("he-homework-create-ai").addEventListener("click",()=>{
  activeLessonId=null;
  el("he-ai-integration").open=true;
  el("he-homework-ai-generate").focus();
- say("he-ai-feedback","Enter a topic and click Generate homework with Nova.");
+ say("he-ai-feedback","Type a topic or skill (e.g. vocabulary), or leave it blank for Nova to choose.");
 });
 document.addEventListener("helloearth:studentsloaded",()=>{studentOptions();loadHomework();loadLessons()});
 document.addEventListener("helloearth:view-changed",e=>{if(e.detail?.view==="homework")loadHomework();if(e.detail?.view==="lessons")loadLessons()});
