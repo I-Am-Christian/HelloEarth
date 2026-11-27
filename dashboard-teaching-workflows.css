@@ -124,3 +124,10 @@ body.space-dashboard #he-generation-list{max-height:420px}
 .he-lesson-review-dialog .he-review-primary{background:#b29adc;color:#251936;border-color:#ccb5ed}
 .he-lesson-review-dialog button:disabled{opacity:.5;cursor:default}
 @media(max-width:560px){.he-review-note-grid{grid-template-columns:1fr}.he-review-skills{grid-template-columns:repeat(2,minmax(0,1fr))}.he-lesson-review-dialog{padding:14px}.he-review-field textarea,.he-review-field input,.he-review-field select{font-size:16px}.he-saved-menu-body{grid-template-columns:1fr}}
+
+.he-lesson-student-search{width:100%;box-sizing:border-box;margin-bottom:6px;min-height:38px;border-radius:9px;padding:8px 12px}
+.he-homework-row .he-inline-actions{display:flex;align-items:center;gap:6px;flex:0 1 auto}
+.he-homework-row .he-inline-actions button,.he-homework-menu summary{font-size:12px;padding:8px 11px;min-height:34px;border-radius:8px}
+.he-homework-menu{position:relative;z-index:3}.he-homework-menu[open]{z-index:20}
+.he-homework-menu .he-homework-delete{color:#ffd0d6;border-color:#d6798d;background:#593042}
+@media(max-width:700px){.he-homework-row .he-inline-actions{flex:1 1 100%;justify-content:flex-start}}
