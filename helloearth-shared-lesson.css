@@ -389,3 +389,28 @@
 }
 @media screen and (max-width:1200px){.he-classroom-title{max-width:220px}.share-top-dock .share-main-row{gap:7px}.he-ribbon-group+.he-ribbon-group{padding-left:7px}.he-ribbon-group+.he-ribbon-group .he-ribbon-label{left:7px}.share-top-dock .share-tool-modes button{font-size:11px;padding:5px 6px}}
 @media screen and (max-width:760px){.share-top-dock .share-toolbar{padding:6px 9px;gap:5px}.he-classroom-identity{flex:1 1 100%;gap:8px}.he-classroom-title{flex:1;max-width:none;padding-left:8px}.he-classroom-title strong{font-size:12px}.share-top-dock .share-toolbar-actions{margin-left:0;flex:1 1 100%;justify-content:flex-start;gap:4px}.share-top-dock .share-control-shell{padding:6px 8px;max-height:35dvh;overflow-y:auto}.share-top-dock .share-tools{align-items:flex-end;gap:6px}.share-top-dock .share-main-row{flex-wrap:wrap;align-items:flex-start;width:100%;gap:8px}.he-ribbon-group+.he-ribbon-group{border-left:0;padding-left:0}.he-ribbon-group+.he-ribbon-group .he-ribbon-label{left:0}.he-ribbon-annotations{flex:1 1 100%}.share-top-dock .share-tools button,.share-top-dock .share-menu summary{min-height:36px}.share-top-dock .share-menu[open] .share-menu-panel{position:fixed;top:calc(var(--share-dock-height,140px) + 4px);right:8px;max-height:50dvh;z-index:50}.he-classroom-statusline{gap:3px}.share-top-dock .share-inline-actions{flex-basis:100%}.share-top-dock .share-meta{font-size:10px}}
+
+/* Teacher-led classroom: calm controls, readable locked student view. */
+@media screen{
+.share-top-dock .share-toolbar-actions>button,.share-top-dock .share-toolbar-actions>.share-menu>summary{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:35px;padding:7px 12px;border-radius:10px;font:600 12px/1.2 system-ui;color:#e8e3f5;background:#303b53;border:1px solid #8895b34a;box-shadow:0 2px 5px #10172825;transition:background .15s,border-color .15s}
+.share-top-dock .share-toolbar-actions>button:hover,.share-top-dock .share-toolbar-actions>.share-menu>summary:hover{background:#414d69;border-color:#baa5e5}
+.share-top-dock .share-toolbar-actions>button:focus-visible,.share-top-dock .share-toolbar-actions>.share-menu>summary:focus-visible{outline:2px solid #d8c4f2;outline-offset:2px}
+.share-top-dock #share-copy{background:#a990d4;color:#241c38;border-color:#c4afe8}
+.share-top-dock #share-chat-toggle::before{content:"";display:inline-block;width:14px;height:12px;border:1.5px solid currentColor;border-radius:4px}
+.share-top-dock .he-dialogue-toggle::before{content:"";width:10px;height:14px;border:1.5px solid currentColor;border-radius:6px}
+.share-top-dock #he-classroom-focus::before{content:"";width:13px;height:11px;border:1.5px solid currentColor;border-radius:2px;box-shadow:inset 0 -4px 0 #a99aca55}
+#share-view-lock:not([hidden]){display:inline-flex;align-items:center;gap:5px;border:1px solid #9b86c84d;border-radius:999px;background:#8a6cc422;padding:5px 9px;color:#e0d2f5;font-size:11px;white-space:nowrap}
+#share-view-lock:not([hidden])::before{content:"";width:7px;height:7px;background:#c6adef;border-radius:50%}
+.he-student-view #share-copy,.he-student-view #share-download,.he-student-view #share-print,.he-student-view #share-cursor-label,.he-student-view #he-classroom-focus{display:none!important}
+.he-student-readonly .he-ribbon-annotations,.he-student-readonly .he-ribbon-style,.he-student-readonly .he-ribbon-document,.he-student-readonly .share-inline-actions{display:none!important}
+.he-teacher-locked .he-student-view .he-ribbon-view,.he-student-view .share-sync-menu{display:none!important}
+.he-teacher-locked .he-student-readonly .share-control-shell .share-tools{display:none!important}
+.he-teacher-locked .he-student-view .share-page{overflow-x:hidden}
+.he-teacher-locked .he-student-view .share-workbook-column{overscroll-behavior:none}
+.he-student-view .share-top-dock .share-toolbar-actions #share-role{display:none}
+}
+@media screen and (max-width:760px){
+.share-top-dock .share-toolbar-actions>button,.share-top-dock .share-toolbar-actions>.share-menu>summary{padding:7px 9px;font-size:11px}
+.he-teacher-locked .he-student-view .share-chat:not([hidden]),.he-teacher-locked .he-student-view .share-dialogue-slot:not([hidden]){position:fixed;top:auto;bottom:12px;right:10px;left:auto;width:min(340px,calc(100vw - 20px));z-index:40;max-height:45dvh;overflow:auto}
+.he-teacher-locked .he-student-view .share-dialogue-slot:not([hidden]){left:10px;right:auto;bottom:calc(12px + env(safe-area-inset-bottom))}
+}
