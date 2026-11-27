@@ -1,7 +1,7 @@
 import {db} from "./supabase-client.js";
 import {SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY} from "./supabase-config.js";
 import {renderWorkbook,workbookBlockMarkdown} from "./helloearth-workbook-renderer.js?v=20261126-eraser1";
-import {mountClassroomDialogue} from "./classroom-dialogue.js?v=20261126-dock2";
+import {mountClassroomDialogue} from "./classroom-dialogue.js?v=20261127-audio2";
 let dialogue=null,assignedStudent=null,contentRevision=0,editingWorkbook=false;
 // One-way tutor presentation. Public guests can view with a signed link,
 // follow scrolling, and make LOCAL drawings; only the owner can save/sync.
@@ -23,7 +23,7 @@ function studentLocked(){return !presenter&&syncEnabled&&!dead}
 let lockedTop=null;
 function updateViewAccess(){
  const locked=studentLocked();document.documentElement.classList.toggle("he-teacher-locked",locked);document.body.classList.toggle("he-student-view",roleKnown&&!presenter);document.body.classList.toggle("he-student-readonly",roleKnown&&!presenter&&!studentEditing);
- canFollow=!presenter&&syncEnabled;follow.checked=canFollow;follow.disabled=true;el("share-follow-label").hidden=true;zoomFollow.checked=locked;zoomFollow.disabled=locked;el("share-zoom-follow-label").hidden=locked||presenter;
+ canFollow=!presenter&&syncEnabled;follow.checked=canFollow;follow.disabled=true;el("share-follow-label").hidden=true;if(locked)zoomFollow.checked=true;zoomFollow.disabled=locked;el("share-zoom-follow-label").hidden=locked||presenter;
  el("he-classroom-outline").disabled=locked||el("he-classroom-outline").options.length<=1;
  el("share-zoom-out").disabled=locked||zoom<=75;el("share-zoom-in").disabled=locked||zoom>=200;el("share-zoom-reset").disabled=locked;
  if(locked){if(lockedTop===null)lockedTop=window.scrollY;}else lockedTop=null;
@@ -697,7 +697,7 @@ presentSync.addEventListener("change",()=>{
 let scrollTimer=null,lastRatioSave=0;
 window.addEventListener("scroll",()=>{
  positionRemoteCursor();
- if(studentLocked()&&!isProgrammatic&&!inlineDraft&&!inlineSaving&&lockedTop!==null&&Math.abs(window.scrollY-lockedTop)>4){scrollAbsolute(lockedTop);return}
+ if(roleKnown&&studentLocked()&&!isProgrammatic&&!inlineDraft&&!inlineSaving&&lockedTop!==null&&Math.abs(window.scrollY-lockedTop)>4){scrollAbsolute(lockedTop);return}
  if(!presenter||!syncEnabled||!loaded||dead)return;
  if(scrollTimer)return;
  scrollTimer=setTimeout(()=>{scrollTimer=null;sendReadingAnchor();if(Date.now()-lastRatioSave>850){lastRatioSave=Date.now();queue({scrollRatio:getRatio()})}},120);
@@ -720,6 +720,7 @@ function updateState(state){
  }
  if(!presenter&&canFollow&&syncEnabled){if(freshAnchor()&&remoteAnchor.enabled)followReadingAnchor(remoteAnchor);else scrollToRatio(Number(state.scrollRatio)||0);if(!wasSync){requestReadingAnchor();if(inkReady)inkChannel.send({type:"broadcast",event:"zoom-request",payload:{}}).catch(()=>{})}}
  if(!presenter&&wasSync!==syncEnabled){
+  if(syncEnabled&&teacherZoomSync)applyZoom(teacherZoom);
   msg(syncEnabled?"Teacher controls your lesson view.":"Teacher has enabled independent reading.");
  }
 }
