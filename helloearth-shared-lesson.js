@@ -112,17 +112,7 @@ function getReadingAnchor(){
  if(index<0)for(let i=blocks.length-1;i>=0;i--){if(blocks[i].getBoundingClientRect().height>0){index=i;break}}
  if(index<0)return {ratio:getRatio(),block:-1,fraction:0,offset:null};
  const block=blocks[index],rect=block.getBoundingClientRect();
- let offset=null;
- if(y>=rect.top&&y<=rect.bottom){
-  const left=Math.max(0,rect.left),right=Math.min(window.innerWidth,rect.right);
-  for(const portion of [.1,.3,.55,.8]){
-   if(right<=left)break;
-   const x=left+(right-left)*portion;
-   const p=document.caretPositionFromPoint?.(x,y),range=!p?document.caretRangeFromPoint?.(x,y):null;
-   const node=p?.offsetNode||range?.startContainer,off=p?.offset??range?.startOffset;
-   if(node&&block.contains(node)&&Number.isInteger(off)){try{offset=textOffset(node,off);break}catch{}}
-  }
- }
+ const offset=null;
  return {block:index,fraction:clamp01((y-rect.top)/Math.max(1,rect.height)),offset,ratio:getRatio()};
 }
 function scrollAbsolute(target){
@@ -530,7 +520,7 @@ async function connectInk(){
  const bytes=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(token));
  const room=Array.from(new Uint8Array(bytes),n=>n.toString(16).padStart(2,"0")).join("");
  inkChannel=db.channel("he-lesson-ink-"+room,{config:{broadcast:{self:false,ack:true},presence:{key:author}}});
- inkChannel.on("presence",{event:"sync"},()=>{presenceSynced=true;updatePresence()})
+ inkChannel.on("presence",{event:"sync"},()=>{presenceSynced=true;updatePresence();if(!presenter&&!freshAnchor())requestReadingAnchor()})
  .on("broadcast",{event:"ink-batch"},({payload})=>receiveInkBatch(payload))
  .on("broadcast",{event:"erase-mark"},({payload})=>receiveErase(payload))
  .on("broadcast",{event:"ink"},({payload:p})=>{
