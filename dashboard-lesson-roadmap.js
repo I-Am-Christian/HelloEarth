@@ -2,7 +2,7 @@ import {db} from "./supabase-client.js";
 const el=id=>document.getElementById(id),root=el("he-roadmap");
 if(root){
  const student=el("he-roadmap-student"),title=el("he-roadmap-title"),goal=el("he-roadmap-goal"),unitTitle=el("he-roadmap-new-unit"),unitTasks=el("he-roadmap-new-tasks"),unitsRoot=el("he-roadmap-units"),status=el("he-roadmap-status"),save=el("he-roadmap-save"),add=el("he-roadmap-add"),template=el("he-roadmap-template");
- let tutor=null,selected="",units=[],plans=[],dirty=false,busy=false,loadVersion=0,prepared=null;
+ let tutor=null,selected="",units=[],plans=[],dirty=false,busy=false,loadVersion=0,prepared=null,loaded=false,revision=null;
  const node=(tag,cls="",str="")=>{const n=document.createElement(tag);if(cls)n.className=cls;if(str)n.textContent=str;return n};
  const btn=(label,fn)=>{const b=node("button","",label);b.type="button";b.onclick=fn;return b};
  const tell=(text,error=false)=>{status.textContent=text;status.classList.toggle("is-error",error)};
@@ -24,25 +24,26 @@ if(root){
   student.value=selected||current;
   if(student.value&&!selected)load(student.value);
  }
- function controls(){for(const field of [title,goal,unitTitle,unitTasks,save,add,template])field.disabled=busy||!selected;student.disabled=busy}
+ function controls(){for(const field of [title,goal,unitTitle,unitTasks,save,add,template])field.disabled=busy||!selected||!loaded;student.disabled=busy}
  function render(){
   controls();unitsRoot.replaceChildren();const current=units.findIndex(u=>!u.completedAt);
   el("he-roadmap-progress").textContent=units.filter(u=>u.completedAt).length+" / "+units.length+" lessons completed";
   if(!selected||!units.length){unitsRoot.append(node("p","he-record-empty",selected?"Add your first lesson, or create a 12-lesson starter roadmap.":"Choose a student to open their roadmap."));return}
   units.forEach((u,index)=>{
-   const card=node("article","he-roadmap-unit");card.classList.toggle("is-current",index===current);
-   const top=node("div","he-roadmap-unit-head"),heading=node("strong","", "Lesson "+(index+1)+" · "+u.title),badge=node("span","he-roadmap-badge",u.completedAt?"Completed":index===current?"Current lesson":"Upcoming");top.append(heading,badge);card.append(top);
+   const card=node("details","he-roadmap-unit");card.open=index===current;card.classList.toggle("is-current",index===current);
+   const top=node("summary","he-roadmap-unit-head"),heading=node("strong","", "Lesson "+(index+1)+" · "+u.title),badge=node("span","he-roadmap-badge",u.completedAt?"Completed":index===current?"Current lesson":"Upcoming");top.append(heading,badge);card.append(top);
    const isCurrent=index===current,editable=!u.completedAt;
    const name=node("input");name.value=u.title;name.maxLength=160;name.setAttribute("aria-label","Lesson "+(index+1)+" title");name.disabled=!editable;name.onchange=()=>{u.title=name.value.trim()||u.title;changed();render()};
    if(editable)card.append(name);
    const taskList=node("div","he-roadmap-tasks");
    for(const t of u.tasks){
-    const row=node("div","he-roadmap-task"),text=node("span","",t.text),state=node("select");
+    const row=node("div","he-roadmap-task"),text=node(editable?"input":"span"),state=node("select");if(editable){text.value=t.text;text.maxLength=300;text.setAttribute("aria-label","Task description");text.onchange=()=>{const v=text.value.trim();if(v){t.text=v;changed()}else text.value=t.text}}else text.textContent=t.text;
     state.setAttribute("aria-label","Task status: "+t.text);for(const [key,label] of [["pending","To do"],["done","Done"],["review","Needs review"],["carry","Carry forward"]])state.add(new Option(label,key));
     state.value=t.state;state.disabled=!isCurrent||busy;state.onchange=()=>{t.state=state.value;changed()};
-    row.append(text,state);taskList.append(row)
+    row.append(text,state);if(editable){const removeTask=btn("×",()=>{if(confirm("Remove this task?")){u.tasks=u.tasks.filter(x=>x.id!==t.id);changed();render()}});removeTask.className="he-roadmap-task-remove";removeTask.setAttribute("aria-label","Remove task");row.append(removeTask)}taskList.append(row)
    }
    card.append(taskList);
+   if(editable){const addTask=btn("+ Add task",()=>{if(u.tasks.length>=40){tell("Maximum 40 tasks per lesson.",true);return}const text=prompt("New lesson task");if(text?.trim()){u.tasks.push({id:crypto.randomUUID(),text:text.trim().slice(0,300),state:"pending"});changed();render()}});addTask.className="he-roadmap-remove he-roadmap-add-task";card.append(addTask)}
    if(isCurrent){
     const notes=node("textarea");notes.value=u.notes||"";notes.maxLength=1500;notes.rows=2;notes.placeholder="Teacher notes / next lesson focus";notes.setAttribute("aria-label","Teacher notes");notes.oninput=()=>{u.notes=notes.value;changed()};card.append(notes);
     const link=node("select");link.setAttribute("aria-label","Link saved lesson");link.add(new Option("Link an existing saved lesson",""));
@@ -51,7 +52,7 @@ if(root){
     link.value=u.lessonId||"";link.onchange=()=>{u.lessonId=link.value||null;changed();render()};card.append(link);
     const actions=node("div","he-work-actions");const linked=plans.find(p=>p.id===u.lessonId);
     const prep=btn(linked?"Open saved lesson":"Prepare in Lesson Studio",()=>prepare(u,index));prep.className="he-primary";actions.append(prep);
-    if(linked&&!linked.completed_at)actions.append(btn("Complete & review lesson",()=>document.dispatchEvent(new CustomEvent("helloearth:review-saved-lesson",{detail:{lessonId:linked.id,studentId:selected}}))));
+    if(linked)actions.append(btn("Present live",()=>present(linked)));if(linked&&!linked.completed_at)actions.append(btn("Complete & review lesson",()=>document.dispatchEvent(new CustomEvent("helloearth:review-saved-lesson",{detail:{lessonId:linked.id,studentId:selected}}))));
     const next=btn("Finish & advance",()=>advance(u,index));next.disabled=!linked?.completed_at||busy;next.title=next.disabled?"Complete and review the linked saved lesson first":"Carry incomplete tasks forward";actions.append(next);card.append(actions);
     if(!linked?.completed_at)card.append(node("small","he-work-help","Confirm the linked lesson's review before moving on. Unfinished and review tasks carry forward."));
    }
@@ -60,18 +61,25 @@ if(root){
   });
  }
  async function load(id){
-  const version=++loadVersion;busy=true;selected=id;prepared=null;units=[];plans=[];title.value="Learning roadmap";goal.value="";dirty=false;render();tell(id?"Loading roadmap…":"Choose a student.");
+  const version=++loadVersion;busy=true;selected=id;prepared=null;loaded=false;revision=null;units=[];plans=[];title.value="Learning roadmap";goal.value="";dirty=false;render();tell(id?"Loading roadmap…":"Choose a student.");
   if(!id){busy=false;render();return}
-  try{const [roadmap,list]=await Promise.all([db.from("he_student_roadmaps").select("title,goal,units").eq("tutor_id",tutor).eq("student_id",id).maybeSingle(),loadPlans(id)]);if(version!==loadVersion)return;if(roadmap.error)throw roadmap.error;const d=roadmap.data;title.value=d?.title||"Learning roadmap";goal.value=d?.goal||"";units=Array.isArray(d?.units)?d.units:[];plans=list;tell("Ready.")}
+  try{const [roadmap,list]=await Promise.all([db.from("he_student_roadmaps").select("title,goal,units,updated_at").eq("tutor_id",tutor).eq("student_id",id).maybeSingle(),loadPlans(id)]);if(version!==loadVersion)return;if(roadmap.error)throw roadmap.error;const d=roadmap.data;title.value=d?.title||"Learning roadmap";goal.value=d?.goal||"";units=Array.isArray(d?.units)?d.units:[];plans=list;revision=d?.updated_at||null;loaded=true;tell("Ready.")}
   catch(e){if(version===loadVersion)tell("Could not load roadmap: "+e.message,true)}
   finally{if(version===loadVersion){busy=false;render()}}
  }
  async function store(){
-  if(!selected||busy)return false;
+  if(!selected||busy||!loaded)return false;
   busy=true;controls();
-  try{const {error}=await db.from("he_student_roadmaps").upsert({tutor_id:tutor,student_id:selected,title:title.value.trim()||"Learning roadmap",goal:goal.value.trim(),units,updated_at:new Date().toISOString()},{onConflict:"tutor_id,student_id"});if(error)throw error;dirty=false;tell("Roadmap saved.");return true}
+  try{const values={title:title.value.trim()||"Learning roadmap",goal:goal.value.trim(),units,updated_at:new Date().toISOString()};
+   const table=db.from("he_student_roadmaps");const query=revision?table.update(values).eq("tutor_id",tutor).eq("student_id",selected).eq("updated_at",revision):table.insert({...values,tutor_id:tutor,student_id:selected});
+   const {data,error}=await query.select("updated_at").maybeSingle();if(error)throw error;if(!data)throw Error("This roadmap changed in another tab. Copy your changes and reload before saving.");revision=data.updated_at;dirty=false;tell("Roadmap saved.");return true}
   catch(e){tell("Roadmap not saved: "+e.message,true);return false}
   finally{busy=false;render()}
+ }
+ async function present(p){
+  const tab=window.open("about:blank","_blank");if(tab)tab.opener=null;
+  try{const {data,error}=await db.functions.invoke("he-lesson-sharing",{body:{action:"create",sourceKind:"saved",sourceId:p.id}});if(error||!data?.url)throw Error(error?.message||"Could not create a live lesson.");if(tab)tab.location.href=data.url;else tell("Pop-up blocked. Open the saved lesson from Lesson Studio.",true)}
+  catch(e){tab?.close();tell(e.message,true)}
  }
  async function prepare(u,index){
   if(u.lessonId){const p=plans.find(x=>x.id===u.lessonId);if(p){window.open("lesson.html#saved="+encodeURIComponent(p.id),"_blank","noopener");return}}
@@ -88,11 +96,11 @@ if(root){
  async function advance(u,index){
   if(busy)return;try{plans=await loadPlans(selected)}catch(e){tell(e.message,true);return}
   if(units.findIndex(x=>!x.completedAt)!==index||!plans.some(p=>p.id===u.lessonId&&p.completed_at)){tell("Complete and confirm the linked lesson review first.",true);render();return}
-  const carry=u.tasks.filter(t=>t.state!=="done");
+  const carry=u.tasks.filter(t=>t.state!=="done");const backup=JSON.stringify(units);
   if(carry.length&&!confirm("Finish lesson "+(index+1)+" and carry "+carry.length+" unfinished/review task(s) forward?"))return;
   if(carry.length&&!units[index+1]){if(units.length>=40){tell("Roadmap has reached 40 lessons. Finish remaining tasks before advancing.",true);return}units.push(unit("Follow-up and review",[]))}
   if(carry.length){const next=units[index+1];if(next.tasks.length+carry.length>40){tell("Too many follow-up tasks for the next lesson. Complete or consolidate tasks first.",true);return}next.tasks=[...carry.map(t=>({id:crypto.randomUUID(),text:t.text,state:"pending",from:u.id})),...next.tasks]}
-  u.completedAt=new Date().toISOString();changed();await store();
+  u.completedAt=new Date().toISOString();changed();if(!await store()){units=JSON.parse(backup);dirty=true;render()}
  }
  student.onchange=()=>{const id=student.value;if(dirty&&!confirm("Discard unsaved roadmap changes?")){student.value=selected;return}load(id)};
  title.oninput=goal.oninput=changed;
