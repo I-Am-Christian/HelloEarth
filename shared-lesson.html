@@ -4,8 +4,8 @@
 <meta name="theme-color" content="#1d2b46"><title>Shared Lesson | HelloEarth</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="stylesheet" href="helloearth-lesson.css?v=20261126-first1">
-<link rel="stylesheet" href="helloearth-shared-lesson.css?v=20261127-stable4">
-<script type="module" src="helloearth-shared-lesson.js?v=20261127-stable4"></script><link rel="stylesheet" href="page-i18n.css?v=20261126-all1"><script src="site-translation.js?v=20261126-all1" defer></script><script src="page-i18n.js?v=20261126-all1" defer></script><script type="module" src="classroom-navigation.js?v=20261127-teacher3"></script></head>
+<link rel="stylesheet" href="helloearth-shared-lesson.css?v=20261128-guided1">
+<script type="module" src="helloearth-shared-lesson.js?v=20261127-stable4"></script><link rel="stylesheet" href="page-i18n.css?v=20261126-all1"><script src="site-translation.js?v=20261126-all1" defer></script><script src="page-i18n.js?v=20261126-all1" defer></script><script type="module" src="classroom-navigation.js?v=20261128-guided1"></script></head>
 <body>
 <div class="share-top-dock">
 <header class="lesson-toolbar share-toolbar">
@@ -15,7 +15,7 @@
   <span id="share-presence" class="share-presence" data-state="waiting" role="status" aria-live="polite"><i aria-hidden="true"></i><span id="share-presence-text">Connecting…</span></span>
   <button type="button" id="share-copy" disabled title="Copy lesson link">Copy link</button>
   <button type="button" id="share-chat-toggle" aria-controls="share-chat" aria-expanded="false" title="Open classroom chat"><span class="share-chat-toggle-label">Chat</span> <span id="share-chat-unread" hidden>0</span></button>
-  <button type="button" id="he-classroom-focus" aria-expanded="true" aria-controls="he-classroom-ribbon" title="Hide or show lesson tools">Hide tools</button><details class="share-menu share-file-menu"><summary aria-label="More lesson actions">More <span aria-hidden="true">⌄</span></summary><div class="share-menu-panel"><span id="share-countdown">Checking link…</span><div id="he-classroom-extra-tools"></div><button type="button" id="share-download" disabled>Download .md</button><button type="button" id="share-print" disabled>Print / Save PDF</button><button type="button" id="share-end" hidden>End sharing</button></div></details>
+  <button type="button" id="he-guided-toggle" aria-expanded="false" aria-controls="he-guided-rail">☷ Sections</button><button type="button" id="he-classroom-focus" aria-expanded="true" aria-controls="he-classroom-ribbon" title="Hide or show lesson tools">Hide tools</button><details class="share-menu share-file-menu"><summary aria-label="More lesson actions">More <span aria-hidden="true">⌄</span></summary><div class="share-menu-panel"><span id="share-countdown">Checking link…</span><div id="he-classroom-extra-tools"></div><button type="button" id="share-download" disabled>Download .md</button><button type="button" id="share-print" disabled>Print / Save PDF</button><button type="button" id="share-end" hidden>End sharing</button></div></details>
  </div>
 </header>
 <div class="share-control-shell" id="he-classroom-ribbon">
@@ -47,7 +47,7 @@
  <span id="share-draw-hint">Teacher and student annotations are shared live while connected.</span></div></div>
 </div>
 </div>
-<div id="share-error" class="share-error" role="alert" hidden></div>
+<aside id="he-guided-rail" class="he-guided-rail" aria-label="Lesson sections"><div class="he-guided-head"><small>LESSON GUIDE</small><strong id="he-guided-progress">Lesson sections</strong></div><nav id="he-guided-list" aria-label="Lesson outline"></nav><div class="he-guided-actions"><button type="button" id="he-guided-prev">← Previous</button><button type="button" id="he-guided-next">Next →</button></div><p class="he-guided-lock-note">Following your teacher</p></aside><div id="share-error" class="share-error" role="alert" hidden></div>
 <div class="share-classroom-layout dialogue-closed chat-closed"><div id="share-dialogue-slot" class="share-dialogue-slot" hidden></div><div class="share-workbook-column"><main class="lesson-screen share-page">
  <div class="share-paper-frame" id="share-paper-frame">
  <section class="lesson-paper share-paper" id="share-paper" aria-label="Shared classroom workbook">
