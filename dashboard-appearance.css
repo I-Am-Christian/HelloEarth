@@ -1,0 +1,92 @@
+/* Hello Earth appearance tokens and final light-mode refinements.
+   No rules in this file modify the existing dark theme. */
+html[data-he-theme="light"]{
+ color-scheme:light;
+ --bg:#f3f2f7;--surface:#fbfafd;--surface2:#eceaf3;
+ --card:#fbfafd;--line:#d8d4e3;--muted:#626579;--text:#282839;
+ --violet:#7655a8;--purple:#7655a8;--glow:#a58bc542;
+ --ux-bg:#f3f2f7;--ux-panel:#fbfafd;--ux-panel-soft:#eeebf5;
+ --ux-line:#d8d4e3;--ux-hover:#e9e2f4;--ux-text:#282839;
+ --ux-muted:#626579;--ux-purple:#7655a8;
+ accent-color:#7655a8;
+ background:#f3f2f7;
+}
+html[data-he-theme="light"] body.space-dashboard,
+html[data-he-theme="light"] body.space-dashboard .workspace,
+html[data-he-theme="light"] body.space-dashboard .ws-main{
+ color:var(--text);background:var(--bg)!important;
+}
+html[data-he-theme="light"] body.space-dashboard #checking{color:#5b4d75!important}
+html[data-he-theme="light"] body.space-dashboard .ws-header,
+html[data-he-theme="light"] body.space-dashboard .ws-view-switch{
+ background:#fbfafd!important;border-bottom-color:#d9d5e5!important;
+ color:#282839;
+}
+html[data-he-theme="light"] body.space-dashboard .ws-header .he-top-brand{color:#352942}
+html[data-he-theme="light"] body.space-dashboard .he-top-brand .brand-dot{color:#8259b3}
+html[data-he-theme="light"] body.space-dashboard .ws-view-switch .ws-view-tab{color:#565369!important}
+html[data-he-theme="light"] body.space-dashboard .ws-view-switch .ws-view-tab.is-current{
+ color:#5d3d91!important;border-bottom-color:#906abf!important;background:#f2edf9!important;
+}
+html[data-he-theme="light"] body.space-dashboard .ws-view-switch .ws-view-tab:hover{color:#5d3d91!important;background:#eee9f6!important}
+html[data-he-theme="light"] body.space-dashboard .ws-header .ux-search-trigger,
+html[data-he-theme="light"] body.space-dashboard .ws-header .ws-account .ux-signout{
+ color:#50485f;
+}
+html[data-he-theme="light"] body.space-dashboard .ux-create-button,
+html[data-he-theme="light"] .he-work-actions button.he-primary,
+html[data-he-theme="light"] .he-generated-address button.he-primary,
+html[data-he-theme="light"] .he-lesson-review-dialog .he-review-primary,
+html[data-he-theme="light"] #he-nova-root #he-nova-send{
+ background:#7655a8!important;color:#fff!important;border-color:#7655a8!important;
+}
+html[data-he-theme="light"] body.space-dashboard #overview-view .he-next-hero{
+ background:linear-gradient(115deg,#eae1f5,#f5edf6)!important;
+ border:1px solid #dbcee9;
+}
+html[data-he-theme="light"] body.space-dashboard #overview-view .he-next-hero :is(h3,.he-feature-time,.he-feature-sub){color:#39274d}
+html[data-he-theme="light"] body.space-dashboard #overview-view .he-feature-actions button{
+ background:#7655a8!important;color:#fff!important;border-color:#7655a8!important;
+}
+html[data-he-theme="light"] body.space-dashboard #overview-view .he-feature-actions button+button{
+ background:#fbfafd!important;color:#5c3c8e!important;border-color:#cbb8e1!important;
+}
+html[data-he-theme="light"] :is(.he-work-card,.he-settings-card,.he-auto-prep,.he-report-entitlement,.he-lesson-review-dialog,.he-homework-review-dialog){
+ background:#fbfafd;color:#282839;border-color:#d8d4e3;
+}
+html[data-he-theme="light"] :is(.he-work-heading,.he-settings-header) :is(h2,h3),
+html[data-he-theme="light"] :is(.he-work-card,.he-settings-card,.he-auto-prep) :is(h3,strong){color:#312940}
+html[data-he-theme="light"] :is(.he-work-help,.he-record-empty,.he-settings-card p,.he-work-heading p,.he-settings-header p,.he-roadmap-header p){color:#626579}
+html[data-he-theme="light"] :is(.he-record-row,.he-roadmap-unit,.he-work-card .he-roadmap-unit,.he-student-folder,.he-saved-menu-body){
+ background:#f2f0f7;color:#312d42;border-color:#ded9e9;
+}
+html[data-he-theme="light"] .he-work-card .he-roadmap-unit.is-current{background:#eee6f8;border-color:#b69ad9}
+html[data-he-theme="light"] :is(.he-work-card,.he-settings-card,.he-lesson-review-dialog,.he-homework-review-dialog) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),textarea,select){
+ background:#fff;color:#282839;border-color:#c7c3d4;
+}
+html[data-he-theme="light"] input::placeholder,html[data-he-theme="light"] textarea::placeholder{color:#747187;opacity:1}
+html[data-he-theme="light"] :is(.he-work-message,.he-saved-reviewed){color:#286448}
+html[data-he-theme="light"] :is(.he-work-message.is-error,.he-review-status,.he-homework-delete){color:#9b344c}
+html[data-he-theme="light"] #he-ai-allowance>summary{background:#f0e9f8;color:#5d3d91;border-color:#d5c5e9}
+html[data-he-theme="light"] #he-ai-allowance>summary strong,html[data-he-theme="light"] .he-allowance-details>div strong{color:#5d3d91}
+html[data-he-theme="light"] #he-ai-allowance .he-allowance-details{background:#fbfafd;color:#282839;border-color:#d8d4e3;box-shadow:0 12px 30px #35244920}
+html[data-he-theme="light"] .he-allowance-details>small{color:#626579}
+html[data-he-theme="light"] #homework-view .he-homework-row .he-inline-actions>button,
+html[data-he-theme="light"] #homework-view .he-homework-menu>summary{
+ background:#f9f6fd;color:#5d3d91;border-color:#ccbbdf;
+}
+html[data-he-theme="light"] #homework-view .he-homework-menu-panel .he-homework-delete{
+ background:#fbe9ed;color:#923b50;border-color:#dfb6c0;
+}
+html[data-he-theme="light"] #he-nova-launch{background:#7655a8;color:#fff;border-color:#7655a8}
+html[data-he-theme="light"] #he-nova-launch .he-nova-symbol{color:#fff}
+html[data-he-theme="light"] #he-nova-root #he-nova-panel{background:#fbfafd;color:#282839;border-color:#d5cbe4}
+html[data-he-theme="light"] #he-nova-root .he-nova-bot{background:#f0edf5;color:#282839;border-color:#dfd8e9}
+html[data-he-theme="light"] #he-nova-root .he-nova-user{background:#eae0f5;color:#39274d;border-color:#d8c5eb}
+html[data-he-theme="light"] #he-nova-root #he-nova-input{background:#fff;color:#282839}
+html[data-he-theme="light"] body.space-dashboard #calendar-view .he-week-shell,
+html[data-he-theme="light"] body.space-dashboard #calendar-view .he-week-main,
+html[data-he-theme="light"] body.space-dashboard #calendar-view .he-week-scroll{background:#faf9fc;border-color:#d8d4e3}
+html[data-he-theme="light"] body.space-dashboard #calendar-view .he-week-slot-label{background:#7655a8;color:#fff}
+html[data-he-theme="light"] :is(button,a,input,textarea,select,summary):focus-visible{outline-color:#7655a8}
+.he-appearance-card #he-appearance-description{margin:10px 0 0}
