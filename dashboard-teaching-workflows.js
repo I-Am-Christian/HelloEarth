@@ -36,6 +36,9 @@ async function refreshSavedPublicLinks(){
 const levels=["A1","A2","B1","B2","C1","C2"];
 const say=(id,msg,err=false)=>{const n=el(id);if(n){n.textContent=msg;n.classList.toggle("is-error",err)}};
 const clean=t=>String(t||"").trim();
+const searchNorm=value=>String(value??"").normalize("NFKD").replace(/\p{M}/gu,"").toLowerCase().replace(/ł/g,"l").replace(/ß/g,"ss").replace(/[^\p{L}\p{N}]+/gu," ").trim();
+const searchTerms=value=>searchNorm(value).split(/\s+/).filter(Boolean);
+const searchMatches=(value,terms)=>{const hay=searchNorm(value);return terms.every(term=>hay.includes(term))};
 const dateToday=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-")};
 const downloadText=(filename,body)=>{
  const url=URL.createObjectURL(new Blob([body],{type:"text/plain;charset=utf-8"}));
@@ -98,9 +101,26 @@ const openLink=async id=>{
 };
 
 const lessonStudentSelect=el("he-lesson-student");
-const studentSearch=document.createElement("input");studentSearch.type="search";studentSearch.placeholder="Search students by name…";studentSearch.setAttribute("aria-label","Search students");studentSearch.className="he-lesson-student-search";lessonStudentSelect.before(studentSearch);
-function filterLessonStudents(){const q=studentSearch.value.trim().toLowerCase();let matches=0,last=null;for(const option of lessonStudentSelect.options){if(!option.value){option.hidden=false;continue}option.hidden=Boolean(q&&!option.textContent.toLowerCase().includes(q)&&option.value!==lessonStudentSelect.value);if(q&&option.textContent.toLowerCase().includes(q)){matches++;last=option}}return matches===1?last:null}
-studentSearch.addEventListener("input",filterLessonStudents);studentSearch.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();const match=filterLessonStudents();if(match){lessonStudentSelect.value=match.value;lessonStudentSelect.dispatchEvent(new Event("change"));studentSearch.value="";filterLessonStudents()}else lessonStudentSelect.focus()}});
+const studentSearch=document.createElement("input");studentSearch.type="search";studentSearch.placeholder="Search students by name…";studentSearch.setAttribute("aria-label","Search students");studentSearch.setAttribute("autocomplete","off");studentSearch.className="he-lesson-student-search";
+const studentMatches=document.createElement("div");studentMatches.className="he-lesson-student-results";studentMatches.id="he-lesson-student-results";studentMatches.hidden=true;
+studentSearch.setAttribute("aria-controls",studentMatches.id);lessonStudentSelect.before(studentSearch,studentMatches);
+function chooseLessonStudent(id){lessonStudentSelect.value=id;lessonStudentSelect.dispatchEvent(new Event("change",{bubbles:true}));studentSearch.value="";filterLessonStudents();lessonStudentSelect.focus({preventScroll:true})}
+function filterLessonStudents(){
+ const terms=searchTerms(studentSearch.value),matches=[...students].filter(s=>terms.length&&searchMatches(s.display_name,terms)).sort((a,b)=>a.display_name.localeCompare(b.display_name));
+ studentMatches.replaceChildren();studentMatches.hidden=!terms.length;
+ if(terms.length){
+  const info=document.createElement("small");info.textContent=matches.length?matches.length+" matching student"+(matches.length===1?"":"s"):"No matching students";info.setAttribute("role","status");studentMatches.append(info);
+  for(const student of matches){const b=document.createElement("button");b.type="button";b.className="he-lesson-student-result";b.textContent=student.display_name;b.onclick=()=>chooseLessonStudent(student.id);studentMatches.append(b)}
+ }
+ return matches;
+}
+studentSearch.addEventListener("input",filterLessonStudents);studentSearch.addEventListener("keydown",e=>{
+ if(e.isComposing)return;
+ if(e.key==="Escape"){studentSearch.value="";filterLessonStudents();e.preventDefault()}
+ if(e.key==="Enter"){e.preventDefault();const matches=filterLessonStudents();if(matches.length===1)chooseLessonStudent(matches[0].id);else studentMatches.querySelector("button")?.focus()}
+ if(e.key==="ArrowDown"&&!studentMatches.hidden){e.preventDefault();studentMatches.querySelector("button")?.focus()}
+});
+lessonStudentSelect.addEventListener("change",()=>{studentSearch.value="";filterLessonStudents()});
 function studentOptions(){
  students=W()?.students||[];
  for(const id of ["he-lesson-student","he-homework-student","he-homework-filter"]){
@@ -349,23 +369,46 @@ document.addEventListener("helloearth:review-saved-lesson",async event=>{
  }catch(e){alert("Could not open lesson review: "+e.message)}
 });
 function renderLessons(){
- const root=el("he-lesson-history");if(!root)return;root.replaceChildren();
- const controls=document.createElement("div");controls.className="he-folder-controls";
- const studentPicker=document.createElement("select");studentPicker.setAttribute("aria-label","Filter saved lessons by student");studentPicker.add(new Option("All students","all"));
+ const root=el("he-lesson-history");if(!root)return;
+ let controls=root.querySelector(".he-folder-controls"),results=root.querySelector(".he-lesson-results");
+ if(!controls||!results){
+  root.replaceChildren();controls=document.createElement("div");controls.className="he-folder-controls";
+  const search=document.createElement("input");search.type="search";search.placeholder="Search student, topic, CEFR or lesson content…";search.setAttribute("aria-label","Find lesson");search.autocomplete="off";
+  const studentPicker=document.createElement("select");studentPicker.setAttribute("aria-label","Filter saved lessons by student");
+  const filters=document.createElement("div");filters.className="he-folder-filters";
+  for(const [key,label] of [["all","All lessons"],["saved","Saved"],["pending","To teach"],["complete","Completed"],["unsaved","Unsaved"]]){
+   const b=actionButton(label,()=>{lessonFilter=key;renderLessons()});b.dataset.lessonFilter=key;filters.append(b);
+  }
+  const clear=actionButton("Reset filters",()=>{lessonSearch="";lessonFolder="all";lessonFilter="all";search.value="";renderLessons();search.focus({preventScroll:true})});clear.className="he-lesson-reset";
+  const count=document.createElement("small");count.className="he-lesson-match-count";count.setAttribute("role","status");
+  search.addEventListener("input",()=>{lessonSearch=search.value;renderLessons()});
+  search.addEventListener("keydown",e=>{if(e.key==="Enter")e.preventDefault();if(e.key==="Escape"){search.value="";lessonSearch="";renderLessons()}});
+  studentPicker.onchange=()=>{lessonFolder=studentPicker.value;renderLessons()};
+  controls.append(search,studentPicker,filters,clear,count);results=document.createElement("div");results.className="he-lesson-results";root.append(controls,results);
+ }
+ const search=controls.querySelector("input"),studentPicker=controls.querySelector("select");
+ if(search.value!==lessonSearch)search.value=lessonSearch;
+ studentPicker.replaceChildren(new Option("All students","all"));
  const ids=[...new Set(lessonRows.map(p=>p.student_id))].sort((a,b)=>selectedName(a).localeCompare(selectedName(b)));
  for(const id of ids)studentPicker.add(new Option("📁 "+selectedName(id),id));
  if(lessonFolder!=="all"&&!ids.includes(lessonFolder))lessonFolder="all";
- studentPicker.value=lessonFolder;studentPicker.onchange=()=>{lessonFolder=studentPicker.value;renderLessons()};
- const filters=document.createElement("div");filters.className="he-folder-filters";for(const [key,label] of [["saved","Saved"],["pending","To teach"],["complete","Completed"],["unsaved","Unsaved"]]){
- const b=actionButton(label,()=>{lessonFilter=key;renderLessons()});b.setAttribute("aria-pressed",String(key===lessonFilter));filters.append(b)}
- const search=document.createElement("input");search.type="search";search.placeholder="Find a lesson…";search.setAttribute("aria-label","Find lesson");search.value=lessonSearch;search.oninput=()=>{lessonSearch=search.value;const pos=search.selectionStart;renderLessons();const next=root.querySelector("input[type=search]");next?.focus();try{next?.setSelectionRange(pos,pos)}catch{}};
- controls.append(studentPicker,filters,search);root.append(controls);
- const folders=new Map();
- for(const p of lessonRows){if(lessonFolder!=="all"&&p.student_id!==lessonFolder)continue;if(lessonFilter==="unsaved"?!p.unsaved_at:p.unsaved_at)continue;if(lessonFilter==="complete"&&!p.completed_at||lessonFilter==="pending"&&p.completed_at)continue;if(lessonSearch&&!([p.topic,selectedName(p.student_id),p.cefr_level].join(" ").toLowerCase().includes(lessonSearch.toLowerCase())))continue;if(!folders.has(p.student_id))folders.set(p.student_id,[]);folders.get(p.student_id).push(p)}
- if(!folders.size){const p=document.createElement("p");p.className="he-record-empty";p.textContent="No lessons match this folder or filter.";root.append(p);return}
+ studentPicker.value=lessonFolder;
+ for(const button of controls.querySelectorAll("[data-lesson-filter]"))button.setAttribute("aria-pressed",String(button.dataset.lessonFilter===lessonFilter));
+ const folders=new Map(),terms=searchTerms(lessonSearch);
+ for(const p of lessonRows){
+  if(lessonFolder!=="all"&&p.student_id!==lessonFolder)continue;
+  if(lessonFilter!=="all"&&(lessonFilter==="unsaved"?!p.unsaved_at:Boolean(p.unsaved_at)))continue;
+  if(lessonFilter==="complete"&&!p.completed_at||lessonFilter==="pending"&&p.completed_at)continue;
+  if(terms.length&&!searchMatches([p.topic,selectedName(p.student_id),p.cefr_level,p.markdown,p.completed_at?"completed":"to teach",p.unsaved_at?"unsaved":"saved"].join(" "),terms))continue;
+  if(!folders.has(p.student_id))folders.set(p.student_id,[]);folders.get(p.student_id).push(p);
+ }
+ const matchCount=[...folders.values()].reduce((sum,plans)=>sum+plans.length,0);
+ controls.querySelector(".he-lesson-match-count").textContent=matchCount+" lesson"+(matchCount===1?"":"s")+" · "+folders.size+" student"+(folders.size===1?"":"s");
+ results.replaceChildren();
+ if(!folders.size){const p=document.createElement("p");p.className="he-record-empty";p.textContent=lessonRows.length?"No lessons match. Try another search or reset filters to search every lesson.":"No saved lessons yet.";results.append(p);return}
  for(const [id,plans] of [...folders].sort((a,b)=>selectedName(a[0]).localeCompare(selectedName(b[0])))){
- const folder=document.createElement("details");folder.className="he-student-folder";folder.open=lessonFolder===id||lessonFolderOpen.has(id)||Boolean(lessonSearch)||folders.size===1;
- const head=document.createElement("summary"),label=document.createElement("strong"),count=document.createElement("small");label.textContent="📁 "+selectedName(id);count.textContent=plans.length+" lesson"+(plans.length===1?"":"s");head.append(label,count);folder.append(head);folder.addEventListener("toggle",()=>{if(folder.open)lessonFolderOpen.add(id);else lessonFolderOpen.delete(id)});root.append(folder);
+ const folder=document.createElement("details");folder.className="he-student-folder";folder.open=lessonFolder===id||lessonFolderOpen.has(id)||terms.length>0||folders.size===1;
+ const head=document.createElement("summary"),label=document.createElement("strong"),count=document.createElement("small");label.textContent="📁 "+selectedName(id);count.textContent=plans.length+" lesson"+(plans.length===1?"":"s");head.append(label,count);folder.append(head);folder.addEventListener("toggle",()=>{if(terms.length)return;if(folder.open)lessonFolderOpen.add(id);else lessonFolderOpen.delete(id)});results.append(folder);
  for(const p of plans){
   const row=document.createElement("article");row.className="he-record-row he-lesson-row";
   const main=document.createElement("div");
@@ -378,7 +421,7 @@ function renderLessons(){
   work.append(actionButton("Edit lesson",()=>{
    activeLessonId=p.id;
    document.dispatchEvent(new CustomEvent("helloearth:lesson-selected",{detail:{id:p.id,studentId:p.student_id}}));
-   el("he-lesson-student").value=p.student_id;
+   el("he-lesson-student").value=p.student_id;studentSearch.value="";filterLessonStudents();presetLevel();
    el("he-lesson-topic").value=p.topic;delete el("he-lesson-topic").dataset.autoSuggested;delete el("he-lesson-topic").dataset.autoFocus;delete el("he-lesson-topic").dataset.autoCategory;
    el("he-lesson-level").value=p.cefr_level;
    el("he-lesson-duration").value=p.duration_minutes;
