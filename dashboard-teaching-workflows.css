@@ -189,3 +189,15 @@ body.space-dashboard #he-generation-list{max-height:420px}
 .he-roadmap-unit .he-roadmap-remove{justify-self:start;border:0;background:transparent;color:#ebadba;padding:5px 0;font:600 11px system-ui;cursor:pointer}
 .he-roadmap-unit .he-work-help{margin:0}
 @media(max-width:820px){.he-roadmap-grid{grid-template-columns:1fr}.he-roadmap-units{max-height:560px}}
+
+.he-work-card .he-roadmap-unit{margin:0;padding:11px 13px;background:#222e46;border:1px solid #8290ab45;border-radius:10px}
+.he-work-card .he-roadmap-unit.is-current{background:#302b49;border-color:#ad92da}
+.he-work-card .he-roadmap-unit>summary{margin:0;list-style:none;cursor:pointer}
+.he-work-card .he-roadmap-unit>summary::-webkit-details-marker{display:none}
+.he-work-card .he-roadmap-unit>summary::after{content:"+";font:700 16px system-ui;color:#bfa5e4}
+.he-work-card .he-roadmap-unit[open]>summary{margin-bottom:9px}
+.he-work-card .he-roadmap-unit[open]>summary::after{content:"−"}
+.he-roadmap-task{grid-template-columns:minmax(0,1fr) minmax(90px,118px) auto}
+.he-roadmap-task input{min-height:32px;padding:5px 7px;margin:0;font-size:12px}
+.he-roadmap-task-remove{width:27px;height:27px;padding:0;background:transparent;border:1px solid #8e728f65;color:#e8afbc;border-radius:6px;cursor:pointer;font-size:17px}
+.he-roadmap-unit .he-roadmap-add-task{color:#c8b1ed}
