@@ -222,12 +222,16 @@ function renderHomework(){
   }
   actions.append(actionButton("View answers",()=>reviewHomework(h)));
   if(h.teacher_answer_key)actions.append(actionButton("Teacher key",()=>reviewHomework(h,true)));
-  const more=document.createElement("details");more.className="he-saved-menu he-homework-menu";const summary=document.createElement("summary");summary.textContent="More ⋯";summary.setAttribute("aria-label","More homework actions");more.append(summary);
-  more.append(actionButton("Download worksheet",()=>downloadText("helloearth-worksheet.txt",h.title+"\n\n"+splitAnswerKey(h.content_markdown).worksheet)));
-  const remove=actionButton("Delete assignment",()=>removeHomework(h));remove.className="he-homework-delete";more.append(remove);actions.append(more);
+  const more=document.createElement("details");more.className="he-homework-menu";const summary=document.createElement("summary");summary.textContent="⋯";summary.title="More homework actions";summary.setAttribute("aria-label","More homework actions");more.append(summary);
+  const panel=document.createElement("div");panel.className="he-homework-menu-panel";
+  panel.append(actionButton("↓ Download worksheet",()=>downloadText("helloearth-worksheet.txt",h.title+"\n\n"+splitAnswerKey(h.content_markdown).worksheet)));
+  const remove=actionButton("Delete assignment",()=>removeHomework(h));remove.className="he-homework-delete";panel.append(remove);more.append(panel);actions.append(more);
+  panel.addEventListener("click",()=>{more.open=false});more.addEventListener("toggle",()=>{if(more.open)for(const other of root.querySelectorAll(".he-homework-menu[open]"))if(other!==more)other.open=false});
   row.append(main,actions);root.append(row);
  }
 }
+document.addEventListener("click",e=>{for(const menu of document.querySelectorAll(".he-homework-menu[open]"))if(!menu.contains(e.target))menu.open=false});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")for(const menu of document.querySelectorAll(".he-homework-menu[open]")){menu.open=false;menu.querySelector("summary")?.focus({preventScroll:true})}});
 function reviewHomework(h,showKey=false){
  reviewWorksheet={...h,reviewText:showKey?h.teacher_answer_key:(h.student_answers||"")};
  el("he-review-title").textContent=(showKey?"Teacher answer key: ":"Student answers: ")+h.title;
@@ -489,6 +493,7 @@ el("he-lesson-save").addEventListener("click",async()=>{
  try{
   await ensureUser();const id=crypto.randomUUID();const {error}=await db.from("atlas_lesson_plans").insert({id,tutor_id:activeTutor,student_id:studentId,topic:topic.slice(0,200),cefr_level:level,duration_minutes:duration,markdown:markdown.slice(0,100000)});if(!error){
    activeLessonId=id;
+   document.dispatchEvent(new CustomEvent("helloearth:lesson-saved",{detail:{id,studentId,topic}}));
    document.dispatchEvent(new CustomEvent("helloearth:lesson-selected",{detail:{id,studentId}}));
   }
   if(error)throw error;say("he-lesson-feedback","Lesson saved to this student's records.");await loadLessons();
@@ -573,7 +578,7 @@ async function generateWithHaiku(mode){
    (Number.isInteger(data.archiveUsed)&&data.archiveUsed>0?" Consulted "+data.archiveUsed+" of "+data.archiveAvailable+" learner-specific archived sources.":"")+
    (Number.isFinite(data.remainingToday)?" Remaining generations today: "+data.remainingToday+".":""));
  }catch(e){say("he-ai-feedback",e.message,true)}
- finally{buttons.forEach(b=>{b.disabled=false})}
+ finally{buttons.forEach(b=>{b.disabled=false});document.dispatchEvent(new Event("helloearth:ai-usage-changed"))}
 }
 el("he-lesson-generate").addEventListener("click",()=>generateWithHaiku("lesson"));
 el("he-homework-ai-generate").addEventListener("click",()=>generateWithHaiku("homework"));
