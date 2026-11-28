@@ -1,0 +1,361 @@
+/* Light palette overrides · core workspace. Layout and dark mode remain unchanged. */
+/* portal.css */
+html[data-he-theme="light"] a:hover{color:rgba(66,36,127,1)}
+html[data-he-theme="light"] button:focus-visible,html[data-he-theme="light"] input:focus-visible,html[data-he-theme="light"] textarea:focus-visible,html[data-he-theme="light"] select:focus-visible,html[data-he-theme="light"] a:focus-visible{outline:2px solid rgba(176,166,201,1)}
+html[data-he-theme="light"] .portal-brand{color:rgba(39,43,57,1.000)!important}
+html[data-he-theme="light"] .brand-dot{color:rgba(65,36,127,1)}
+html[data-he-theme="light"] .auth-aside{border-right:1px solid rgba(116,103,151,0.180);background:radial-gradient(ellipse at 30% 26%,rgba(238,233,247,0.6) 0%,transparent 44%),radial-gradient(ellipse at 80% 88%,rgba(233,240,247,0.549) 0%,transparent 42%),rgba(242,243,250,1)}
+html[data-he-theme="light"] .auth-aside-content h1 em{color:rgba(58,36,127,1)}
+html[data-he-theme="light"] .eyebrow,html[data-he-theme="light"] .auth-kicker,html[data-he-theme="light"] .dash-overline{color:rgba(60,36,127,1)}
+html[data-he-theme="light"] .auth-aside-content p{color:rgba(54,54,109,1)}
+html[data-he-theme="light"] .auth-aside-foot{color:rgba(69,69,110,1)}
+html[data-he-theme="light"] .auth-orbit{border:1px solid rgba(175,166,201,0.5);box-shadow:0 0 0 35px rgba(49,39,72,0.035),0 0 0 78px rgba(49,39,72,0.031)}
+html[data-he-theme="light"] .auth-orbit:before{border:1px dashed rgba(172,166,201,0.5)}
+html[data-he-theme="light"] .auth-planet{background:radial-gradient(circle at 35% 30%,rgba(207,231,237,1),rgba(218,225,241,1) 39%,rgba(233,233,247,1) 75%);box-shadow:0 0 44px rgba(49,39,72,0.160),inset -12px -15px 24px rgba(49,39,72,0.160)}
+html[data-he-theme="light"] .auth-satellite{background:radial-gradient(circle at 30% 25%,#faf7ff,rgba(213,211,233,1) 47%,rgba(223,223,236,1) 95%);box-shadow:0 0 28px rgba(49,39,72,0.160)}
+html[data-he-theme="light"] .auth-spark{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .auth-main{background:radial-gradient(ellipse at 80% -18%,rgba(120,96,189,0.267),transparent 52%),rgba(242,244,250,1)}
+html[data-he-theme="light"] .auth-top{color:rgba(59,66,104,1)}
+html[data-he-theme="light"] .auth-top>span span{color:rgba(62,36,127,1)}
+html[data-he-theme="light"] .auth-description{color:rgba(59,66,105,1)}
+html[data-he-theme="light"] .google-signin{border:1px solid rgba(166,169,201,1)}
+html[data-he-theme="light"] .google-signin:hover{box-shadow:0 9px 30px rgba(49,39,72,0.114)}
+html[data-he-theme="light"] .auth-separator{color:rgba(71,79,108,1)}
+html[data-he-theme="light"] .auth-separator:before,html[data-he-theme="light"] .auth-separator:after{background:rgba(236,237,243,0.533)}
+html[data-he-theme="light"] .auth-form>label,html[data-he-theme="light"] .auth-label-row label,html[data-he-theme="light"] .field label{color:rgba(40,44,123,1)}
+html[data-he-theme="light"] .auth-form input:not([type=checkbox]),html[data-he-theme="light"] .auth-form select,html[data-he-theme="light"] .field input,html[data-he-theme="light"] .field textarea,html[data-he-theme="light"] .field select{color:rgba(39,43,57,1.000);background:rgba(243,244,249,1);border:1px solid rgba(188,190,210,0.549)}
+html[data-he-theme="light"] .auth-form input::placeholder,html[data-he-theme="light"] .field input::placeholder,html[data-he-theme="light"] .field textarea::placeholder{color:rgba(69,77,109,1)}
+html[data-he-theme="light"] .auth-form input:focus,html[data-he-theme="light"] .field input:focus,html[data-he-theme="light"] .field textarea:focus,html[data-he-theme="light"] .field select:focus{border-color:rgba(177,166,201,1);box-shadow:0 0 0 3px rgba(49,39,72,0.129)}
+html[data-he-theme="light"] .auth-label-row a,html[data-he-theme="light"] .auth-switch a,html[data-he-theme="light"] .terms-check a,html[data-he-theme="light"] .auth-privacy a{color:rgba(60,36,127,1)}
+html[data-he-theme="light"] .toggle-password{color:rgba(67,52,111,1)}
+html[data-he-theme="light"] .terms-check{color:rgba(56,63,107,1)!important}
+html[data-he-theme="light"] .primary-action,html[data-he-theme="light"] .dash-primary{background:linear-gradient(105deg,rgba(215,207,237,1),rgba(215,207,237,1));border:1px solid rgba(176,166,201,1);color:rgba(39,43,57,1.000);box-shadow:0 10px 25px rgba(49,39,72,0.160)}
+html[data-he-theme="light"] .is-error{color:rgba(127,36,46,1)!important}
+html[data-he-theme="light"] .is-success{color:rgba(37,126,69,1)!important}
+html[data-he-theme="light"] .auth-switch{color:rgba(60,66,103,1)}
+html[data-he-theme="light"] .auth-privacy{color:rgba(69,77,109,1)}
+html[data-he-theme="light"] .auth-bottom{color:rgba(73,79,106,1)}
+html[data-he-theme="light"] .workspace{background:rgba(242,244,250,1)}
+html[data-he-theme="light"] .ws-sidebar{border-right:1px solid rgba(191,188,209,0.5);background:linear-gradient(180deg,rgba(243,243,249,1),rgba(242,244,250,1))}
+html[data-he-theme="light"] .ws-nav button,html[data-he-theme="light"] .ws-nav a{color:rgba(57,65,106,1)}
+html[data-he-theme="light"] .ws-nav .active,html[data-he-theme="light"] .ws-nav button:hover,html[data-he-theme="light"] .ws-nav a:hover{background:rgba(116,93,192,0.157);color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-sidebar-foot{color:rgba(69,77,110,1);border-top:1px solid rgba(188,190,210,0.5)}
+html[data-he-theme="light"] .ws-account{color:rgba(62,65,102,1)}
+html[data-he-theme="light"] .ws-avatar{background:linear-gradient(130deg,rgba(219,207,237,1),rgba(221,218,241,1))}
+html[data-he-theme="light"] .ws-account button{background:rgba(235,236,244,1);border:1px solid rgba(192,189,208,1);color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-metric,html[data-he-theme="light"] .ws-card{border:1px solid rgba(190,190,208,0.5);background:linear-gradient(140deg,rgba(243,243,249,1),rgba(243,243,250,1))}
+html[data-he-theme="light"] .ws-metric span{color:rgba(72,76,107,1)}
+html[data-he-theme="light"] .ws-metric small{color:rgba(58,70,121,1)}
+html[data-he-theme="light"] .ws-search{background:rgba(243,244,249,1);border:1px solid rgba(191,190,208,1);color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-search::placeholder{color:rgba(72,77,106,1)}
+html[data-he-theme="light"] .student-card{border:1px solid rgba(189,190,209,0.5);background:linear-gradient(145deg,rgba(243,244,249,1),rgba(243,244,249,1))}
+html[data-he-theme="light"] .student-card:hover{border-color:rgba(177,166,201,1)}
+html[data-he-theme="light"] .student-avatar{background:linear-gradient(135deg,rgba(222,220,239,1),rgba(237,235,245,1));color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .cefr-pill{border:1px solid rgba(174,166,201,0.5);color:rgba(64,36,127,1);background:rgba(115,93,192,0.125)}
+html[data-he-theme="light"] .student-card p{color:rgba(61,70,103,1)}
+html[data-he-theme="light"] .student-card-footer{border-top:1px solid rgba(188,189,210,0.5);color:rgba(57,36,127,1)}
+html[data-he-theme="light"] .ws-empty{border:1px dashed rgba(194,188,210,1);background:rgba(243,244,249,0.31);color:rgba(61,66,102,1)}
+html[data-he-theme="light"] .ws-empty strong{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-mini-btn{border:1px solid rgba(192,190,208,1);background:rgba(237,236,243,1);color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-field{color:rgba(55,67,108,1)}
+html[data-he-theme="light"] .ws-field strong{color:rgba(62,36,127,1)}
+html[data-he-theme="light"] .ws-note{border:1px solid rgba(190,189,209,0.5);color:rgba(57,54,109,1);background:rgba(242,244,250,1)}
+html[data-he-theme="light"] .ws-note time{color:rgba(57,36,127,1)}
+html[data-he-theme="light"] .ws-banner{background:rgba(236,235,244,1);border:1px solid rgba(192,185,212,1);color:rgba(62,36,127,1)}
+html[data-he-theme="light"] .ws-modal{background:rgba(242,243,250,0.796)}
+html[data-he-theme="light"] .ws-dialog{background:rgba(243,244,249,1);border:1px solid rgba(192,186,212,1);box-shadow:0 32px 80px rgba(49,39,72,0.160)}
+html[data-he-theme="light"] .ws-dialog p{color:rgba(62,66,101,1)}
+html[data-he-theme="light"] .ws-dialog-head button{background:rgba(236,237,243,1);color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-plan-strip{background:linear-gradient(110deg,rgba(239,235,244,0.4),rgba(233,238,246,0.478));border:1px solid rgba(178,166,201,0.5)}
+html[data-he-theme="light"] .ws-plan-strip strong{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-plan-strip span{color:rgba(47,63,116,1)}
+html[data-he-theme="light"] .ws-plan-strip a{border:1px solid rgba(174,166,201,0.565);color:rgba(70,36,127,1)}
+html[data-he-theme="light"] .ws-plan-strip a:hover{background:rgba(117,93,192,0.169);color:rgba(39,43,57,1.000)}
+
+/* page-i18n.css */
+html[data-he-theme="light"] .page-language-picker{background:rgba(243,243,250,1);border:1px solid rgba(178,166,201,1);box-shadow:0 4px 20px rgba(49,39,72,0.160)}
+html[data-he-theme="light"] .page-language-picker select{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .page-language-picker option{background:rgba(243,243,250,1);color:rgba(39,43,57,1.000)}
+
+/* space-theme.css */
+html[data-he-theme="light"] body.space-theme{background-color:rgba(242,244,250,1);background-image:radial-gradient(ellipse 55% 47% at 6% 5%,var(--sky-purple),transparent 80%),
+  radial-gradient(ellipse 57% 52% at 97% 77%,var(--sky-blue),transparent 80%),
+  radial-gradient(ellipse 42% 40% at 68% 20%,var(--sky-pink),transparent 85%),
+  radial-gradient(circle at 31px 66px,rgba(219,205,255,.32) .8px,transparent 1.4px),
+  radial-gradient(circle at 137px 19px,rgba(207,222,237,0.28) .85px,transparent 1.45px),
+  radial-gradient(circle at 81px 151px,rgba(104,83,153,0.140) .65px,transparent 1.3px)}
+html[data-he-theme="light"] body.space-pricing .pricing-header{background:linear-gradient(100deg,rgba(243,243,249,0.83),rgba(243,244,249,0.77))}
+html[data-he-theme="light"] body.space-auth .auth-main{background:radial-gradient(ellipse at 98% 4%,rgba(126,93,192,0.17),transparent 48%),
+  radial-gradient(ellipse at 4% 90%,rgba(93,136,192,0.15),transparent 55%),
+  radial-gradient(circle at 43px 93px,rgba(104,83,153,0.140) .8px,transparent 1.4px),
+  radial-gradient(circle at 109px 39px,rgba(93,147,192,0.18) .7px,transparent 1.2px),
+  rgba(242,244,250,1)}
+html[data-he-theme="light"] body.space-auth .auth-aside{background:radial-gradient(ellipse at 22% 27%,rgba(229,219,240,0.55),transparent 57%),
+  radial-gradient(ellipse at 80% 88%,rgba(218,229,241,0.44),transparent 55%),
+  linear-gradient(160deg,rgba(242,243,250,1),rgba(242,244,250,1))}
+html[data-he-theme="light"] body.space-auth .auth-form-wrap{border:1px solid rgba(176,166,201,0.5);background:linear-gradient(140deg,rgba(237,235,245,0.67),rgba(242,244,250,0.79) 84%);box-shadow:0 19px 55px rgba(49,39,72,0.160),inset 0 1px rgba(49,39,72,0.045)}
+html[data-he-theme="light"] body.space-auth .auth-form input:not([type=checkbox]),html[data-he-theme="light"] body.space-auth .auth-form select{background:linear-gradient(125deg,rgba(235,236,245,1),rgba(242,245,250,1))}
+html[data-he-theme="light"] body.space-auth .primary-action{background:linear-gradient(110deg,rgba(217,207,237,1),rgba(211,208,236,1));box-shadow:0 11px 30px rgba(49,39,72,0.160)}
+html[data-he-theme="light"] body.space-dashboard .workspace{background-color:rgba(242,244,250,1);background-image:radial-gradient(ellipse 57% 36% at 6% 9%,rgba(130,99,187,0.17),transparent 74%),
+  radial-gradient(ellipse 54% 40% at 95% 72%,rgba(93,136,192,0.13),transparent 80%),
+  radial-gradient(circle at 34px 89px,rgba(104,83,153,0.140) .7px,transparent 1.35px),
+  radial-gradient(circle at 103px 49px,rgba(93,132,192,0.14) .7px,transparent 1.25px)}
+html[data-he-theme="light"] body.space-dashboard .ws-sidebar{background:linear-gradient(160deg,rgba(244,243,249,0.96),rgba(242,245,250,0.97))}
+html[data-he-theme="light"] body.space-dashboard .ws-metric:nth-child(3n + 1){background:linear-gradient(138deg,rgba(238,234,245,0.94),rgba(242,244,250,0.96));border-color:rgba(177,166,201,0.5)}
+html[data-he-theme="light"] body.space-dashboard .ws-metric:nth-child(3n + 2){background:linear-gradient(138deg,rgba(234,237,245,0.94),rgba(243,244,250,0.96));border-color:rgba(166,179,201,0.5)}
+html[data-he-theme="light"] body.space-dashboard .ws-metric:nth-child(3n + 3){background:linear-gradient(138deg,rgba(239,235,244,0.94),rgba(242,244,250,0.96));border-color:rgba(185,166,201,0.5)}
+html[data-he-theme="light"] body.space-dashboard .student-card:nth-child(3n + 1){background:linear-gradient(140deg,rgba(237,236,244,1),rgba(242,245,250,1))}
+html[data-he-theme="light"] body.space-dashboard .student-card:nth-child(3n + 2){background:linear-gradient(140deg,rgba(234,238,245,1),rgba(243,244,250,1))}
+html[data-he-theme="light"] body.space-dashboard .student-card:nth-child(3n + 3){background:linear-gradient(140deg,rgba(239,236,244,1),rgba(243,244,249,1))}
+html[data-he-theme="light"] body.space-dashboard .ws-card,html[data-he-theme="light"] body.space-dashboard .ws-empty,html[data-he-theme="light"] body.space-dashboard .ws-note{background:linear-gradient(130deg,rgba(236,235,244,0.87),rgba(242,245,250,0.92))}
+html[data-he-theme="light"] body.space-dashboard .ws-banner,html[data-he-theme="light"] body.space-dashboard .ws-plan-strip{background:linear-gradient(115deg,rgba(240,234,245,0.62),rgba(233,238,247,0.48))}
+html[data-he-theme="light"] body.space-dashboard .ws-dialog{background:linear-gradient(140deg,rgba(238,235,244,1),rgba(242,245,250,1))}
+html[data-he-theme="light"] body.space-legal .legal-main{background:radial-gradient(ellipse 56% 46% at 88% 8%,rgba(134,95,191,0.18),transparent 79%),
+  radial-gradient(ellipse 56% 60% at 5% 82%,rgba(93,123,192,0.16),transparent 80%),
+  radial-gradient(circle at 29px 66px,rgba(104,83,153,0.140) .8px,transparent 1.35px),
+  radial-gradient(circle at 147px 35px,rgba(93,142,192,0.15) .7px,transparent 1.25px),
+  rgba(243,244,250,1)}
+html[data-he-theme="light"] body.space-legal .legal-content{background:linear-gradient(145deg,rgba(237,235,244,0.97),rgba(242,245,250,0.98) 85%);border-color:rgba(177,166,201,0.5);box-shadow:0 20px 58px rgba(49,39,72,0.160),inset 0 1px rgba(49,39,72,0.040)}
+html[data-he-theme="light"] body.space-legal .legal-date{background:rgba(131,105,180,0.16);border-color:rgba(178,166,201,0.5)}
+html[data-he-theme="light"] body.space-legal .site-header,html[data-he-theme="light"] body.space-home .site-header{background:linear-gradient(110deg,rgba(243,243,249,0.95),rgba(242,245,250,0.94))!important}
+html[data-he-theme="light"] body.space-legal .site-footer{background:linear-gradient(140deg,rgba(243,244,250,1),rgba(242,245,250,1))}
+@media(max-width:700px){html[data-he-theme="light"] body.space-pricing .pricing-header{border-bottom-color:rgba(179,166,201,0.5)}
+}
+
+/* dashboard-navigation.css */
+html[data-he-theme="light"] .ws-home-link{border:1px solid rgba(176,166,201,0.5);background:linear-gradient(115deg,rgba(238,235,245,0.28),rgba(234,237,246,0.31));color:rgba(63,36,127,1)}
+html[data-he-theme="light"] .ws-home-link:hover{border-color:rgba(176,166,201,1);color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-view-switch{border:1px solid rgba(173,166,201,0.5);background:rgba(243,244,249,0.9)}
+html[data-he-theme="light"] .ws-view-tab{color:rgba(53,66,110,1)}
+html[data-he-theme="light"] .ws-view-tab.is-current{color:rgba(39,43,57,1.000);background:linear-gradient(115deg,rgba(226,219,240,1),rgba(221,225,238,1));box-shadow:0 5px 18px rgba(49,39,72,0.160)}
+html[data-he-theme="light"] .ws-view-tab:not(.is-current):hover{background:rgba(127,107,179,0.15);color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-swipe-hint{color:rgba(66,79,113,1)}
+html[data-he-theme="light"] .ws-calendar-intro h2{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-calendar-intro p{color:rgba(52,68,111,1)}
+html[data-he-theme="light"] .ws-calendar-open{color:rgba(58,36,127,1);border:1px solid rgba(177,166,201,0.5)}
+html[data-he-theme="light"] .ws-calendar-card,html[data-he-theme="light"] .ws-agenda-card{border:1px solid rgba(175,166,201,0.5);background:radial-gradient(ellipse at 5% 0%,rgba(134,93,192,0.17),transparent 63%),linear-gradient(130deg,rgba(236,236,244,1),rgba(242,245,250,1));box-shadow:0 12px 35px rgba(49,39,72,0.160)}
+html[data-he-theme="light"] .ws-calendar-month{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-calendar-head p{color:rgba(53,69,111,1)}
+html[data-he-theme="light"] .ws-calendar-controls button{background:rgba(127,114,171,0.2);border:1px solid rgba(176,166,201,0.5);color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-calendar-controls button:hover{background:rgba(217,207,237,0.35)}
+html[data-he-theme="light"] .ws-day{border:1px solid rgba(116,103,151,0.200);background:rgba(235,236,245,0.7);color:rgba(50,66,113,1)}
+html[data-he-theme="light"] .ws-day.is-today{border-color:rgba(166,182,201,0.55)}
+html[data-he-theme="light"] .ws-day.is-selected{background:linear-gradient(135deg,rgba(226,218,241,1),rgba(220,226,239,1));border-color:rgba(179,166,201,0.8);color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-agenda-heading p{color:rgba(54,69,109,1)}
+html[data-he-theme="light"] .ws-calendar-empty{color:rgba(53,62,110,1)}
+html[data-he-theme="light"] .ws-calendar-empty>span{border:1px solid rgba(175,166,201,0.5);background:linear-gradient(135deg,rgba(228,221,238,1),rgba(234,236,245,1));color:rgba(81,36,127,1)}
+html[data-he-theme="light"] .ws-calendar-empty strong{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-calendar-empty p{color:rgba(54,69,109,1)}
+html[data-he-theme="light"] .ws-calendar-status{color:rgba(82,39,124,1)}
+html[data-he-theme="light"] .ws-event{border:1px solid rgba(174,166,201,0.5);background:linear-gradient(110deg,rgba(237,234,245,0.7),rgba(233,237,246,0.65))}
+html[data-he-theme="light"] .ws-event-time{color:rgba(67,36,127,1)}
+html[data-he-theme="light"] .ws-event strong{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-event small{color:rgba(53,71,110,1)}
+html[data-he-theme="light"] .ws-event a{color:rgba(66,36,127,1)}
+html[data-he-theme="light"] .ws-side-nav button{color:rgba(59,66,104,1)}
+html[data-he-theme="light"] .ws-side-nav button span{color:rgba(64,36,127,1)}
+html[data-he-theme="light"] .ws-side-nav button:hover{background:rgba(130,105,181,0.19);color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-side-nav button.active{background:linear-gradient(100deg,rgba(226,219,240,0.36),rgba(94,122,192,0.24));border-color:rgba(177,166,201,0.5);color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-section-intro h2{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-section-intro p{color:rgba(60,66,103,1)}
+html[data-he-theme="light"] .ws-shortcut-grid button{border:1px solid rgba(178,166,201,0.5);background:linear-gradient(125deg,rgba(237,235,245,0.8),rgba(233,237,246,0.8));color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-shortcut-grid button:hover{border-color:rgba(176,166,201,0.8)}
+html[data-he-theme="light"] .ws-shortcut-grid button>span{color:rgba(61,36,127,1)}
+html[data-he-theme="light"] .ws-shortcut-grid button>small{color:rgba(51,69,112,1)}
+html[data-he-theme="light"] .ws-calendar-actions .ws-calendar-disconnect{border-color:rgba(201,166,188,0.5);background:rgba(189,96,146,0.16);color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-calendar-actions .ws-calendar-disconnect:hover{background:rgba(239,220,227,0.32)}
+html[data-he-theme="light"] .ws-insight-card{border:1px solid rgba(175,166,201,0.5);background:linear-gradient(135deg,rgba(237,235,244,1),rgba(242,245,250,1))}
+html[data-he-theme="light"] .ws-level-row{color:rgba(62,36,127,1)}
+html[data-he-theme="light"] .ws-level-track{background:rgba(226,224,235,0.3)}
+html[data-he-theme="light"] .ws-level-fill{background:linear-gradient(90deg,rgba(212,207,237,1),rgba(217,207,237,1))}
+html[data-he-theme="light"] .ws-insight-note{color:rgba(59,67,105,1)}
+html[data-he-theme="light"] .ws-atlas-hero{border:1px solid rgba(178,166,201,0.55);background:radial-gradient(ellipse at 94% 0%,rgba(217,207,237,0.3),transparent 59%),linear-gradient(130deg,rgba(237,235,245,1),rgba(242,246,250,1))}
+html[data-he-theme="light"] .ws-atlas-orb{background:linear-gradient(135deg,rgba(227,219,240,1),rgba(218,228,241,1));border:1px solid rgba(180,166,201,0.56);box-shadow:0 14px 38px rgba(49,39,72,0.160);color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-atlas-hero p{color:rgba(53,53,110,1)}
+html[data-he-theme="light"] .ws-atlas-status{border:1px solid rgba(178,166,201,0.5);color:rgba(70,36,127,1);background:rgba(137,95,190,0.18)}
+html[data-he-theme="light"] .ws-calendar-revoke{color:rgba(62,36,127,1)}
+html[data-he-theme="light"] .ws-calendar-revoke:hover{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-calendar-connection{border:1px solid rgba(174,166,201,0.5);background:linear-gradient(110deg,rgba(237,235,245,0.77),rgba(233,238,247,0.77))}
+html[data-he-theme="light"] .ws-connection-indicator{background:rgba(217,216,227,1);box-shadow:0 0 0 5px rgba(49,39,72,0.150)}
+html[data-he-theme="light"] .ws-connection-indicator.is-connected{background:rgba(207,237,225,1);box-shadow:0 0 0 5px rgba(49,39,72,0.160)}
+html[data-he-theme="light"] .ws-connection-identity>span{color:rgba(80,61,118,1)}
+html[data-he-theme="light"] .ws-connection-identity>strong{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-connection-status{color:rgba(56,65,107,1)}
+html[data-he-theme="light"] .ws-calendar-source label{color:rgba(48,59,115,1)}
+html[data-he-theme="light"] .ws-calendar-source select{color:rgba(39,43,57,1.000);background:rgba(235,236,245,1);border:1px solid rgba(177,166,201,0.54)}
+html[data-he-theme="light"] .ws-calendar-source #calendar-source-count{color:rgba(56,68,108,1)}
+html[data-he-theme="light"] .ws-day-event-dot{background:rgba(218,207,237,1)}
+html[data-he-theme="light"] .ws-event-calendar{color:rgba(72,36,127,1)!important}
+
+/* dashboard-scheduler.css */
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-dialog-head h2{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-dialog-head p.ws-schedule-subtitle{color:rgba(58,67,105,1)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-kind-button{background:linear-gradient(135deg,rgba(235,236,244,0.83),rgba(243,244,250,0.9));border:1px solid rgba(176,166,201,0.5);color:rgba(57,54,109,1)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-kind-button>span{background:rgba(127,97,188,0.22)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-kind-button strong{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-kind-button small{color:rgba(57,74,107,1)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-kind-button.active{border-color:rgba(177,166,201,1);background:linear-gradient(128deg,rgba(227,219,240,0.49),rgba(234,237,246,0.56));box-shadow:0 0 0 1px rgba(49,39,72,0.160)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-kind-button:hover{border-color:rgba(178,166,201,1)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-picker{background:linear-gradient(135deg,rgba(243,244,249,0.89),rgba(236,234,245,0.9));border:1px solid rgba(176,166,201,0.5)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-picker-head strong{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-picker-head p{color:rgba(56,68,107,1)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-month-nav span{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-month-nav button{border:1px solid rgba(174,166,201,0.5);background:rgba(235,236,244,1);color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-month-nav button:hover{background:rgba(238,235,244,1)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-target button{border:1px solid rgba(176,166,201,0.5);background:rgba(119,112,174,0.27);color:rgba(65,62,101,1)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-target button.is-selected{color:rgba(39,43,57,1.000);background:rgba(228,222,237,0.557);border-color:rgba(178,166,201,1)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-weekdays span{color:rgba(65,74,113,1)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-date-button{border:1px solid rgba(116,103,151,0.180);background:rgba(243,244,249,0.6);color:rgba(42,46,121,1)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-date-button:hover{border-color:rgba(178,166,201,1);background:rgba(227,221,238,0.31)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-date-button.is-in-range{background:rgba(226,222,237,0.29);border-color:rgba(179,166,201,0.5)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-date-button.is-start,html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-date-button.is-end{color:rgba(39,43,57,1.000);border-color:rgba(179,166,201,1);background:linear-gradient(145deg,rgba(218,208,236,1),rgba(221,224,238,1));box-shadow:0 0 0 2px rgba(49,39,72,0.141)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-busy-dot{background:rgba(237,219,207,1);box-shadow:0 0 6px rgba(49,39,72,0.160)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-month-status{color:rgba(60,93,103,1)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-month-status.has-warning{color:rgba(123,95,40,1)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-all-day{border:1px solid rgba(176,166,201,0.5);background:rgba(235,236,245,0.65)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-all-day strong{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-all-day small{color:rgba(58,73,105,1)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-preview{border:1px solid rgba(182,166,201,0.5);color:rgba(64,36,127,1);background:linear-gradient(110deg,rgba(238,235,245,0.28),rgba(234,237,246,0.41))}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-preview.invalid{color:rgba(127,36,38,1);border-color:rgba(201,166,181,1)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-availability{border:1px solid rgba(178,166,201,0.5);background:linear-gradient(135deg,rgba(235,237,245,0.87),rgba(243,244,249,0.91))}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-availability strong{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-availability p{color:rgba(52,69,111,1)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-availability.is-free,html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-availability.is-busy-day{border-color:rgba(166,201,191,0.5);background:linear-gradient(120deg,rgba(233,245,247,0.32),rgba(235,237,245,0.62))}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-availability.is-conflict,html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-availability.is-unverified{border-color:rgba(201,181,166,0.56);background:linear-gradient(110deg,rgba(244,236,236,0.54),rgba(240,236,243,0.77))}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-conflicts li{background:rgba(242,244,250,0.3);border:1px solid rgba(116,103,151,0.210)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-conflicts li.is-overlap{border-color:rgba(201,182,166,0.5);background:rgba(182,118,103,0.19)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-conflicts li>span:first-child{color:rgba(139,81,39,1)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-conflicts li small{color:rgba(58,71,105,1)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-confirm label{border:1px solid rgba(201,180,166,0.57);background:rgba(244,238,235,0.31);color:rgba(127,82,36,1)}
+html[data-he-theme="light"] .ws-scheduler-dialog .ws-schedule-disclaimer{color:rgba(65,77,113,1)!important}
+
+/* dashboard-features.css */
+html[data-he-theme="light"] .ws-feature-panel,html[data-he-theme="light"] .ws-student-workflow{border:1px solid rgba(177,166,201,0.5);background:radial-gradient(ellipse at 0% 0%,rgba(133,99,186,0.16),transparent 75%),linear-gradient(135deg,rgba(236,236,244,1),rgba(242,245,250,1))}
+html[data-he-theme="light"] .ws-feature-title h3,html[data-he-theme="light"] .ws-student-workflow h3{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-feature-title p,html[data-he-theme="light"] .ws-student-workflow p{color:rgba(51,69,112,1)}
+html[data-he-theme="light"] .ws-day-counts>div{border:1px solid rgba(177,166,201,0.5);background:rgba(243,243,250,0.39)}
+html[data-he-theme="light"] .ws-day-counts strong{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-day-counts small{color:rgba(56,72,107,1)}
+html[data-he-theme="light"] .ws-lesson-row{border:1px solid rgba(173,166,201,0.5);background:rgba(242,244,250,0.53)}
+html[data-he-theme="light"] .ws-lesson-row time{color:rgba(65,36,127,1)}
+html[data-he-theme="light"] .ws-lesson-row strong{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-lesson-row small{color:rgba(58,72,106,1)}
+html[data-he-theme="light"] .ws-scheduling-actions>span{color:rgba(60,70,104,1)}
+html[data-he-theme="light"] .ws-form-grid label,html[data-he-theme="light"] .ws-skill-form label,html[data-he-theme="light"] .ws-editor-label{color:rgba(55,66,108,1)}
+html[data-he-theme="light"] .ws-form-grid input,html[data-he-theme="light"] .ws-form-grid select,html[data-he-theme="light"] .ws-skill-form input,html[data-he-theme="light"] .ws-skill-form select,html[data-he-theme="light"] .ws-student-workflow textarea,html[data-he-theme="light"] .ws-editor-label select,html[data-he-theme="light"] .ws-editor-label textarea{border:1px solid rgba(176,166,201,0.5);background:rgba(243,244,249,1);color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-form-grid input:focus,html[data-he-theme="light"] .ws-student-workflow textarea:focus,html[data-he-theme="light"] .ws-skill-form select:focus,html[data-he-theme="light"] .ws-editor-label select:focus{outline:2px solid rgba(177,166,201,1)}
+html[data-he-theme="light"] .ws-saved-plan-row{border:1px solid rgba(176,166,201,0.5);background:rgba(242,244,250,0.46)}
+html[data-he-theme="light"] .ws-saved-plan-row>span{color:rgba(55,47,116,1)}
+html[data-he-theme="light"] .ws-assessment-history p{color:rgba(57,70,106,1)}
+html[data-he-theme="light"] .ws-assessment-entry{border:1px solid rgba(177,166,201,0.5);background:rgba(242,244,250,0.48)}
+html[data-he-theme="light"] .ws-assessment-entry time{color:rgba(63,36,127,1)}
+html[data-he-theme="light"] .ws-assessment-entry p{color:rgba(50,72,113,1)}
+html[data-he-theme="light"] .ws-skill-score{color:rgba(58,64,105,1)}
+html[data-he-theme="light"] .ws-skill-score i{background:linear-gradient(90deg,rgba(213,207,237,1),rgba(216,207,237,1))}
+html[data-he-theme="light"] .ws-skill-score b{background:rgba(126,117,169,0.25)}
+html[data-he-theme="light"] .ws-import-preview{border:1px solid rgba(180,166,201,0.5);color:rgba(46,61,118,1)}
+@media print{html[data-he-theme="light"] #progress-print *{border-color:rgba(184,184,184,1)!important}
+}
+html[data-he-theme="light"] .ws-attendance-entry{border:1px solid rgba(177,166,201,0.5);background:rgba(243,244,250,0.5)}
+html[data-he-theme="light"] .ws-attendance-entry strong{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-attendance-entry span{color:rgba(62,36,127,1)}
+html[data-he-theme="light"] .ws-attendance-entry small{color:rgba(47,65,116,1)}
+html[data-he-theme="light"] .ws-attendance-summary{border:1px solid rgba(177,166,201,0.5);background:rgba(236,235,244,0.65)}
+html[data-he-theme="light"] .ws-attendance-summary h3{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-attendance-summary p{color:rgba(69,36,127,1)}
+html[data-he-theme="light"] .ws-attendance-summary small{color:rgba(56,73,107,1)}
+
+/* dashboard-extras.css */
+html[data-he-theme="light"] .ws-extra-toolbar h3{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-extra-toolbar p{color:rgba(53,66,110,1)}
+html[data-he-theme="light"] .ws-extra-controls label{color:rgba(66,57,106,1)}
+html[data-he-theme="light"] .ws-extra-controls select{background:rgba(243,244,249,1);color:rgba(39,43,57,1.000);border:1px solid rgba(177,166,201,0.5)}
+html[data-he-theme="light"] .ws-extra-feedback{color:rgba(46,71,117,1)}
+html[data-he-theme="light"] .ws-extra-empty{color:rgba(54,68,109,1)}
+html[data-he-theme="light"] .ws-timeline-entry{border:1px solid rgba(176,166,201,0.5);background:linear-gradient(115deg,rgba(237,235,244,0.55),rgba(242,245,250,0.6))}
+html[data-he-theme="light"] .ws-timeline-entry:before{background:rgba(217,207,237,1)}
+html[data-he-theme="light"] .ws-timeline-kind{color:rgba(72,36,127,1);background:rgba(226,218,241,0.3);border:1px solid rgba(179,166,201,0.5)}
+html[data-he-theme="light"] .ws-timeline-attendance{color:rgba(40,124,105,1);background:rgba(234,245,244,0.28);border-color:rgba(185,212,206,0.5)}
+html[data-he-theme="light"] .ws-timeline-assessment{color:rgba(36,75,127,1);background:rgba(96,132,190,0.25);border-color:rgba(166,184,201,0.5)}
+html[data-he-theme="light"] .ws-timeline-plan{color:rgba(127,89,36,1);background:rgba(192,148,93,0.2);border-color:rgba(201,185,166,0.5)}
+html[data-he-theme="light"] .ws-timeline-entry time{color:rgba(61,75,117,1)}
+html[data-he-theme="light"] .ws-timeline-entry>strong{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-timeline-entry>p{color:rgba(53,69,110,1)}
+html[data-he-theme="light"] .ws-chart-card{border:1px solid rgba(177,166,201,0.5);background:linear-gradient(135deg,rgba(236,235,244,0.75),rgba(242,245,250,0.73))}
+html[data-he-theme="light"] .ws-chart-axis{fill:rgba(63,90,156,1)}
+html[data-he-theme="light"] .ws-chart-dot{fill:rgba(91,46,173,1)}
+html[data-he-theme="light"] .ws-chart-dot:focus-visible{stroke:rgba(148,71,71,1)}
+html[data-he-theme="light"] .ws-progress-summary{color:rgba(64,44,119,1)}
+html[data-he-theme="light"] .ws-chart-data caption{color:rgba(73,39,125,1)}
+html[data-he-theme="light"] .ws-chart-data th,html[data-he-theme="light"] .ws-chart-data td{border-bottom:1px solid rgba(176,166,201,0.5)}
+html[data-he-theme="light"] .ws-chart-data th{color:rgba(64,36,127,1)}
+html[data-he-theme="light"] .ws-companion-launch{color:rgba(39,43,57,1.000)!important;border-color:rgba(179,166,201,0.5)!important;background:rgba(226,219,240,0.28)!important}
+html[data-he-theme="light"] .ws-companion-panel{border:1px solid rgba(178,166,201,0.62);background:linear-gradient(145deg,rgba(244,243,249,1),rgba(242,244,250,1) 69%,rgba(242,245,250,1));box-shadow:0 24px 75px rgba(49,39,72,0.160);color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .ws-companion-heading button{background:rgba(133,112,173,0.25);color:rgba(39,43,57,1.000);border:1px solid rgba(177,166,201,0.5)}
+html[data-he-theme="light"] .ws-companion-info{color:rgba(52,70,111,1)}
+html[data-he-theme="light"] .ws-companion-label{color:rgba(52,62,112,1)}
+html[data-he-theme="light"] .ws-companion-label select,html[data-he-theme="light"] .ws-companion-label textarea{color:rgba(39,43,57,1.000);background:rgba(243,244,250,1);border:1px solid rgba(179,166,201,0.5)}
+html[data-he-theme="light"] .ws-companion-timer{border:1px solid rgba(175,166,201,0.5);background:rgba(243,243,249,1)}
+html[data-he-theme="light"] .ws-companion-plan{background:rgba(235,236,244,0.68);border:1px solid rgba(174,166,201,0.5)}
+html[data-he-theme="light"] .ws-companion-plan summary{color:rgba(62,36,127,1)}
+html[data-he-theme="light"] .ws-companion-plan pre{color:rgba(44,68,119,1)}
+
+/* dashboard-suite.css */
+html[data-he-theme="light"] .he-suite-tabs{border:1px solid rgba(174,166,201,0.5);background:rgba(243,244,249,0.72)}
+html[data-he-theme="light"] .he-suite-tabs button{color:rgba(50,67,113,1)}
+html[data-he-theme="light"] .he-suite-tabs button.active,html[data-he-theme="light"] .he-suite-tabs button[aria-pressed=true]{color:rgba(39,43,57,1.000);border-color:rgba(179,166,201,0.5);background:linear-gradient(115deg,rgba(227,219,240,0.61),rgba(220,223,239,0.48))}
+html[data-he-theme="light"] .he-suite-tabs button:hover{color:rgba(39,43,57,1.000);background:rgba(126,105,181,0.22)}
+html[data-he-theme="light"] .he-suite-message{color:rgba(53,125,97,1)}
+html[data-he-theme="light"] .he-suite-message.is-error{color:rgba(127,36,47,1)}
+html[data-he-theme="light"] .he-suite-card{border:1px solid rgba(176,166,201,0.5);background:linear-gradient(136deg,rgba(236,236,244,0.94),rgba(242,244,250,0.96));box-shadow:inset 0 1px rgba(49,39,72,0.040)}
+html[data-he-theme="light"] .he-suite-card>summary:hover{background:rgba(129,108,178,0.13)}
+html[data-he-theme="light"] .he-suite-card>summary strong{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .he-suite-card>summary small{color:rgba(55,67,108,1)}
+html[data-he-theme="light"] .he-suite-card>summary>span:last-child{color:rgba(73,36,127,1)}
+html[data-he-theme="light"] .he-suite-card[open]>summary{border-bottom:1px solid rgba(178,166,201,0.5)}
+html[data-he-theme="light"] .he-suite-grid>label,html[data-he-theme="light"] .he-suite-actions>label,html[data-he-theme="light"] .he-suite-template-picker{color:rgba(63,47,117,1)}
+html[data-he-theme="light"] .he-suite-grid input:not([type=checkbox]),html[data-he-theme="light"] .he-suite-grid select,html[data-he-theme="light"] .he-suite-grid textarea,html[data-he-theme="light"] .he-suite-actions input,html[data-he-theme="light"] .he-suite-actions select,html[data-he-theme="light"] .he-suite-template-picker select,html[data-he-theme="light"] .he-suite-result input{border:1px solid rgba(173,166,201,0.5);background:rgba(243,244,250,1);color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .he-suite-grid input:focus-visible,html[data-he-theme="light"] .he-suite-grid select:focus-visible,html[data-he-theme="light"] .he-suite-grid textarea:focus-visible,html[data-he-theme="light"] .he-suite-actions input:focus-visible{border-color:rgba(177,166,201,1);box-shadow:0 0 0 3px rgba(49,39,72,0.110)}
+html[data-he-theme="light"] .he-suite-grid input::placeholder,html[data-he-theme="light"] .he-suite-grid textarea::placeholder,html[data-he-theme="light"] .he-suite-actions input::placeholder{color:rgba(68,82,110,1)}
+html[data-he-theme="light"] .he-suite-check span{color:rgba(69,47,116,1)}
+html[data-he-theme="light"] .he-suite-days,html[data-he-theme="light"] .he-suite-checklist{border:1px solid rgba(172,166,201,0.5);background:rgba(243,244,249,0.37)}
+html[data-he-theme="light"] .he-suite-days legend,html[data-he-theme="light"] .he-suite-checklist legend{color:rgba(70,36,127,1)}
+html[data-he-theme="light"] .he-suite-days label,html[data-he-theme="light"] .he-suite-checklist label{color:rgba(64,57,106,1)}
+html[data-he-theme="light"] .he-suite-note{color:rgba(52,70,111,1)}
+html[data-he-theme="light"] .he-suite-empty{color:rgba(51,68,112,1)}
+html[data-he-theme="light"] .he-suite-row{border:1px solid rgba(174,166,201,0.5);background:rgba(242,244,250,0.5)}
+html[data-he-theme="light"] .he-suite-row strong{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .he-suite-row small{color:rgba(54,70,109,1)}
+html[data-he-theme="light"] .he-suite-row p{color:rgba(54,63,109,1)}
+html[data-he-theme="light"] .he-suite-row-status{color:rgba(65,45,118,1)}
+html[data-he-theme="light"] .he-suite-row-actions>span{color:rgba(68,45,118,1)}
+html[data-he-theme="light"] .he-suite-row-actions>button,html[data-he-theme="light"] .he-suite-row>button,html[data-he-theme="light"] .he-suite-row-actions>a{border:1px solid rgba(176,166,201,0.5);background:rgba(131,101,185,0.25);color:rgba(63,36,127,1)}
+html[data-he-theme="light"] .he-suite-row-actions>button:hover,html[data-he-theme="light"] .he-suite-row>button:hover{background:rgba(218,207,237,0.4);color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .he-suite-metric{border:1px solid rgba(176,166,201,0.5);background:linear-gradient(130deg,rgba(238,234,245,0.44),rgba(234,236,246,0.4))}
+html[data-he-theme="light"] .he-suite-metric small{color:rgba(56,71,107,1)}
+html[data-he-theme="light"] .he-suite-metric strong{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .he-suite-metric span{color:rgba(55,68,108,1)}
+html[data-he-theme="light"] .he-suite-timezone,html[data-he-theme="light"] .he-suite-result{border:1px solid rgba(180,166,201,0.5);background:rgba(243,244,249,0.59);color:rgba(60,55,108,1)}
+html[data-he-theme="light"] .he-suite-result button{border:1px solid rgba(179,166,201,0.5);background:rgba(228,222,237,1);color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .he-suite-result p{color:rgba(68,51,112,1)}
+html[data-he-theme="light"] .he-suite-template{border:1px solid rgba(176,166,201,0.5);background:rgba(243,244,250,0.5)}
+html[data-he-theme="light"] .he-suite-template h4{color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .he-suite-template small{color:rgba(53,69,111,1)}
+html[data-he-theme="light"] .he-suite-level{border:1px solid rgba(179,166,201,0.5);color:rgba(72,36,127,1);background:rgba(146,105,180,0.251)}
+html[data-he-theme="light"] .he-suite-slot{border:1px solid rgba(172,166,201,0.5);background:rgba(224,220,239,0.38);color:rgba(39,43,57,1.000)}
+html[data-he-theme="light"] .he-suite-slot:hover{border-color:rgba(180,166,201,1);background:rgba(226,219,240,0.5)}
+html[data-he-theme="light"] .ws-calendar-days .ws-day.is-drop-target{outline:2px dashed rgba(179,166,201,1);background:rgba(226,218,241,0.34)!important}
+html[data-he-theme="light"] .ws-event-move{border:1px solid rgba(176,166,201,0.5);background:rgba(118,109,176,0.18)}
+html[data-he-theme="light"] .ws-event-move summary{color:rgba(67,36,127,1)}
+html[data-he-theme="light"] .ws-event-move-row input{color:rgba(39,43,57,1.000);border:1px solid rgba(175,166,201,0.5);background:rgba(234,236,245,1)}
+html[data-he-theme="light"] .ws-event-move-row button{color:rgba(39,43,57,1.000);background:rgba(227,220,239,0.294);border:1px solid rgba(181,166,201,0.5)}
+html[data-he-theme="light"] .he-suite-booking-student{color:rgba(71,46,117,1)}
+html[data-he-theme="light"] .he-suite-booking-student select{background:rgba(243,244,249,1);color:rgba(39,43,57,1.000);border:1px solid rgba(181,166,201,0.502)}
+html[data-he-theme="light"] .he-suite-schedule-timezones{color:rgba(69,36,127,1);background:rgba(237,235,244,0.29);border:1px solid rgba(177,166,201,0.5)}
+
+/* notifications.css */
+html[data-he-theme="light"] .he-notice-card{border:1px solid rgba(175,166,201,0.5);background:linear-gradient(110deg,rgba(120,100,186,0.14),rgba(242,243,250,0.75))}
+html[data-he-theme="light"] .he-notice-head p{color:rgba(70,64,99,1)}
+html[data-he-theme="light"] .he-notice-status{color:rgba(43,120,77,1)}
+html[data-he-theme="light"] .he-notice-status.is-error{color:rgba(127,40,36,1)}
+html[data-he-theme="light"] .he-notice-footnote{color:rgba(74,64,99,1)}
