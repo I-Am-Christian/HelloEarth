@@ -94,7 +94,7 @@ if(root){
   prepared={studentId:id,unitId:u.id,topic:u.title};tell("Lesson Studio prepared. Generate or make a manual template, then save to link it here.");el("he-lesson-new-title").scrollIntoView({block:"start",behavior:"smooth"});
  }
  async function advance(u,index){
-  if(busy)return;try{plans=await loadPlans(selected)}catch(e){tell(e.message,true);return}
+  if(busy)return;const id=selected;try{const latest=await loadPlans(id);if(selected!==id||!units.includes(u)||busy)return;plans=latest}catch(e){tell(e.message,true);return}
   if(units.findIndex(x=>!x.completedAt)!==index||!plans.some(p=>p.id===u.lessonId&&p.completed_at)){tell("Complete and confirm the linked lesson review first.",true);render();return}
   const carry=u.tasks.filter(t=>t.state!=="done");const backup=JSON.stringify(units);
   if(carry.length&&!confirm("Finish lesson "+(index+1)+" and carry "+carry.length+" unfinished/review task(s) forward?"))return;
