@@ -424,3 +424,37 @@ html.he-teacher-locked{overflow-y:hidden;scrollbar-gutter:stable;scroll-behavior
 .share-dialogue-slot .he-audio-meters{display:grid;gap:4px;padding:7px 10px;flex:none}
 .share-dialogue-slot .he-audio-meters label{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;color:#c1b4d7}
 .share-dialogue-slot .he-audio-meters meter{width:48%;height:10px}
+
+/* Guided classroom: numbered sections beside the workbook, without duplicating
+   the lesson DOM or interfering with annotation coordinates. */
+.he-guided-rail{display:none;position:fixed;left:12px;top:calc(var(--share-dock-height,110px) + 12px);bottom:16px;width:208px;z-index:18;flex-direction:column;gap:12px;padding:13px;background:#222b40;color:#eeeaf8;border:1px solid #7685a552;border-radius:12px;box-sizing:border-box}
+body.he-guided-open .he-guided-rail{display:flex}
+.he-guided-head{display:grid;gap:5px}
+.he-guided-head small{font-size:10px;letter-spacing:.12em;color:#b9a6d5;font-weight:750}
+.he-guided-head strong{font:650 13px system-ui,sans-serif}
+#he-guided-list{display:grid;gap:5px;align-content:start;overflow:auto;min-height:0;flex:1;overscroll-behavior:contain}
+.he-guided-section{display:flex;align-items:flex-start;gap:9px;text-align:left;min-width:0;border:1px solid transparent;border-radius:8px;background:transparent;color:#d9deed;padding:9px 6px;font:500 12px/1.4 system-ui,sans-serif;cursor:pointer;overflow-wrap:anywhere}
+.he-guided-number{display:grid;place-items:center;flex:none;width:23px;height:23px;background:#ffffff0d;border-radius:5px;font:650 11px system-ui,sans-serif;color:#cab6e4}
+.he-guided-section.is-subsection{padding-left:13px;font-size:11px}
+.he-guided-section[aria-current=step]{background:#aa90d326;border-color:#a88bd5;color:#fff}
+.he-guided-section[aria-current=step] .he-guided-number{background:#b79be7;color:#241a37}
+.he-guided-section:hover:not(:disabled){background:#aa90d326}
+.he-guided-section:disabled{cursor:default;opacity:1}
+.he-guided-actions{display:flex;gap:6px}
+.he-guided-actions button{flex:1;padding:8px 5px;border:1px solid #9680b36e;background:#342d48;color:#f2e9ff;border-radius:7px;font:600 11px system-ui;cursor:pointer}
+.he-guided-actions button:disabled{opacity:.4;cursor:default}
+.he-guided-lock-note{display:none;font:11px system-ui;color:#bdc5dc;margin:0}
+.he-guided-rail.is-locked .he-guided-lock-note{display:block}
+.he-guided-rail.is-locked .he-guided-actions{display:none}
+@media(min-width:1180px){body.he-guided-open .share-classroom-layout{width:calc(100% - 238px);margin-left:226px;margin-right:12px;box-sizing:border-box}}
+@media(max-width:1179px){.he-guided-rail{width:min(300px,85vw);max-height:min(65dvh,600px);bottom:auto;box-shadow:0 12px 38px #0008}}
+/* Screen-only presentation hierarchy: clean paper, short reading lines. */
+@media screen{
+.share-paper-frame .share-paper .workbook-body{font-size:16px;line-height:1.65}
+.share-paper-frame .share-paper .workbook-body h2{margin-top:1.65em;padding:12px 15px;border-radius:8px;background:#f0ebf8;color:#463466;border-left:4px solid #8c70bc;font-size:1.24em;line-height:1.35}
+.share-paper-frame .share-paper .workbook-body h3{margin-top:1.35em;color:#5e4783;font-size:1.12em;line-height:1.4}
+.share-paper-frame .share-paper .workbook-body li{margin-block:5px}
+.share-paper-frame .share-paper .workbook-body p{margin-block:9px}
+.share-paper-frame .share-paper .workbook-body table{line-height:1.5}
+}
+@media print{.he-guided-rail,#he-guided-toggle{display:none!important}body.he-guided-open .share-classroom-layout{width:100%!important;margin:0!important}}
