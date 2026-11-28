@@ -131,3 +131,14 @@ body.space-dashboard #he-generation-list{max-height:420px}
 .he-homework-menu{position:relative;z-index:3}.he-homework-menu[open]{z-index:20}
 .he-homework-menu .he-homework-delete{color:#ffd0d6;border-color:#d6798d;background:#593042}
 @media(max-width:700px){.he-homework-row .he-inline-actions{flex:1 1 100%;justify-content:flex-start}}
+
+/* Lesson Studio search — keep input stable and show selectable matches. */
+.he-lesson-student-results{display:grid;gap:4px;padding:8px;margin:0 0 8px;border:1px solid #a99ac155;border-radius:9px;background:var(--card,#292f48);max-height:220px;overflow:auto;overscroll-behavior:contain}
+.he-lesson-student-results[hidden]{display:none}
+.he-lesson-student-results small,.he-lesson-match-count{font-size:12px;opacity:.85}
+.he-lesson-student-results .he-lesson-student-result{display:block;text-align:left;width:100%;min-height:36px;padding:7px 10px;border:1px solid transparent;border-radius:6px;background:transparent;color:inherit;cursor:pointer;font:inherit}
+.he-lesson-student-results .he-lesson-student-result:hover,.he-lesson-student-results .he-lesson-student-result:focus-visible{background:#a88bd32b;border-color:#a88bd3;outline:none}
+.he-lesson-results{display:grid;gap:9px;min-width:0}
+.he-folder-controls .he-lesson-reset{justify-self:start;min-height:30px;padding:5px 10px;font:600 12px system-ui;border:1px solid #a99ac155;border-radius:7px;background:transparent;color:inherit;cursor:pointer}
+.he-folder-controls .he-lesson-reset:hover{background:#a88bd326}
+.he-folder-controls input:focus-visible,.he-lesson-student-search:focus-visible{outline:2px solid #b99beb;outline-offset:2px}
