@@ -25,3 +25,21 @@ settings?.addEventListener("change",()=>{
  document.dispatchEvent(new CustomEvent("helloearth:time-format-changed",{detail:{format}}));
 });
 update();
+
+/* Appearance is browser-local and applies before the workspace renders. */
+const themeKey="helloearth:appearance";
+const appearance=document.getElementById("he-appearance");
+const themeDescription=document.getElementById("he-appearance-description");
+const validTheme=value=>value==="dark"?"dark":"light";
+function applyAppearance(value,persist=false){
+ const theme=validTheme(value);
+ document.documentElement.dataset.heTheme=theme;
+ document.querySelector('meta[name="theme-color"]')?.setAttribute("content",theme==="dark"?"#101727":"#f3f2f7");
+ if(appearance)appearance.value=theme;
+ if(themeDescription)themeDescription.textContent=theme==="dark"?"Dark mode · the original midnight-purple palette.":"Light mode · soft grey and lavender surfaces.";
+ if(persist)try{localStorage.setItem(themeKey,theme)}catch{}
+ document.dispatchEvent(new CustomEvent("helloearth:appearance-changed",{detail:{theme}}));
+}
+applyAppearance(document.documentElement.dataset.heTheme);
+appearance?.addEventListener("change",()=>applyAppearance(appearance.value,true));
+window.addEventListener("storage",event=>{if(event.key===themeKey)applyAppearance(event.newValue)});
